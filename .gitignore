@@ -1,0 +1,9 @@
+*.o
+basic
+test/test
+
+*sw[op]
+*~
+
+.DS_Store
+

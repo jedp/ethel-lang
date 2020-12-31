@@ -1,0 +1,130 @@
+#ifndef __LEXER_H
+#define __LEXER_H
+
+#include <inttypes.h>
+
+#define LEXER_BUF_SIZE 128
+
+typedef enum {
+  _EOF = 0,
+  LIST,
+  PRINT,
+  INPUT,
+  DATA,
+  READ,
+  RESTORE,
+  IF,
+  THEN,
+  ELSE,
+  EQ,
+  NE,
+  GT,
+  LT,
+  GE,
+  LE,
+  AND,
+  OR,
+  TRUE,
+  FALSE,
+  INT,
+  REAL,
+  CHAR,
+  STRING,
+  VARNAME,
+  AS,
+  FOR,
+  IN,
+  TO,
+  STEP,
+  NEXT,
+  DO,
+  LOOP,
+  WHILE,
+  WHEND,
+  REPEAT,
+  UNTIL,
+  ON,
+  GOSUB,
+  END,
+  ADD,
+  SUB,
+  MUL,
+  DIV,
+  ABS,
+  ATAN,
+  COS,
+  EXP,
+  LOG,
+  RAND,
+  SIN,
+  SQR,
+  TAN,
+  REM
+} tag_t;
+
+typedef struct {
+  tag_t tag;
+  union {
+    uint32_t value;
+    char* string;
+  } ;
+} token_t;
+
+static const token_t reserved[] = {
+  { LIST,     .string = "list" },
+  { PRINT,    .string = "print" },
+  { INPUT,    .string = "input" },
+  { DATA,     .string = "data" },
+  { READ,     .string = "read" },
+  { RESTORE,  .string = "restore" },
+  { IF,       .string = "if" },
+  { THEN,     .string = "then" },
+  { AND,      .string = "and" },
+  { OR,       .string = "or" },
+  { TRUE,     .string = "true" },
+  { FALSE,    .string = "false" },
+  { INT,      .string = "int" },
+  { REAL,     .string = "real" },
+  { CHAR,     .string = "char" },
+  { STRING,   .string = "string" },
+  { AS,       .string = "as" },
+  { FOR,      .string = "for" },
+  { IN,       .string = "in" },
+  { TO,       .string = "to" },
+  { STEP,     .string = "step" },
+  { NEXT,     .string = "next" },
+  { DO,       .string = "do" },
+  { LOOP,     .string = "loop" },
+  { WHILE,    .string = "while" },
+  { WHEND,    .string = "whend" },
+  { REPEAT,   .string = "repeat" },
+  { UNTIL,    .string = "until" },
+  { ON,       .string = "on" },
+  { GOSUB,    .string = "gosub" },
+  { END,      .string = "end" },
+  { ABS,      .string = "abs" },
+  { ATAN,     .string = "atan" },
+  { COS,      .string = "cos" },
+  { EXP,      .string = "exp" },
+  { LOG,      .string = "log" },
+  { RAND,     .string = "rand" },
+  { SIN,      .string = "sin" },
+  { SQR,      .string = "sqr" },
+  { TAN,      .string = "tan" },
+  { REM,      .string = ";" },
+};
+
+typedef struct {
+  uint32_t pos;
+  int err;
+  char peek;
+  char buf[LEXER_BUF_SIZE];
+  token_t token;
+} lexer_t;
+
+void lexer_init(lexer_t *lexer, const char input[], const uint8_t input_size);
+
+token_t *lexer_next(lexer_t *lexer);
+
+#endif
+
