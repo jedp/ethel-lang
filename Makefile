@@ -1,9 +1,12 @@
 
+MEMOBJS  = src/map.o
+
 COMPOBJS = src/lexer.o
 
 REPLOBJS = src/basic.o
 
 TESTOBJS = test/unity/unity.o \
+	   test/test_map.o \
 	   test/test_lexer.o \
 	   test/test.o
 
@@ -16,10 +19,10 @@ all: basic
 %.o: %.c
 	$(CC) $(CFLAGS) -c -o $@ $<
 
-basic: $(REPLOBJS) $(COMPOBJS)
+basic: $(MEMOBJS) $(REPLOBJS) $(COMPOBJS)
 	$(CC) $(CFLAGS) -o $@ $^ $(LDFLAGS)
 
-test: $(COMPOBJS) $(TESTOBJS)
+test: $(MEMOBJS) $(COMPOBJS) $(TESTOBJS)
 	$(CC) $(CFLAGS) $(TESTFLAGS) -o $@/test $^ $(LDFLAGS)
 	./test/test
 
@@ -28,6 +31,6 @@ wc:
 
 .PHONY: clean
 clean:
-	rm -f $(COMPOBJS) $(REPLOBJS) $(TESTOBJS)
+	rm -f $(MEMOBJS) $(COMPOBJS) $(REPLOBJS) $(TESTOBJS)
 	rm -f basic test/test
 
