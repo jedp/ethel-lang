@@ -1,6 +1,7 @@
 #include "unity/unity.h"
 #include "test_map.h"
 #include "test_lexer.h"
+#include "test_parser.h"
 
 void setUp(void) {
 }
@@ -13,6 +14,7 @@ int main(int argc, char** argv) {
 
   test_map();
   test_lexer();
+  test_parser();
 
   UNITY_END();
 }

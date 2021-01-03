@@ -22,7 +22,7 @@ static void readch(lexer_t *lexer) {
   lexer->peek = lexer->buf[lexer->pos++];
 }
 
-static bool nextch(lexer_t *lexer, char c) {
+bool lexer_eat(lexer_t *lexer, char c) {
   readch(lexer);
   if (lexer->peek != c) {
     return false;
@@ -49,27 +49,55 @@ static void consume_ws(lexer_t *lexer) {
 
 static token_t *lexer_error(lexer_t *lexer) {
   lexer->token.tag = _EOF;
-  lexer->token.value = -1;
+  lexer->token.intval = -1;
   // The error was at the previous pos.
   lexer->err = lexer->pos > 0 ? lexer->pos - 1 : 0;
   return &lexer->token;
 }
 
-static token_t *lex_eof(lexer_t *lexer) {
+token_t *lex_eof(lexer_t *lexer) {
   lexer->token.tag = _EOF;
-  lexer->token.value = -1;
+  lexer->token.intval = -1;
   return &lexer->token;
 }
 
+/**
+ * Lex the an int or float number.
+ *
+ * Float numbers do not need an initial decimal digit.
+ * I.e., 0.123 and .123 are equally ok.
+ */
 static token_t *lex_num(lexer_t *lexer) {
-  int v = 0;
-  do {
-    v = v * 10 + (lexer->peek - '0');
-    readch(lexer);
-  } while (lexer->peek >= '0' && lexer->peek <= '9');
+  int i = 0;
+  int f = 0;
+  float frac = 1.0;
 
-  lexer->token.tag = INT;
-  lexer->token.value = v;
+  // Integer part from digits up to any non-digit character.
+  if (lexer->peek >= '0' && lexer->peek <= '9') {
+    do {
+      i = i * 10 + (lexer->peek - '0');
+      readch(lexer);
+    } while (lexer->peek >= '0' && lexer->peek <= '9');
+  }
+
+  if (lexer->peek == '.') {
+    readch(lexer);
+    do {
+      f = f * 10 + (lexer->peek - '0');
+      // What a mess.
+      frac *= 0.1;
+      readch(lexer);
+    } while (lexer->peek >'0' && lexer->peek <= '9');
+  }
+
+  if (!f) {
+    lexer->token.tag = INT;
+    lexer->token.intval = i;
+  } else {
+    lexer->token.tag = FLOAT;
+    lexer->token.floatval = ((float) i) + ((float) f * frac);
+  }
+
   return &lexer->token;
 }
 
@@ -96,7 +124,7 @@ static token_t *lex_word(lexer_t *lexer) {
 
 static token_t *lex_binop(lexer_t *lexer, tag_t op) {
   lexer->token.tag = op;
-  lexer->token.value = -1;
+  lexer->token.intval = -1;
   return &lexer->token;
 }
 
@@ -105,7 +133,8 @@ token_t *lexer_next(lexer_t *lexer) {
 
   if (lexer->peek == 0) return lex_eof(lexer);
 
-  if (lexer->peek >= '0' && lexer->peek <= '9') return lex_num(lexer);
+  if (lexer->peek == '.' ||
+      (lexer->peek >= '0' && lexer->peek <= '9')) return lex_num(lexer);
 
   if ((lexer->peek >= 'a' && lexer->peek <= 'z') ||
       (lexer->peek >= 'A' && lexer->peek <= 'Z')) return lex_word(lexer);
@@ -115,8 +144,8 @@ token_t *lexer_next(lexer_t *lexer) {
     case '-': return lex_binop(lexer, SUB);
     case '*': return lex_binop(lexer, MUL);
     case '/': return lex_binop(lexer, DIV);
-    case '<': return nextch(lexer, '=') ? lex_binop(lexer, LE) : lex_binop(lexer, LT);
-    case '>': return nextch(lexer, '=') ? lex_binop(lexer, GE) : lex_binop(lexer, GT);
+    case '<': return lexer_eat(lexer, '=') ? lex_binop(lexer, LE) : lex_binop(lexer, LT);
+    case '>': return lexer_eat(lexer, '=') ? lex_binop(lexer, GE) : lex_binop(lexer, GT);
   }
 
   return lexer_error(lexer);

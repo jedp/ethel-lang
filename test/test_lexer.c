@@ -26,11 +26,11 @@ void test_lex_word(void) {
     { .tag = FOR,     .string = "for" },
     { .tag = VARNAME, .string = "i" },
     { .tag = IN,      .string = "in" },
-    { .tag = INT,     .value = 1 },
+    { .tag = INT,     .intval = 1 },
     { .tag = TO,      .string = "to" },
-    { .tag = INT,     .value = 10 },
+    { .tag = INT,     .intval = 10 },
     { .tag = STEP,    .string = "step" },
-    { .tag = INT,     .value = 2 },
+    { .tag = INT,     .intval = 2 },
   };
 
   for (int i = 0; i < sizeof(expected) / sizeof(expected[0]); i++) {
@@ -38,14 +38,14 @@ void test_lex_word(void) {
     TEST_ASSERT_EQUAL(-1, lexer.err);
     TEST_ASSERT_EQUAL(expected[i].tag, t->tag);
     if (t->tag == INT) {
-      TEST_ASSERT_EQUAL(expected[i].value, t->value);
+      TEST_ASSERT_EQUAL(expected[i].intval, t->intval);
     } else {
       TEST_ASSERT(!strcmp(expected[i].string, t->string));
     }
   }
 }
 
-void test_lex_num(void) {
+void test_lex_int(void) {
   char *expr = "3120";
   lexer_t lexer;
   lexer_init(&lexer, expr, strlen(expr));
@@ -53,19 +53,41 @@ void test_lex_num(void) {
   token_t *token = lexer_next(&lexer);
 
   TEST_ASSERT_EQUAL(INT, token->tag);
-  TEST_ASSERT_EQUAL(3120, token->value);
+  TEST_ASSERT_EQUAL(3120, token->intval);
+}
+
+void test_lex_float(void) {
+  char *expr = "3.1415";
+  lexer_t lexer;
+  lexer_init(&lexer, expr, strlen(expr));
+
+  token_t *token = lexer_next(&lexer);
+
+  TEST_ASSERT_EQUAL(FLOAT, token->tag);
+  TEST_ASSERT_EQUAL((float) 3.1415, token->floatval);
+}
+
+void test_lex_float_no_leading_decimal(void) {
+  char *expr = ".125";
+  lexer_t lexer;
+  lexer_init(&lexer, expr, strlen(expr));
+
+  token_t *token = lexer_next(&lexer);
+
+  TEST_ASSERT_EQUAL(FLOAT, token->tag);
+  TEST_ASSERT_EQUAL((float) 0.125, token->floatval);
 }
 
 void test_lex_arithmetic(void) {
-  char *expr = "123 + 2345 * 3 - 42 / 5";
+  char *expr = "123 + 2345.67 * 3 - .42 / 5";
   lexer_t lexer;
   lexer_init(&lexer, expr, strlen(expr));
 
   int expected[] = {
     INT, ADD,
-    INT, MUL,
+    FLOAT, MUL,
     INT, SUB,
-    INT, DIV,
+    FLOAT, DIV,
     INT, _EOF
   };
 
@@ -96,7 +118,9 @@ void test_lex_inequality(void) {
 void test_lexer(void) {
   RUN_TEST(test_lex_error);
   RUN_TEST(test_lex_word);
-  RUN_TEST(test_lex_num);
+  RUN_TEST(test_lex_int);
+  RUN_TEST(test_lex_float);
+  RUN_TEST(test_lex_float_no_leading_decimal);
   RUN_TEST(test_lex_arithmetic);
   RUN_TEST(test_lex_inequality);
 }

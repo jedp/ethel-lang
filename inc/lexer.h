@@ -2,6 +2,7 @@
 #define __LEXER_H
 
 #include <inttypes.h>
+#include <stdbool.h>
 
 #define LEXER_BUF_SIZE 128
 
@@ -27,7 +28,7 @@ typedef enum {
   TRUE,
   FALSE,
   INT,
-  REAL,
+  FLOAT,
   CHAR,
   STRING,
   VARNAME,
@@ -65,7 +66,8 @@ typedef enum {
 typedef struct {
   tag_t tag;
   union {
-    uint32_t value;
+    int32_t intval;
+    float floatval;
     char* string;
   } ;
 } token_t;
@@ -84,7 +86,7 @@ static const token_t reserved[] = {
   { TRUE,     .string = "true" },
   { FALSE,    .string = "false" },
   { INT,      .string = "int" },
-  { REAL,     .string = "real" },
+  { FLOAT,    .string = "float" },
   { CHAR,     .string = "char" },
   { STRING,   .string = "string" },
   { AS,       .string = "as" },
@@ -125,6 +127,8 @@ typedef struct {
 void lexer_init(lexer_t *lexer, const char input[], const uint8_t input_size);
 
 token_t *lexer_next(lexer_t *lexer);
+bool lexer_eat(lexer_t *lexer, char c);
+token_t *lex_eof(lexer_t *lexer);
 
 #endif
 
