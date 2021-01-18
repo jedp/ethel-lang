@@ -9,9 +9,9 @@ void test_lex_error(void) {
   lexer_t lexer;
   lexer_init(&lexer, expr, strlen(expr));
 
-  lexer_next(&lexer);
-  lexer_next(&lexer);
-  lexer_next(&lexer);
+  advance(&lexer);
+  advance(&lexer);
+  advance(&lexer);
 
   TEST_ASSERT_EQUAL(_EOF, lexer.token.tag);
   TEST_ASSERT_EQUAL(6, lexer.err);
@@ -34,13 +34,13 @@ void test_lex_word(void) {
   };
 
   for (int i = 0; i < sizeof(expected) / sizeof(expected[0]); i++) {
-    token_t *t = lexer_next(&lexer);
+    advance(&lexer);
     TEST_ASSERT_EQUAL(-1, lexer.err);
-    TEST_ASSERT_EQUAL(expected[i].tag, t->tag);
-    if (t->tag == INT) {
-      TEST_ASSERT_EQUAL(expected[i].intval, t->intval);
+    TEST_ASSERT_EQUAL(expected[i].tag, lexer.token.tag);
+    if (lexer.token.tag == INT) {
+      TEST_ASSERT_EQUAL(expected[i].intval, lexer.token.intval);
     } else {
-      TEST_ASSERT(!strcmp(expected[i].string, t->string));
+      TEST_ASSERT(!strcmp(expected[i].string, lexer.token.string));
     }
   }
 }
@@ -50,10 +50,10 @@ void test_lex_int(void) {
   lexer_t lexer;
   lexer_init(&lexer, expr, strlen(expr));
 
-  token_t *token = lexer_next(&lexer);
+  advance(&lexer);
 
-  TEST_ASSERT_EQUAL(INT, token->tag);
-  TEST_ASSERT_EQUAL(3120, token->intval);
+  TEST_ASSERT_EQUAL(INT, lexer.token.tag);
+  TEST_ASSERT_EQUAL(3120, lexer.token.intval);
 }
 
 void test_lex_float(void) {
@@ -61,10 +61,10 @@ void test_lex_float(void) {
   lexer_t lexer;
   lexer_init(&lexer, expr, strlen(expr));
 
-  token_t *token = lexer_next(&lexer);
+  advance(&lexer);
 
-  TEST_ASSERT_EQUAL(FLOAT, token->tag);
-  TEST_ASSERT_EQUAL((float) 3.1415, token->floatval);
+  TEST_ASSERT_EQUAL(FLOAT, lexer.token.tag);
+  TEST_ASSERT_EQUAL((float) 3.1415, lexer.token.floatval);
 }
 
 void test_lex_float_no_leading_decimal(void) {
@@ -72,10 +72,10 @@ void test_lex_float_no_leading_decimal(void) {
   lexer_t lexer;
   lexer_init(&lexer, expr, strlen(expr));
 
-  token_t *token = lexer_next(&lexer);
+  advance(&lexer);
 
-  TEST_ASSERT_EQUAL(FLOAT, token->tag);
-  TEST_ASSERT_EQUAL((float) 0.125, token->floatval);
+  TEST_ASSERT_EQUAL(FLOAT, lexer.token.tag);
+  TEST_ASSERT_EQUAL((float) 0.125, lexer.token.floatval);
 }
 
 void test_lex_arithmetic(void) {
@@ -93,7 +93,8 @@ void test_lex_arithmetic(void) {
 
   for (int i = 0; i < sizeof(expected) / sizeof(expected[0]); i++) {
     TEST_ASSERT_EQUAL(-1, lexer.err);
-    TEST_ASSERT_EQUAL(expected[i], (lexer_next(&lexer))->tag);
+    advance(&lexer);
+    TEST_ASSERT_EQUAL(expected[i], lexer.token.tag);
   }
 }
 
@@ -111,7 +112,27 @@ void test_lex_inequality(void) {
 
   for (int i = 0; i < sizeof(expected) / sizeof(expected[0]); i++) {
     TEST_ASSERT_EQUAL(-1, lexer.err);
-    TEST_ASSERT_EQUAL(expected[i], (lexer_next(&lexer))->tag);
+    advance(&lexer);
+    TEST_ASSERT_EQUAL(expected[i], lexer.token.tag);
+  }
+}
+
+void test_lex_parens(void) {
+  char *expr = "(1.24 * ( 3.5-2+ 4 ) + 1) * 2";
+  lexer_t lexer;
+  lexer_init(&lexer, expr, strlen(expr));
+
+  int expected[] = {
+    LPAREN, FLOAT, MUL,
+    LPAREN, FLOAT, SUB, INT, ADD, INT, RPAREN,
+    ADD, INT, RPAREN,
+    MUL, INT
+  };
+
+  for (int i = 0; i < sizeof(expected) / sizeof(expected[0]); i++) {
+    TEST_ASSERT_EQUAL(-1, lexer.err);
+    advance(&lexer);
+    TEST_ASSERT_EQUAL(expected[i], lexer.token.tag);
   }
 }
 
@@ -123,5 +144,6 @@ void test_lexer(void) {
   RUN_TEST(test_lex_float_no_leading_decimal);
   RUN_TEST(test_lex_arithmetic);
   RUN_TEST(test_lex_inequality);
+  RUN_TEST(test_lex_parens);
 }
 

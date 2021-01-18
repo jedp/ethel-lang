@@ -18,18 +18,14 @@ void lexer_init(lexer_t *lexer, const char input[], const uint8_t input_size) {
   }
 }
 
-static void readch(lexer_t *lexer) {
-  lexer->peek = lexer->buf[lexer->pos++];
+static void unreadch(lexer_t *lexer) {
+  lexer->pos--;
+  lexer->buf[lexer->pos] = lexer->peek;
+  lexer->peek = ' ';
 }
 
-bool lexer_eat(lexer_t *lexer, char c) {
-  readch(lexer);
-  if (lexer->peek != c) {
-    return false;
-  }
-
-  lexer->peek = ' ';
-  return true;
+static void readch(lexer_t *lexer) {
+  lexer->peek = lexer->buf[lexer->pos++];
 }
 
 static void consume_ws(lexer_t *lexer) {
@@ -38,6 +34,8 @@ static void consume_ws(lexer_t *lexer) {
     switch (lexer->peek) {
     case ' ':
     case '\t':
+    case '\r':
+    case '\n':
       /* continue */
       break;
 
@@ -90,6 +88,8 @@ static token_t *lex_num(lexer_t *lexer) {
     } while (lexer->peek >'0' && lexer->peek <= '9');
   }
 
+  unreadch(lexer);
+
   if (!f) {
     lexer->token.tag = INT;
     lexer->token.intval = i;
@@ -122,13 +122,18 @@ static token_t *lex_word(lexer_t *lexer) {
   return &lexer->token;
 }
 
+static token_t *lex_paren(lexer_t *lexer, tag_t which) {
+  lexer->token.tag = which;
+  return &lexer->token;
+}
+
 static token_t *lex_binop(lexer_t *lexer, tag_t op) {
   lexer->token.tag = op;
   lexer->token.intval = -1;
   return &lexer->token;
 }
 
-token_t *lexer_next(lexer_t *lexer) {
+token_t *get_token(lexer_t *lexer) {
   consume_ws(lexer);
 
   if (lexer->peek == 0) return lex_eof(lexer);
@@ -140,14 +145,53 @@ token_t *lexer_next(lexer_t *lexer) {
       (lexer->peek >= 'A' && lexer->peek <= 'Z')) return lex_word(lexer);
        
   switch(lexer->peek) {
+    case '(': return lex_paren(lexer, LPAREN);
+    case ')': return lex_paren(lexer, RPAREN);
     case '+': return lex_binop(lexer, ADD);
     case '-': return lex_binop(lexer, SUB);
     case '*': return lex_binop(lexer, MUL);
     case '/': return lex_binop(lexer, DIV);
-    case '<': return lexer_eat(lexer, '=') ? lex_binop(lexer, LE) : lex_binop(lexer, LT);
-    case '>': return lexer_eat(lexer, '=') ? lex_binop(lexer, GE) : lex_binop(lexer, GT);
+    case ':': {
+      eat(lexer, EQ);
+      return lex_binop(lexer, GETS);
+    }
+    case '<': {
+      readch(lexer);
+      if (lexer->peek == '=') {
+	return lex_binop(lexer, LE);
+      }
+      unreadch(lexer);
+      return lex_binop(lexer, LT);
+    }
+    case '>': {
+      readch(lexer);
+      if (lexer->peek == '=') {
+	return lex_binop(lexer, GE);
+      }
+      unreadch(lexer);
+      return lex_binop(lexer, GT);
+    }
+    case '=': return lex_binop(lexer, EQ);
   }
 
   return lexer_error(lexer);
+}
+
+void advance(lexer_t *lexer) {
+  lexer->token = *get_token(lexer);
+  if (lexer->token.tag != _EOF) {
+    lexer->peek = lexer->buf[lexer->pos+1];
+  }
+}
+
+bool eat(lexer_t *lexer, tag_t t) {
+  if (lexer->token.tag != t) {
+    printf("Syntax error. Expected to eat token of type %d.\n", t);
+    lexer->err = lexer->pos;
+    return false;
+  }
+
+  advance(lexer);
+  return true;
 }
 

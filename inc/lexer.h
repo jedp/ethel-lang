@@ -31,7 +31,10 @@ typedef enum {
   FLOAT,
   CHAR,
   STRING,
+  LPAREN,
+  RPAREN,
   VARNAME,
+  GETS,
   AS,
   FOR,
   IN,
@@ -127,8 +130,9 @@ typedef struct {
 void lexer_init(lexer_t *lexer, const char input[], const uint8_t input_size);
 
 token_t *lexer_next(lexer_t *lexer);
-bool lexer_eat(lexer_t *lexer, char c);
 token_t *lex_eof(lexer_t *lexer);
+bool eat(lexer_t *lexer, tag_t t);
+void advance();
 
 #endif
 

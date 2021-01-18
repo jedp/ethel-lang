@@ -1,21 +1,18 @@
 #include <stdio.h>
 #include <string.h>
-#include "lexer.h"
+#include "parser.h"
 
-lexer_t lexer;
+#define MAX_INPUT 80
 
 int main(int argc, char** argv) {
-  char *input = "2 + 2";
-  lexer_init(&lexer, input, strlen(input));
+  char input[MAX_INPUT];
+  memset(input, 0, MAX_INPUT);
 
-  for (;;) {
-    token_t *token = lexer_next(&lexer);
-    printf("token tag %d\n", token->tag);
-    if (token->tag == _EOF) {
-      break;
-    }
+  printf("> ");
+  if (!fgets(input, sizeof(input), stdin)) {
+    printf("No input!");
+    return -1;
   }
 
-  printf("done.\n");
+  return parse_program(input); 
 }
-

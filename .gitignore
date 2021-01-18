@@ -1,5 +1,6 @@
 *.o
 basic
+calc
 test/test
 
 *sw[op]

@@ -2,6 +2,7 @@
 MEMOBJS  = src/map.o
 
 COMPOBJS = src/lexer.o \
+	   src/calc.o \
 	   src/parser.o
 
 REPLOBJS = src/basic.o
