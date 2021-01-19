@@ -5,11 +5,12 @@ COMPOBJS = src/lexer.o \
 	   src/calc.o \
 	   src/parser.o
 
-REPLOBJS = src/basic.o
+REPLOBJS = src/repl.o
 
 TESTOBJS = test/unity/unity.o \
 	   test/test_map.o \
 	   test/test_lexer.o \
+	   test/test_calc.o \
 	   test/test_parser.o \
 	   test/test.o
 
@@ -17,12 +18,12 @@ CFLAGS = -std=gnu11 -Wall -m32 -g -O0 -I inc
 TESTFLAGS = -I test
 LDFLAGS = -lm -lreadline -ldl
 
-all: basic
+all: repl
 
 %.o: %.c
 	$(CC) $(CFLAGS) -c -o $@ $<
 
-basic: $(MEMOBJS) $(REPLOBJS) $(COMPOBJS)
+repl: $(MEMOBJS) $(REPLOBJS) $(COMPOBJS)
 	$(CC) $(CFLAGS) -o $@ $^ $(LDFLAGS)
 
 test: $(MEMOBJS) $(COMPOBJS) $(TESTOBJS)
@@ -35,5 +36,5 @@ wc:
 .PHONY: clean
 clean:
 	rm -f $(MEMOBJS) $(COMPOBJS) $(REPLOBJS) $(TESTOBJS)
-	rm -f basic test/test
+	rm -f repl test/test
 

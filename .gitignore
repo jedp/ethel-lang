@@ -1,5 +1,5 @@
 *.o
-basic
+repl
 calc
 test/test
 

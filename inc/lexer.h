@@ -63,7 +63,6 @@ typedef enum {
   SIN,
   SQR,
   TAN,
-  REM
 } tag_t;
 
 typedef struct {
@@ -116,23 +115,24 @@ static const token_t reserved[] = {
   { SIN,      .string = "sin" },
   { SQR,      .string = "sqr" },
   { TAN,      .string = "tan" },
-  { REM,      .string = ";" },
 };
 
 typedef struct {
   uint32_t pos;
   int err;
-  char peek;
+  char nextch;
   char buf[LEXER_BUF_SIZE];
   token_t token;
+  token_t next_token;
 } lexer_t;
 
 void lexer_init(lexer_t *lexer, const char input[], const uint8_t input_size);
 
-token_t *lexer_next(lexer_t *lexer);
-token_t *lex_eof(lexer_t *lexer);
+void advance(lexer_t *lexer);
+
 bool eat(lexer_t *lexer, tag_t t);
-void advance();
+
+tag_t peek_token_type(lexer_t *lexer);
 
 #endif
 
