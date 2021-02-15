@@ -2,8 +2,9 @@
 #define __PARSER_H
 
 #include "lexer.h"
+#include "ast.h"
 
-int parse_program(char* input);
+ast_expr_t *parse_program(char* input);
 
 #endif
 

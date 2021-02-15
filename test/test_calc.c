@@ -29,6 +29,14 @@ void test_add(void) {
   TEST_ASSERT_EQUAL(2, parse_start(&lexer));
 }
 
+void test_add_multiple(void) {
+  char *expr = "0 + 1 + 1 + 2 + 3 + 5";
+  lexer_t lexer;
+  lexer_init(&lexer, expr, strlen(expr));
+
+  TEST_ASSERT_EQUAL(12, parse_start(&lexer));
+}
+
 void test_sub(void) {
   char *expr = "4-2";
   lexer_t lexer;
@@ -89,6 +97,7 @@ void test_calc(void) {
   RUN_TEST(test_digit);
   RUN_TEST(test_digit_neg);
   RUN_TEST(test_add);
+  RUN_TEST(test_add_multiple);
   RUN_TEST(test_sub);
   RUN_TEST(test_mul);
   RUN_TEST(test_div);
