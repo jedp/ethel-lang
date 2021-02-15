@@ -2,8 +2,8 @@
 #include <string.h>
 #include "unity/unity.h"
 #include "test_calc.h"
-#include "lexer.h"
-#include "calc.h"
+#include "../inc/lexer.h"
+#include "../inc/calc.h"
 
 void test_digit(void) {
   char *expr = "2";

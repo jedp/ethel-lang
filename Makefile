@@ -14,7 +14,7 @@ TESTOBJS = test/unity/unity.o \
 	   test/test_parser.o \
 	   test/test.o
 
-CFLAGS = -std=gnu11 -Wall -m32 -g -O0 -I inc
+CFLAGS = -std=gnu11 -Wall -g -O0 -I inc
 TESTFLAGS = -I test
 LDFLAGS = -lm -lreadline -ldl
 

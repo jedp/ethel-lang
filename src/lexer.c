@@ -2,7 +2,7 @@
 #include <stdbool.h>
 #include <string.h>
 #include <ctype.h>
-#include "lexer.h"
+#include "../inc/lexer.h"
 
 #define MAX_WORD 16
 char word_buf[MAX_WORD];
@@ -36,14 +36,14 @@ static void consume_ws(lexer_t *lexer) {
 }
 
 static token_t *lexer_error(lexer_t *lexer) {
-  lexer->next_token.tag = _EOF;
+  lexer->next_token.tag = TAG_EOF;
   // The error was at the previous pos.
   lexer->err = lexer->pos > 0 ? lexer->pos - 1 : 0;
   return &lexer->next_token;
 }
 
 token_t *lex_eof(lexer_t *lexer) {
-  lexer->next_token.tag = _EOF;
+  lexer->next_token.tag = TAG_EOF;
   return &lexer->next_token;
 }
 
@@ -80,10 +80,10 @@ static token_t *lex_num(lexer_t *lexer) {
   unreadch(lexer);
 
   if (!f) {
-    lexer->next_token.tag = INT;
+    lexer->next_token.tag = TAG_INT;
     lexer->next_token.intval = sign * i;
   } else {
-    lexer->next_token.tag = FLOAT;
+    lexer->next_token.tag = TAG_FLOAT;
     lexer->next_token.floatval = sign * ((float) i) + ((float) f * frac);
   }
 
@@ -100,7 +100,6 @@ static token_t *lex_word(lexer_t *lexer) {
 
   unreadch(lexer);
 
-  // A hash map might be faster.
   for (int j = 0; j < sizeof(reserved) / sizeof(reserved[0]); j++) {
     if (!strcmp(reserved[j].string, next_word_buf)) { 
       lexer->next_token = reserved[j];
@@ -108,7 +107,7 @@ static token_t *lex_word(lexer_t *lexer) {
     }
   }
 
-  lexer->next_token.tag = VARNAME;
+  lexer->next_token.tag = TAG_VARNAME;
   lexer->next_token.string = next_word_buf;
   return &lexer->next_token;
 }
@@ -146,37 +145,37 @@ token_t *get_token(lexer_t *lexer) {
       (ch >= 'A' && ch <= 'Z')) return lex_word(lexer);
        
   switch(ch) {
-    case '(': return lex_paren(lexer, LPAREN);
-    case ')': return lex_paren(lexer, RPAREN);
-    case '+': return lex_op(lexer, ADD);
+    case '(': return lex_paren(lexer, TAG_LPAREN);
+    case ')': return lex_paren(lexer, TAG_RPAREN);
+    case '+': return lex_op(lexer, TAG_PLUS);
     // The parser can treat this as the sign op or a binop as context dictates.
-    case '-': return lex_op(lexer, SUB);
-    case '*': return lex_op(lexer, MUL);
-    case '/': return lex_op(lexer, DIV);
+    case '-': return lex_op(lexer, TAG_MINUS);
+    case '*': return lex_op(lexer, TAG_TIMES);
+    case '/': return lex_op(lexer, TAG_DIVIDE);
     case ':': {
       readch(lexer);
       if (lexer->nextch == '=') {
-        return lex_op(lexer, GETS);
+        return lex_op(lexer, TAG_ASSIGN);
       }
       return lexer_error(lexer);
     }
     case '<': {
       readch(lexer);
       if (lexer->nextch == '=') {
-	return lex_op(lexer, LE);
+	return lex_op(lexer, TAG_LE);
       }
       unreadch(lexer);
-      return lex_op(lexer, LT);
+      return lex_op(lexer, TAG_LT);
     }
     case '>': {
       readch(lexer);
       if (lexer->nextch == '=') {
-	return lex_op(lexer, GE);
+	return lex_op(lexer, TAG_GE);
       }
       unreadch(lexer);
-      return lex_op(lexer, GT);
+      return lex_op(lexer, TAG_GT);
     }
-    case '=': return lex_op(lexer, EQ);
+    case '=': return lex_op(lexer, TAG_EQ);
   }
 
   return lexer_error(lexer);
@@ -185,10 +184,10 @@ token_t *get_token(lexer_t *lexer) {
 void advance(lexer_t *lexer) {
   lexer->token = lexer->next_token;
   switch(lexer->token.tag) {
-    case INT:
+    case TAG_INT:
       lexer->token.intval = lexer->next_token.intval;
       break;
-    case FLOAT:
+    case TAG_FLOAT:
       lexer->token.floatval = lexer->next_token.floatval;
       break;
     default: 
@@ -199,7 +198,7 @@ void advance(lexer_t *lexer) {
       break;
   }
 
-  if (lexer->token.tag != _EOF) {
+  if (lexer->token.tag != TAG_EOF) {
     lexer->next_token = *get_token(lexer);
   }
 }

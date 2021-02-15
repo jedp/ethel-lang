@@ -1,7 +1,7 @@
 #include <stdio.h>
 #include <string.h>
-#include "lexer.h"
-#include "calc.h"
+#include "../inc/lexer.h"
+#include "../inc/calc.h"
 
 /**********************************************************************
  * Recursive-descent interpreter for arithmetic expressions.
@@ -36,7 +36,7 @@ int parse_eof(lexer_t *lexer);
 
 /* S -> E $ */
 int parse_start(lexer_t *lexer) {
-  return (lexer->token.tag == _EOF) ? 0 : parse_expr(lexer);
+  return (lexer->token.tag == TAG_EOF) ? 0 : parse_expr(lexer);
 }
 
 /* E -> T E' */
@@ -54,11 +54,11 @@ int parse_expr1(int a, lexer_t *lexer) {
   if (lexer->err > -1) return 0;
 
   switch(lexer->token.tag) {
-    case ADD: {
+    case TAG_PLUS: {
       advance(lexer);
       return parse_expr1(a + parse_term(lexer), lexer);
     }
-    case SUB: {
+    case TAG_MINUS: {
       advance(lexer);
       return parse_expr1(a - parse_term(lexer), lexer);
     }
@@ -81,11 +81,11 @@ int parse_term1(int a, lexer_t *lexer) {
   if (lexer->err > -1) return 0;
 
   switch (lexer->token.tag) {
-    case MUL: {
+    case TAG_TIMES: {
       advance(lexer);
       return parse_term1(a * parse_factor(lexer), lexer);
     }
-    case DIV: {
+    case TAG_DIVIDE: {
       advance(lexer);
       return parse_term1(a / parse_factor(lexer), lexer);
     }
@@ -102,24 +102,24 @@ int parse_factor(lexer_t *lexer) {
   if (lexer->err > -1) return 0;
 
   switch (lexer->token.tag) {
-    case INT: {
+    case TAG_INT: {
       int i = lexer->token.intval;
       advance(lexer);
       return i;
     }
-    case FLOAT: {
+    case TAG_FLOAT: {
       float f = lexer->token.floatval;
       advance(lexer);
       return (int) f;
     }
-    case SUB: {
+    case TAG_MINUS: {
       advance(lexer);
       return -1 * parse_factor(lexer);
     }
-    case LPAREN: {
+    case TAG_LPAREN: {
       advance(lexer);
       int i = parse_expr(lexer);
-      if (!eat(lexer, RPAREN)) goto error;
+      if (!eat(lexer, TAG_RPAREN)) goto error;
       return i;
     }
     default: goto error;

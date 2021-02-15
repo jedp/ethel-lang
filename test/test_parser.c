@@ -2,7 +2,7 @@
 #include <string.h>
 #include "unity/unity.h"
 #include "test_parser.h"
-#include "parser.h"
+#include "../inc/parser.h"
 
 void test_parse_numeric_expr(void) {
   char *expr = "1 + 2 / 3.0 * 4 - 5";

@@ -1,8 +1,10 @@
 #include <stdio.h>
 #include <string.h>
-#include "lexer.h"
-#include "calc.h"
-#include "parser.h"
+#include "../inc/ast.h"
+#include "../inc/lexer.h"
+#include "../inc/calc.h"
+#include "../inc/parser.h"
+
 
 int parse_program(char *input) {
   lexer_t lexer;

@@ -13,7 +13,8 @@ void tearDown(void) {
 int main(int argc, char** argv) {
   UNITY_BEGIN();
 
-  test_map();
+  // test_map();
+
   test_lexer();
   test_calc();
   test_parser();

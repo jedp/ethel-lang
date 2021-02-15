@@ -1,6 +1,6 @@
 #include <string.h>
 #include "unity/unity.h"
-#include "map.h"
+#include "../inc/map.h"
 #include "test_map.h"
 
 void test_map_init(void) {

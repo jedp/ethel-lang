@@ -2,7 +2,7 @@
 #include <stdbool.h>
 #include <stdlib.h>
 #include <string.h>
-#include "map.h"
+#include "../inc/map.h"
 
 #define FVN32Prime 0x01000193
 #define FVN32Basis 0x811C9DC5
