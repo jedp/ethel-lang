@@ -24,6 +24,22 @@ ast_expr_t *ast_int(int value) {
   return node;
 }
 
+ast_expr_t *ast_ident(char* name) {
+  ast_expr_t *node = malloc(sizeof(ast_expr_t));
+  node->type = AST_IDENT;
+  node->stringval = name;
+  return node;
+
+}
+
+ast_expr_t *ast_assign(ast_expr_t *ident, ast_expr_t *value) {
+  ast_expr_t *node = malloc(sizeof(ast_expr_t));
+  node->type = AST_ASSIGN;
+  node->e1 = ident;
+  node->e2 = value;
+  return node;
+}
+
 ast_expr_t *ast_empty() {
   return ast_expr(AST_EMPTY, 0, 0);
 }

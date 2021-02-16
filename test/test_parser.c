@@ -126,6 +126,15 @@ void test_parse_priority(void) {
   TEST_ASSERT_EQUAL(AST_ADD, ((ast_expr_t*) expr->e2)->type);
 }
 
+void test_parse_assign(void) {
+  char *program = "x := 2 + 2";
+
+  ast_expr_t *expr = parse_program(program);
+  TEST_ASSERT_EQUAL(AST_ASSIGN, expr->type);
+  TEST_ASSERT_EQUAL(AST_IDENT, ((ast_expr_t*) expr->e1)->type);
+  TEST_ASSERT_EQUAL(AST_ADD, ((ast_expr_t*) expr->e2)->type);
+}
+
 void test_parser(void) {
   RUN_TEST(test_parse_empty);
   RUN_TEST(test_parse_add);
@@ -135,5 +144,6 @@ void test_parser(void) {
   RUN_TEST(test_parse_add_multiple);
   RUN_TEST(test_parse_mul_multiple);
   RUN_TEST(test_parse_priority);
+  RUN_TEST(test_parse_assign);
 }
 

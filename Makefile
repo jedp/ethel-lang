@@ -2,7 +2,8 @@
 COMPOBJS = src/lexer.o \
 					 src/ast.o \
 					 src/parser.o \
-					 src/eval.o
+					 src/eval.o \
+					 src/env.o
 
 REPLOBJS = src/repl.o
 
@@ -10,6 +11,7 @@ TESTOBJS = test/unity/unity.o \
 					 test/test_lexer.o \
 					 test/test_parser.o \
 					 test/test_eval.o \
+					 test/test_env.o \
 					 test/test.o
 
 CFLAGS = -std=gnu11 -Wall -g -O0 -I inc

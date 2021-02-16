@@ -59,6 +59,8 @@ eval_result_t *eval_expr(ast_expr_t *expr) {
             break;
         case AST_IDENT:
             break;
+        case AST_ASSIGN:
+            break;
         default:
             result->err = AST_UNSUPPORTED_OPERATION;
             break;

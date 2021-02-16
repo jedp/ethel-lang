@@ -4,7 +4,7 @@
 #include "test_eval.h"
 #include "../inc/eval.h"
 
-void test_calculator(void) {
+void test_eval_calculator(void) {
   char *program = "4 + 3 * (3+2) + -10/2";
 
   eval_result_t *result = eval(program);
@@ -13,6 +13,6 @@ void test_calculator(void) {
 }
 
 void test_eval(void) {
-  RUN_TEST(test_calculator);
+  RUN_TEST(test_eval_calculator);
 }
 

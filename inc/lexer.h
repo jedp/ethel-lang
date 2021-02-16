@@ -9,7 +9,6 @@
 typedef enum {
   TAG_EOF = 0,
   TAG_IDENT,
-  TAG_VARNAME,
   TAG_LPAREN,
   TAG_RPAREN,
   TAG_PLUS,

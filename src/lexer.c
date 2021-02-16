@@ -107,7 +107,7 @@ static token_t *lex_word(lexer_t *lexer) {
     }
   }
 
-  lexer->next_token.tag = TAG_VARNAME;
+  lexer->next_token.tag = TAG_IDENT;
   lexer->next_token.string = next_word_buf;
   return &lexer->next_token;
 }

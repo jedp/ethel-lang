@@ -2,6 +2,7 @@
 #include "test_lexer.h"
 #include "test_parser.h"
 #include "test_eval.h"
+#include "test_env.h"
 
 void setUp(void) {
 }
@@ -15,6 +16,7 @@ int main(int argc, char** argv) {
   test_lexer();
   test_parser();
   test_eval();
+  test_env();
 
   UNITY_END();
 }

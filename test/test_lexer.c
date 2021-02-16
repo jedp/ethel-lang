@@ -23,7 +23,7 @@ void test_lex_word(void) {
 
   token_t expected[] = {
     { .tag = TAG_FOR,     .string = "for" },
-    { .tag = TAG_VARNAME, .string = "i" },
+    { .tag = TAG_IDENT,   .string = "i" },
     { .tag = TAG_IN,      .string = "in" },
     { .tag = TAG_INT,     .intval = 1 },
     { .tag = TAG_TO,      .string = "to" },
@@ -117,10 +117,10 @@ void test_lex_inequality(void) {
   lexer_init(&lexer, expr, strlen(expr));
 
   int expected[] = {
-    TAG_IF, TAG_VARNAME, TAG_LT, TAG_INT,
-    TAG_AND, TAG_VARNAME, TAG_LE, TAG_INT,
-    TAG_AND, TAG_VARNAME, TAG_GT, TAG_INT,
-    TAG_AND, TAG_VARNAME, TAG_GE, TAG_INT
+    TAG_IF, TAG_IDENT, TAG_LT, TAG_INT,
+    TAG_AND, TAG_IDENT, TAG_LE, TAG_INT,
+    TAG_AND, TAG_IDENT, TAG_GT, TAG_INT,
+    TAG_AND, TAG_IDENT, TAG_GE, TAG_INT
   };
 
   for (int i = 0; i < sizeof(expected) / sizeof(expected[0]); i++) {
@@ -136,10 +136,10 @@ void test_lex_inequality_no_spaces(void) {
   lexer_init(&lexer, expr, strlen(expr));
 
   int expected[] = {
-    TAG_IF, TAG_VARNAME, TAG_LT, TAG_INT,
-    TAG_AND, TAG_VARNAME, TAG_LE, TAG_INT,
-    TAG_AND, TAG_VARNAME, TAG_GT, TAG_INT,
-    TAG_AND, TAG_VARNAME, TAG_GE, TAG_INT
+    TAG_IF, TAG_IDENT, TAG_LT, TAG_INT,
+    TAG_AND, TAG_IDENT, TAG_LE, TAG_INT,
+    TAG_AND, TAG_IDENT, TAG_GT, TAG_INT,
+    TAG_AND, TAG_IDENT, TAG_GE, TAG_INT
   };
 
   for (int i = 0; i < sizeof(expected) / sizeof(expected[0]); i++) {
@@ -155,11 +155,11 @@ void test_lex_inequality_nested_expressions(void) {
   lexer_init(&lexer, expr, strlen(expr));
 
   int expected[] = {
-    TAG_IF, TAG_LPAREN, TAG_VARNAME, TAG_LT, TAG_INT, TAG_RPAREN,
-    TAG_AND, TAG_LPAREN, TAG_VARNAME, TAG_LE,
+    TAG_IF, TAG_LPAREN, TAG_IDENT, TAG_LT, TAG_INT, TAG_RPAREN,
+    TAG_AND, TAG_LPAREN, TAG_IDENT, TAG_LE,
       TAG_LPAREN, TAG_INT, TAG_TIMES, TAG_INT, TAG_RPAREN, TAG_RPAREN,
-    TAG_AND, TAG_VARNAME, TAG_GT, TAG_INT,
-    TAG_AND, TAG_VARNAME, TAG_GE, TAG_INT
+    TAG_AND, TAG_IDENT, TAG_GT, TAG_INT,
+    TAG_AND, TAG_IDENT, TAG_GE, TAG_INT
   };
 
   for (int i = 0; i < sizeof(expected) / sizeof(expected[0]); i++) {
@@ -212,7 +212,7 @@ void test_assignment(void) {
   lexer_t lexer;
   lexer_init(&lexer, expr, strlen(expr));
 
-  int expected[] = { TAG_VARNAME, TAG_ASSIGN, TAG_INT };
+  int expected[] = { TAG_IDENT, TAG_ASSIGN, TAG_INT };
   for (int i = 0; i < sizeof(expected) / sizeof(expected[0]); i++) {
     TEST_ASSERT_EQUAL(-1, lexer.err);
     TEST_ASSERT_EQUAL(expected[i], lexer.token.tag);

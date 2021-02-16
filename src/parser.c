@@ -18,6 +18,7 @@ ast_expr_t *parse_start(lexer_t *lexer) {
 /*
  * E -> E + T
  * E -> E - T
+ * E -> assign
  * E -> E
  *
  * An expression produces a term and maybe an additive or subractive expression.
@@ -57,6 +58,10 @@ ast_expr_t *parse_term(lexer_t *lexer) {
       advance(lexer);
       return ast_expr(AST_DIV, e, parse_term(lexer));
     }
+    case TAG_ASSIGN: {
+      advance(lexer);
+      return ast_assign(e, parse_expr(lexer));
+    }
     default: return e;
   }
 }
@@ -80,6 +85,10 @@ ast_expr_t *parse_factor(lexer_t *lexer) {
       float f = lexer->token.floatval;
       advance(lexer);
       return ast_float(f);
+    }
+    case TAG_IDENT: {
+      advance(lexer);
+      return ast_ident(lexer->token.string);
     }
     case TAG_MINUS: {
       advance(lexer);
