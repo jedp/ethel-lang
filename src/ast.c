@@ -1,4 +1,5 @@
 #include <stdlib.h>
+#include <strings.h>
 #include <stdio.h>
 #include "../inc/ast.h"
 
@@ -26,8 +27,10 @@ ast_expr_t *ast_int(int value) {
 
 ast_expr_t *ast_ident(char* name) {
   ast_expr_t *node = malloc(sizeof(ast_expr_t));
+  char* node_name = malloc(strlen(name) + 1);
+  strcpy(node_name, name);
   node->type = AST_IDENT;
-  node->stringval = name;
+  node->stringval = node_name;
   return node;
 
 }
@@ -35,6 +38,7 @@ ast_expr_t *ast_ident(char* name) {
 ast_expr_t *ast_assign(ast_expr_t *ident, ast_expr_t *value) {
   ast_expr_t *node = malloc(sizeof(ast_expr_t));
   node->type = AST_ASSIGN;
+  node->stringval = ident->stringval;
   node->e1 = ident;
   node->e2 = value;
   return node;

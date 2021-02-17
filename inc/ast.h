@@ -27,12 +27,6 @@ static const char *ast_node_names[] = {
     "IDENT",
 };
 
-typedef enum {
-    AST_NO_ERROR,
-    AST_SYNTAX_ERROR,
-    AST_UNSUPPORTED_OPERATION,
-} ast_err_t;
-
 typedef struct Expr {
     uint8_t type;
     void *e1;
