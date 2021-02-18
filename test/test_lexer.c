@@ -207,8 +207,8 @@ void test_lex_parens_no_spaces(void) {
   }
 }
 
-void test_assignment(void) {
-  char *expr = "a := 3";
+void test_lex_assign(void) {
+  char *expr = "a = 3";
   lexer_t lexer;
   lexer_init(&lexer, expr, strlen(expr));
 
@@ -232,6 +232,6 @@ void test_lexer(void) {
   RUN_TEST(test_lex_inequality_nested_expressions);
   RUN_TEST(test_lex_parens);
   RUN_TEST(test_lex_parens_no_spaces);
-  RUN_TEST(test_assignment);
+  RUN_TEST(test_lex_assign);
 }
 

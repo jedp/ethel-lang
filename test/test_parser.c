@@ -127,7 +127,7 @@ void test_parse_priority(void) {
 }
 
 void test_parse_assign(void) {
-  char *program = "x := 2 + 2";
+  char *program = "x = 2 + 2";
 
   ast_expr_t *expr = parse_program(program);
   TEST_ASSERT_EQUAL(AST_ASSIGN, expr->type);

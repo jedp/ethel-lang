@@ -152,17 +152,10 @@ token_t *get_token(lexer_t *lexer) {
     case '-': return lex_op(lexer, TAG_MINUS);
     case '*': return lex_op(lexer, TAG_TIMES);
     case '/': return lex_op(lexer, TAG_DIVIDE);
-    case ':': {
-      readch(lexer);
-      if (lexer->nextch == '=') {
-        return lex_op(lexer, TAG_ASSIGN);
-      }
-      return lexer_error(lexer);
-    }
     case '<': {
       readch(lexer);
       if (lexer->nextch == '=') {
-	return lex_op(lexer, TAG_LE);
+        return lex_op(lexer, TAG_LE);
       }
       unreadch(lexer);
       return lex_op(lexer, TAG_LT);
@@ -170,12 +163,18 @@ token_t *get_token(lexer_t *lexer) {
     case '>': {
       readch(lexer);
       if (lexer->nextch == '=') {
-	return lex_op(lexer, TAG_GE);
+        return lex_op(lexer, TAG_GE);
       }
       unreadch(lexer);
       return lex_op(lexer, TAG_GT);
     }
-    case '=': return lex_op(lexer, TAG_EQ);
+    case '=': {
+      readch(lexer);
+      if (lexer->nextch == '=') {
+        return lex_op(lexer, TAG_EQ);
+      }
+      return lex_op(lexer, TAG_ASSIGN);
+    }
   }
 
   return lexer_error(lexer);
