@@ -35,9 +35,13 @@ int main(int argc, char** argv) {
         case TYPE_FLOAT:
           printf("%f\n", ((obj_t*)result->obj)->floatval);
           break;
+        case TYPE_STRING:
+          printf("%s\n", ((obj_t*)result->obj)->stringval);
+          break;
         default:
+          // The type was printed. That's fine.
           printf("\n");
-
+          break;
       }
     }
 
@@ -46,3 +50,4 @@ int main(int argc, char** argv) {
 
   return 0;
 }
+

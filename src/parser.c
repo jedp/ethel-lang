@@ -19,6 +19,7 @@ ast_expr_t *parse_start(lexer_t *lexer) {
  * E -> E + T
  * E -> E - T
  * E -> assign
+ * E -> if E then E [ else E ]
  * E -> E
  *
  * An expression produces a term and maybe an additive or subractive expression.
@@ -102,6 +103,13 @@ ast_expr_t *parse_factor(lexer_t *lexer) {
       ast_expr_t *e = parse_expr(lexer);
       if (!eat(lexer, TAG_RPAREN)) goto error;
       return e;
+    }
+    case TAG_IF: {
+      advance(lexer);
+      ast_expr_t *if_clause = parse_expr(lexer);
+      if (!eat(lexer, TAG_THEN)) goto error;
+      ast_expr_t *then_clause = parse_expr(lexer);
+      return ast_if_then(if_clause, then_clause); 
     }
     default: goto error;
   }

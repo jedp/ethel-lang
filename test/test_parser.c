@@ -135,6 +135,25 @@ void test_parse_assign(void) {
   TEST_ASSERT_EQUAL(AST_ADD, ((ast_expr_t*) expr->e2)->type);
 }
 
+void test_parse_if_else(void) {
+  char *program = "if 1 then 2";
+
+  ast_expr_t *expr = parse_program(program);
+  TEST_ASSERT_EQUAL(AST_IF_THEN, expr->type);
+  TEST_ASSERT_EQUAL(AST_INT, ((ast_expr_t*) expr->e1)->type);
+  TEST_ASSERT_EQUAL(AST_INT, ((ast_expr_t*) expr->e2)->type);
+}
+
+void test_parse_if_else_assign_expr(void) {
+  char *program = "x = if 1 then 2.0";
+
+  ast_expr_t *expr = parse_program(program);
+  TEST_ASSERT_EQUAL(AST_ASSIGN, expr->type);
+  TEST_ASSERT_EQUAL(AST_IDENT, ((ast_expr_t*) expr->e1)->type);
+  TEST_ASSERT_EQUAL(AST_IF_THEN, ((ast_expr_t*) expr->e2)->type);
+
+}
+
 void test_parser(void) {
   RUN_TEST(test_parse_empty);
   RUN_TEST(test_parse_add);
@@ -145,5 +164,7 @@ void test_parser(void) {
   RUN_TEST(test_parse_mul_multiple);
   RUN_TEST(test_parse_priority);
   RUN_TEST(test_parse_assign);
+  RUN_TEST(test_parse_if_else);
+  RUN_TEST(test_parse_if_else_assign_expr);
 }
 

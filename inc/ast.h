@@ -13,6 +13,8 @@ typedef enum {
     AST_FLOAT,
     AST_ASSIGN,
     AST_IDENT,
+    AST_IF_THEN,
+    AST_IF_THEN_ELSE,
 } ast_type_t;
 
 static const char *ast_node_names[] = {
@@ -25,6 +27,8 @@ static const char *ast_node_names[] = {
     "FLOAT",
     "ASSIGN",
     "IDENT",
+    "IF-THEN",
+    "IF-THEN-ELSE",
 };
 
 typedef struct Expr {
@@ -44,6 +48,8 @@ ast_expr_t *ast_float(float value);
 ast_expr_t *ast_int(int value);
 ast_expr_t *ast_ident(char* name);
 ast_expr_t *ast_assign(ast_expr_t *ident, ast_expr_t *value);
+ast_expr_t *ast_if_then(ast_expr_t *if_clause, ast_expr_t *then_clause);
+ast_expr_t *ast_if_then_else(ast_expr_t *if_clause, ast_expr_t *then_clause, ast_expr_t *else_clause);
 ast_expr_t *ast_empty();
 
 #endif

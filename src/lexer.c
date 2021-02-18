@@ -238,7 +238,7 @@ void advance(lexer_t *lexer) {
 
 bool eat(lexer_t *lexer, tag_t t) {
   if (lexer->token.tag != t) {
-    printf("Syntax error. Expected to eat token of type %d.\n", t);
+    printf("Syntax error. Expected to eat %s but ate %s\n", tag_names[t], tag_names[lexer->token.tag]);
     lexer->err = lexer->pos;
     return false;
   }

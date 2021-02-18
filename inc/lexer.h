@@ -60,6 +60,60 @@ typedef enum {
   TAG_LOG,
 } tag_t;
 
+static const char* tag_names[] = {
+  "EOF",
+
+  // Identifiers
+  "IDENT",
+  "ASSIGN",
+
+  // Association
+  "LPAREN",
+  "RPAREN",
+  "COMMA",
+
+  // Addition and multiplication
+  "PLUS",
+  "MINUS",
+  "TIMES",
+  "DIVIDE",
+  "AND",
+  "OR",
+  "MOD",
+
+  // Types
+  "INT",
+  "FLOAT",
+  "CHAR",
+  "STRING",
+
+  // Structure
+  "IF",
+  "THEN",
+  "ELSE",
+  "FOR",
+  "IN",
+  "TO",
+  "STEP",
+
+  // Comparison
+  "GT",
+  "LT",
+  "GE",
+  "LE",
+  "EQ",
+
+  // Math
+  "ABS",
+  "SIN",
+  "COS",
+  "TAN",
+  "SQR",
+  "EXP",
+  "LN",
+  "LOG",
+};
+
 typedef struct {
   tag_t tag;
   union {

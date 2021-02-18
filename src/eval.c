@@ -186,6 +186,20 @@ eval_result_t *eval_expr(ast_expr_t *expr, env_t *env) {
             }
             break;
         }
+        case AST_IF_THEN: {
+          eval_result_t *if_val = eval_expr(expr->e1, env);
+          result->err = if_val->err;
+          if (result->err != NO_ERROR) goto error;
+          if (truthy(if_val->obj)) {
+            eval_result_t *then_val = eval_expr(expr->e2, env);
+            result->err = then_val->err;
+            if (result->err != NO_ERROR) goto error;
+            result->obj = then_val->obj;
+            break;
+          }
+          result->obj = nil_obj();
+          break;
+        }
         default:
             result->err = EVAL_UNHANDLED_OBJECT;
             break;

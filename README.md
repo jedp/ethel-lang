@@ -27,3 +27,11 @@ end
 println i  // 8
 ```
 
+#### Expressions
+
+```
+if 42 then a = 5
+
+a = if 42 then 5
+```
+

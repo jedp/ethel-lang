@@ -44,6 +44,14 @@ ast_expr_t *ast_assign(ast_expr_t *ident, ast_expr_t *value) {
   return node;
 }
 
+ast_expr_t *ast_if_then(ast_expr_t *if_clause, ast_expr_t *then_clause) {
+  ast_expr_t *node = malloc(sizeof(ast_expr_t));
+  node->type = AST_IF_THEN;
+  node->e1 = if_clause;
+  node->e2 = then_clause;
+  return node;
+}
+
 ast_expr_t *ast_empty() {
   return ast_expr(AST_EMPTY, 0, 0);
 }
