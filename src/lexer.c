@@ -122,6 +122,34 @@ static token_t *lex_op(lexer_t *lexer, tag_t op) {
   return &lexer->next_token;
 }
 
+static token_t *lex_char(lexer_t *lexer) {
+  readch(lexer);
+  char c = lexer->nextch;
+  if (c == '\'') return lexer_error(lexer);
+  readch(lexer);
+  if (lexer->nextch != '\'') return lexer_error(lexer);
+
+  lexer->next_token.tag = TAG_CHAR;
+  lexer->next_token.ch = c;
+  return &lexer->next_token;
+}
+
+static token_t *lex_string(lexer_t *lexer) {
+  // Eat initial quote.
+  readch(lexer);
+  memset(next_word_buf, 0, MAX_WORD);
+  int i = 0;
+  do {
+    next_word_buf[i++] = lexer->nextch;
+    readch(lexer);
+  } while (lexer->nextch != '"');
+  // Ate final quote.
+
+  lexer->next_token.tag = TAG_STRING;
+  // The string value is moved in the advance() function.
+  return &lexer->next_token;
+}
+
 bool is_whitespace(char c) {
   switch(c) {
     case ' ':
@@ -147,6 +175,7 @@ token_t *get_token(lexer_t *lexer) {
   switch(ch) {
     case '(': return lex_paren(lexer, TAG_LPAREN);
     case ')': return lex_paren(lexer, TAG_RPAREN);
+    case ',': return lex_paren(lexer, TAG_COMMA);
     case '+': return lex_op(lexer, TAG_PLUS);
     // The parser can treat this as the sign op or a binop as context dictates.
     case '-': return lex_op(lexer, TAG_MINUS);
@@ -175,6 +204,8 @@ token_t *get_token(lexer_t *lexer) {
       }
       return lex_op(lexer, TAG_ASSIGN);
     }
+    case '\'': return lex_char(lexer);
+    case '"': return lex_string(lexer);
   }
 
   return lexer_error(lexer);
@@ -189,8 +220,11 @@ void advance(lexer_t *lexer) {
     case TAG_FLOAT:
       lexer->token.floatval = lexer->next_token.floatval;
       break;
-    default: 
-      for (int i = 0; i <  MAX_WORD; i++) {
+    case TAG_CHAR:
+      lexer->token.ch = lexer->next_token.ch;
+      break;
+    default:
+      for (int i = 0; i < MAX_WORD; i++) {
         word_buf[i] = next_word_buf[i];
       }
       lexer->token.string = word_buf;

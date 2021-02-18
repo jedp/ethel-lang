@@ -8,30 +8,48 @@
 
 typedef enum {
   TAG_EOF = 0,
+
+  // Identifiers
   TAG_IDENT,
+  TAG_ASSIGN,
+
+  // Association
   TAG_LPAREN,
   TAG_RPAREN,
+  TAG_COMMA,
+
+  // Addition and multiplication
   TAG_PLUS,
   TAG_MINUS,
   TAG_TIMES,
   TAG_DIVIDE,
+  TAG_AND,
+  TAG_OR,
+  TAG_MOD,
+
+  // Types
   TAG_INT,
   TAG_FLOAT,
   TAG_CHAR,
   TAG_STRING,
-  TAG_ASSIGN,
+
+  // Structure
   TAG_IF,
-  TAG_AND,
-  TAG_OR,
+  TAG_THEN,
+  TAG_ELSE,
+  TAG_FOR,
+  TAG_IN,
+  TAG_TO,
+  TAG_STEP,
+
+  // Comparison
   TAG_GT,
   TAG_LT,
   TAG_GE,
   TAG_LE,
   TAG_EQ,
-  TAG_FOR,
-  TAG_IN,
-  TAG_TO,
-  TAG_STEP,
+
+  // Math
   TAG_ABS,
   TAG_SIN,
   TAG_COS,
@@ -48,13 +66,17 @@ typedef struct {
     int32_t intval;
     float floatval;
     char* string;
+    char ch;
   } ;
 } token_t;
 
 static const token_t reserved[] = {
   { TAG_IF,      .string = (char *) "if" },
+  { TAG_THEN,    .string = (char *) "then" },
+  { TAG_ELSE,    .string = (char *) "else" },
   { TAG_AND,     .string = (char *) "and" },
   { TAG_OR,      .string = (char *) "or" },
+  { TAG_MOD,     .string = (char *) "mod" },
   { TAG_FOR,     .string = (char *) "for" },
   { TAG_IN,      .string = (char *) "in" },
   { TAG_TO,      .string = (char *) "to" },
