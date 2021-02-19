@@ -38,6 +38,9 @@ int main(int argc, char** argv) {
         case TYPE_STRING:
           printf("%s\n", ((obj_t*)result->obj)->stringval);
           break;
+        case TYPE_CHAR:
+          printf("'%c'\n", ((obj_t*)result->obj)->charval);
+          break;
         default:
           // The type was printed. That's fine.
           printf("\n");

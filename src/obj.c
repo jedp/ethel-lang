@@ -37,6 +37,7 @@ bool truthy(obj_t *obj) {
     case TYPE_INT: return obj->intval != 0;
     case TYPE_FLOAT: return obj->floatval != 0;
     case TYPE_STRING: return strlen(obj->stringval) > 0;
+    case TYPE_CHAR: return obj->charval != 0x0;
     default:
       printf("Unknown type: %d\n", obj->type);
       return false;

@@ -25,6 +25,22 @@ ast_expr_t *ast_int(int value) {
   return node;
 }
 
+ast_expr_t *ast_char(char c) {
+  ast_expr_t *node = malloc(sizeof(ast_expr_t));
+  node->type = AST_CHAR;
+  node->charval = c;
+  return node;
+}
+
+ast_expr_t *ast_string(char* s) {
+  ast_expr_t *node = malloc(sizeof(ast_expr_t));
+  char* stringval = malloc(sizeof(s) + 1);
+  strcpy(stringval, s);
+  node->type = AST_STRING;
+  node->stringval = stringval;
+  return node;
+}
+
 ast_expr_t *ast_ident(char* name) {
   ast_expr_t *node = malloc(sizeof(ast_expr_t));
   char* node_name = malloc(strlen(name) + 1);
@@ -49,6 +65,15 @@ ast_expr_t *ast_if_then(ast_expr_t *if_clause, ast_expr_t *then_clause) {
   node->type = AST_IF_THEN;
   node->e1 = if_clause;
   node->e2 = then_clause;
+  return node;
+}
+
+ast_expr_t *ast_if_then_else(ast_expr_t *if_clause, ast_expr_t *then_clause, ast_expr_t *else_clause) {
+  ast_expr_t *node = malloc(sizeof(ast_expr_t));
+  node->type = AST_IF_THEN_ELSE;
+  node->e1 = if_clause;
+  node->e2 = then_clause;
+  node->e3 = else_clause;
   return node;
 }
 

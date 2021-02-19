@@ -98,6 +98,16 @@ ast_expr_t *parse_factor(lexer_t *lexer) {
       if (e->type == AST_FLOAT) e->intval *= -1;
       return e;
     }
+    case TAG_CHAR: {
+      char c = lexer->token.ch;
+      advance(lexer);
+      return ast_char(c);
+    }
+    case TAG_STRING: {
+      char* s = lexer->token.string;
+      advance(lexer);
+      return ast_string(s);
+    }
     case TAG_LPAREN: {
       advance(lexer);
       ast_expr_t *e = parse_expr(lexer);
@@ -109,13 +119,18 @@ ast_expr_t *parse_factor(lexer_t *lexer) {
       ast_expr_t *if_clause = parse_expr(lexer);
       if (!eat(lexer, TAG_THEN)) goto error;
       ast_expr_t *then_clause = parse_expr(lexer);
+      if (lexer->token.tag == TAG_ELSE) {
+        eat(lexer, TAG_ELSE);
+        ast_expr_t *else_clause = parse_expr(lexer);
+        return ast_if_then_else(if_clause, then_clause, else_clause);
+      }
       return ast_if_then(if_clause, then_clause); 
     }
     default: goto error;
   }
 
 error:
-  printf("Expected int, float, or paren; got tag %d.\n", lexer->token.tag);
+  printf("Expected int, float, or paren; got %s.\n", tag_names[lexer->token.tag]);
   lexer->err = lexer->pos;
   return ast_empty();
 }

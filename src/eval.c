@@ -31,6 +31,29 @@ void eval_float_expr(ast_expr_t *expr, eval_result_t *result) {
   result->obj = obj;
 }
 
+void eval_char_expr(ast_expr_t *expr, eval_result_t *result) {
+  if (expr->type != AST_CHAR) {
+    result->err = EVAL_TYPE_ERROR;
+    return;
+  }
+  obj_t* obj = malloc(sizeof(obj_t));
+  obj->type = TYPE_CHAR;
+  obj->charval = expr->charval;
+  result->obj = obj;
+}
+
+void eval_string_expr(ast_expr_t *expr, eval_result_t *result) {
+  if (expr->type != AST_STRING) {
+    result->err = EVAL_TYPE_ERROR;
+    return;
+  }
+  obj_t* obj = malloc(sizeof(obj_t));
+  char* stringval = malloc(sizeof(expr->stringval) + 1);
+  obj->type = TYPE_STRING;
+  obj->stringval = stringval;
+  result->obj = obj;
+}
+
 bool is_numeric(obj_t *o) {
   return o->type == TYPE_INT || o->type == TYPE_FLOAT;
 }
@@ -161,6 +184,14 @@ eval_result_t *eval_expr(ast_expr_t *expr, env_t *env) {
             eval_float_expr(expr, result);
             if (result->err != NO_ERROR) goto error;
             break;
+        case AST_CHAR:
+            eval_char_expr(expr, result);
+            if (result->err != NO_ERROR) goto error;
+            break;
+        case AST_STRING:
+            eval_string_expr(expr, result);
+            if (result->err != NO_ERROR) goto error;
+            break;
         case AST_IDENT: {
             // Look up the identifier by name in the environment.
             const char* name = expr->stringval;
@@ -177,6 +208,7 @@ eval_result_t *eval_expr(ast_expr_t *expr, env_t *env) {
             const char* name = ((ast_expr_t*)expr->e1)->stringval;
             // Eval the object now and save the result as a primitive value.
             eval_result_t *r = eval_expr(expr->e2, env);
+            if ((result->err = r->err) != NO_ERROR) goto error;
             int error = put_env(env, name, r->obj);
             result->obj = r->obj;
             // Store the obj in the result value for the caller.
@@ -195,6 +227,23 @@ eval_result_t *eval_expr(ast_expr_t *expr, env_t *env) {
             result->err = then_val->err;
             if (result->err != NO_ERROR) goto error;
             result->obj = then_val->obj;
+            break;
+          }
+          result->obj = nil_obj();
+          break;
+        }
+        case AST_IF_THEN_ELSE: {
+          eval_result_t *if_val = eval_expr(expr->e1, env);
+          if ((result->err = if_val->err) != NO_ERROR) goto error;
+          if (truthy(if_val->obj)) {
+            eval_result_t *then_val = eval_expr(expr->e2, env);
+            if ((result->err = then_val->err) != NO_ERROR) goto error;
+            result->obj = then_val->obj;
+            break;
+          } else {
+            eval_result_t *else_val = eval_expr(expr->e3, env);
+            if ((result->err = else_val->err) != NO_ERROR) goto error;
+            result->obj = else_val->obj;
             break;
           }
           result->obj = nil_obj();

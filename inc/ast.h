@@ -11,6 +11,8 @@ typedef enum {
     AST_DIV,
     AST_INT,
     AST_FLOAT,
+    AST_STRING,
+    AST_CHAR,
     AST_ASSIGN,
     AST_IDENT,
     AST_IF_THEN,
@@ -25,6 +27,8 @@ static const char *ast_node_names[] = {
     "DIV",
     "INT",
     "FLOAT",
+    "STRING",
+    "CHAR",
     "ASSIGN",
     "IDENT",
     "IF-THEN",
@@ -35,10 +39,12 @@ typedef struct Expr {
     uint8_t type;
     void *e1;
     void *e2;
+    void *e3;
     union {
         int intval;
         float floatval;
         char* stringval;
+        char charval;
     };
 } ast_expr_t;
 
@@ -46,6 +52,8 @@ void pretty_print(ast_expr_t *expr);
 ast_expr_t *ast_expr(ast_type_t type, ast_expr_t *e1, ast_expr_t *e2);
 ast_expr_t *ast_float(float value);
 ast_expr_t *ast_int(int value);
+ast_expr_t *ast_char(char c);
+ast_expr_t *ast_string(char* s);
 ast_expr_t *ast_ident(char* name);
 ast_expr_t *ast_assign(ast_expr_t *ident, ast_expr_t *value);
 ast_expr_t *ast_if_then(ast_expr_t *if_clause, ast_expr_t *then_clause);

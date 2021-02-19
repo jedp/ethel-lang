@@ -9,6 +9,7 @@ typedef enum {
   TYPE_NIL,
   TYPE_INT,
   TYPE_FLOAT,
+  TYPE_CHAR,
   TYPE_STRING,
   TYPE_IDENT,
   TYPE_MAX,
@@ -20,6 +21,7 @@ typedef struct Obj {
     int intval;
     float floatval;
     char* stringval;
+    char charval;
   };
 } obj_t;
 
@@ -28,6 +30,7 @@ static const char* obj_type_names[TYPE_MAX] = {
   "Nil",
   "Integer",
   "Float",
+  "Char",
   "String",
   "Identifier"
 };

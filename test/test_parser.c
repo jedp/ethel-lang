@@ -151,7 +151,26 @@ void test_parse_if_else_assign_expr(void) {
   TEST_ASSERT_EQUAL(AST_ASSIGN, expr->type);
   TEST_ASSERT_EQUAL(AST_IDENT, ((ast_expr_t*) expr->e1)->type);
   TEST_ASSERT_EQUAL(AST_IF_THEN, ((ast_expr_t*) expr->e2)->type);
+}
 
+void test_parse_char(void) {
+  char *program = "c = 'c'";
+
+  ast_expr_t *expr = parse_program(program);
+  TEST_ASSERT_EQUAL(AST_ASSIGN, expr->type);
+  TEST_ASSERT_EQUAL(AST_IDENT, ((ast_expr_t*) expr->e1)->type);
+  TEST_ASSERT_EQUAL(AST_CHAR, ((ast_expr_t*) expr->e2)->type);
+  TEST_ASSERT_EQUAL('c', ((ast_expr_t*) expr->e2)->charval);
+}
+
+void test_parse_string(void) {
+  char *program = "s = \"Ethel\"";
+
+  ast_expr_t *expr = parse_program(program);
+  TEST_ASSERT_EQUAL(AST_ASSIGN, expr->type);
+  TEST_ASSERT_EQUAL(AST_IDENT, ((ast_expr_t*) expr->e1)->type);
+  TEST_ASSERT_EQUAL(AST_STRING, ((ast_expr_t*) expr->e2)->type);
+  TEST_ASSERT_EQUAL_STRING("Ethel", ((ast_expr_t*) expr->e2)->stringval);
 }
 
 void test_parser(void) {
@@ -166,5 +185,7 @@ void test_parser(void) {
   RUN_TEST(test_parse_assign);
   RUN_TEST(test_parse_if_else);
   RUN_TEST(test_parse_if_else_assign_expr);
+  RUN_TEST(test_parse_char);
+  RUN_TEST(test_parse_string);
 }
 

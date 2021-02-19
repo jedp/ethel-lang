@@ -29,8 +29,8 @@ static const char* err_names[ERR_MAX] = {
   "No current variable scope",
   "Immutable symbol cannot be redefined",
   "Symbol undefined",
-  "Type unsupported",
   "Evaluation error",
+  "Type unsupported",
   "Types incompatible for operation",
   "Division by zero",
 };
