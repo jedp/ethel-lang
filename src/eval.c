@@ -143,6 +143,38 @@ void divide(obj_t *a, obj_t *b, eval_result_t *result) {
   }
 }
 
+void resolve_callable_expr(ast_expr_t *expr, eval_result_t *result) {
+  if (expr->type != AST_RESERVED_CALLABLE) {
+    result->err = EVAL_TYPE_ERROR;
+    return;
+  }
+
+  // Function args are stored in a list in e1.
+  ast_expr_list_t *args = expr->e1;
+
+  switch (expr->intval) {
+    case AST_CALL_ABS:
+      if (args->e->type == AST_INT) {
+        result->obj = int_obj(args->e->intval < 0 ? -1 * args->e->intval : args->e->intval);
+      } else if (args->e->type == AST_INT)  {
+        result->obj = int_obj(args->e->floatval < 0 ? -1 * args->e->floatval : args->e->floatval);
+      } else {
+        printf("What is this slish?\n");
+        goto error;
+      }
+      break;
+    default:
+      goto error;
+      break;
+  }
+
+  return;
+
+error:
+      result->err = AST_TYPE_UNHANDLED;
+      result->obj = nil_obj();
+}
+
 eval_result_t *eval_expr(ast_expr_t *expr, env_t *env) {
     eval_result_t *result = malloc(sizeof(eval_result_t));
     result->err = NO_ERROR;
@@ -202,6 +234,11 @@ eval_result_t *eval_expr(ast_expr_t *expr, env_t *env) {
             }
             result->obj = obj;
             break;
+        }
+        case AST_RESERVED_CALLABLE: {
+          resolve_callable_expr(expr, result);
+          if (result->err != NO_ERROR) goto error;
+          break;
         }
         case AST_ASSIGN: {
             // Save the expression associated with the identifier.

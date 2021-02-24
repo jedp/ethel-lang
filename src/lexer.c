@@ -2,6 +2,7 @@
 #include <stdbool.h>
 #include <string.h>
 #include <ctype.h>
+#include "../inc/token.h"
 #include "../inc/lexer.h"
 
 #define MAX_WORD 16

@@ -6,13 +6,48 @@
 #include "../inc/parser.h"
 
 ast_expr_t *parse_start(lexer_t *lexer);
+ast_expr_list_t *parse_expr_list(lexer_t *lexer);
 ast_expr_t *parse_expr(lexer_t *lexer);
 ast_expr_t *parse_term(lexer_t *lexer);
 ast_expr_t *parse_factor(lexer_t *lexer);
 ast_expr_t *parse_eof(lexer_t *lexer);
 
+ast_reserved_callable_type_t ast_callable_type_for_tag(tag_t tag) {
+  switch (tag) {
+    case TAG_ABS: return AST_CALL_ABS;
+    case TAG_SIN: return AST_CALL_SIN;
+    case TAG_COS: return AST_CALL_COS;
+    case TAG_TAN: return AST_CALL_TAN;
+    case TAG_SQRT: return AST_CALL_SQRT;
+    case TAG_EXP: return AST_CALL_EXP;
+    case TAG_LN: return AST_CALL_LN;
+    case TAG_LOG: return AST_CALL_LOG;
+    default: return AST_CALL_UNDEFINED;
+  }
+}
+
 ast_expr_t *parse_start(lexer_t *lexer) {
   return (lexer->token.tag == TAG_EOF) ? ast_empty() : parse_expr(lexer);
+}
+
+ast_expr_list_t *parse_expr_list(lexer_t *lexer) {
+  ast_expr_list_t *node = malloc(sizeof(ast_expr_list_t));
+  ast_expr_list_t *root = node;
+
+  ast_expr_t *e = parse_expr(lexer);
+  node->e = e;
+  
+  while (lexer->token.tag == TAG_COMMA) {
+    advance(lexer);
+    ast_expr_list_t *next = malloc(sizeof(ast_expr_list_t));
+    e = parse_expr(lexer);
+    next->e = e;
+
+    node->next = next;
+    node = next;
+  }
+
+  return root;
 }
 
 /*
@@ -71,6 +106,7 @@ ast_expr_t *parse_term(lexer_t *lexer) {
  * F -> int
  * F -> float
  * F -> ( E )
+ * F -> callable ( expr-list )
  *
  * A factor produces a numeric value or an expression in parentheses.
  */
@@ -86,10 +122,6 @@ ast_expr_t *parse_factor(lexer_t *lexer) {
       float f = lexer->token.floatval;
       advance(lexer);
       return ast_float(f);
-    }
-    case TAG_IDENT: {
-      advance(lexer);
-      return ast_ident(lexer->token.string);
     }
     case TAG_MINUS: {
       advance(lexer);
@@ -114,6 +146,10 @@ ast_expr_t *parse_factor(lexer_t *lexer) {
       if (!eat(lexer, TAG_RPAREN)) goto error;
       return e;
     }
+    case TAG_IDENT: {
+      advance(lexer);
+      return ast_ident(lexer->token.string);
+    }
     case TAG_IF: {
       advance(lexer);
       ast_expr_t *if_clause = parse_expr(lexer);
@@ -125,6 +161,24 @@ ast_expr_t *parse_factor(lexer_t *lexer) {
         return ast_if_then_else(if_clause, then_clause, else_clause);
       }
       return ast_if_then(if_clause, then_clause); 
+    }
+    case TAG_ABS: 
+    case TAG_SIN: 
+    case TAG_COS: 
+    case TAG_TAN: 
+    case TAG_SQRT: 
+    case TAG_EXP: 
+    case TAG_LN: 
+    case TAG_LOG: {
+      int callable_type = ast_callable_type_for_tag(lexer->token.tag);
+      advance(lexer);
+      if (lexer->token.tag == TAG_LPAREN) {
+        eat(lexer, TAG_LPAREN);
+        ast_expr_list_t *es = parse_expr_list(lexer);
+        if (!eat(lexer, TAG_RPAREN)) goto error;
+        return ast_reserved_callable(callable_type, es);
+      }
+      return ast_ident(lexer->token.string);
     }
     default: goto error;
   }

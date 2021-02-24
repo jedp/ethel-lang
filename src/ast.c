@@ -48,7 +48,14 @@ ast_expr_t *ast_ident(char* name) {
   node->type = AST_IDENT;
   node->stringval = node_name;
   return node;
+}
 
+ast_expr_t *ast_reserved_callable(ast_reserved_callable_type_t type, ast_expr_list_t *es) {
+  ast_expr_t *node = malloc(sizeof(ast_expr_t));
+  node->type = AST_RESERVED_CALLABLE;
+  node->intval = type;
+  node->e1 = es;
+  return node;
 }
 
 ast_expr_t *ast_assign(ast_expr_t *ident, ast_expr_t *value) {

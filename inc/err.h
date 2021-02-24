@@ -6,6 +6,8 @@ typedef enum {
 
   LEX_ERROR,
 
+  AST_TYPE_UNHANDLED,
+
   ENV_MAX_DEPTH_EXCEEDED,
   ENV_NO_SCOPE,
   ENV_SYMBOL_REDEFINED,
@@ -25,6 +27,7 @@ typedef enum {
 static const char* err_names[ERR_MAX] = {
   "Ok",
   "Lexical error",
+  "Parser broken: Type not handled",
   "Max scope depth exceeded",
   "No current variable scope",
   "Immutable symbol cannot be redefined",
