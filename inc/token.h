@@ -29,6 +29,7 @@ typedef enum {
   TAG_FLOAT,
   TAG_CHAR,
   TAG_STRING,
+  TAG_NIL,
 
   // Structure
   TAG_IF,
@@ -83,6 +84,7 @@ static const char* tag_names[] = {
   "FLOAT",
   "CHAR",
   "STRING",
+  "NIL",
 
   // Structure
   "IF",
@@ -132,6 +134,7 @@ static const token_t reserved[] = {
   { TAG_IN,      .string = (char *) "in" },
   { TAG_TO,      .string = (char *) "to" },
   { TAG_STEP,    .string = (char *) "step" },
+  { TAG_NIL,     .string = (char *) "nil" },
   { TAG_ABS,     .string = (char *) "abs" },
   { TAG_SIN,     .string = (char *) "sin" },
   { TAG_COS,     .string = (char *) "cos" },

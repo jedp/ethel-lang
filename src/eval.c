@@ -9,15 +9,22 @@
 #include "../inc/ast.h"
 #include "../inc/env.h"
 
+void eval_nil_expr(ast_expr_t *expr, eval_result_t *result) {
+  if (expr->type != AST_NIL) {
+    result->err = EVAL_TYPE_ERROR;
+    return;
+  }
+  obj_t* obj = malloc(sizeof(obj_t));
+  obj->type = TYPE_NIL;
+  result->obj = obj;
+}
+
 void eval_int_expr(ast_expr_t *expr, eval_result_t *result) {
   if (expr->type != AST_INT) {
     result->err = EVAL_TYPE_ERROR;
     return;
   }
-  obj_t* obj = malloc(sizeof(obj_t));
-  obj->type = TYPE_INT;
-  obj->intval = expr->intval;
-  result->obj = obj;
+  result->obj = int_obj(expr->intval);
 }
 
 void eval_float_expr(ast_expr_t *expr, eval_result_t *result) {
@@ -25,10 +32,7 @@ void eval_float_expr(ast_expr_t *expr, eval_result_t *result) {
     result->err = EVAL_TYPE_ERROR;
     return;
   }
-  obj_t* obj = malloc(sizeof(obj_t));
-  obj->type = TYPE_FLOAT;
-  obj->floatval = expr->floatval;
-  result->obj = obj;
+  result->obj = float_obj(expr->floatval);
 }
 
 void eval_char_expr(ast_expr_t *expr, eval_result_t *result) {
@@ -36,10 +40,7 @@ void eval_char_expr(ast_expr_t *expr, eval_result_t *result) {
     result->err = EVAL_TYPE_ERROR;
     return;
   }
-  obj_t* obj = malloc(sizeof(obj_t));
-  obj->type = TYPE_CHAR;
-  obj->charval = expr->charval;
-  result->obj = obj;
+  result->obj = char_obj(expr->charval);
 }
 
 void eval_string_expr(ast_expr_t *expr, eval_result_t *result) {
@@ -49,6 +50,7 @@ void eval_string_expr(ast_expr_t *expr, eval_result_t *result) {
   }
   obj_t* obj = malloc(sizeof(obj_t));
   char* stringval = malloc(sizeof(expr->stringval) + 1);
+  strcpy(stringval, expr->stringval);
   obj->type = TYPE_STRING;
   obj->stringval = stringval;
   result->obj = obj;
@@ -172,7 +174,7 @@ void resolve_callable_expr(ast_expr_t *expr, eval_result_t *result) {
 
 error:
       result->err = AST_TYPE_UNHANDLED;
-      result->obj = nil_obj();
+      result->obj = undef_obj();
 }
 
 eval_result_t *eval_expr(ast_expr_t *expr, env_t *env) {
@@ -208,6 +210,10 @@ eval_result_t *eval_expr(ast_expr_t *expr, env_t *env) {
             if (result->err != NO_ERROR) goto error;
             break;
         }
+        case AST_NIL: {
+            eval_nil_expr(expr, result);
+            break;
+        }
         case AST_INT:
             eval_int_expr(expr, result);
             if (result->err != NO_ERROR) goto error;
@@ -228,7 +234,7 @@ eval_result_t *eval_expr(ast_expr_t *expr, env_t *env) {
             // Look up the identifier by name in the environment.
             const char* name = expr->stringval;
             obj_t *obj = get_env(env, name);
-            if (obj->type == TYPE_NIL) {
+            if (obj->type == TYPE_UNDEF) {
               result->err = ENV_SYMBOL_UNDEFINED;
               goto error;
             }

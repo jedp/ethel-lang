@@ -113,6 +113,10 @@ ast_expr_t *parse_term(lexer_t *lexer) {
 ast_expr_t *parse_factor(lexer_t *lexer) {
 
   switch (lexer->token.tag) {
+    case TAG_NIL: {
+      advance(lexer);
+      return ast_nil();
+    }
     case TAG_INT: {
       int i = lexer->token.intval;
       advance(lexer);
@@ -160,7 +164,7 @@ ast_expr_t *parse_factor(lexer_t *lexer) {
         ast_expr_t *else_clause = parse_expr(lexer);
         return ast_if_then_else(if_clause, then_clause, else_clause);
       }
-      return ast_if_then(if_clause, then_clause); 
+      return ast_if_then(if_clause, then_clause);
     }
     case TAG_ABS: 
     case TAG_SIN: 

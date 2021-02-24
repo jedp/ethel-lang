@@ -62,7 +62,7 @@ error_t put_env(env_t *env, const char* name, const obj_t *obj) {
 
 obj_t *get_env(env_t *env, const char* name) {
   if (env->top < 0) {
-    return nil_obj();
+    return undef_obj();
   }
 
   // Search back through the scopes to find the name.
@@ -82,7 +82,7 @@ obj_t *get_env(env_t *env, const char* name) {
   }
 
   // Not found :(
-  return nil_obj();
+  return undef_obj();
 }
 
 error_t env_init(env_t *env) {

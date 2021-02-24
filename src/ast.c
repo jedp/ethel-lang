@@ -11,6 +11,12 @@ ast_expr_t *ast_expr(ast_type_t type, ast_expr_t *e1, ast_expr_t *e2) {
   return node;
 }
 
+ast_expr_t *ast_nil() {
+  ast_expr_t *node = malloc(sizeof(ast_expr_t));
+  node->type = AST_NIL;
+  return node;
+}
+
 ast_expr_t *ast_float(float value) {
   ast_expr_t *node = malloc(sizeof(ast_expr_t));
   node->type = AST_FLOAT;

@@ -4,30 +4,41 @@
 #include <string.h>
 #include "../inc/obj.h"
 
-obj_t *nil_obj() {
+obj_t *obj_of(obj_type_t type) {
   obj_t *obj = malloc(sizeof(obj_t));
-  obj->type = TYPE_NIL;
+  obj->type = type;
   return obj;
 }
 
+obj_t *undef_obj() {
+  return obj_of(TYPE_UNDEF);
+}
+
+obj_t *nil_obj() {
+  return obj_of(TYPE_NIL);
+}
+
 obj_t *int_obj(int i) {
-  obj_t *obj = malloc(sizeof(obj_t));
-  obj->type = TYPE_INT;
+  obj_t *obj = obj_of(TYPE_INT);
   obj->intval = i;
   return obj;
 }
 
 obj_t *float_obj(float f) {
-  obj_t *obj = malloc(sizeof(obj_t));
-  obj->type = TYPE_FLOAT;
+  obj_t *obj = obj_of(TYPE_FLOAT);
   obj->floatval = f;
   return obj;
 }
 
 obj_t *string_obj(char* s) {
-  obj_t *obj = malloc(sizeof(obj_t));
-  obj->type = TYPE_STRING;
+  obj_t *obj = obj_of(TYPE_STRING);
   obj->stringval = s;
+  return obj;
+}
+
+obj_t *char_obj(char c) {
+  obj_t *obj = obj_of(TYPE_CHAR);
+  obj->charval = c;
   return obj;
 }
 

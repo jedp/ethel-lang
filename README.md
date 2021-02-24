@@ -35,3 +35,15 @@ if 42 then a = 5
 a = if 42 then 5
 ```
 
+#### Nil and Undefined
+
+God help me.
+
+```
+a = if 0 then 42
+Nil
+
+b
+Undefined
+```
+

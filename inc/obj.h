@@ -6,6 +6,7 @@
 
 typedef enum {
   TYPE_UNKNOWN = 0,
+  TYPE_UNDEF,
   TYPE_NIL,
   TYPE_INT,
   TYPE_FLOAT,
@@ -27,6 +28,7 @@ typedef struct Obj {
 
 static const char* obj_type_names[TYPE_MAX] = {
   "Unknown",
+  "Undefined",
   "Nil",
   "Integer",
   "Float",
@@ -35,10 +37,12 @@ static const char* obj_type_names[TYPE_MAX] = {
   "Identifier"
 };
 
+obj_t *undef_obj();
 obj_t *nil_obj();
 obj_t *int_obj(int);
 obj_t *float_obj(float);
 obj_t *string_obj(char*);
+obj_t *char_obj(char);
 
 bool truthy(obj_t *obj);
 

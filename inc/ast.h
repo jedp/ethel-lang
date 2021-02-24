@@ -9,6 +9,7 @@ typedef enum {
   AST_SUB,
   AST_MUL,
   AST_DIV,
+  AST_NIL,
   AST_INT,
   AST_FLOAT,
   AST_STRING,
@@ -38,6 +39,7 @@ static const char *ast_node_names[] = {
   "SUB",
   "MUL",
   "DIV",
+  "NIL",
   "INT",
   "FLOAT",
   "STRING",
@@ -69,6 +71,7 @@ typedef struct ExprListNode {
 
 void pretty_print(ast_expr_t *expr);
 ast_expr_t *ast_expr(ast_type_t type, ast_expr_t *e1, ast_expr_t *e2);
+ast_expr_t *ast_nil();
 ast_expr_t *ast_float(float value);
 ast_expr_t *ast_int(int value);
 ast_expr_t *ast_char(char c);
