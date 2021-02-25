@@ -92,7 +92,6 @@ void test_eval_truthiness(void) {
 
 void test_eval_int_mod(void) {
   char *program = "7 mod 4";
-
   eval_result_t *result = eval_program(program);
   TEST_ASSERT_EQUAL(NO_ERROR, result->err);
 
@@ -102,12 +101,30 @@ void test_eval_int_mod(void) {
 
 void test_eval_float_mod(void) {
   char *program = "16.2 mod 3";
-
   eval_result_t *result = eval_program(program);
   TEST_ASSERT_EQUAL(NO_ERROR, result->err);
 
   obj_t *obj = result->obj;
   TEST_ASSERT_FLOAT_WITHIN(0.001, 1.2, obj->floatval);
+}
+
+void test_eval_numeric_comparison(void) {
+  char *program = "if 5 < 3.1 then x = 2 else x = if 5>= 3 then 42 else -1";
+
+  eval_result_t *result = eval_program(program);
+  TEST_ASSERT_EQUAL(NO_ERROR, result->err);
+
+  obj_t *obj = result->obj;
+  TEST_ASSERT_EQUAL(42, obj->intval);
+}
+
+void test_eval_char_comparison(void) {
+  char *program = "if 'c' > 'd' then 'e' else if 'f' == 'f' then 'g'";
+  eval_result_t *result = eval_program(program);
+  TEST_ASSERT_EQUAL(NO_ERROR, result->err);
+
+  obj_t *obj = result->obj;
+  TEST_ASSERT_EQUAL('g', obj->charval);
 }
 
 void test_eval(void) {
@@ -121,5 +138,7 @@ void test_eval(void) {
   RUN_TEST(test_eval_truthiness);
   RUN_TEST(test_eval_int_mod);
   RUN_TEST(test_eval_float_mod);
+  RUN_TEST(test_eval_numeric_comparison);
+  RUN_TEST(test_eval_char_comparison);
 }
 

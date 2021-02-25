@@ -118,13 +118,11 @@ ast_expr_t *_parse_expr(lexer_t *lexer, int min_preced) {
       case TAG_MOD:    lhs = ast_expr(AST_MOD, lhs, _parse_expr(lexer, next_min_preced)); break;
       case TAG_AND:    lhs = ast_expr(AST_AND, lhs, _parse_expr(lexer, next_min_preced)); break;
       case TAG_OR:     lhs = ast_expr(AST_OR,  lhs, _parse_expr(lexer, next_min_preced)); break;
-      /*
-      case TAG_GT:     lhs =
-      case TAG_GE:     lhs =
-      case TAG_LT:     lhs =
-      case TAG_LE:     lhs =
-      case TAG_EQ:     lhs =
-      */
+      case TAG_GT:     lhs = ast_expr(AST_GT,  lhs, _parse_expr(lexer, next_min_preced)); break;
+      case TAG_GE:     lhs = ast_expr(AST_GE,  lhs, _parse_expr(lexer, next_min_preced)); break;
+      case TAG_LT:     lhs = ast_expr(AST_LT,  lhs, _parse_expr(lexer, next_min_preced)); break;
+      case TAG_LE:     lhs = ast_expr(AST_LE,  lhs, _parse_expr(lexer, next_min_preced)); break;
+      case TAG_EQ:     lhs = ast_expr(AST_EQ,  lhs, _parse_expr(lexer, next_min_preced)); break;
 
       default:
         printf("what? why this %s?\n", tag_names[tag]);

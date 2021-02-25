@@ -171,6 +171,42 @@ void modulus(obj_t *a, obj_t *b, eval_result_t *result) {
   }
 }
 
+void cmp(ast_type_t type, obj_t *a, obj_t *b, eval_result_t *result) {
+  if (a->type == TYPE_CHAR && b->type == TYPE_CHAR) {
+    switch(type) {
+      case AST_GT: result->obj = boolean_obj(a->charval >  b->charval); return;
+      case AST_GE: result->obj = boolean_obj(a->charval >= b->charval); return;
+      case AST_LT: result->obj = boolean_obj(a->charval <  b->charval); return;
+      case AST_LE: result->obj = boolean_obj(a->charval <= b->charval); return;
+      case AST_EQ: result->obj = boolean_obj(a->charval == b->charval); return;
+      default:
+        printf("what what what???\n");
+        result->obj = boolean_obj(false);
+        return;
+    }
+  }
+
+  if (!is_numeric(a) || !is_numeric(b)) {
+    result->err = EVAL_TYPE_ERROR;
+    return;
+  }
+
+  float x = a->type == TYPE_INT ? a->intval : a->floatval;
+  float y = b->type == TYPE_INT ? b->intval : b->floatval;
+
+  switch(type) {
+    case AST_GT: result->obj = boolean_obj(x >  y); return;
+    case AST_GE: result->obj = boolean_obj(x >= y); return;
+    case AST_LT: result->obj = boolean_obj(x <  y); return;
+    case AST_LE: result->obj = boolean_obj(x <= y); return;
+    case AST_EQ: result->obj = boolean_obj(x == y); return;
+    default:
+      printf("what what what???\n");
+      result->obj = boolean_obj(false);
+      return;
+  }
+}
+
 void boolean_and(obj_t *a, obj_t *b, eval_result_t *result) {
   result->obj = boolean_obj(truthy(a) && truthy(b)); 
 }
@@ -276,6 +312,19 @@ eval_result_t *eval_expr(ast_expr_t *expr, env_t *env) {
             eval_result_t *r2 = eval_expr(expr->e2, env);
             if ((result->err = r2->err) != NO_ERROR) goto error;
             boolean_or(r1->obj, r2->obj, result); 
+            if (result->err != NO_ERROR) goto error;
+            break;
+        }
+        case AST_GT:
+        case AST_GE:
+        case AST_LT:
+        case AST_LE:
+        case AST_EQ: {
+            eval_result_t *r1 = eval_expr(expr->e1, env);
+            if ((result->err = r1->err) != NO_ERROR) goto error;
+            eval_result_t *r2 = eval_expr(expr->e2, env);
+            if ((result->err = r2->err) != NO_ERROR) goto error;
+            cmp(expr->type, r1->obj, r2->obj, result); 
             if (result->err != NO_ERROR) goto error;
             break;
         }
