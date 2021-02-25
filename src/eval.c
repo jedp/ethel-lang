@@ -3,6 +3,7 @@
 #include <stdlib.h>
 #include <string.h>
 #include <stdio.h>
+#include <math.h>
 #include "../inc/err.h"
 #include "../inc/eval.h"
 #include "../inc/parser.h"
@@ -145,6 +146,31 @@ void divide(obj_t *a, obj_t *b, eval_result_t *result) {
   }
 }
 
+void modulus(obj_t *a, obj_t *b, eval_result_t *result) {
+  if (!is_numeric(a) || !is_numeric(b)) {
+    result->err = EVAL_TYPE_ERROR;
+    return;
+  }
+
+  if ((b->type == TYPE_INT && b->intval == 0) ||
+      (b->type == TYPE_FLOAT && b->floatval == 0.0)) {
+    result->err = DIVISION_BY_ZERO;
+    return;
+  }
+
+  if (a->type == TYPE_INT && b->type == TYPE_INT) {
+    result->obj = int_obj(a->intval % b->intval);
+  } else if (a->type == TYPE_INT && b->type == TYPE_FLOAT) {
+    result->obj = float_obj(fmod(a->intval, b->floatval));
+  } else if (a->type == TYPE_FLOAT && b->type == TYPE_INT) {
+    result->obj = float_obj(fmod(a->floatval, b->intval));
+  } else if (a->type == TYPE_FLOAT && b->type == TYPE_FLOAT) {
+    result->obj = float_obj(fmod(a->floatval, b->floatval));
+  } else {
+    result->err = EVAL_TYPE_ERROR;
+  }
+}
+
 void boolean_and(obj_t *a, obj_t *b, eval_result_t *result) {
   result->obj = boolean_obj(truthy(a) && truthy(b)); 
 }
@@ -223,6 +249,15 @@ eval_result_t *eval_expr(ast_expr_t *expr, env_t *env) {
             eval_result_t *r2 = eval_expr(expr->e2, env);
             if ((result->err = r2->err) != NO_ERROR) goto error;
             divide(r1->obj, r2->obj, result);
+            if (result->err != NO_ERROR) goto error;
+            break;
+        }
+        case AST_MOD: {
+            eval_result_t *r1 = eval_expr(expr->e1, env);
+            if ((result->err = r1->err) != NO_ERROR) goto error;
+            eval_result_t *r2 = eval_expr(expr->e2, env);
+            if ((result->err = r2->err) != NO_ERROR) goto error;
+            modulus(r1->obj, r2->obj, result);
             if (result->err != NO_ERROR) goto error;
             break;
         }

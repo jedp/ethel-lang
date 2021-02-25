@@ -30,6 +30,7 @@ uint8_t binop_preced(token_t *token) {
   switch (token->tag) {
     case TAG_TIMES:
     case TAG_DIVIDE:
+    case TAG_MOD:
       return PRECED_MUL;
     case TAG_PLUS:
     case TAG_MINUS:
@@ -114,10 +115,10 @@ ast_expr_t *_parse_expr(lexer_t *lexer, int min_preced) {
       case TAG_MINUS:  lhs = ast_expr(AST_SUB, lhs, _parse_expr(lexer, next_min_preced)); break;
       case TAG_TIMES:  lhs = ast_expr(AST_MUL, lhs, _parse_expr(lexer, next_min_preced)); break;
       case TAG_DIVIDE: lhs = ast_expr(AST_DIV, lhs, _parse_expr(lexer, next_min_preced)); break;
+      case TAG_MOD:    lhs = ast_expr(AST_MOD, lhs, _parse_expr(lexer, next_min_preced)); break;
       case TAG_AND:    lhs = ast_expr(AST_AND, lhs, _parse_expr(lexer, next_min_preced)); break;
-      case TAG_OR:     lhs = ast_expr(AST_OR, lhs, _parse_expr(lexer, next_min_preced)); break;
+      case TAG_OR:     lhs = ast_expr(AST_OR,  lhs, _parse_expr(lexer, next_min_preced)); break;
       /*
-      case TAG_MOD:    lhs =
       case TAG_GT:     lhs =
       case TAG_GE:     lhs =
       case TAG_LT:     lhs =

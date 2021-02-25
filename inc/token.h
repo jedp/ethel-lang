@@ -20,9 +20,9 @@ typedef enum {
   TAG_MINUS,
   TAG_TIMES,
   TAG_DIVIDE,
+  TAG_MOD,
   TAG_AND,
   TAG_OR,
-  TAG_MOD,
 
   // Types
   TAG_INT,
@@ -75,9 +75,9 @@ static const char* tag_names[] = {
   "MINUS",
   "TIMES",
   "DIVIDE",
+  "MOD",
   "AND",
   "OR",
-  "MOD",
 
   // Types
   "INT",

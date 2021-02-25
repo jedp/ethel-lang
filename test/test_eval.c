@@ -90,6 +90,26 @@ void test_eval_truthiness(void) {
   TEST_ASSERT_EQUAL(1, obj->intval);
 }
 
+void test_eval_int_mod(void) {
+  char *program = "7 mod 4";
+
+  eval_result_t *result = eval_program(program);
+  TEST_ASSERT_EQUAL(NO_ERROR, result->err);
+
+  obj_t *obj = result->obj;
+  TEST_ASSERT_EQUAL(3, obj->intval);
+}
+
+void test_eval_float_mod(void) {
+  char *program = "16.2 mod 3";
+
+  eval_result_t *result = eval_program(program);
+  TEST_ASSERT_EQUAL(NO_ERROR, result->err);
+
+  obj_t *obj = result->obj;
+  TEST_ASSERT_FLOAT_WITHIN(0.001, 1.2, obj->floatval);
+}
+
 void test_eval(void) {
   RUN_TEST(test_eval_calculator);
   RUN_TEST(test_eval_if_else);
@@ -99,5 +119,7 @@ void test_eval(void) {
   RUN_TEST(test_eval_boolean_true);
   RUN_TEST(test_eval_boolean_false);
   RUN_TEST(test_eval_truthiness);
+  RUN_TEST(test_eval_int_mod);
+  RUN_TEST(test_eval_float_mod);
 }
 
