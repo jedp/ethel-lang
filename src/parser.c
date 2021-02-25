@@ -8,9 +8,48 @@
 ast_expr_t *parse_start(lexer_t *lexer);
 ast_expr_list_t *parse_expr_list(lexer_t *lexer);
 ast_expr_t *parse_expr(lexer_t *lexer);
-ast_expr_t *parse_term(lexer_t *lexer);
-ast_expr_t *parse_factor(lexer_t *lexer);
+ast_expr_t *parse_atom(lexer_t *lexer);
 ast_expr_t *parse_eof(lexer_t *lexer);
+
+bool is_binop(token_t *token) {
+  return token->tag == TAG_PLUS
+      || token->tag == TAG_MINUS
+      || token->tag == TAG_TIMES
+      || token->tag == TAG_DIVIDE
+      || token->tag == TAG_AND
+      || token->tag == TAG_OR
+      || token->tag == TAG_MOD
+      || token->tag == TAG_GT
+      || token->tag == TAG_GE
+      || token->tag == TAG_LT
+      || token->tag == TAG_LE
+      || token->tag == TAG_EQ;
+}
+
+uint8_t binop_preced(token_t *token) {
+  switch (token->tag) {
+    case TAG_TIMES:
+    case TAG_DIVIDE:
+      return PRECED_MUL;
+    case TAG_PLUS:
+    case TAG_MINUS:
+      return PRECED_ADD;
+    case TAG_GT:
+    case TAG_GE:
+    case TAG_LT:
+    case TAG_LE:
+      return PRECED_GLT;
+    case TAG_EQ:
+      return PRECED_EQ;
+    case TAG_AND:
+      return PRECED_AND;
+    case TAG_OR:
+      return PRECED_OR;
+    default:
+      return PRECED_NONE;
+      break;
+  }
+}
 
 ast_reserved_callable_type_t ast_callable_type_for_tag(tag_t tag) {
   switch (tag) {
@@ -50,67 +89,65 @@ ast_expr_list_t *parse_expr_list(lexer_t *lexer) {
   return root;
 }
 
-/*
- * E -> E + T
- * E -> E - T
- * E -> assign
- * E -> if E then E [ else E ]
- * E -> E
- *
- * An expression produces a term and maybe an additive or subractive expression.
- */
-ast_expr_t *parse_expr(lexer_t *lexer) {
-  ast_expr_t *e = parse_term(lexer);
+ast_expr_t *_parse_expr(lexer_t *lexer, int min_preced) {
+  ast_expr_t *lhs = parse_atom(lexer);
 
-  switch(lexer->token.tag) {
-    case TAG_PLUS: {
-      advance(lexer);
-      return ast_expr(AST_ADD, e, parse_expr(lexer));
+  // The recursively recursive precedence-climbing algorithm.
+  while (1) {
+    token_t token = lexer->token;
+
+    if (!is_binop(&token) ||
+        binop_preced(&token) < min_preced) {
+      goto done;
     }
-    case TAG_MINUS: {
-      advance(lexer);
-      return ast_expr(AST_SUB, e, parse_expr(lexer));
+
+    int preced = binop_preced(&token);
+
+    // TODO the +1 is only for left-associative operators.
+    int next_min_preced = preced +1;
+
+    tag_t tag = token.tag;
+    advance(lexer);
+
+    switch(tag) {
+      case TAG_PLUS:   lhs = ast_expr(AST_ADD, lhs, _parse_expr(lexer, next_min_preced)); break;
+      case TAG_MINUS:  lhs = ast_expr(AST_SUB, lhs, _parse_expr(lexer, next_min_preced)); break;
+      case TAG_TIMES:  lhs = ast_expr(AST_MUL, lhs, _parse_expr(lexer, next_min_preced)); break;
+      case TAG_DIVIDE: lhs = ast_expr(AST_DIV, lhs, _parse_expr(lexer, next_min_preced)); break;
+      /*
+      case TAG_AND:    lhs = 
+      case TAG_OR:     lhs = 
+      case TAG_MOD:    lhs =
+      case TAG_GT:     lhs =
+      case TAG_GE:     lhs =
+      case TAG_LT:     lhs =
+      case TAG_LE:     lhs =
+      case TAG_EQ:     lhs =
+      */
+
+      default:
+        printf("what? why this %s?\n", tag_names[tag]);
+        return lhs;
     }
-    default: return e;
   }
+
+done:
+  return lhs;
 }
 
-/*
- * T -> F * T
- * T -> F / T
- * T -> F
- *
- * A term produces a factor and maybe a multiplicative term.
- */
-ast_expr_t *parse_term(lexer_t *lexer) {
-  ast_expr_t *e = parse_factor(lexer);
-
-  switch (lexer->token.tag) {
-    case TAG_TIMES: {
-      advance(lexer);
-      return ast_expr(AST_MUL, e, parse_term(lexer));
-    }
-    case TAG_DIVIDE: {
-      advance(lexer);
-      return ast_expr(AST_DIV, e, parse_term(lexer));
-    }
-    case TAG_ASSIGN: {
-      advance(lexer);
-      return ast_assign(e, parse_expr(lexer));
-    }
-    default: return e;
-  }
+ast_expr_t *parse_expr(lexer_t *lexer) {
+  return _parse_expr(lexer, PRECED_NONE);
 }
 
 /*
  * F -> int
  * F -> float
+ * F -> ident
  * F -> ( E )
+ * F -> if expr then expr [ else expr ]
  * F -> callable ( expr-list )
- *
- * A factor produces a numeric value or an expression in parentheses.
  */
-ast_expr_t *parse_factor(lexer_t *lexer) {
+ast_expr_t *parse_atom(lexer_t *lexer) {
 
   switch (lexer->token.tag) {
     case TAG_NIL: {
@@ -127,9 +164,10 @@ ast_expr_t *parse_factor(lexer_t *lexer) {
       advance(lexer);
       return ast_float(f);
     }
+    // TODO: Not actually right - doesn't do -(3+2), for example
     case TAG_MINUS: {
       advance(lexer);
-      ast_expr_t *e = parse_factor(lexer);
+      ast_expr_t *e = parse_atom(lexer);
       if (e->type == AST_INT) e->intval *= -1;
       if (e->type == AST_FLOAT) e->intval *= -1;
       return e;
@@ -151,8 +189,13 @@ ast_expr_t *parse_factor(lexer_t *lexer) {
       return e;
     }
     case TAG_IDENT: {
+      ast_expr_t *id = ast_ident(lexer->token.string);
       advance(lexer);
-      return ast_ident(lexer->token.string);
+      if (lexer->token.tag == TAG_ASSIGN) {
+        advance(lexer);
+        return ast_assign(id, parse_expr(lexer));
+      }
+      return id;
     }
     case TAG_IF: {
       advance(lexer);

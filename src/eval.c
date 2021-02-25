@@ -184,28 +184,36 @@ eval_result_t *eval_expr(ast_expr_t *expr, env_t *env) {
     switch(expr->type) {
         case AST_ADD: {
             eval_result_t *r1 = eval_expr(expr->e1, env);
+            if ((result->err = r1->err) != NO_ERROR) goto error;
             eval_result_t *r2 = eval_expr(expr->e2, env);
+            if ((result->err = r2->err) != NO_ERROR) goto error;
             add(r1->obj, r2->obj, result);
             if (result->err != NO_ERROR) goto error;
             break;
         }
         case AST_SUB: {
             eval_result_t *r1 = eval_expr(expr->e1, env);
+            if ((result->err = r1->err) != NO_ERROR) goto error;
             eval_result_t *r2 = eval_expr(expr->e2, env);
+            if ((result->err = r2->err) != NO_ERROR) goto error;
             subtract(r1->obj, r2->obj, result);
             if (result->err != NO_ERROR) goto error;
             break;
         }
         case AST_MUL: {
             eval_result_t *r1 = eval_expr(expr->e1, env);
+            if ((result->err = r1->err) != NO_ERROR) goto error;
             eval_result_t *r2 = eval_expr(expr->e2, env);
+            if ((result->err = r2->err) != NO_ERROR) goto error;
             multiply(r1->obj, r2->obj, result);
             if (result->err != NO_ERROR) goto error;
             break;
         }
         case AST_DIV: {
             eval_result_t *r1 = eval_expr(expr->e1, env);
+            if ((result->err = r1->err) != NO_ERROR) goto error;
             eval_result_t *r2 = eval_expr(expr->e2, env);
+            if ((result->err = r2->err) != NO_ERROR) goto error;
             divide(r1->obj, r2->obj, result);
             if (result->err != NO_ERROR) goto error;
             break;

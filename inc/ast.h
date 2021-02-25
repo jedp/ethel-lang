@@ -15,23 +15,12 @@ typedef enum {
   AST_STRING,
   AST_CHAR,
   AST_ASSIGN,
+  AST_NEGATE,
   AST_IDENT,
   AST_RESERVED_CALLABLE,
   AST_IF_THEN,
   AST_IF_THEN_ELSE,
 } ast_type_t;
-
-typedef enum {
-  AST_CALL_UNDEFINED = 0,
-  AST_CALL_ABS,
-  AST_CALL_SIN,
-  AST_CALL_COS,
-  AST_CALL_TAN,
-  AST_CALL_SQRT,
-  AST_CALL_EXP,
-  AST_CALL_LN,
-  AST_CALL_LOG,
-} ast_reserved_callable_type_t;
 
 static const char *ast_node_names[] = {
   "<EMPTY>",
@@ -45,14 +34,27 @@ static const char *ast_node_names[] = {
   "STRING",
   "CHAR",
   "ASSIGN",
+  "NEGATE",
   "IDENT",
   "RESERVED-CALLABLE"
   "IF-THEN",
   "IF-THEN-ELSE",
 };
 
+typedef enum {
+  AST_CALL_UNDEFINED = 0,
+  AST_CALL_ABS,
+  AST_CALL_SIN,
+  AST_CALL_COS,
+  AST_CALL_TAN,
+  AST_CALL_SQRT,
+  AST_CALL_EXP,
+  AST_CALL_LN,
+  AST_CALL_LOG,
+} ast_reserved_callable_type_t;
+
 typedef struct Expr {
-  int8_t type;
+  uint8_t type;
   void *e1;
   void *e2;
   void *e3;
