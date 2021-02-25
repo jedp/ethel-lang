@@ -114,9 +114,9 @@ ast_expr_t *_parse_expr(lexer_t *lexer, int min_preced) {
       case TAG_MINUS:  lhs = ast_expr(AST_SUB, lhs, _parse_expr(lexer, next_min_preced)); break;
       case TAG_TIMES:  lhs = ast_expr(AST_MUL, lhs, _parse_expr(lexer, next_min_preced)); break;
       case TAG_DIVIDE: lhs = ast_expr(AST_DIV, lhs, _parse_expr(lexer, next_min_preced)); break;
+      case TAG_AND:    lhs = ast_expr(AST_AND, lhs, _parse_expr(lexer, next_min_preced)); break;
+      case TAG_OR:     lhs = ast_expr(AST_OR, lhs, _parse_expr(lexer, next_min_preced)); break;
       /*
-      case TAG_AND:    lhs = 
-      case TAG_OR:     lhs = 
       case TAG_MOD:    lhs =
       case TAG_GT:     lhs =
       case TAG_GE:     lhs =

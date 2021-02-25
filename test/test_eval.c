@@ -60,11 +60,44 @@ void test_eval_if_else_assign_expr(void) {
   TEST_ASSERT_EQUAL(5, obj->intval);
 }
 
+void test_eval_boolean_true(void) {
+  char *program = "x = 1 and (1 or 0) or (0 and 1 or 1)";
+  eval_result_t *result = eval_program(program);
+  TEST_ASSERT_EQUAL(NO_ERROR, result->err);
+
+  obj_t *obj = result->obj;
+  // 1 is boolean true.
+  TEST_ASSERT_EQUAL(1, obj->intval);
+}
+
+void test_eval_boolean_false(void) {
+  char *program = "x = 0 and (1 or 0) or (0 and 1 or 0)";
+  eval_result_t *result = eval_program(program);
+  TEST_ASSERT_EQUAL(NO_ERROR, result->err);
+
+  obj_t *obj = result->obj;
+  // 0 is boolean false.
+  TEST_ASSERT_EQUAL(0, obj->intval);
+}
+
+void test_eval_truthiness(void) {
+  char *program = "x = (\"glug\" or 0) and (4.3 or 0) and (0 or 'c')"; 
+  eval_result_t *result = eval_program(program);
+  TEST_ASSERT_EQUAL(NO_ERROR, result->err);
+
+  obj_t *obj = result->obj;
+  // 1 is boolean true.
+  TEST_ASSERT_EQUAL(1, obj->intval);
+}
+
 void test_eval(void) {
   RUN_TEST(test_eval_calculator);
   RUN_TEST(test_eval_if_else);
   RUN_TEST(test_eval_if_else_nil);
   RUN_TEST(test_eval_if_else_assign);
   RUN_TEST(test_eval_if_else_assign_expr);
+  RUN_TEST(test_eval_boolean_true);
+  RUN_TEST(test_eval_boolean_false);
+  RUN_TEST(test_eval_truthiness);
 }
 

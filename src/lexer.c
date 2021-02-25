@@ -140,10 +140,10 @@ static token_t *lex_string(lexer_t *lexer) {
   readch(lexer);
   memset(next_word_buf, 0, MAX_WORD);
   int i = 0;
-  do {
+  while (lexer->nextch != '"') {
     next_word_buf[i++] = lexer->nextch;
     readch(lexer);
-  } while (lexer->nextch != '"');
+  } 
   // Ate final quote.
 
   lexer->next_token.tag = TAG_STRING;

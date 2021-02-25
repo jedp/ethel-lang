@@ -12,6 +12,7 @@ typedef enum {
   TYPE_FLOAT,
   TYPE_CHAR,
   TYPE_STRING,
+  TYPE_BOOLEAN,
   TYPE_IDENT,
   TYPE_MAX,
 } obj_type_t;
@@ -34,6 +35,7 @@ static const char* obj_type_names[TYPE_MAX] = {
   "Float",
   "Char",
   "String",
+  "Boolean",
   "Identifier"
 };
 
@@ -43,6 +45,7 @@ obj_t *int_obj(int);
 obj_t *float_obj(float);
 obj_t *string_obj(char*);
 obj_t *char_obj(char);
+obj_t *boolean_obj(bool);
 
 bool truthy(obj_t *obj);
 

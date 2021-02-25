@@ -41,6 +41,13 @@ int main(int argc, char** argv) {
         case TYPE_CHAR:
           printf("'%c'\n", ((obj_t*)result->obj)->charval);
           break;
+        case TYPE_BOOLEAN:
+          if (((obj_t*)result->obj)->intval) {
+            printf("True\n");
+          } else {
+            printf("False\n");
+          }
+          break;
         default:
           // The type was printed. That's fine.
           printf("\n");

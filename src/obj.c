@@ -42,6 +42,12 @@ obj_t *char_obj(char c) {
   return obj;
 }
 
+obj_t *boolean_obj(bool t) {
+  obj_t *obj = obj_of(TYPE_BOOLEAN);
+  obj->intval = t ? 1 : 0;
+  return obj;
+}
+
 bool truthy(obj_t *obj) {
   switch(obj->type) {
     case TYPE_NIL: return false;
@@ -49,6 +55,7 @@ bool truthy(obj_t *obj) {
     case TYPE_FLOAT: return obj->floatval != 0;
     case TYPE_STRING: return strlen(obj->stringval) > 0;
     case TYPE_CHAR: return obj->charval != 0x0;
+    case TYPE_BOOLEAN: return obj->intval == 1;
     default:
       printf("Unknown type: %d\n", obj->type);
       return false;

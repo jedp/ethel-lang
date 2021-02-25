@@ -69,11 +69,11 @@ void add(obj_t *a, obj_t *b, eval_result_t *result) {
   if ((a->type == TYPE_INT) && (b->type == TYPE_INT)) {
     result->obj = int_obj(a->intval + b->intval);
   } else if ((a->type == TYPE_INT) && (b->type == TYPE_FLOAT)) {
-    result-> obj = float_obj(a->intval + b->floatval);
+    result->obj = float_obj(a->intval + b->floatval);
   } else if ((a->type == TYPE_FLOAT) && (b->type == TYPE_INT)) {
-    result-> obj = float_obj(a->floatval + b->intval);
+    result->obj = float_obj(a->floatval + b->intval);
   } else if ((a->type == TYPE_FLOAT) && (b->type == TYPE_FLOAT)) {
-    result-> obj = float_obj(a->floatval + b->floatval);
+    result->obj = float_obj(a->floatval + b->floatval);
   } else {
     result->err = EVAL_TYPE_ERROR;
   }
@@ -86,13 +86,13 @@ void subtract(obj_t *a, obj_t *b, eval_result_t *result) {
   }
 
   if (a->type == TYPE_INT && b->type == TYPE_INT) {
-    result-> obj = int_obj(a->intval - b->intval);
+    result->obj = int_obj(a->intval - b->intval);
   } else if (a->type == TYPE_INT && b->type == TYPE_FLOAT) {
-    result-> obj = float_obj(a->intval - b->floatval);
+    result->obj = float_obj(a->intval - b->floatval);
   } else if (a->type == TYPE_FLOAT && b->type == TYPE_INT) {
-    result-> obj = float_obj(a->floatval - b->intval);
+    result->obj = float_obj(a->floatval - b->intval);
   } else if (a->type == TYPE_FLOAT && b->type == TYPE_FLOAT) {
-    result-> obj = float_obj(a->floatval - b->floatval);
+    result->obj = float_obj(a->floatval - b->floatval);
   } else {
     result->err = EVAL_TYPE_ERROR;
   }
@@ -105,13 +105,13 @@ void multiply(obj_t *a, obj_t *b, eval_result_t *result) {
   }
 
   if (a->type == TYPE_INT && b->type == TYPE_INT) {
-    result-> obj = int_obj(a->intval * b->intval);
+    result->obj = int_obj(a->intval * b->intval);
   } else if (a->type == TYPE_INT && b->type == TYPE_FLOAT) {
-    result-> obj = float_obj(a->intval * b->floatval);
+    result->obj = float_obj(a->intval * b->floatval);
   } else if (a->type == TYPE_FLOAT && b->type == TYPE_INT) {
-    result-> obj = float_obj(a->floatval * b->intval);
+    result->obj = float_obj(a->floatval * b->intval);
   } else if (a->type == TYPE_FLOAT && b->type == TYPE_FLOAT) {
-    result-> obj = float_obj(a->floatval * b->floatval);
+    result->obj = float_obj(a->floatval * b->floatval);
   } else {
     result->err = EVAL_TYPE_ERROR;
   }
@@ -133,16 +133,24 @@ void divide(obj_t *a, obj_t *b, eval_result_t *result) {
     // Return an int if possible. I guess?
     float f_div = (float) a->intval / b->intval;
     int i_div = a->intval / b->intval;
-    result-> obj = (f_div == i_div) ? int_obj(i_div) : float_obj(f_div);
+    result->obj = (f_div == i_div) ? int_obj(i_div) : float_obj(f_div);
   } else if (a->type == TYPE_INT && b->type == TYPE_FLOAT) {
-    result-> obj = float_obj(a->intval / b->floatval);
+    result->obj = float_obj(a->intval / b->floatval);
   } else if (a->type == TYPE_FLOAT && b->type == TYPE_INT) {
-    result-> obj = float_obj(a->floatval / b->intval);
+    result->obj = float_obj(a->floatval / b->intval);
   } else if (a->type == TYPE_FLOAT && b->type == TYPE_FLOAT) {
-    result-> obj = float_obj(a->floatval / b->floatval);
+    result->obj = float_obj(a->floatval / b->floatval);
   } else {
     result->err = EVAL_TYPE_ERROR;
   }
+}
+
+void boolean_and(obj_t *a, obj_t *b, eval_result_t *result) {
+  result->obj = boolean_obj(truthy(a) && truthy(b)); 
+}
+
+void boolean_or(obj_t *a, obj_t *b, eval_result_t *result) {
+  result->obj = boolean_obj(truthy(a) || truthy(b)); 
 }
 
 void resolve_callable_expr(ast_expr_t *expr, eval_result_t *result) {
@@ -215,6 +223,24 @@ eval_result_t *eval_expr(ast_expr_t *expr, env_t *env) {
             eval_result_t *r2 = eval_expr(expr->e2, env);
             if ((result->err = r2->err) != NO_ERROR) goto error;
             divide(r1->obj, r2->obj, result);
+            if (result->err != NO_ERROR) goto error;
+            break;
+        }
+        case AST_AND: {
+            eval_result_t *r1 = eval_expr(expr->e1, env);
+            if ((result->err = r1->err) != NO_ERROR) goto error;
+            eval_result_t *r2 = eval_expr(expr->e2, env);
+            if ((result->err = r2->err) != NO_ERROR) goto error;
+            boolean_and(r1->obj, r2->obj, result); 
+            if (result->err != NO_ERROR) goto error;
+            break;
+        }
+        case AST_OR: {
+            eval_result_t *r1 = eval_expr(expr->e1, env);
+            if ((result->err = r1->err) != NO_ERROR) goto error;
+            eval_result_t *r2 = eval_expr(expr->e2, env);
+            if ((result->err = r2->err) != NO_ERROR) goto error;
+            boolean_or(r1->obj, r2->obj, result); 
             if (result->err != NO_ERROR) goto error;
             break;
         }
