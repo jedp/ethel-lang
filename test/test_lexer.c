@@ -238,6 +238,28 @@ void test_lex_assign(void) {
   }
 }
 
+void test_lex_line_with_comment(void) {
+  char *expr = "a = 3 ; a comment ... ";
+  lexer_t lexer;
+  lexer_init(&lexer, expr, strlen(expr));
+
+  int expected[] = { TAG_IDENT, TAG_ASSIGN, TAG_INT };
+  for (int i = 0; i < sizeof(expected) / sizeof(expected[0]); i++) {
+    TEST_ASSERT_EQUAL(-1, lexer.err);
+    TEST_ASSERT_EQUAL(expected[i], lexer.token.tag);
+    advance(&lexer);
+  }
+}
+
+void test_lex_comment_only(void) {
+  char *expr = ";";
+  lexer_t lexer;
+  lexer_init(&lexer, expr, strlen(expr));
+
+  TEST_ASSERT_EQUAL(-1, lexer.err);
+  TEST_ASSERT_EQUAL(TAG_EOF, lexer.token.tag);
+}
+
 void test_lex_all_tokens(void) {
   typedef struct {
     char* text;
@@ -293,6 +315,8 @@ void test_lexer(void) {
   RUN_TEST(test_lex_parens);
   RUN_TEST(test_lex_parens_no_spaces);
   RUN_TEST(test_lex_assign);
+  RUN_TEST(test_lex_line_with_comment);
+  RUN_TEST(test_lex_comment_only);
   RUN_TEST(test_lex_all_tokens);
 }
 

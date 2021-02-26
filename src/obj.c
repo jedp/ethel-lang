@@ -14,6 +14,10 @@ obj_t *undef_obj() {
   return obj_of(TYPE_UNDEF);
 }
 
+obj_t *no_obj() {
+  return obj_of(TYPE_NOTHING);
+}
+
 obj_t *nil_obj() {
   return obj_of(TYPE_NIL);
 }

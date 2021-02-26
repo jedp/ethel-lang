@@ -24,25 +24,27 @@ int main(int argc, char** argv) {
       return -1;
     }
     eval_result_t *result = eval(&env, input);
+    obj_t *obj = (obj_t*)result->obj;
 
-    if (result->err == NO_ERROR) {
-      printf("%s ", obj_type_names[((obj_t*)result->obj)->type]);
+    if (result->err == NO_ERROR && obj->type != TYPE_NOTHING) {
 
-      switch (((obj_t*)result->obj)->type) {
+      printf("%s ", obj_type_names[obj->type]);
+
+      switch (obj->type) {
         case TYPE_INT:
-          printf("%d\n", ((obj_t*)result->obj)->intval);
+          printf("%d\n", obj->intval);
           break;
         case TYPE_FLOAT:
-          printf("%f\n", ((obj_t*)result->obj)->floatval);
+          printf("%f\n", obj->floatval);
           break;
         case TYPE_STRING:
-          printf("%s\n", ((obj_t*)result->obj)->stringval);
+          printf("%s\n", obj->stringval);
           break;
         case TYPE_CHAR:
-          printf("'%c'\n", ((obj_t*)result->obj)->charval);
+          printf("'%c'\n", obj->charval);
           break;
         case TYPE_BOOLEAN:
-          if (((obj_t*)result->obj)->intval) {
+          if (obj->intval) {
             printf("True\n");
           } else {
             printf("False\n");

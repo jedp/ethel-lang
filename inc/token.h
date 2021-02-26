@@ -6,6 +6,8 @@
 typedef enum {
   TAG_EOF = 0,
 
+  TAG_COMMENT,
+
   // Identifiers
   TAG_IDENT,
   TAG_ASSIGN,
@@ -60,6 +62,8 @@ typedef enum {
 
 static const char* tag_names[] = {
   "EOF",
+
+  "COMMENT",
 
   // Identifiers
   "IDENT",

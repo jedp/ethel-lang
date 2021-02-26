@@ -49,6 +49,17 @@ token_t *lex_eof(lexer_t *lexer) {
 }
 
 /**
+ * Consume all text up to the end of the line; return EOF.
+ */
+static token_t *lex_comment(lexer_t *lexer) {
+  while (lexer->nextch != 0) {
+    readch(lexer);
+  }
+
+  return lex_eof(lexer);
+}
+
+/**
  * Lex the an int or float number.
  *
  * Float numbers do not need an initial decimal digit.
@@ -174,6 +185,7 @@ token_t *get_token(lexer_t *lexer) {
       (ch >= 'A' && ch <= 'Z')) return lex_word(lexer);
        
   switch(ch) {
+    case ';': return lex_comment(lexer);
     case '(': return lex_paren(lexer, TAG_LPAREN);
     case ')': return lex_paren(lexer, TAG_RPAREN);
     case ',': return lex_paren(lexer, TAG_COMMA);

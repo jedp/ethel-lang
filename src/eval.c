@@ -252,6 +252,10 @@ eval_result_t *eval_expr(ast_expr_t *expr, env_t *env) {
     result->err = NO_ERROR;
 
     switch(expr->type) {
+        case AST_EMPTY: {
+            result->obj = no_obj();
+            break;
+        }
         case AST_ADD: {
             eval_result_t *r1 = eval_expr(expr->e1, env);
             if ((result->err = r1->err) != NO_ERROR) goto error;
