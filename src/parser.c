@@ -54,6 +54,7 @@ uint8_t binop_preced(token_t *token) {
 
 ast_reserved_callable_type_t ast_callable_type_for_tag(tag_t tag) {
   switch (tag) {
+    case TAG_PRINT: return AST_CALL_PRINT;
     case TAG_ABS: return AST_CALL_ABS;
     case TAG_SIN: return AST_CALL_SIN;
     case TAG_COS: return AST_CALL_COS;
@@ -70,8 +71,14 @@ ast_expr_t *parse_start(lexer_t *lexer) {
   return (lexer->token.tag == TAG_EOF) ? ast_empty() : parse_expr(lexer);
 }
 
-ast_expr_list_t *parse_expr_list(lexer_t *lexer) {
+ast_expr_list_t *empty_expr_list() {
   ast_expr_list_t *node = malloc(sizeof(ast_expr_list_t));
+  node->e = ast_empty();
+  return node;
+}
+
+ast_expr_list_t *parse_expr_list(lexer_t *lexer) {
+  ast_expr_list_t *node = empty_expr_list();
   ast_expr_list_t *root = node;
 
   ast_expr_t *e = parse_expr(lexer);
@@ -215,14 +222,20 @@ ast_expr_t *parse_atom(lexer_t *lexer) {
     case TAG_SQRT: 
     case TAG_EXP: 
     case TAG_LN: 
-    case TAG_LOG: {
+    case TAG_LOG:
+    case TAG_PRINT: {
       int callable_type = ast_callable_type_for_tag(lexer->token.tag);
       advance(lexer);
       if (lexer->token.tag == TAG_LPAREN) {
         eat(lexer, TAG_LPAREN);
-        ast_expr_list_t *es = parse_expr_list(lexer);
+        // More than 0 args.
+        if (lexer->token.tag != TAG_RPAREN) {
+          ast_expr_list_t *es = parse_expr_list(lexer);
+          if (!eat(lexer, TAG_RPAREN)) goto error;
+          return ast_reserved_callable(callable_type, es);
+        }
         if (!eat(lexer, TAG_RPAREN)) goto error;
-        return ast_reserved_callable(callable_type, es);
+        return ast_reserved_callable(callable_type, empty_expr_list());
       }
       return ast_ident(lexer->token.string);
     }

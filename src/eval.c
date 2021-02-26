@@ -10,6 +10,8 @@
 #include "../inc/ast.h"
 #include "../inc/env.h"
 
+eval_result_t *eval_expr(ast_expr_t *expr, env_t *env);
+
 void eval_nil_expr(ast_expr_t *expr, eval_result_t *result) {
   if (expr->type != AST_NIL) {
     result->err = EVAL_TYPE_ERROR;
@@ -215,7 +217,7 @@ void boolean_or(obj_t *a, obj_t *b, eval_result_t *result) {
   result->obj = boolean_obj(truthy(a) || truthy(b)); 
 }
 
-void resolve_callable_expr(ast_expr_t *expr, eval_result_t *result) {
+void resolve_callable_expr(ast_expr_t *expr, env_t *env, eval_result_t *result) {
   if (expr->type != AST_RESERVED_CALLABLE) {
     result->err = EVAL_TYPE_ERROR;
     return;
@@ -225,6 +227,30 @@ void resolve_callable_expr(ast_expr_t *expr, eval_result_t *result) {
   ast_expr_list_t *args = expr->e1;
 
   switch (expr->intval) {
+    case AST_CALL_PRINT: {
+      ast_expr_list_t *node = (ast_expr_list_t*) args;
+      if (node->e->type != AST_EMPTY) {
+        while(node != NULL) {
+          eval_result_t *r = eval_expr(node->e, env);
+
+          // TODO: probably want to put the whole string result in result->obj.
+          // TODO: it needs tests, one way or the other
+          switch (r->obj->type) {
+            case TYPE_INT: printf("%d ", r->obj->intval); break;
+            case TYPE_FLOAT: printf("%f ", r->obj->floatval); break;
+            case TYPE_CHAR: printf("%c ", r->obj->charval); break;
+            case TYPE_STRING: printf("%s ", r->obj->stringval); break;
+            case TYPE_BOOLEAN: printf("%s ", r->obj->intval ? "true" : "false"); break;
+            case TYPE_NIL: printf("Nil "); break;
+            default: printf("?? "); break;
+          }
+          node = node->next;
+        }
+        printf("\n");
+      }
+      result->obj = no_obj();
+      break;
+    }
     case AST_CALL_ABS:
       if (args->e->type == AST_INT) {
         result->obj = int_obj(args->e->intval < 0 ? -1 * args->e->intval : args->e->intval);
@@ -364,7 +390,7 @@ eval_result_t *eval_expr(ast_expr_t *expr, env_t *env) {
             break;
         }
         case AST_RESERVED_CALLABLE: {
-          resolve_callable_expr(expr, result);
+          resolve_callable_expr(expr, env, result);
           if (result->err != NO_ERROR) goto error;
           break;
         }

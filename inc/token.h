@@ -49,6 +49,10 @@ typedef enum {
   TAG_LE,
   TAG_EQ,
 
+  // IO
+  TAG_PRINT,
+  TAG_INPUT,
+
   // Math
   TAG_ABS,
   TAG_SIN,
@@ -106,6 +110,10 @@ static const char* tag_names[] = {
   "LE",
   "EQ",
 
+  // IO
+  "PRINT",
+  "INPUT",
+
   // Math
   "ABS",
   "SIN",
@@ -134,6 +142,8 @@ static const token_t reserved[] = {
   { TAG_AND,     .string = (char *) "and" },
   { TAG_OR,      .string = (char *) "or" },
   { TAG_MOD,     .string = (char *) "mod" },
+  { TAG_PRINT,   .string = (char *) "print" },
+  { TAG_INPUT,   .string = (char *) "input" },
   { TAG_FOR,     .string = (char *) "for" },
   { TAG_IN,      .string = (char *) "in" },
   { TAG_TO,      .string = (char *) "to" },
