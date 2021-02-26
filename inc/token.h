@@ -43,6 +43,7 @@ typedef enum {
   TAG_IN,
   TAG_TO,
   TAG_STEP,
+  TAG_DO,
 
   // Comparison
   TAG_GT,
@@ -106,6 +107,7 @@ static const char* tag_names[] = {
   "IN",
   "TO",
   "STEP",
+  "DO",
 
   // Comparison
   "GT",
@@ -152,6 +154,7 @@ static const token_t reserved[] = {
   { TAG_IN,      .string = (char *) "in" },
   { TAG_TO,      .string = (char *) "to" },
   { TAG_STEP,    .string = (char *) "step" },
+  { TAG_DO,      .string = (char *) "do" },
   { TAG_NIL,     .string = (char *) "nil" },
   { TAG_TRUE,    .string = (char *) "true" },
   { TAG_FALSE,   .string = (char *) "false" },

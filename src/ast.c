@@ -92,6 +92,18 @@ ast_expr_t *ast_if_then_else(ast_expr_t *if_clause, ast_expr_t *then_clause, ast
   return node;
 }
 
+ast_expr_t *ast_for_loop(ast_expr_t *index,
+                         ast_expr_t *start,
+                         ast_expr_t *end,
+                         ast_expr_t *pred) {
+  ast_expr_t *node = ast_node(AST_FOR_LOOP);
+  node->e1 = index;
+  node->e2 = start;
+  node->e3 = end;
+  node->e4 = pred;
+  return node;
+}
+
 ast_expr_t *ast_empty() {
   return ast_expr(AST_EMPTY, 0, 0);
 }

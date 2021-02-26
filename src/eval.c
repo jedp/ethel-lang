@@ -458,6 +458,33 @@ eval_result_t *eval_expr(ast_expr_t *expr, env_t *env) {
           result->obj = nil_obj();
           break;
         }
+        case AST_FOR_LOOP: {
+          char* index_name = ((ast_expr_t*) expr->e1)->stringval;
+
+          eval_result_t *start = eval_expr(expr->e2, env);
+          if ((result->err = start->err) != NO_ERROR) goto error;
+
+          eval_result_t *end = eval_expr(expr->e3, env);
+          if ((result->err = end->err) != NO_ERROR) goto error;
+
+          // Hack hack
+          push_scope(env);
+          obj_t *index_obj = int_obj(start->obj->intval);
+          put_env(env, index_name, index_obj);
+          eval_result_t *r;
+          for (int i = start->obj->intval; i <= end->obj->intval; ++i) {
+            index_obj->intval = i;
+
+            r = eval_expr(expr->e4, env);
+            if ((result->err = r->err) != NO_ERROR) {
+              pop_scope(env);
+              goto error;
+            }
+          }
+          pop_scope(env);
+          result->obj = r->obj;
+          break;
+        }
         default:
             result->err = EVAL_UNHANDLED_OBJECT;
             break;

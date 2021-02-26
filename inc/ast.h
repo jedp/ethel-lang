@@ -30,6 +30,7 @@ typedef enum {
   AST_RESERVED_CALLABLE,
   AST_IF_THEN,
   AST_IF_THEN_ELSE,
+  AST_FOR_LOOP,
 } ast_type_t;
 
 static const char *ast_node_names[] = {
@@ -55,9 +56,10 @@ static const char *ast_node_names[] = {
   "ASSIGN",
   "NEGATE",
   "IDENT",
-  "RESERVED-CALLABLE"
+  "RESERVED-CALLABLE",
   "IF-THEN",
   "IF-THEN-ELSE",
+  "FOR-LOOP",
 };
 
 typedef enum {
@@ -78,6 +80,7 @@ typedef struct Expr {
   void *e1;
   void *e2;
   void *e3;
+  void *e4;
   union {
     int intval;
     float floatval;
@@ -104,6 +107,7 @@ ast_expr_t *ast_reserved_callable(ast_reserved_callable_type_t type, ast_expr_li
 ast_expr_t *ast_assign(ast_expr_t *ident, ast_expr_t *value);
 ast_expr_t *ast_if_then(ast_expr_t *if_clause, ast_expr_t *then_clause);
 ast_expr_t *ast_if_then_else(ast_expr_t *if_clause, ast_expr_t *then_clause, ast_expr_t *else_clause);
+ast_expr_t *ast_for_loop(ast_expr_t *index, ast_expr_t *start, ast_expr_t *end, ast_expr_t *pred);
 ast_expr_t *ast_empty();
 
 #endif

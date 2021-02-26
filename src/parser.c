@@ -223,6 +223,18 @@ ast_expr_t *parse_atom(lexer_t *lexer) {
       }
       return ast_if_then(if_clause, then_clause);
     }
+    case TAG_FOR: {
+      advance(lexer);
+      ast_expr_t *index = parse_expr(lexer);
+      if (index->type != AST_IDENT) goto error;
+      if (!eat(lexer, TAG_IN)) goto error;
+      ast_expr_t *start = parse_expr(lexer);
+      if (!eat(lexer, TAG_TO)) goto error;
+      ast_expr_t *end = parse_expr(lexer);
+      if (!eat(lexer, TAG_DO)) goto error;
+      ast_expr_t *pred = parse_expr(lexer);
+      return ast_for_loop(index, start, end, pred);
+    }
     case TAG_ABS: 
     case TAG_SIN: 
     case TAG_COS: 
