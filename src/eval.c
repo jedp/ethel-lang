@@ -241,6 +241,12 @@ void resolve_callable_expr(ast_expr_t *expr, env_t *env, eval_result_t *result) 
         while(node != NULL) {
           eval_result_t *r = eval_expr(node->e, env);
 
+          if (r->err != NO_ERROR) {
+            result->err = r->err;
+            result->obj = undef_obj();
+            return;
+          }
+
           // TODO: probably want to put the whole string result in result->obj.
           // TODO: it needs tests, one way or the other
           switch (r->obj->type) {
