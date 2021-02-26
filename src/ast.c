@@ -1,5 +1,6 @@
 #include <stdlib.h>
 #include <strings.h>
+#include <stdbool.h>
 #include <stdio.h>
 #include "../inc/ast.h"
 
@@ -44,6 +45,12 @@ ast_expr_t *ast_string(char* s) {
   char* stringval = malloc(sizeof(s) + 1);
   strcpy(stringval, s);
   node->stringval = stringval;
+  return node;
+}
+
+ast_expr_t *ast_boolean(bool t) {
+  ast_expr_t *node = ast_node(AST_BOOLEAN);
+  node->intval = t ? 1 : 0;
   return node;
 }
 

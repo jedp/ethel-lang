@@ -22,6 +22,14 @@ void eval_nil_expr(ast_expr_t *expr, eval_result_t *result) {
   result->obj = obj;
 }
 
+void eval_boolean_expr(ast_expr_t *expr, eval_result_t *result) {
+  if (expr->type != AST_BOOLEAN) {
+    result->err = EVAL_TYPE_ERROR;
+    return;
+  }
+  result->obj = boolean_obj(expr->intval == 1);
+}
+
 void eval_int_expr(ast_expr_t *expr, eval_result_t *result) {
   if (expr->type != AST_INT) {
     result->err = EVAL_TYPE_ERROR;
@@ -360,6 +368,10 @@ eval_result_t *eval_expr(ast_expr_t *expr, env_t *env) {
         }
         case AST_NIL: {
             eval_nil_expr(expr, result);
+            break;
+        }
+        case AST_BOOLEAN: {
+            eval_boolean_expr(expr, result);
             break;
         }
         case AST_INT:

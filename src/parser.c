@@ -160,6 +160,14 @@ ast_expr_t *parse_atom(lexer_t *lexer) {
       advance(lexer);
       return ast_nil();
     }
+    case TAG_TRUE: {
+      advance(lexer);
+      return ast_boolean(true);
+    }
+    case TAG_FALSE: {
+      advance(lexer);
+      return ast_boolean(false);
+    }
     case TAG_INT: {
       int i = lexer->token.intval;
       advance(lexer);

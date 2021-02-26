@@ -89,6 +89,22 @@ void test_lex_string(void) {
   TEST_ASSERT_EQUAL_STRING("i like pie", lexer.token.string);
 }
 
+void test_lex_true(void) {
+  char *expr = "true";
+  lexer_t lexer;
+  lexer_init(&lexer, expr, strlen(expr));
+
+  TEST_ASSERT_EQUAL(TAG_TRUE, lexer.token.tag);
+}
+
+void test_lex_false(void) {
+  char *expr = "false";
+  lexer_t lexer;
+  lexer_init(&lexer, expr, strlen(expr));
+
+  TEST_ASSERT_EQUAL(TAG_FALSE, lexer.token.tag);
+}
+
 void test_lex_arithmetic(void) {
   char *expr = "123 + 2345.67 * 3 - .42 / 5";
   lexer_t lexer;
@@ -308,6 +324,8 @@ void test_lexer(void) {
   RUN_TEST(test_lex_float_no_leading_decimal);
   RUN_TEST(test_lex_char);
   RUN_TEST(test_lex_string);
+  RUN_TEST(test_lex_true);
+  RUN_TEST(test_lex_false);
   RUN_TEST(test_lex_arithmetic);
   RUN_TEST(test_lex_arithmetic_no_spaces);
   RUN_TEST(test_lex_inequality);

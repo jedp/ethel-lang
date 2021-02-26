@@ -102,6 +102,26 @@ void test_parse_string(void) {
   TEST_ASSERT_EQUAL_STRING("Ethel", ((ast_expr_t*) expr->e2)->stringval);
 }
 
+void test_parse_boolean_true(void) {
+  char *program = "x = true";
+
+  ast_expr_t *expr = parse_program(program);
+  TEST_ASSERT_EQUAL(AST_ASSIGN, expr->type);
+  TEST_ASSERT_EQUAL(AST_IDENT, ((ast_expr_t*) expr->e1)->type);
+  TEST_ASSERT_EQUAL(AST_BOOLEAN, ((ast_expr_t*) expr->e2)->type);
+  TEST_ASSERT_TRUE(((ast_expr_t*) expr->e2)->intval);
+}
+
+void test_parse_boolean_false(void) {
+  char *program = "x = false";
+
+  ast_expr_t *expr = parse_program(program);
+  TEST_ASSERT_EQUAL(AST_ASSIGN, expr->type);
+  TEST_ASSERT_EQUAL(AST_IDENT, ((ast_expr_t*) expr->e1)->type);
+  TEST_ASSERT_EQUAL(AST_BOOLEAN, ((ast_expr_t*) expr->e2)->type);
+  TEST_ASSERT_FALSE(((ast_expr_t*) expr->e2)->intval);
+}
+
 void test_parser(void) {
   RUN_TEST(test_parse_empty);
   RUN_TEST(test_parse_add);
@@ -113,5 +133,7 @@ void test_parser(void) {
   RUN_TEST(test_parse_if_else_assign_expr);
   RUN_TEST(test_parse_char);
   RUN_TEST(test_parse_string);
+  RUN_TEST(test_parse_boolean_true);
+  RUN_TEST(test_parse_boolean_false);
 }
 

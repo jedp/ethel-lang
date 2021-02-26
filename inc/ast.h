@@ -2,6 +2,7 @@
 #define _AST_H
 
 #include <inttypes.h>
+#include <stdbool.h>
 
 typedef enum {
   AST_EMPTY = 0,
@@ -22,6 +23,7 @@ typedef enum {
   AST_FLOAT,
   AST_STRING,
   AST_CHAR,
+  AST_BOOLEAN,
   AST_ASSIGN,
   AST_NEGATE,
   AST_IDENT,
@@ -49,6 +51,7 @@ static const char *ast_node_names[] = {
   "FLOAT",
   "STRING",
   "CHAR",
+  "BOOLEAN",
   "ASSIGN",
   "NEGATE",
   "IDENT",
@@ -95,6 +98,7 @@ ast_expr_t *ast_float(float value);
 ast_expr_t *ast_int(int value);
 ast_expr_t *ast_char(char c);
 ast_expr_t *ast_string(char* s);
+ast_expr_t *ast_boolean(bool t);
 ast_expr_t *ast_ident(char* name);
 ast_expr_t *ast_reserved_callable(ast_reserved_callable_type_t type, ast_expr_list_t *es);
 ast_expr_t *ast_assign(ast_expr_t *ident, ast_expr_t *value);
