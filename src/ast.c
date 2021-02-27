@@ -7,12 +7,29 @@
 ast_expr_t *ast_node(ast_type_t type) {
   ast_expr_t *node = malloc(sizeof(ast_expr_t));
 
+  switch(type) {
+    case AST_INT:     node->intval = 0;      break;
+    case AST_FLOAT:   node->floatval = 0.0;  break;
+    case AST_CHAR:    node->charval = 0;     break;
+    case AST_STRING:  node->stringval = "";  break;
+    case AST_BOOLEAN: node->intval = 0;      break;
+    // Other nodes are not initialized.
+    default: break;
+  }
+
   node->type = type;
   return node;
 }
 
 ast_expr_t *ast_expr(ast_type_t type, ast_expr_t *e1, ast_expr_t *e2) {
   ast_expr_t *node = ast_node(type);
+  node->e1 = e1;
+  node->e2 = e2;
+  return node;
+}
+
+ast_expr_t *ast_cast(ast_expr_t *e1, ast_expr_t *e2) {
+  ast_expr_t *node = ast_node(AST_CAST);
   node->e1 = e1;
   node->e2 = e2;
   return node;
@@ -42,7 +59,7 @@ ast_expr_t *ast_char(char c) {
 
 ast_expr_t *ast_string(char* s) {
   ast_expr_t *node = ast_node(AST_STRING);
-  char* stringval = malloc(sizeof(s) + 1);
+  char* stringval = malloc(strlen(s) + 1);
   strcpy(stringval, s);
   node->stringval = stringval;
   return node;
@@ -51,6 +68,11 @@ ast_expr_t *ast_string(char* s) {
 ast_expr_t *ast_boolean(bool t) {
   ast_expr_t *node = ast_node(AST_BOOLEAN);
   node->intval = t ? 1 : 0;
+  return node;
+}
+
+ast_expr_t *ast_type(ast_type_t type) {
+  ast_expr_t *node = ast_node(type);
   return node;
 }
 

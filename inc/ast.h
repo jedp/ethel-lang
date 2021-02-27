@@ -24,6 +24,7 @@ typedef enum {
   AST_STRING,
   AST_CHAR,
   AST_BOOLEAN,
+  AST_CAST,
   AST_ASSIGN,
   AST_NEGATE,
   AST_IDENT,
@@ -53,6 +54,7 @@ static const char *ast_node_names[] = {
   "STRING",
   "CHAR",
   "BOOLEAN",
+  "CAST",
   "ASSIGN",
   "NEGATE",
   "IDENT",
@@ -96,12 +98,14 @@ typedef struct ExprListNode {
 
 void pretty_print(ast_expr_t *expr);
 ast_expr_t *ast_expr(ast_type_t type, ast_expr_t *e1, ast_expr_t *e2);
+ast_expr_t *ast_cast(ast_expr_t *e1, ast_expr_t *e2);
 ast_expr_t *ast_nil();
 ast_expr_t *ast_float(float value);
 ast_expr_t *ast_int(int value);
 ast_expr_t *ast_char(char c);
 ast_expr_t *ast_string(char* s);
 ast_expr_t *ast_boolean(bool t);
+ast_expr_t *ast_type(ast_type_t type);
 ast_expr_t *ast_ident(char* name);
 ast_expr_t *ast_reserved_callable(ast_reserved_callable_type_t type, ast_expr_list_t *es);
 ast_expr_t *ast_assign(ast_expr_t *ident, ast_expr_t *value);

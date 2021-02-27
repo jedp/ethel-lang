@@ -19,9 +19,12 @@ typedef enum {
 
   EVAL_UNHANDLED_OBJECT,
   EVAL_TYPE_ERROR,
+  EVAL_BAD_INPUT,
 
   DIVISION_BY_ZERO,
   OVERFLOW_ERROR,
+  UNDERFLOW_ERROR,
+  VALUE_TOO_LARGE_FOR_CHAR,
 
   ERR_MAX,
 
@@ -40,8 +43,11 @@ static const char* err_names[ERR_MAX] = {
   "Positive integer argument required",
   "Evaluation error",
   "Types incompatible for operation",
+  "Bad input",
   "Division by zero",
   "Overflow error",
+  "Underflow error",
+  "Char value too large",
 };
 
 #endif

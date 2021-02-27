@@ -41,6 +41,7 @@ int main(int argc, char** argv) {
           printf("%s\n", obj->stringval);
           break;
         case TYPE_CHAR:
+          // Range check here.
           printf("'%c'\n", obj->charval);
           break;
         case TYPE_BOOLEAN:

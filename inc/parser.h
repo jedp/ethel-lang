@@ -15,6 +15,7 @@ typedef enum {
   PRECED_SHIFT,
   PRECED_ADD,
   PRECED_MUL,
+  PRECED_CAST,
   PRECED_UNARY,
 } preced_t;
 

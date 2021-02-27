@@ -127,6 +127,122 @@ void test_eval_char_comparison(void) {
   TEST_ASSERT_EQUAL('g', obj->charval);
 }
 
+void test_eval_cast_int(void) {
+  obj_t *obj; 
+
+  obj = eval_program("-99 as int")->obj;
+  TEST_ASSERT_EQUAL(TYPE_INT, obj->type);
+  TEST_ASSERT_EQUAL(-99, obj->intval);
+
+  obj = eval_program("-99 as float")->obj;
+  TEST_ASSERT_EQUAL(TYPE_FLOAT, obj->type);
+  TEST_ASSERT_EQUAL(-99.0, obj->floatval);
+
+  obj = eval_program("-99 as string")->obj;
+  TEST_ASSERT_EQUAL(TYPE_STRING, obj->type);
+  TEST_ASSERT_EQUAL_STRING("-99", obj->stringval);
+
+  obj = eval_program("99 as char")->obj;
+  TEST_ASSERT_EQUAL(TYPE_CHAR, obj->type);
+  TEST_ASSERT_EQUAL('c', obj->charval);
+
+  obj = eval_program("-99 as boolean")->obj;
+  TEST_ASSERT_EQUAL(TYPE_BOOLEAN, obj->type);
+  TEST_ASSERT_EQUAL(1, obj->intval);
+}
+
+void test_eval_cast_float(void) {
+  obj_t *obj; 
+
+  obj = eval_program("-42.99 as int")->obj;
+  TEST_ASSERT_EQUAL(TYPE_INT, obj->type);
+  TEST_ASSERT_EQUAL(-42, obj->intval);
+
+  obj = eval_program("-42.99 as float")->obj;
+  TEST_ASSERT_EQUAL(TYPE_FLOAT, obj->type);
+  TEST_ASSERT_EQUAL(-42.99, obj->floatval);
+
+  obj = eval_program("-42.02 as string")->obj;
+  TEST_ASSERT_EQUAL(TYPE_STRING, obj->type);
+  TEST_ASSERT_EQUAL_STRING("-42.020000", obj->stringval);
+
+  obj = eval_program("-42.99 as boolean")->obj;
+  TEST_ASSERT_EQUAL(TYPE_BOOLEAN, obj->type);
+  TEST_ASSERT_EQUAL(1, obj->intval);
+}
+
+void test_eval_cast_string(void) {
+  obj_t *obj; 
+
+  obj = eval_program("\"-12.44\" as int")->obj;
+  TEST_ASSERT_EQUAL(TYPE_INT, obj->type);
+  TEST_ASSERT_EQUAL(-12, obj->intval);
+
+  obj = eval_program("\"-42.99\" as float")->obj;
+  TEST_ASSERT_EQUAL(TYPE_FLOAT, obj->type);
+  TEST_ASSERT_EQUAL(-42.99, obj->floatval);
+
+  obj = eval_program("\"-42.1\" as string")->obj;
+  TEST_ASSERT_EQUAL(TYPE_STRING, obj->type);
+  TEST_ASSERT_EQUAL_STRING("-42.1", obj->stringval);
+
+  obj = eval_program("\"-42.99\" as boolean")->obj;
+  TEST_ASSERT_EQUAL(TYPE_BOOLEAN, obj->type);
+  TEST_ASSERT_EQUAL(1, obj->intval);
+}
+
+void test_eval_cast_char(void) {
+  obj_t *obj;
+
+  obj = eval_program("'c' as int")->obj;
+  TEST_ASSERT_EQUAL(TYPE_INT, obj->type);
+  TEST_ASSERT_EQUAL(99, obj->intval);
+
+  obj = eval_program("'c' as float")->obj;
+  TEST_ASSERT_EQUAL(TYPE_FLOAT, obj->type);
+  TEST_ASSERT_EQUAL(99.0, obj->floatval);
+
+  obj = eval_program("'c' as string")->obj;
+  TEST_ASSERT_EQUAL(TYPE_STRING, obj->type);
+  TEST_ASSERT_EQUAL_STRING("c", obj->stringval);
+
+  obj = eval_program("'c' as boolean")->obj;
+  TEST_ASSERT_EQUAL(TYPE_BOOLEAN, obj->type);
+  TEST_ASSERT_EQUAL(1, obj->intval);
+}
+
+void test_eval_cast_boolean(void) {
+  obj_t *obj;
+
+  obj = eval_program("true as int")->obj;
+  TEST_ASSERT_EQUAL(TYPE_INT, obj->type);
+  TEST_ASSERT_EQUAL(1, obj->intval);
+  obj = eval_program("false as int")->obj;
+  TEST_ASSERT_EQUAL(TYPE_INT, obj->type);
+  TEST_ASSERT_EQUAL(0, obj->intval);
+
+  obj = eval_program("true as float")->obj;
+  TEST_ASSERT_EQUAL(TYPE_FLOAT, obj->type);
+  TEST_ASSERT_EQUAL(1.0, obj->floatval);
+  obj = eval_program("false as float")->obj;
+  TEST_ASSERT_EQUAL(TYPE_FLOAT, obj->type);
+  TEST_ASSERT_EQUAL(0.0, obj->floatval);
+
+  obj = eval_program("true as string")->obj;
+  TEST_ASSERT_EQUAL(TYPE_STRING, obj->type);
+  TEST_ASSERT_EQUAL_STRING("true", obj->stringval);
+  obj = eval_program("false as string")->obj;
+  TEST_ASSERT_EQUAL(TYPE_STRING, obj->type);
+  TEST_ASSERT_EQUAL_STRING("false", obj->stringval);
+
+  obj = eval_program("true as char")->obj;
+  TEST_ASSERT_EQUAL(TYPE_CHAR, obj->type);
+  TEST_ASSERT_EQUAL('t', obj->intval);
+  obj = eval_program("false as char")->obj;
+  TEST_ASSERT_EQUAL(TYPE_CHAR, obj->type);
+  TEST_ASSERT_EQUAL('f', obj->intval);
+}
+
 void test_eval(void) {
   RUN_TEST(test_eval_calculator);
   RUN_TEST(test_eval_if_else);
@@ -140,5 +256,10 @@ void test_eval(void) {
   RUN_TEST(test_eval_float_mod);
   RUN_TEST(test_eval_numeric_comparison);
   RUN_TEST(test_eval_char_comparison);
+  RUN_TEST(test_eval_cast_int);
+  RUN_TEST(test_eval_cast_float);
+  RUN_TEST(test_eval_cast_string);
+  RUN_TEST(test_eval_cast_char);
+  RUN_TEST(test_eval_cast_boolean);
 }
 

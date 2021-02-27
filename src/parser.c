@@ -12,7 +12,8 @@ ast_expr_t *parse_atom(lexer_t *lexer);
 ast_expr_t *parse_eof(lexer_t *lexer);
 
 bool is_binop(token_t *token) {
-  return token->tag == TAG_PLUS
+  return token->tag == TAG_AS
+      || token->tag == TAG_PLUS
       || token->tag == TAG_MINUS
       || token->tag == TAG_TIMES
       || token->tag == TAG_DIVIDE
@@ -28,6 +29,8 @@ bool is_binop(token_t *token) {
 
 uint8_t binop_preced(token_t *token) {
   switch (token->tag) {
+    case TAG_AS:
+      return PRECED_CAST;
     case TAG_TIMES:
     case TAG_DIVIDE:
     case TAG_MOD:
@@ -118,6 +121,7 @@ ast_expr_t *_parse_expr(lexer_t *lexer, int min_preced) {
     advance(lexer);
 
     switch(tag) {
+      case TAG_AS:     lhs = ast_cast(lhs, _parse_expr(lexer, next_min_preced)); break;
       case TAG_PLUS:   lhs = ast_expr(AST_ADD, lhs, _parse_expr(lexer, next_min_preced)); break;
       case TAG_MINUS:  lhs = ast_expr(AST_SUB, lhs, _parse_expr(lexer, next_min_preced)); break;
       case TAG_TIMES:  lhs = ast_expr(AST_MUL, lhs, _parse_expr(lexer, next_min_preced)); break;
@@ -160,6 +164,26 @@ ast_expr_t *parse_atom(lexer_t *lexer) {
       advance(lexer);
       return ast_nil();
     }
+    case TAG_TYPE_INT: {
+      advance(lexer);
+      return ast_type(AST_INT);
+    }
+    case TAG_TYPE_FLOAT: {
+      advance(lexer);
+      return ast_type(AST_FLOAT);
+    }
+    case TAG_TYPE_CHAR: {
+      advance(lexer);
+      return ast_type(AST_CHAR);
+    }
+    case TAG_TYPE_STRING: {
+      advance(lexer);
+      return ast_type(AST_STRING);
+    }
+    case TAG_TYPE_BOOLEAN: {
+      advance(lexer);
+      return ast_type(AST_BOOLEAN);
+    }
     case TAG_TRUE: {
       advance(lexer);
       return ast_boolean(true);
@@ -178,23 +202,23 @@ ast_expr_t *parse_atom(lexer_t *lexer) {
       advance(lexer);
       return ast_float(f);
     }
-    // TODO: Not actually right - doesn't do -(3+2), for example
-    case TAG_MINUS: {
-      advance(lexer);
-      ast_expr_t *e = parse_atom(lexer);
-      if (e->type == AST_INT) e->intval *= -1;
-      if (e->type == AST_FLOAT) e->intval *= -1;
-      return e;
-    }
     case TAG_CHAR: {
       char c = lexer->token.ch;
       advance(lexer);
       return ast_char(c);
     }
     case TAG_STRING: {
-      char* s = lexer->token.string;
+      ast_expr_t *e = ast_string(lexer->token.string);
       advance(lexer);
-      return ast_string(s);
+      return e;
+    }
+    // TODO: Not actually right - doesn't do -(3+2), for example
+    case TAG_MINUS: {
+      advance(lexer);
+      ast_expr_t *e = parse_atom(lexer);
+      if (e->type == AST_INT) e->intval *= -1;
+      if (e->type == AST_FLOAT) e->floatval *= -1;
+      return e;
     }
     case TAG_LPAREN: {
       advance(lexer);

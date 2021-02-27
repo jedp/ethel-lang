@@ -3,6 +3,7 @@
 #include <stdlib.h>
 #include <string.h>
 #include <stdio.h>
+#include <limits.h>
 #include <math.h>
 #include "../inc/err.h"
 #include "../inc/eval.h"
@@ -54,6 +55,45 @@ void eval_char_expr(ast_expr_t *expr, eval_result_t *result) {
   result->obj = char_obj(expr->charval);
 }
 
+void int_to_string(obj_t *obj) {
+  int i = obj->intval;
+  int len =  snprintf(NULL, 0, "%d", i);
+  obj->stringval = malloc(len + 1);
+  snprintf(obj->stringval, len + 1, "%d", i);
+  obj->type = TYPE_STRING;
+}
+
+void float_to_string(obj_t *obj) {
+  float f = obj->floatval;
+  int len =  snprintf(NULL, 0, "%f", f);
+  obj->stringval = malloc(len + 1);
+  snprintf(obj->stringval, len + 1, "%f", f);
+  obj->type = TYPE_STRING;
+}
+
+error_t string_to_int(obj_t *obj) {
+  char *end;
+  long l = strtol(obj->stringval, &end, 10);
+  // Expect either end of line, or to have encountered a decimal point.
+  if (*end != '\0' && *end != '.') return EVAL_BAD_INPUT;
+  if (l > INT_MAX)  return OVERFLOW_ERROR;
+  if (l < INT_MIN)  return UNDERFLOW_ERROR;
+
+  obj->type = TYPE_INT;
+  obj->intval = (int) l;
+  return NO_ERROR;
+}
+
+error_t string_to_float(obj_t *obj) {
+  char *end;
+  float f = strtof(obj->stringval, &end);
+  if (*end != '\0') return EVAL_BAD_INPUT;
+
+  obj->type = TYPE_FLOAT;
+  obj->floatval = f;
+  return NO_ERROR;
+}
+
 void eval_string_expr(ast_expr_t *expr, eval_result_t *result) {
   if (expr->type != AST_STRING) {
     result->err = EVAL_TYPE_ERROR;
@@ -64,6 +104,149 @@ void eval_string_expr(ast_expr_t *expr, eval_result_t *result) {
   strcpy(stringval, expr->stringval);
   obj->type = TYPE_STRING;
   obj->stringval = stringval;
+  result->obj = obj;
+}
+
+void cast(obj_t *obj, obj_t *type_obj, eval_result_t *result) {
+  if ( !(type_obj->type == TYPE_INT
+      || type_obj->type == TYPE_FLOAT
+      || type_obj->type == TYPE_CHAR
+      || type_obj->type == TYPE_STRING
+      || type_obj->type == TYPE_BOOLEAN)) {
+    result->err = EVAL_TYPE_ERROR;
+    return;
+  }
+
+  switch (obj->type) {
+    case TYPE_INT:
+      obj->type = type_obj->type;
+      switch (type_obj->type) {
+        case TYPE_INT:
+          goto done;
+        case TYPE_FLOAT:
+          obj->floatval= (float) obj->intval;
+          goto done;
+        case TYPE_CHAR:
+          if (obj->intval < 0 || obj->intval > 255) {
+            result->err = VALUE_TOO_LARGE_FOR_CHAR;
+            goto done;
+          }
+          obj->charval= (char) obj->intval;
+          goto done;
+        case TYPE_STRING:
+          int_to_string(obj);
+          goto done;
+        case TYPE_BOOLEAN:
+          obj->intval = obj->intval ? 1 : 0;
+          goto done;
+        default:
+          result->err = EVAL_TYPE_ERROR;
+          goto done;
+      }
+      break;
+    case TYPE_FLOAT:
+      obj->type = type_obj->type;
+      switch (type_obj->type) {
+        case TYPE_INT:
+          if (obj->floatval > INT_MAX) { result->err = OVERFLOW_ERROR; goto done; }
+          if (obj->floatval < INT_MIN) { result->err = OVERFLOW_ERROR; goto done; }
+          obj->intval = (int) obj->floatval;
+          goto done;
+        case TYPE_FLOAT:
+          goto done;
+        case TYPE_CHAR:
+          result->err = EVAL_TYPE_ERROR;
+          goto done;
+        case TYPE_STRING:
+          float_to_string(obj);
+          goto done;
+        case TYPE_BOOLEAN:
+          obj->intval = obj->floatval ? 1 : 0;
+          goto done;
+        default:
+          result->err = EVAL_TYPE_ERROR;
+          goto done;
+      }
+      break;
+    case TYPE_STRING:
+      obj->type = type_obj->type;
+      switch (type_obj->type) {
+        case TYPE_INT:
+          result->err = string_to_int(obj);
+          goto done;
+        case TYPE_FLOAT:
+          result->err = string_to_float(obj);
+          goto done;
+        case TYPE_CHAR:
+          if (strlen(obj->stringval) > 1) {
+            result->err = EVAL_TYPE_ERROR;
+            goto done;
+          }
+          obj->charval = obj->stringval[0];
+          goto done;
+        case TYPE_STRING:
+          goto done;
+        case TYPE_BOOLEAN:
+          obj->intval = strlen(obj->stringval) > 0 ? 1 : 0;
+          goto done;
+        default:
+          result->err = EVAL_TYPE_ERROR;
+          goto done;
+      }
+      break;
+    case TYPE_CHAR:
+      obj->type = type_obj->type;
+      switch (type_obj->type) {
+        case TYPE_INT:
+          obj->intval = (int) obj->charval;
+          goto done;
+        case TYPE_FLOAT:
+          obj->floatval = (float) obj->charval;
+          goto done;
+        case TYPE_CHAR:
+          goto done;
+        case TYPE_STRING: {
+          char c = obj->charval;
+          obj->stringval = malloc(2);
+          snprintf(obj->stringval, 2, "%c", c);
+          goto done;
+        }
+        case TYPE_BOOLEAN:
+          obj->intval = obj->charval != 0 ? 1 : 0;
+          goto done;
+        default:
+          result->err = EVAL_TYPE_ERROR;
+          goto done;
+      }
+      break;
+    case TYPE_BOOLEAN:
+      obj->type = type_obj->type;
+      switch (type_obj->type) {
+        case TYPE_INT:
+          // No change for intval.
+          goto done;
+        case TYPE_FLOAT:
+          obj->floatval = (float) obj->intval;
+          goto done;
+        case TYPE_CHAR:
+          obj->charval = obj->intval ? 't' : 'f';
+          goto done;
+        case TYPE_STRING:
+          obj->stringval = obj->intval ? "true" : "false";
+          goto done;
+        case TYPE_BOOLEAN:
+          goto done;
+        default:
+          result->err = EVAL_TYPE_ERROR;
+          goto done;
+      }
+      break;
+    default:
+      result->err = EVAL_TYPE_ERROR;
+      break;
+  }
+
+done:
   result->obj = obj;
 }
 
@@ -363,6 +546,15 @@ eval_result_t *eval_expr(ast_expr_t *expr, env_t *env) {
     switch(expr->type) {
         case AST_EMPTY: {
             result->obj = no_obj();
+            break;
+        }
+        case AST_CAST: {
+            eval_result_t *r1 = eval_expr(expr->e1, env);
+            if ((result->err = r1->err) != NO_ERROR) goto error;
+            eval_result_t *r2 = eval_expr(expr->e2, env);
+            if ((result->err = r2->err) != NO_ERROR) goto error;
+            cast(r1->obj, r2->obj, result);
+            if (result->err != NO_ERROR) goto error;
             break;
         }
         case AST_ADD: {
