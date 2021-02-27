@@ -287,6 +287,75 @@ error:
       result->obj = undef_obj();
 }
 
+void eval_for_loop(ast_expr_t *expr, env_t *env, eval_result_t *result) {
+  char* index_name = ((ast_expr_t*) expr->e1)->stringval;
+
+  // int from.
+  if (((obj_t*)expr->e2)->type != AST_INT) {
+    printf("expected int ; got %d\n", ((obj_t*)expr->e2)->type);
+    result->err = TYPE_INT_REQUIRED;
+    goto error;
+  }
+  eval_result_t *start = eval_expr(expr->e2, env);
+  if ((result->err = start->err) != NO_ERROR) goto error;
+
+  // int to.
+  if (((obj_t*)expr->e3)->type != AST_INT) {
+    printf("expected int ; got %d\n", ((obj_t*)expr->e3)->type);
+    result->err = TYPE_INT_REQUIRED;
+    goto error;
+  }
+  eval_result_t *end = eval_expr(expr->e3, env);
+  if ((result->err = end->err) != NO_ERROR) goto error;
+
+  // Push a new scope and store the index variable.
+  // We will mutate this variable with each iteration through the loop.
+  push_scope(env);
+  obj_t *index_obj = int_obj(start->obj->intval);
+  put_env(env, index_name, index_obj);
+
+  int start_val = start->obj->intval;
+  int end_val = end->obj->intval;
+  if (start_val < 0 || end_val < 0) {
+    result->err = TYPE_POSITIVE_INT_REQUIRED;
+    goto error;
+  }
+  eval_result_t *r;
+
+  // These are both in the same mongo function because I don't want to have to call
+  // functions with more than four args.
+  if (start_val <= end_val) {
+    for (int i = start_val; i <= end_val; ++i) {
+      // Overflow?
+      if (i < 0) { result->err = OVERFLOW_ERROR; goto error; }
+      index_obj->intval = i;
+      r = eval_expr(expr->e4, env);
+      if ((result->err = r->err) != NO_ERROR) {
+        pop_scope(env);
+        goto error;
+      }
+    }
+  } else {
+    for (int i = start_val; i >= end_val; --i) {
+      // Overflow?
+      if (i < 0) { result->err = OVERFLOW_ERROR; goto error; }
+      index_obj->intval = i;
+      r = eval_expr(expr->e4, env);
+      if ((result->err = r->err) != NO_ERROR) {
+        pop_scope(env);
+        goto error;
+      }
+    }
+  }
+
+  pop_scope(env);
+  result->obj = r->obj;
+  return;
+
+error:
+  result->obj = undef_obj();
+}
+
 eval_result_t *eval_expr(ast_expr_t *expr, env_t *env) {
     eval_result_t *result = malloc(sizeof(eval_result_t));
     result->err = NO_ERROR;
@@ -458,36 +527,12 @@ eval_result_t *eval_expr(ast_expr_t *expr, env_t *env) {
           result->obj = nil_obj();
           break;
         }
-        case AST_FOR_LOOP: {
-          char* index_name = ((ast_expr_t*) expr->e1)->stringval;
-
-          eval_result_t *start = eval_expr(expr->e2, env);
-          if ((result->err = start->err) != NO_ERROR) goto error;
-
-          eval_result_t *end = eval_expr(expr->e3, env);
-          if ((result->err = end->err) != NO_ERROR) goto error;
-
-          // Hack hack
-          push_scope(env);
-          obj_t *index_obj = int_obj(start->obj->intval);
-          put_env(env, index_name, index_obj);
-          eval_result_t *r;
-          for (int i = start->obj->intval; i <= end->obj->intval; ++i) {
-            index_obj->intval = i;
-
-            r = eval_expr(expr->e4, env);
-            if ((result->err = r->err) != NO_ERROR) {
-              pop_scope(env);
-              goto error;
-            }
-          }
-          pop_scope(env);
-          result->obj = r->obj;
+        case AST_FOR_LOOP:
+          eval_for_loop(expr, env, result);
           break;
-        }
         default:
-            result->err = EVAL_UNHANDLED_OBJECT;
-            break;
+          result->err = EVAL_UNHANDLED_OBJECT;
+          break;
     }
 
 error:

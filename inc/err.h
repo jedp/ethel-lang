@@ -14,11 +14,14 @@ typedef enum {
   ENV_SYMBOL_UNDEFINED,
 
   TYPE_UNSUPPORTED,
+  TYPE_INT_REQUIRED,
+  TYPE_POSITIVE_INT_REQUIRED,
 
   EVAL_UNHANDLED_OBJECT,
   EVAL_TYPE_ERROR,
 
   DIVISION_BY_ZERO,
+  OVERFLOW_ERROR,
 
   ERR_MAX,
 
@@ -33,9 +36,12 @@ static const char* err_names[ERR_MAX] = {
   "Immutable symbol cannot be redefined",
   "Symbol undefined",
   "Type unsupported",
+  "Integer argument required",
+  "Positive integer argument required",
   "Evaluation error",
   "Types incompatible for operation",
   "Division by zero",
+  "Overflow error",
 };
 
 #endif
