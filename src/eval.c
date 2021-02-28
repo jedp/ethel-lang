@@ -101,7 +101,7 @@ void eval_string_expr(ast_expr_t *expr, eval_result_t *result) {
     return;
   }
   obj_t* obj = malloc(sizeof(obj_t));
-  char* stringval = malloc(sizeof(expr->stringval) + 1);
+  char* stringval = malloc(strlen(expr->stringval));
   strcpy(stringval, expr->stringval);
   obj->type = TYPE_STRING;
   obj->stringval = stringval;

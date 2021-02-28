@@ -5,7 +5,7 @@
 #include "../inc/token.h"
 #include "../inc/lexer.h"
 
-#define MAX_WORD 16
+#define MAX_WORD 80
 char word_buf[MAX_WORD];
 char next_word_buf[MAX_WORD];
 
