@@ -67,6 +67,7 @@ static const char *ast_node_names[] = {
 typedef enum {
   AST_CALL_UNDEFINED = 0,
   AST_CALL_PRINT,
+  AST_CALL_INPUT,
   AST_CALL_ABS,
   AST_CALL_SIN,
   AST_CALL_COS,

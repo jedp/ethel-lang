@@ -25,6 +25,7 @@ typedef enum {
   OVERFLOW_ERROR,
   UNDERFLOW_ERROR,
   VALUE_TOO_LARGE_FOR_CHAR,
+  INPUT_STREAM_ERROR,
 
   ERR_MAX,
 
@@ -48,6 +49,7 @@ static const char* err_names[ERR_MAX] = {
   "Overflow error",
   "Underflow error",
   "Char value too large",
+  "Input stream error",
 };
 
 #endif

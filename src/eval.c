@@ -11,6 +11,7 @@
 #include "../inc/ast.h"
 #include "../inc/env.h"
 
+size_t MAX_INPUT_LINE = 80;
 eval_result_t *eval_expr(ast_expr_t *expr, env_t *env);
 
 void eval_nil_expr(ast_expr_t *expr, eval_result_t *result) {
@@ -119,7 +120,6 @@ void cast(obj_t *obj, obj_t *type_obj, eval_result_t *result) {
 
   switch (obj->type) {
     case TYPE_INT:
-      obj->type = type_obj->type;
       switch (type_obj->type) {
         case TYPE_INT:
           goto done;
@@ -145,7 +145,6 @@ void cast(obj_t *obj, obj_t *type_obj, eval_result_t *result) {
       }
       break;
     case TYPE_FLOAT:
-      obj->type = type_obj->type;
       switch (type_obj->type) {
         case TYPE_INT:
           if (obj->floatval > INT_MAX) { result->err = OVERFLOW_ERROR; goto done; }
@@ -195,7 +194,6 @@ void cast(obj_t *obj, obj_t *type_obj, eval_result_t *result) {
       }
       break;
     case TYPE_CHAR:
-      obj->type = type_obj->type;
       switch (type_obj->type) {
         case TYPE_INT:
           obj->intval = (int) obj->charval;
@@ -220,7 +218,6 @@ void cast(obj_t *obj, obj_t *type_obj, eval_result_t *result) {
       }
       break;
     case TYPE_BOOLEAN:
-      obj->type = type_obj->type;
       switch (type_obj->type) {
         case TYPE_INT:
           // No change for intval.
@@ -247,6 +244,7 @@ void cast(obj_t *obj, obj_t *type_obj, eval_result_t *result) {
   }
 
 done:
+  if (result->err == NO_ERROR) obj->type = type_obj->type;
   result->obj = obj;
 }
 
@@ -408,6 +406,55 @@ void boolean_or(obj_t *a, obj_t *b, eval_result_t *result) {
   result->obj = boolean_obj(truthy(a) || truthy(b)); 
 }
 
+int print_args(ast_expr_list_t *args, eval_result_t *result, env_t *env) {
+  int printed = 0;
+  ast_expr_list_t *node = (ast_expr_list_t*) args;
+  if (args->e->type != AST_EMPTY) {
+    while(node != NULL) {
+      eval_result_t *r = eval_expr(node->e, env);
+
+      if (r->err != NO_ERROR) {
+        result->err = r->err;
+        result->obj = undef_obj();
+        return printed;
+      }
+
+      // TODO: probably want to put the whole string result in result->obj.
+      // TODO: it needs tests, one way or the other
+      printed++;
+      switch (r->obj->type) {
+        case TYPE_INT: printf("%d ", r->obj->intval); break;
+        case TYPE_FLOAT: printf("%f ", r->obj->floatval); break;
+        case TYPE_CHAR: printf("%c ", r->obj->charval); break;
+        case TYPE_STRING: printf("%s ", r->obj->stringval); break;
+        case TYPE_BOOLEAN: printf("%s ", r->obj->intval ? "true" : "false"); break;
+        case TYPE_NIL: printf("Nil "); break;
+        default: printf("?? "); break;
+      }
+      node = node->next;
+    }
+  }
+  result->obj = no_obj();
+  return printed;
+}
+
+void println_args(ast_expr_list_t *args, eval_result_t *result, env_t *env) {
+  print_args(args, result, env);
+  printf("\n");
+}
+
+void readln_input(eval_result_t *result) {
+  char* s = malloc(MAX_INPUT_LINE);
+  if (getline(&s, &MAX_INPUT_LINE, stdin) == -1) {
+    result->err = INPUT_STREAM_ERROR;
+  }
+  // Trim trailing newline.
+  int end = strlen(s) - 1;
+  while (end > 0 && s[end] == '\n') s[end--] = 0;
+
+  result->obj = string_obj(s);
+}
+
 void resolve_callable_expr(ast_expr_t *expr, env_t *env, eval_result_t *result) {
   if (expr->type != AST_RESERVED_CALLABLE) {
     result->err = EVAL_TYPE_ERROR;
@@ -418,34 +465,14 @@ void resolve_callable_expr(ast_expr_t *expr, env_t *env, eval_result_t *result) 
   ast_expr_list_t *args = expr->e1;
 
   switch (expr->intval) {
-    case AST_CALL_PRINT: {
-      ast_expr_list_t *node = (ast_expr_list_t*) args;
-      if (node->e->type != AST_EMPTY) {
-        while(node != NULL) {
-          eval_result_t *r = eval_expr(node->e, env);
-
-          if (r->err != NO_ERROR) {
-            result->err = r->err;
-            result->obj = undef_obj();
-            return;
-          }
-
-          // TODO: probably want to put the whole string result in result->obj.
-          // TODO: it needs tests, one way or the other
-          switch (r->obj->type) {
-            case TYPE_INT: printf("%d ", r->obj->intval); break;
-            case TYPE_FLOAT: printf("%f ", r->obj->floatval); break;
-            case TYPE_CHAR: printf("%c ", r->obj->charval); break;
-            case TYPE_STRING: printf("%s ", r->obj->stringval); break;
-            case TYPE_BOOLEAN: printf("%s ", r->obj->intval ? "true" : "false"); break;
-            case TYPE_NIL: printf("Nil "); break;
-            default: printf("?? "); break;
-          }
-          node = node->next;
-        }
-        printf("\n");
+    case AST_CALL_PRINT:
+      println_args(args, result, env);
+      break;
+    case AST_CALL_INPUT: {
+      if (print_args(args, result, env) == 0) {
+        printf("? ");
       }
-      result->obj = no_obj();
+      readln_input(result);
       break;
     }
     case AST_CALL_ABS:
