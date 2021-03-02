@@ -1,7 +1,10 @@
 #ifndef __ERR_H
 #define __ERR_H
 
-typedef enum {
+#include <inttypes.h>
+
+typedef uint8_t error_t;
+enum error_enum {
   NO_ERROR = 0,
 
   LEX_ERROR,
@@ -26,10 +29,10 @@ typedef enum {
   UNDERFLOW_ERROR,
   VALUE_TOO_LARGE_FOR_CHAR,
   INPUT_STREAM_ERROR,
+  INPUT_TOO_LONG,
 
   ERR_MAX,
-
-} error_t;
+};
 
 static const char* err_names[ERR_MAX] = {
   "Ok",
@@ -50,6 +53,7 @@ static const char* err_names[ERR_MAX] = {
   "Underflow error",
   "Char value too large",
   "Input stream error",
+  "Input too long",
 };
 
 #endif

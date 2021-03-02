@@ -1,4 +1,3 @@
-#include <assert.h>
 #include <stdbool.h>
 #include <stdlib.h>
 #include <string.h>
@@ -58,16 +57,16 @@ void eval_char_expr(ast_expr_t *expr, eval_result_t *result) {
 
 void int_to_string(obj_t *obj) {
   int i = obj->intval;
-  int len =  snprintf(NULL, 0, "%d", i);
-  obj->stringval = malloc(len + 1);
-  snprintf(obj->stringval, len + 1, "%d", i);
+  // Longest thing we can print is -2147483648, which is 11 characters + 1 for the null.
+  obj->stringval = malloc(12);
+  snprintf(obj->stringval, 12, "%d", i);
   obj->type = TYPE_STRING;
 }
 
 void float_to_string(obj_t *obj) {
   float f = obj->floatval;
-  int len =  snprintf(NULL, 0, "%f", f);
-  obj->stringval = malloc(len + 1);
+  int len = snprintf(NULL, 0, "%f", f);
+  obj->stringval = malloc((uint64_t) len + 1);
   snprintf(obj->stringval, len + 1, "%f", f);
   obj->type = TYPE_STRING;
 }
@@ -160,7 +159,7 @@ void cast(obj_t *obj, obj_t *type_obj, eval_result_t *result) {
           float_to_string(obj);
           goto done;
         case TYPE_BOOLEAN:
-          obj->intval = obj->floatval ? 1 : 0;
+          obj->intval = (obj->floatval != 0.0f) ? (int) 1 : (int) 0;
           goto done;
         default:
           result->err = EVAL_TYPE_ERROR;
@@ -316,7 +315,7 @@ void divide(obj_t *a, obj_t *b, eval_result_t *result) {
   }
 
   if ((b->type == TYPE_INT && b->intval == 0) ||
-      (b->type == TYPE_FLOAT && b->floatval == 0.0)) {
+      (b->type == TYPE_FLOAT && b->floatval == 0.0f)) {
     result->err = DIVISION_BY_ZERO;
     return;
   }
@@ -344,7 +343,7 @@ void modulus(obj_t *a, obj_t *b, eval_result_t *result) {
   }
 
   if ((b->type == TYPE_INT && b->intval == 0) ||
-      (b->type == TYPE_FLOAT && b->floatval == 0.0)) {
+      (b->type == TYPE_FLOAT && b->floatval == 0.0f)) {
     result->err = DIVISION_BY_ZERO;
     return;
   }
@@ -352,11 +351,11 @@ void modulus(obj_t *a, obj_t *b, eval_result_t *result) {
   if (a->type == TYPE_INT && b->type == TYPE_INT) {
     result->obj = int_obj(a->intval % b->intval);
   } else if (a->type == TYPE_INT && b->type == TYPE_FLOAT) {
-    result->obj = float_obj(fmod(a->intval, b->floatval));
+    result->obj = float_obj((float) fmod(a->intval, (double) b->floatval));
   } else if (a->type == TYPE_FLOAT && b->type == TYPE_INT) {
-    result->obj = float_obj(fmod(a->floatval, b->intval));
+    result->obj = float_obj((float) fmod((double) a->floatval, b->intval));
   } else if (a->type == TYPE_FLOAT && b->type == TYPE_FLOAT) {
-    result->obj = float_obj(fmod(a->floatval, b->floatval));
+    result->obj = float_obj((float) fmod((double) a->floatval, (double) b->floatval));
   } else {
     result->err = EVAL_TYPE_ERROR;
   }
@@ -424,7 +423,7 @@ int print_args(ast_expr_list_t *args, eval_result_t *result, env_t *env) {
       printed++;
       switch (r->obj->type) {
         case TYPE_INT: printf("%d ", r->obj->intval); break;
-        case TYPE_FLOAT: printf("%f ", r->obj->floatval); break;
+        case TYPE_FLOAT: printf("%f ", (double) r->obj->floatval); break;
         case TYPE_CHAR: printf("%c ", r->obj->charval); break;
         case TYPE_STRING: printf("%s ", r->obj->stringval); break;
         case TYPE_BOOLEAN: printf("%s ", r->obj->intval ? "true" : "false"); break;
@@ -449,7 +448,8 @@ void readln_input(eval_result_t *result) {
     result->err = INPUT_STREAM_ERROR;
   }
   // Trim trailing newline.
-  int end = strlen(s) - 1;
+  int len = (int) strlen(s);
+  uint32_t end = len > 0 ? (uint32_t) (len - 1) : 0;
   while (end > 0 && s[end] == '\n') s[end--] = 0;
 
   result->obj = string_obj(s);
@@ -479,7 +479,7 @@ void resolve_callable_expr(ast_expr_t *expr, env_t *env, eval_result_t *result) 
       if (args->e->type == AST_INT) {
         result->obj = int_obj(args->e->intval < 0 ? -1 * args->e->intval : args->e->intval);
       } else if (args->e->type == AST_INT)  {
-        result->obj = int_obj(args->e->floatval < 0 ? -1 * args->e->floatval : args->e->floatval);
+        result->obj = int_obj(args->e->floatval < 0 ? -1 * (int) args->e->floatval : (int) args->e->floatval);
       } else {
         printf("What is this slish?\n");
         goto error;
@@ -706,7 +706,7 @@ eval_result_t *eval_expr(ast_expr_t *expr, env_t *env) {
             // Eval the object now and save the result as a primitive value.
             eval_result_t *r = eval_expr(expr->e2, env);
             if ((result->err = r->err) != NO_ERROR) goto error;
-            int error = put_env(env, name, r->obj);
+            error_t error = put_env(env, name, r->obj);
             result->obj = r->obj;
             // Store the obj in the result value for the caller.
             if (error != NO_ERROR) {

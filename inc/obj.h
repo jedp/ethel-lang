@@ -4,7 +4,8 @@
 #include <inttypes.h>
 #include <stdbool.h>
 
-typedef enum {
+typedef uint8_t obj_type_t;
+enum obj_type_enum {
   TYPE_UNKNOWN = 0,
   TYPE_NOTHING,
   TYPE_UNDEF,
@@ -16,7 +17,7 @@ typedef enum {
   TYPE_BOOLEAN,
   TYPE_IDENT,
   TYPE_MAX,
-} obj_type_t;
+};
 
 typedef struct Obj {
   uint8_t type;
@@ -42,8 +43,8 @@ static const char* obj_type_names[TYPE_MAX] = {
 };
 
 obj_t *undef_obj();
-obj_t *no_obj();
 obj_t *nil_obj();
+obj_t *no_obj();
 obj_t *int_obj(int);
 obj_t *float_obj(float);
 obj_t *string_obj(char*);

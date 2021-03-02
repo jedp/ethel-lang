@@ -35,7 +35,7 @@ int main(int argc, char** argv) {
           printf("%d\n", obj->intval);
           break;
         case TYPE_FLOAT:
-          printf("%f\n", obj->floatval);
+          printf("%f\n", (double) obj->floatval);
           break;
         case TYPE_STRING:
           printf("%s\n", obj->stringval);

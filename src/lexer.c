@@ -39,7 +39,7 @@ static void consume_ws(lexer_t *lexer) {
 static token_t *lexer_error(lexer_t *lexer) {
   lexer->next_token.tag = TAG_EOF;
   // The error was at the previous pos.
-  lexer->err = lexer->pos > 0 ? lexer->pos - 1 : 0;
+  lexer->err = lexer->pos > 0 ? (int) lexer->pos - 1 : 0;
   return &lexer->next_token;
 }
 
@@ -84,7 +84,7 @@ static token_t *lex_num(lexer_t *lexer) {
     do {
       f = f * 10 + (lexer->nextch - '0');
       // What a mess.
-      frac *= 0.1;
+      frac *= 0.1F;
       readch(lexer);
     } while (lexer->nextch >'0' && lexer->nextch <= '9');
   }
@@ -252,7 +252,7 @@ void advance(lexer_t *lexer) {
 bool eat(lexer_t *lexer, tag_t t) {
   if (lexer->token.tag != t) {
     printf("Syntax error. Expected to eat %s but ate %s\n", tag_names[t], tag_names[lexer->token.tag]);
-    lexer->err = lexer->pos;
+    lexer->err = (int) lexer->pos;
     return false;
   }
 

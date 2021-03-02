@@ -269,7 +269,7 @@ ast_expr_t *parse_atom(lexer_t *lexer) {
     case TAG_LN: 
     case TAG_LOG:
     case TAG_PRINT: {
-      int callable_type = ast_callable_type_for_tag(lexer->token.tag);
+      ast_reserved_callable_type_t callable_type = ast_callable_type_for_tag(lexer->token.tag);
       advance(lexer);
       if (lexer->token.tag == TAG_LPAREN) {
         eat(lexer, TAG_LPAREN);
@@ -285,7 +285,7 @@ ast_expr_t *parse_atom(lexer_t *lexer) {
       return ast_ident(lexer->token.string);
     }
     case TAG_INPUT: {
-      int callable_type = ast_callable_type_for_tag(lexer->token.tag);
+      ast_reserved_callable_type_t callable_type = ast_callable_type_for_tag(lexer->token.tag);
       advance(lexer);
       if (lexer->token.tag == TAG_LPAREN) {
         eat(lexer, TAG_LPAREN);
@@ -305,13 +305,19 @@ ast_expr_t *parse_atom(lexer_t *lexer) {
 
 error:
   printf("Expected int, float, or paren; got %s.\n", tag_names[lexer->token.tag]);
-  lexer->err = lexer->pos;
+  lexer->err = (int) lexer->pos;
   return ast_empty();
 }
 
 ast_expr_t *parse_program(char *input) {
   lexer_t lexer;
-  lexer_init(&lexer, input, strlen(input));
+
+  uint64_t len = strlen(input);
+  if (len > 0xFF) {
+    printf("Input too long!\n");
+    return ast_empty();
+  }
+  lexer_init(&lexer, input, (uint8_t) len);
 
   ast_expr_t *ast = parse_start(&lexer);
   if (lexer.err > -1) {

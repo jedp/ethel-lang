@@ -15,7 +15,8 @@ TESTOBJS = test/unity/unity.o \
 					 test/test_env.o \
 					 test/test.o
 
-CFLAGS = -std=gnu11 -Wall -g -O0 -I inc
+CFLAGS = -std=gnu11 -Wall -g3 -Os -I inc
+EXTRA_CFLAGS = -Wshadow -Wdouble-promotion -Wconversion -Wformat -Wno-undef -fno-common
 TESTFLAGS = -I test
 LDFLAGS = -lm -lreadline -ldl
 
@@ -28,7 +29,7 @@ debug: all
 	$(CC) $(CFLAGS) -c -o $@ $<
 
 repl: $(REPLOBJS) $(COMPOBJS)
-	$(CC) $(CFLAGS) -o $@ $^ $(LDFLAGS)
+	$(CC) $(CFLAGS) $(EXTRA_CFLAGS) -o $@ $^ $(LDFLAGS)
 
 test: $(COMPOBJS) $(TESTOBJS)
 	$(CC) $(CFLAGS) $(TESTFLAGS) -o $@/test $^ $(LDFLAGS)

@@ -3,7 +3,8 @@
 
 #include <inttypes.h>
 
-typedef enum {
+typedef uint8_t tag_t;
+enum tag_enum {
   TAG_EOF = 0,
 
   TAG_COMMENT,
@@ -73,7 +74,7 @@ typedef enum {
   TAG_EXP,
   TAG_LN,
   TAG_LOG,
-} tag_t;
+};
 
 static const char* tag_names[] = {
   "EOF",

@@ -86,7 +86,7 @@ ast_expr_t *ast_ident(char* name) {
 
 ast_expr_t *ast_reserved_callable(ast_reserved_callable_type_t type, ast_expr_list_t *es) {
   ast_expr_t *node = ast_node(AST_RESERVED_CALLABLE);
-  node->intval = type;
+  node->intval = (int) type;
   node->e1 = es;
   return node;
 }
@@ -141,7 +141,7 @@ void _pretty_print(ast_expr_t *expr, int indent) {
       printf(" %d", expr->intval);
       break;
     case AST_FLOAT:
-      printf(" %f", expr->floatval);
+      printf(" %f", (double) expr->floatval);
       break;
     case AST_ADD:
     case AST_SUB:

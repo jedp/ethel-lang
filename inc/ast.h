@@ -4,7 +4,8 @@
 #include <inttypes.h>
 #include <stdbool.h>
 
-typedef enum {
+typedef uint8_t ast_type_t;
+enum ast_type_enum {
   AST_EMPTY = 0,
   AST_ADD,
   AST_SUB,
@@ -32,7 +33,7 @@ typedef enum {
   AST_IF_THEN,
   AST_IF_THEN_ELSE,
   AST_FOR_LOOP,
-} ast_type_t;
+};
 
 static const char *ast_node_names[] = {
   "<EMPTY>",
@@ -64,7 +65,8 @@ static const char *ast_node_names[] = {
   "FOR-LOOP",
 };
 
-typedef enum {
+typedef uint8_t ast_reserved_callable_type_t;
+enum ast_call_type_enum {
   AST_CALL_UNDEFINED = 0,
   AST_CALL_PRINT,
   AST_CALL_INPUT,
@@ -76,7 +78,7 @@ typedef enum {
   AST_CALL_EXP,
   AST_CALL_LN,
   AST_CALL_LOG,
-} ast_reserved_callable_type_t;
+};
 
 typedef struct Expr {
   uint8_t type;
