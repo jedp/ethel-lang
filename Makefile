@@ -20,7 +20,7 @@ EXTRA_CFLAGS = -Wshadow -Wdouble-promotion -Wconversion -Wformat -Wno-undef -fno
 TESTFLAGS = -I test
 LDFLAGS = -lm -lreadline -ldl
 
-all: repl
+all: test repl
 
 debug: CFLAGS += -DDEBUG
 debug: all
@@ -38,7 +38,7 @@ test: $(COMPOBJS) $(TESTOBJS)
 wc:
 	find . -name "*.[ch]" | xargs wc -l | sort -n
 
-.PHONY: all clean debug
+.PHONY: all clean test debug
 clean:
 	rm -f $(COMPOBJS) $(REPLOBJS) $(TESTOBJS)
 	rm -f repl test/test
