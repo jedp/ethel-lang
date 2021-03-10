@@ -5,7 +5,7 @@
 #include "../inc/token.h"
 #include "../inc/lexer.h"
 
-#define MAX_WORD 80
+#define MAX_WORD 256
 char word_buf[MAX_WORD];
 char next_word_buf[MAX_WORD];
 
@@ -26,7 +26,7 @@ static void consume_ws(lexer_t *lexer) {
     case ' ':
     case '\t':
     case '\r':
-    case '\n':
+      // Do not eat EOL.
       /* continue */
       break;
 
@@ -38,8 +38,9 @@ static void consume_ws(lexer_t *lexer) {
 
 static token_t *lexer_error(lexer_t *lexer) {
   lexer->next_token.tag = TAG_EOF;
+  lexer->err = LEX_UNEXPECTED_TOKEN;
   // The error was at the previous pos.
-  lexer->err = lexer->pos > 0 ? (int) lexer->pos - 1 : 0;
+  lexer->err_pos = lexer->pos > 0 ? lexer->pos - 1 : 0;
   return &lexer->next_token;
 }
 
@@ -48,15 +49,20 @@ token_t *lex_eof(lexer_t *lexer) {
   return &lexer->next_token;
 }
 
+token_t *lex_eol(lexer_t *lexer) {
+  lexer->next_token.tag = TAG_EOL;
+  return &lexer->next_token;
+}
+
 /**
- * Consume all text up to the end of the line; return EOF.
+ * Consume all text up to the end of the line; return EOL.
  */
 static token_t *lex_comment(lexer_t *lexer) {
-  while (lexer->nextch != 0) {
+  while (lexer->nextch != 0 && lexer->nextch != '\n') {
     readch(lexer);
   }
 
-  return lex_eof(lexer);
+  return lex_eol(lexer);
 }
 
 /**
@@ -179,6 +185,8 @@ token_t *get_token(lexer_t *lexer) {
 
   if (ch == 0) return lex_eof(lexer);
 
+  if (ch == '\n') return lex_eol(lexer);
+
   if (ch == '.' || (ch >= '0' && ch <= '9')) return lex_num(lexer);
 
   if ((ch >= 'a' && ch <= 'z') ||
@@ -251,8 +259,8 @@ void advance(lexer_t *lexer) {
 
 bool eat(lexer_t *lexer, tag_t t) {
   if (lexer->token.tag != t) {
-    printf("Syntax error. Expected to eat %s but ate %s\n", tag_names[t], tag_names[lexer->token.tag]);
-    lexer->err = (int) lexer->pos;
+    lexer->err_pos = (int) lexer->pos;
+    lexer->err = LEX_ERROR;
     return false;
   }
 
@@ -260,9 +268,11 @@ bool eat(lexer_t *lexer, tag_t t) {
   return true;
 }
 
-void lexer_init(lexer_t *lexer, const char input[], const uint8_t input_size) {
+void lexer_init(lexer_t *lexer, const char input[], const uint32_t input_size) {
   lexer->pos = 0;
-  lexer->err = -1;
+  lexer->err_pos = 0;
+  lexer->depth = 1;
+  lexer->err = NO_ERROR;
 
   memset(next_word_buf, 0, MAX_WORD);
   memset(word_buf, 0, MAX_WORD);

@@ -7,8 +7,9 @@
 #include "env.h"
 
 typedef struct Result {
-    uint8_t err;
-    struct Obj *obj;
+  uint8_t depth;
+  uint8_t err;
+  struct Obj *obj;
 } eval_result_t;
 
 eval_result_t *eval(env_t *env, char* input);

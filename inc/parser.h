@@ -1,6 +1,7 @@
 #ifndef __PARSER_H
 #define __PARSER_H
 
+#include "err.h"
 #include "lexer.h"
 #include "ast.h"
 
@@ -24,7 +25,13 @@ typedef enum {
   ASSOC_RIGHT,
 } assoc_t;
 
-ast_expr_t *parse_program(char* input);
+typedef struct {
+  uint32_t pos;
+  uint8_t depth;
+  uint8_t err;
+} parse_result_t;
+
+void parse_program(char* input, ast_expr_t *ast, parse_result_t *parse_result);
 
 #endif
 

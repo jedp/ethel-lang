@@ -2,6 +2,7 @@
 #include <string.h>
 #include "unity/unity.h"
 #include "test_lexer.h"
+#include "../inc/err.h"
 #include "../inc/lexer.h"
 
 void test_lex_error(void) {
@@ -13,7 +14,7 @@ void test_lex_error(void) {
   advance(&lexer); // eat "42"
 
   TEST_ASSERT_EQUAL(TAG_EOF, lexer.token.tag);
-  TEST_ASSERT_EQUAL(6, lexer.err);
+  TEST_ASSERT_EQUAL(LEX_UNEXPECTED_TOKEN, lexer.err);
 }
 
 void test_lex_word(void) {
@@ -33,7 +34,7 @@ void test_lex_word(void) {
   };
 
   for (int i = 0; i < sizeof(expected) / sizeof(expected[0]); i++) {
-    TEST_ASSERT_EQUAL(-1, lexer.err);
+    TEST_ASSERT_EQUAL(NO_ERROR, lexer.err);
     TEST_ASSERT_EQUAL(expected[i].tag, lexer.token.tag);
     if (lexer.token.tag == TAG_INT) {
       TEST_ASSERT_EQUAL(expected[i].intval, lexer.token.intval);
@@ -119,7 +120,7 @@ void test_lex_arithmetic(void) {
   };
 
   for (int i = 0; i < sizeof(expected) / sizeof(expected[0]); i++) {
-    TEST_ASSERT_EQUAL(-1, lexer.err);
+    TEST_ASSERT_EQUAL(NO_ERROR, lexer.err);
     TEST_ASSERT_EQUAL(expected[i], lexer.token.tag);
     advance(&lexer);
   }
@@ -139,7 +140,7 @@ void test_lex_arithmetic_no_spaces(void) {
   };
 
   for (int i = 0; i < sizeof(expected) / sizeof(expected[0]); i++) {
-    TEST_ASSERT_EQUAL(-1, lexer.err);
+    TEST_ASSERT_EQUAL(NO_ERROR, lexer.err);
     TEST_ASSERT_EQUAL(expected[i], lexer.token.tag);
     advance(&lexer);
   }
@@ -158,7 +159,7 @@ void test_lex_inequality(void) {
   };
 
   for (int i = 0; i < sizeof(expected) / sizeof(expected[0]); i++) {
-    TEST_ASSERT_EQUAL(-1, lexer.err);
+    TEST_ASSERT_EQUAL(NO_ERROR, lexer.err);
     TEST_ASSERT_EQUAL(expected[i], lexer.token.tag);
     advance(&lexer);
   }
@@ -177,7 +178,7 @@ void test_lex_inequality_no_spaces(void) {
   };
 
   for (int i = 0; i < sizeof(expected) / sizeof(expected[0]); i++) {
-    TEST_ASSERT_EQUAL(-1, lexer.err);
+    TEST_ASSERT_EQUAL(NO_ERROR, lexer.err);
     TEST_ASSERT_EQUAL(expected[i], lexer.token.tag);
     advance(&lexer);
   }
@@ -197,7 +198,7 @@ void test_lex_inequality_nested_expressions(void) {
   };
 
   for (int i = 0; i < sizeof(expected) / sizeof(expected[0]); i++) {
-    TEST_ASSERT_EQUAL(-1, lexer.err);
+    TEST_ASSERT_EQUAL(NO_ERROR, lexer.err);
     TEST_ASSERT_EQUAL(expected[i], lexer.token.tag);
     advance(&lexer);
   }
@@ -216,7 +217,7 @@ void test_lex_parens(void) {
   };
 
   for (int i = 0; i < sizeof(expected) / sizeof(expected[0]); i++) {
-    TEST_ASSERT_EQUAL(-1, lexer.err);
+    TEST_ASSERT_EQUAL(NO_ERROR, lexer.err);
     TEST_ASSERT_EQUAL(expected[i], lexer.token.tag);
     advance(&lexer);
   }
@@ -235,7 +236,7 @@ void test_lex_parens_no_spaces(void) {
   };
 
   for (int i = 0; i < sizeof(expected) / sizeof(expected[0]); i++) {
-    TEST_ASSERT_EQUAL(-1, lexer.err);
+    TEST_ASSERT_EQUAL(NO_ERROR, lexer.err);
     TEST_ASSERT_EQUAL(expected[i], lexer.token.tag);
     advance(&lexer);
   }
@@ -248,7 +249,7 @@ void test_lex_assign(void) {
 
   int expected[] = { TAG_IDENT, TAG_ASSIGN, TAG_INT };
   for (int i = 0; i < sizeof(expected) / sizeof(expected[0]); i++) {
-    TEST_ASSERT_EQUAL(-1, lexer.err);
+    TEST_ASSERT_EQUAL(NO_ERROR, lexer.err);
     TEST_ASSERT_EQUAL(expected[i], lexer.token.tag);
     advance(&lexer);
   }
@@ -261,10 +262,28 @@ void test_lex_line_with_comment(void) {
 
   int expected[] = { TAG_IDENT, TAG_ASSIGN, TAG_INT };
   for (int i = 0; i < sizeof(expected) / sizeof(expected[0]); i++) {
-    TEST_ASSERT_EQUAL(-1, lexer.err);
+    TEST_ASSERT_EQUAL(NO_ERROR, lexer.err);
     TEST_ASSERT_EQUAL(expected[i], lexer.token.tag);
     advance(&lexer);
   }
+}
+
+void test_lex_only_whitespace_input(void) {
+  char *expr = "  ";
+  lexer_t lexer;
+  lexer_init(&lexer, expr, strlen(expr));
+
+  TEST_ASSERT_EQUAL(NO_ERROR, lexer.err);
+  TEST_ASSERT_EQUAL(TAG_EOF, lexer.token.tag);
+}
+
+void test_lex_no_input(void) {
+  char *expr = "";
+  lexer_t lexer;
+  lexer_init(&lexer, expr, strlen(expr));
+
+  TEST_ASSERT_EQUAL(NO_ERROR, lexer.err);
+  TEST_ASSERT_EQUAL(TAG_EOF, lexer.token.tag);
 }
 
 void test_lex_comment_only(void) {
@@ -272,8 +291,26 @@ void test_lex_comment_only(void) {
   lexer_t lexer;
   lexer_init(&lexer, expr, strlen(expr));
 
-  TEST_ASSERT_EQUAL(-1, lexer.err);
-  TEST_ASSERT_EQUAL(TAG_EOF, lexer.token.tag);
+  TEST_ASSERT_EQUAL(NO_ERROR, lexer.err);
+  // TODO not sure about this
+  TEST_ASSERT_EQUAL(TAG_EOL, lexer.token.tag);
+}
+
+void test_lex_begin_end(void) {
+  char *expr = "for i in 1 to 10 do begin   \n  print(i) \n  end";
+  lexer_t lexer;
+  lexer_init(&lexer, expr, strlen(expr));
+
+  int expected[] = { 
+    TAG_FOR, TAG_IDENT, TAG_IN, TAG_INT, TAG_TO, TAG_INT, TAG_DO, TAG_BEGIN, TAG_EOL,
+    TAG_PRINT, TAG_LPAREN, TAG_IDENT, TAG_RPAREN, TAG_EOL,
+    TAG_END, TAG_EOF
+  };
+  for (int i = 0; i < sizeof(expected) / sizeof(expected[0]); i++) {
+    TEST_ASSERT_EQUAL(NO_ERROR, lexer.err);
+    TEST_ASSERT_EQUAL(expected[i], lexer.token.tag);
+    advance(&lexer);
+  }
 }
 
 void test_lex_all_tokens(void) {
@@ -334,7 +371,10 @@ void test_lexer(void) {
   RUN_TEST(test_lex_parens_no_spaces);
   RUN_TEST(test_lex_assign);
   RUN_TEST(test_lex_line_with_comment);
+  RUN_TEST(test_lex_no_input);
+  RUN_TEST(test_lex_only_whitespace_input);
   RUN_TEST(test_lex_comment_only);
+  RUN_TEST(test_lex_begin_end);
   RUN_TEST(test_lex_all_tokens);
 }
 

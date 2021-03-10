@@ -66,7 +66,7 @@ void int_to_string(obj_t *obj) {
 void float_to_string(obj_t *obj) {
   float f = obj->floatval;
   int len = snprintf(NULL, 0, "%f", f);
-  obj->stringval = malloc((uint64_t) len + 1);
+  obj->stringval = malloc(len + 1);
   snprintf(obj->stringval, len + 1, "%f", f);
   obj->type = TYPE_STRING;
 }
@@ -695,6 +695,23 @@ eval_result_t *eval_expr(ast_expr_t *expr, env_t *env) {
             result->obj = obj;
             break;
         }
+        case AST_BLOCK: {
+            ast_expr_list_t *root = expr->e1;
+            push_scope(env);
+            while (root != NULL) {
+              eval_result_t *r = eval_expr(root->e, env);
+              if ((result->err = r->err) != NO_ERROR) {
+                pop_scope(env);
+                goto error;
+              }
+
+              // The last object in the block is its value.
+              result->obj = r->obj;
+              root = root->next;
+            }
+            pop_scope(env);
+            break;
+        }
         case AST_RESERVED_CALLABLE: {
           resolve_callable_expr(expr, env, result);
           if (result->err != NO_ERROR) goto error;
@@ -759,7 +776,18 @@ error:
 }
 
 eval_result_t *eval(env_t *env, char *input) {
-  ast_expr_t *ast = parse_program(input);
+  ast_expr_t *ast = ast_empty();
+  parse_result_t *parse_result = malloc(sizeof(parse_result_t));
+  parse_program(input, ast, parse_result);
+
+  eval_result_t *r = malloc(sizeof(eval_result_t));
+  r->err = parse_result->err;
+  r->depth = parse_result->depth;
+
+  if (parse_result->err != NO_ERROR) {
+    r->obj = no_obj();
+    return r;
+  }
 
 #ifdef DEBUG
     pretty_print(ast);

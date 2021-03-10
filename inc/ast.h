@@ -29,6 +29,7 @@ enum ast_type_enum {
   AST_ASSIGN,
   AST_NEGATE,
   AST_IDENT,
+  AST_BLOCK,
   AST_RESERVED_CALLABLE,
   AST_IF_THEN,
   AST_IF_THEN_ELSE,
@@ -59,6 +60,7 @@ static const char *ast_node_names[] = {
   "ASSIGN",
   "NEGATE",
   "IDENT",
+  "BLOCK",
   "RESERVED-CALLABLE",
   "IF-THEN",
   "IF-THEN-ELSE",
@@ -110,6 +112,7 @@ ast_expr_t *ast_string(char* s);
 ast_expr_t *ast_boolean(bool t);
 ast_expr_t *ast_type(ast_type_t type);
 ast_expr_t *ast_ident(char* name);
+ast_expr_t *ast_block(ast_expr_list_t *es);
 ast_expr_t *ast_reserved_callable(ast_reserved_callable_type_t type, ast_expr_list_t *es);
 ast_expr_t *ast_assign(ast_expr_t *ident, ast_expr_t *value);
 ast_expr_t *ast_if_then(ast_expr_t *if_clause, ast_expr_t *then_clause);

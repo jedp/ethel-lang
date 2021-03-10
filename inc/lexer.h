@@ -3,20 +3,23 @@
 
 #include <inttypes.h>
 #include <stdbool.h>
+#include "err.h"
 #include "token.h"
 
 #define LEXER_BUF_SIZE 128
 
 typedef struct {
   uint32_t pos;
-  int err;
+  uint32_t err_pos;
+  uint8_t depth; // Gross to have message-passing from the parser here :(
+  error_t err;
   char nextch;
   char buf[LEXER_BUF_SIZE];
   token_t token;
   token_t next_token;
 } lexer_t;
 
-void lexer_init(lexer_t *lexer, const char input[], const uint8_t input_size);
+void lexer_init(lexer_t *lexer, const char input[], const uint32_t input_size);
 
 void advance(lexer_t *lexer);
 

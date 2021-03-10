@@ -101,6 +101,28 @@ ast_expr_list_t *parse_expr_list(lexer_t *lexer) {
   return root;
 }
 
+ast_expr_list_t *parse_block(lexer_t *lexer) {
+  ast_expr_list_t *node = empty_expr_list();
+  ast_expr_list_t *root = node;
+
+  ast_expr_t *e = parse_expr(lexer);
+  node->e = e;
+
+  while (lexer->token.tag == TAG_EOL) {
+    advance(lexer);
+    ast_expr_list_t *next = malloc(sizeof(ast_expr_list_t));
+    e = parse_expr(lexer);
+    next->e = e;
+
+    node->next = next;
+    node = next;
+    if (lexer->token.tag == TAG_END) goto done;
+  }
+
+done:
+  return root;
+}
+
 ast_expr_t *_parse_expr(lexer_t *lexer, int min_preced) {
   ast_expr_t *lhs = parse_atom(lexer);
 
@@ -227,6 +249,24 @@ ast_expr_t *parse_atom(lexer_t *lexer) {
       if (!eat(lexer, TAG_RPAREN)) goto error;
       return e;
     }
+    case TAG_BEGIN: {
+      lexer->depth++;
+      advance(lexer);
+      if (lexer->token.tag != TAG_END) {
+        ast_expr_list_t *es = parse_block(lexer);
+        if (!eat(lexer, TAG_END)) goto error;
+        return ast_block(es);
+      }
+      if (!eat(lexer, TAG_END)) goto error;
+      return ast_block(empty_expr_list());
+    }
+    case TAG_END: {
+      // This ends up getting parsed recursively by the BEGIN handler.
+      // Treat it as a no-op.
+      lexer->err = NO_ERROR;
+      lexer->depth--;
+      return ast_empty();
+    }
     case TAG_IDENT: {
       ast_expr_t *id = ast_ident(lexer->token.string);
       advance(lexer);
@@ -258,6 +298,7 @@ ast_expr_t *parse_atom(lexer_t *lexer) {
       ast_expr_t *end = parse_expr(lexer);
       if (!eat(lexer, TAG_DO)) goto error;
       ast_expr_t *pred = parse_expr(lexer);
+      if (pred->type == AST_EMPTY) goto error;
       return ast_for_loop(index, start, end, pred);
     }
     case TAG_ABS: 
@@ -304,27 +345,51 @@ ast_expr_t *parse_atom(lexer_t *lexer) {
   }
 
 error:
-  printf("Expected int, float, or paren; got %s.\n", tag_names[lexer->token.tag]);
-  lexer->err = (int) lexer->pos;
+  lexer->err_pos = (int) lexer->pos;
+
+  // Incomplete input?
+  if (lexer->depth > 1 &&
+      (lexer->token.tag == TAG_EOF || lexer->token.tag == TAG_EOL)) {
+    lexer->err = LEX_INCOMPLETE_INPUT;
+  } else {
+    printf("Expected atom or block; got %s.\n", tag_names[lexer->token.tag]);
+    lexer->err = LEX_ERROR;
+  }
+
   return ast_empty();
 }
 
-ast_expr_t *parse_program(char *input) {
+void parse_program(char *input, ast_expr_t *ast, parse_result_t *parse_result) {
   lexer_t lexer;
 
-  uint64_t len = strlen(input);
-  if (len > 0xFF) {
-    printf("Input too long!\n");
-    return ast_empty();
-  }
-  lexer_init(&lexer, input, (uint8_t) len);
+  lexer_init(&lexer, input, strlen(input));
 
-  ast_expr_t *ast = parse_start(&lexer);
-  if (lexer.err > -1) {
-    printf("Syntax error at %d\n", lexer.pos);
-    return ast_empty();
+  // Lexer error. Don't parse.
+  if (lexer.err != NO_ERROR) {
+    parse_result->err = lexer.err;
+    parse_result->pos = lexer.pos;
+    return;
   }
 
-  return ast;
+  // This feels so wrong.
+  ast_expr_t *p = parse_start(&lexer);
+
+  parse_result->err = lexer.err;
+  parse_result->pos = lexer.pos;
+  parse_result->depth = lexer.depth;
+  if (lexer.err == LEX_INCOMPLETE_INPUT) {
+    return;
+  }
+
+  ast->type = p->type;
+  ast->e1 = p->e1;
+  ast->e2 = p->e2;
+  ast->e3 = p->e3;
+  ast->e4 = p->e4;
+  // End up assigning the one that isn't null.
+  ast->intval = p->intval;
+  ast->floatval = p->floatval;
+  ast->stringval = p->stringval;
+  ast->charval = p->charval;
 }
 

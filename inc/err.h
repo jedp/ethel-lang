@@ -8,6 +8,8 @@ enum error_enum {
   NO_ERROR = 0,
 
   LEX_ERROR,
+  LEX_UNEXPECTED_TOKEN,
+  LEX_INCOMPLETE_INPUT,
 
   AST_TYPE_UNHANDLED,
 
@@ -37,7 +39,9 @@ enum error_enum {
 static const char* err_names[ERR_MAX] = {
   "Ok",
   "Lexical error",
-  "Parser broken: Type not handled",
+  "Unexpected token",
+  "Incomplete input",
+  "Parser error",
   "Max scope depth exceeded",
   "No current variable scope",
   "Immutable symbol cannot be redefined",

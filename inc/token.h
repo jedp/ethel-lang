@@ -6,6 +6,7 @@
 typedef uint8_t tag_t;
 enum tag_enum {
   TAG_EOF = 0,
+  TAG_EOL,
 
   TAG_COMMENT,
 
@@ -65,6 +66,10 @@ enum tag_enum {
   TAG_PRINT,
   TAG_INPUT,
 
+  // Blocks
+  TAG_BEGIN,
+  TAG_END,
+
   // Math
   TAG_ABS,
   TAG_SIN,
@@ -78,6 +83,7 @@ enum tag_enum {
 
 static const char* tag_names[] = {
   "EOF",
+  "EOL",
 
   "COMMENT",
 
@@ -137,6 +143,10 @@ static const char* tag_names[] = {
   "PRINT",
   "INPUT",
 
+  // Blocks
+  "BEGIN",
+  "END",
+
   // Math
   "ABS",
   "SIN",
@@ -159,6 +169,8 @@ typedef struct {
 } token_t;
 
 static const token_t reserved[] = {
+  { TAG_BEGIN,         .string = (char *) "begin" },
+  { TAG_END,           .string = (char *) "end" },
   { TAG_IF,            .string = (char *) "if" },
   { TAG_THEN,          .string = (char *) "then" },
   { TAG_ELSE,          .string = (char *) "else" },
