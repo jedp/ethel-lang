@@ -19,6 +19,7 @@ enum ast_type_enum {
   AST_LT,
   AST_LE,
   AST_EQ,
+  AST_NE,
   AST_NIL,
   AST_INT,
   AST_FLOAT,
@@ -33,6 +34,7 @@ enum ast_type_enum {
   AST_RESERVED_CALLABLE,
   AST_IF_THEN,
   AST_IF_THEN_ELSE,
+  AST_WHILE_LOOP,
   AST_FOR_LOOP,
 };
 
@@ -50,6 +52,7 @@ static const char *ast_node_names[] = {
   "LT",
   "LE",
   "EQ",
+  "NE",
   "NIL",
   "INT",
   "FLOAT",
@@ -64,6 +67,7 @@ static const char *ast_node_names[] = {
   "RESERVED-CALLABLE",
   "IF-THEN",
   "IF-THEN-ELSE",
+  "WHILE-LOOP",
   "FOR-LOOP",
 };
 
@@ -117,6 +121,7 @@ ast_expr_t *ast_reserved_callable(ast_reserved_callable_type_t type, ast_expr_li
 ast_expr_t *ast_assign(ast_expr_t *ident, ast_expr_t *value);
 ast_expr_t *ast_if_then(ast_expr_t *if_clause, ast_expr_t *then_clause);
 ast_expr_t *ast_if_then_else(ast_expr_t *if_clause, ast_expr_t *then_clause, ast_expr_t *else_clause);
+ast_expr_t *ast_while_loop(ast_expr_t *cond, ast_expr_t *pred);
 ast_expr_t *ast_for_loop(ast_expr_t *index, ast_expr_t *start, ast_expr_t *end, ast_expr_t *pred);
 ast_expr_t *ast_empty();
 

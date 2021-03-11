@@ -120,6 +120,13 @@ ast_expr_t *ast_if_then_else(ast_expr_t *if_clause, ast_expr_t *then_clause, ast
   return node;
 }
 
+ast_expr_t *ast_while_loop(ast_expr_t *cond, ast_expr_t *pred) {
+  ast_expr_t *node = ast_node(AST_WHILE_LOOP);
+  node->e1 = cond;
+  node->e2 = pred;
+  return node;
+}
+
 ast_expr_t *ast_for_loop(ast_expr_t *index,
                          ast_expr_t *start,
                          ast_expr_t *end,

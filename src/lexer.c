@@ -225,6 +225,14 @@ token_t *get_token(lexer_t *lexer) {
       }
       return lex_op(lexer, TAG_ASSIGN);
     }
+    case '!': {
+      readch(lexer);
+      if (lexer->nextch == '=') {
+        return lex_op(lexer, TAG_NE);
+      }
+      // TODO: NOT, probably like NEG
+      return lexer_error(lexer);
+    }
     case '\'': return lex_char(lexer);
     case '"': return lex_string(lexer);
   }

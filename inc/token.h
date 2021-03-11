@@ -49,6 +49,7 @@ enum tag_enum {
   TAG_IF,
   TAG_THEN,
   TAG_ELSE,
+  TAG_WHILE,
   TAG_FOR,
   TAG_IN,
   TAG_TO,
@@ -61,6 +62,7 @@ enum tag_enum {
   TAG_GE,
   TAG_LE,
   TAG_EQ,
+  TAG_NE,
 
   // IO
   TAG_PRINT,
@@ -126,6 +128,7 @@ static const char* tag_names[] = {
   "IF",
   "THEN",
   "ELSE",
+  "WHILE",
   "FOR",
   "IN",
   "TO",
@@ -179,6 +182,7 @@ static const token_t reserved[] = {
   { TAG_MOD,           .string = (char *) "mod" },
   { TAG_PRINT,         .string = (char *) "print" },
   { TAG_INPUT,         .string = (char *) "input" },
+  { TAG_WHILE,         .string = (char *) "while" },
   { TAG_FOR,           .string = (char *) "for" },
   { TAG_IN,            .string = (char *) "in" },
   { TAG_TO,            .string = (char *) "to" },

@@ -368,6 +368,7 @@ void cmp(ast_type_t type, obj_t *a, obj_t *b, eval_result_t *result) {
       case AST_GE: result->obj = boolean_obj(a->charval >= b->charval); return;
       case AST_LT: result->obj = boolean_obj(a->charval <  b->charval); return;
       case AST_LE: result->obj = boolean_obj(a->charval <= b->charval); return;
+      case AST_NE: result->obj = boolean_obj(a->charval != b->charval); return;
       case AST_EQ: result->obj = boolean_obj(a->charval == b->charval); return;
       default:
         printf("what what what???\n");
@@ -389,6 +390,7 @@ void cmp(ast_type_t type, obj_t *a, obj_t *b, eval_result_t *result) {
     case AST_GE: result->obj = boolean_obj(x >= y); return;
     case AST_LT: result->obj = boolean_obj(x <  y); return;
     case AST_LE: result->obj = boolean_obj(x <= y); return;
+    case AST_NE: result->obj = boolean_obj(x != y); return;
     case AST_EQ: result->obj = boolean_obj(x == y); return;
     default:
       printf("what what what???\n");
@@ -495,6 +497,33 @@ void resolve_callable_expr(ast_expr_t *expr, env_t *env, eval_result_t *result) 
 error:
       result->err = AST_TYPE_UNHANDLED;
       result->obj = undef_obj();
+}
+
+void eval_while_loop(ast_expr_t *expr, env_t *env, eval_result_t *result) {
+  eval_result_t *cond;
+  eval_result_t *r;
+  result->obj = nil_obj();
+  result->err = NO_ERROR;
+
+  for(;;) {
+    cond = eval_expr(expr->e1, env);
+    if (cond->err != NO_ERROR) {
+      result->err = cond->err;
+      result->obj = undef_obj();
+      return;
+    }
+
+    if (!truthy(cond->obj)) return;
+
+    r = eval_expr(expr->e2, env);
+    if (r->err != NO_ERROR) {
+      result->err = r->err;
+      result->obj = undef_obj();
+      return;
+    }
+
+    result->obj = r->obj;
+  }
 }
 
 void eval_for_loop(ast_expr_t *expr, env_t *env, eval_result_t *result) {
@@ -651,6 +680,7 @@ eval_result_t *eval_expr(ast_expr_t *expr, env_t *env) {
         case AST_GE:
         case AST_LT:
         case AST_LE:
+        case AST_NE:
         case AST_EQ: {
             eval_result_t *r1 = eval_expr(expr->e1, env);
             if ((result->err = r1->err) != NO_ERROR) goto error;
@@ -763,6 +793,9 @@ eval_result_t *eval_expr(ast_expr_t *expr, env_t *env) {
           result->obj = nil_obj();
           break;
         }
+        case AST_WHILE_LOOP:
+          eval_while_loop(expr, env, result);
+          break;
         case AST_FOR_LOOP:
           eval_for_loop(expr, env, result);
           break;

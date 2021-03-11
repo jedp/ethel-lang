@@ -24,7 +24,8 @@ bool is_binop(token_t *token) {
       || token->tag == TAG_GE
       || token->tag == TAG_LT
       || token->tag == TAG_LE
-      || token->tag == TAG_EQ;
+      || token->tag == TAG_EQ
+      || token->tag == TAG_NE;
 }
 
 uint8_t binop_preced(token_t *token) {
@@ -44,6 +45,7 @@ uint8_t binop_preced(token_t *token) {
     case TAG_LE:
       return PRECED_GLT;
     case TAG_EQ:
+    case TAG_NE:
       return PRECED_EQ;
     case TAG_AND:
       return PRECED_AND;
@@ -157,6 +159,7 @@ ast_expr_t *_parse_expr(lexer_t *lexer, int min_preced) {
       case TAG_LT:     lhs = ast_expr(AST_LT,  lhs, _parse_expr(lexer, next_min_preced)); break;
       case TAG_LE:     lhs = ast_expr(AST_LE,  lhs, _parse_expr(lexer, next_min_preced)); break;
       case TAG_EQ:     lhs = ast_expr(AST_EQ,  lhs, _parse_expr(lexer, next_min_preced)); break;
+      case TAG_NE:     lhs = ast_expr(AST_NE,  lhs, _parse_expr(lexer, next_min_preced)); break;
 
       default:
         printf("what? why this %s?\n", tag_names[tag]);
@@ -287,6 +290,15 @@ ast_expr_t *parse_atom(lexer_t *lexer) {
         return ast_if_then_else(if_clause, then_clause, else_clause);
       }
       return ast_if_then(if_clause, then_clause);
+    }
+    case TAG_WHILE: {
+      advance(lexer);
+      ast_expr_t *cond = parse_expr(lexer);
+      if (cond->type == AST_EMPTY) goto error;
+      if (!eat(lexer, TAG_DO)) goto error;
+      ast_expr_t *pred = parse_expr(lexer);
+      if (pred->type == AST_EMPTY) goto error;
+      return ast_while_loop(cond, pred);
     }
     case TAG_FOR: {
       advance(lexer);
