@@ -2,6 +2,7 @@
 #include <strings.h>
 #include <stdbool.h>
 #include <stdio.h>
+#include "../inc/def.h"
 #include "../inc/ast.h"
 
 ast_expr_t *ast_node(ast_type_t type) {
@@ -18,6 +19,7 @@ ast_expr_t *ast_node(ast_type_t type) {
   }
 
   node->type = type;
+  node->flags = F_NONE;
   return node;
 }
 
@@ -97,9 +99,10 @@ ast_expr_t *ast_reserved_callable(ast_reserved_callable_type_t type, ast_expr_li
   return node;
 }
 
-ast_expr_t *ast_assign(ast_expr_t *ident, ast_expr_t *value) {
+ast_expr_t *ast_assign(ast_expr_t *ident, ast_expr_t *value, uint8_t flags) {
   ast_expr_t *node = ast_node(AST_ASSIGN);
   node->stringval = ident->stringval;
+  node->flags = flags;
   node->e1 = ident;
   node->e2 = value;
   return node;

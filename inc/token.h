@@ -13,6 +13,7 @@ enum tag_enum {
   // Identifiers
   TAG_IDENT,
   TAG_ASSIGN,
+  TAG_MUT,
 
   // Association
   TAG_LPAREN,
@@ -92,6 +93,7 @@ static const char* tag_names[] = {
   // Identifiers
   "IDENT",
   "ASSIGN",
+  "MUT",
 
   // Association
   "LPAREN",
@@ -180,6 +182,7 @@ static const token_t reserved[] = {
   { TAG_AND,           .string = (char *) "and" },
   { TAG_OR,            .string = (char *) "or" },
   { TAG_MOD,           .string = (char *) "mod" },
+  { TAG_MUT,           .string = (char *) "mut" },
   { TAG_PRINT,         .string = (char *) "print" },
   { TAG_INPUT,         .string = (char *) "input" },
   { TAG_WHILE,         .string = (char *) "while" },

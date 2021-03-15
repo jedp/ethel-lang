@@ -551,7 +551,8 @@ void eval_for_loop(ast_expr_t *expr, env_t *env, eval_result_t *result) {
   // We will mutate this variable with each iteration through the loop.
   push_scope(env);
   obj_t *index_obj = int_obj(start->obj->intval);
-  put_env(env, index_name, index_obj);
+  // Not mutable in code.
+  put_env(env, index_name, index_obj, F_NONE);
 
   int start_val = start->obj->intval;
   int end_val = end->obj->intval;
@@ -749,11 +750,13 @@ eval_result_t *eval_expr(ast_expr_t *expr, env_t *env) {
         }
         case AST_ASSIGN: {
             // Save the expression associated with the identifier.
+            // The mutability flags are on the associated expression e2,
+            // and these need to be copied over to the new object.
             const char* name = ((ast_expr_t*)expr->e1)->stringval;
             // Eval the object now and save the result as a primitive value.
             eval_result_t *r = eval_expr(expr->e2, env);
             if ((result->err = r->err) != NO_ERROR) goto error;
-            error_t error = put_env(env, name, r->obj);
+            error_t error = put_env(env, name, r->obj, expr->flags);
             result->obj = r->obj;
             // Store the obj in the result value for the caller.
             if (error != NO_ERROR) {

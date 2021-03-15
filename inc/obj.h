@@ -3,6 +3,7 @@
 
 #include <inttypes.h>
 #include <stdbool.h>
+#include "def.h"
 
 typedef uint8_t obj_type_t;
 enum obj_type_enum {
@@ -21,6 +22,7 @@ enum obj_type_enum {
 
 typedef struct Obj {
   uint8_t type;
+  uint8_t flags;
   union {
     int intval;
     float floatval;
@@ -34,11 +36,11 @@ static const char* obj_type_names[TYPE_MAX] = {
   "Nothing",
   "Undefined",
   "Nil",
-  "Integer",
+  "Int",
   "Float",
   "Char",
-  "String",
-  "Boolean",
+  "Str",
+  "Bool",
   "Identifier"
 };
 

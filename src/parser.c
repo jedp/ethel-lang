@@ -1,6 +1,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+#include "../inc/def.h"
 #include "../inc/ast.h"
 #include "../inc/lexer.h"
 #include "../inc/parser.h"
@@ -270,12 +271,20 @@ ast_expr_t *parse_atom(lexer_t *lexer) {
       lexer->depth--;
       return ast_empty();
     }
+    case TAG_MUT: {
+      advance(lexer);
+      ast_expr_t *id = ast_ident(lexer->token.string);
+      if (!eat(lexer, TAG_IDENT)) goto error;
+      if (!eat(lexer, TAG_ASSIGN)) goto error;
+      ast_expr_t *val = parse_expr(lexer);
+      return ast_assign(id, val, F_VAR);
+    }
     case TAG_IDENT: {
       ast_expr_t *id = ast_ident(lexer->token.string);
       advance(lexer);
       if (lexer->token.tag == TAG_ASSIGN) {
         advance(lexer);
-        return ast_assign(id, parse_expr(lexer));
+        return ast_assign(id, parse_expr(lexer), F_NONE);
       }
       return id;
     }
@@ -393,7 +402,9 @@ void parse_program(char *input, ast_expr_t *ast, parse_result_t *parse_result) {
     return;
   }
 
+  // This feels even more wrong.
   ast->type = p->type;
+  ast->flags = p->flags;
   ast->e1 = p->e1;
   ast->e2 = p->e2;
   ast->e3 = p->e3;

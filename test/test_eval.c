@@ -23,6 +23,25 @@ void test_eval_calculator(void) {
   TEST_ASSERT_EQUAL(14, obj->intval);
 }
 
+void test_eval_assign_immutable(void) {
+  char *program = "begin\nx = 32\nx = 33\nend";
+  eval_result_t *result = eval_program(program);
+  TEST_ASSERT_EQUAL(ENV_SYMBOL_REDEFINED, result->err);
+}
+
+void test_eval_assign_var(void) {
+  char *program = "begin\nmut x = 32\nx = 33\nend";
+  eval_result_t *result = eval_program(program);
+  TEST_ASSERT_EQUAL(NO_ERROR, result->err);
+}
+
+void test_eval_assign_multiple(void) {
+  char *program = "begin\nmut x = 42\ny = 9\nx = y\nwhile (x < 12) do begin\nx = x + 1\nend\nx end\n";
+  eval_result_t *result = eval_program(program);
+  TEST_ASSERT_EQUAL(NO_ERROR, result->err);
+  TEST_ASSERT_EQUAL(12, ((obj_t *)result->obj)->intval);
+}
+
 void test_eval_if_else(void) {
   char *program = "if 12 then x = 5";
   eval_result_t *result = eval_program(program);
@@ -245,6 +264,9 @@ void test_eval_cast_boolean(void) {
 
 void test_eval(void) {
   RUN_TEST(test_eval_calculator);
+  RUN_TEST(test_eval_assign_immutable);
+  RUN_TEST(test_eval_assign_var);
+  RUN_TEST(test_eval_assign_multiple);
   RUN_TEST(test_eval_if_else);
   RUN_TEST(test_eval_if_else_nil);
   RUN_TEST(test_eval_if_else_assign);
