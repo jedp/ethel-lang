@@ -765,6 +765,15 @@ eval_result_t *eval_expr(ast_expr_t *expr, env_t *env) {
             }
             break;
         }
+        case AST_DELETE: {
+          error_t error = del_env(env, expr->stringval);
+          if (error != NO_ERROR) {
+            result->err = error;
+            goto error;
+          }
+          result->obj = nil_obj();
+          break;
+        }
         case AST_IF_THEN: {
           eval_result_t *if_val = eval_expr(expr->e1, env);
           result->err = if_val->err;

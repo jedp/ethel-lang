@@ -173,7 +173,92 @@ done:
 }
 
 ast_expr_t *parse_expr(lexer_t *lexer) {
+  switch(lexer->token.tag) {
+    case TAG_BEGIN: {
+      lexer->depth++;
+      advance(lexer);
+      if (lexer->token.tag != TAG_END) {
+        ast_expr_list_t *es = parse_block(lexer);
+        if (!eat(lexer, TAG_END)) goto error;
+        return ast_block(es);
+      }
+      if (!eat(lexer, TAG_END)) goto error;
+      return ast_block(empty_expr_list());
+    }
+    case TAG_END: {
+      // This ends up getting parsed recursively by the BEGIN handler.
+      // Treat it as a no-op.
+      lexer->err = NO_ERROR;
+      lexer->depth--;
+      return ast_empty();
+    }
+    case TAG_IF: {
+      advance(lexer);
+      ast_expr_t *if_clause = parse_expr(lexer);
+      if (!eat(lexer, TAG_THEN)) goto error;
+      ast_expr_t *then_clause = parse_expr(lexer);
+      if (lexer->token.tag == TAG_ELSE) {
+        eat(lexer, TAG_ELSE);
+        ast_expr_t *else_clause = parse_expr(lexer);
+        return ast_if_then_else(if_clause, then_clause, else_clause);
+      }
+      return ast_if_then(if_clause, then_clause);
+    }
+    case TAG_WHILE: {
+      advance(lexer);
+      ast_expr_t *cond = parse_expr(lexer);
+      if (cond->type == AST_EMPTY) goto error;
+      if (!eat(lexer, TAG_DO)) goto error;
+      ast_expr_t *pred = parse_expr(lexer);
+      if (pred->type == AST_EMPTY) goto error;
+      return ast_while_loop(cond, pred);
+    }
+    case TAG_FOR: {
+      advance(lexer);
+      ast_expr_t *index = parse_expr(lexer);
+      if (index->type != AST_IDENT) goto error;
+      if (!eat(lexer, TAG_IN)) goto error;
+      ast_expr_t *start = parse_expr(lexer);
+      if (!eat(lexer, TAG_TO)) goto error;
+      ast_expr_t *end = parse_expr(lexer);
+      if (!eat(lexer, TAG_DO)) goto error;
+      ast_expr_t *pred = parse_expr(lexer);
+      if (pred->type == AST_EMPTY) goto error;
+      return ast_for_loop(index, start, end, pred);
+    }
+    case TAG_INPUT: {
+      ast_reserved_callable_type_t callable_type = ast_callable_type_for_tag(lexer->token.tag);
+      advance(lexer);
+      if (lexer->token.tag == TAG_LPAREN) {
+        eat(lexer, TAG_LPAREN);
+        // More than 0 args.
+        if (lexer->token.tag != TAG_RPAREN) {
+          ast_expr_list_t *es = parse_expr_list(lexer);
+          if (!eat(lexer, TAG_RPAREN)) goto error;
+          return ast_reserved_callable(callable_type, es);
+        }
+        if (!eat(lexer, TAG_RPAREN)) goto error;
+        return ast_reserved_callable(callable_type, empty_expr_list());
+      }
+      return ast_ident(lexer->token.string);
+    }
+  }
+
   return _parse_expr(lexer, PRECED_NONE);
+
+error:
+  lexer->err_pos = (int) lexer->pos;
+
+  // Incomplete input?
+  if (lexer->depth > 1 &&
+      (lexer->token.tag == TAG_EOF || lexer->token.tag == TAG_EOL)) {
+    lexer->err = LEX_INCOMPLETE_INPUT;
+  } else {
+    printf("Expected atom or block; got %s.\n", tag_names[lexer->token.tag]);
+    lexer->err = LEX_ERROR;
+  }
+
+  return ast_empty();
 }
 
 /*
@@ -181,7 +266,6 @@ ast_expr_t *parse_expr(lexer_t *lexer) {
  * F -> float
  * F -> ident
  * F -> ( E )
- * F -> if expr then expr [ else expr ]
  * F -> callable ( expr-list )
  */
 ast_expr_t *parse_atom(lexer_t *lexer) {
@@ -253,24 +337,6 @@ ast_expr_t *parse_atom(lexer_t *lexer) {
       if (!eat(lexer, TAG_RPAREN)) goto error;
       return e;
     }
-    case TAG_BEGIN: {
-      lexer->depth++;
-      advance(lexer);
-      if (lexer->token.tag != TAG_END) {
-        ast_expr_list_t *es = parse_block(lexer);
-        if (!eat(lexer, TAG_END)) goto error;
-        return ast_block(es);
-      }
-      if (!eat(lexer, TAG_END)) goto error;
-      return ast_block(empty_expr_list());
-    }
-    case TAG_END: {
-      // This ends up getting parsed recursively by the BEGIN handler.
-      // Treat it as a no-op.
-      lexer->err = NO_ERROR;
-      lexer->depth--;
-      return ast_empty();
-    }
     case TAG_MUT: {
       advance(lexer);
       ast_expr_t *id = ast_ident(lexer->token.string);
@@ -288,39 +354,10 @@ ast_expr_t *parse_atom(lexer_t *lexer) {
       }
       return id;
     }
-    case TAG_IF: {
+    case TAG_DEL: {
       advance(lexer);
-      ast_expr_t *if_clause = parse_expr(lexer);
-      if (!eat(lexer, TAG_THEN)) goto error;
-      ast_expr_t *then_clause = parse_expr(lexer);
-      if (lexer->token.tag == TAG_ELSE) {
-        eat(lexer, TAG_ELSE);
-        ast_expr_t *else_clause = parse_expr(lexer);
-        return ast_if_then_else(if_clause, then_clause, else_clause);
-      }
-      return ast_if_then(if_clause, then_clause);
-    }
-    case TAG_WHILE: {
-      advance(lexer);
-      ast_expr_t *cond = parse_expr(lexer);
-      if (cond->type == AST_EMPTY) goto error;
-      if (!eat(lexer, TAG_DO)) goto error;
-      ast_expr_t *pred = parse_expr(lexer);
-      if (pred->type == AST_EMPTY) goto error;
-      return ast_while_loop(cond, pred);
-    }
-    case TAG_FOR: {
-      advance(lexer);
-      ast_expr_t *index = parse_expr(lexer);
-      if (index->type != AST_IDENT) goto error;
-      if (!eat(lexer, TAG_IN)) goto error;
-      ast_expr_t *start = parse_expr(lexer);
-      if (!eat(lexer, TAG_TO)) goto error;
-      ast_expr_t *end = parse_expr(lexer);
-      if (!eat(lexer, TAG_DO)) goto error;
-      ast_expr_t *pred = parse_expr(lexer);
-      if (pred->type == AST_EMPTY) goto error;
-      return ast_for_loop(index, start, end, pred);
+      ast_expr_t *id = ast_ident(lexer->token.string);
+      return ast_delete(id);
     }
     case TAG_ABS: 
     case TAG_SIN: 
@@ -331,22 +368,6 @@ ast_expr_t *parse_atom(lexer_t *lexer) {
     case TAG_LN: 
     case TAG_LOG:
     case TAG_PRINT: {
-      ast_reserved_callable_type_t callable_type = ast_callable_type_for_tag(lexer->token.tag);
-      advance(lexer);
-      if (lexer->token.tag == TAG_LPAREN) {
-        eat(lexer, TAG_LPAREN);
-        // More than 0 args.
-        if (lexer->token.tag != TAG_RPAREN) {
-          ast_expr_list_t *es = parse_expr_list(lexer);
-          if (!eat(lexer, TAG_RPAREN)) goto error;
-          return ast_reserved_callable(callable_type, es);
-        }
-        if (!eat(lexer, TAG_RPAREN)) goto error;
-        return ast_reserved_callable(callable_type, empty_expr_list());
-      }
-      return ast_ident(lexer->token.string);
-    }
-    case TAG_INPUT: {
       ast_reserved_callable_type_t callable_type = ast_callable_type_for_tag(lexer->token.tag);
       advance(lexer);
       if (lexer->token.tag == TAG_LPAREN) {

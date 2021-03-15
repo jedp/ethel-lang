@@ -14,6 +14,7 @@ enum tag_enum {
   TAG_IDENT,
   TAG_ASSIGN,
   TAG_MUT,
+  TAG_DEL,
 
   // Association
   TAG_LPAREN,
@@ -183,6 +184,7 @@ static const token_t reserved[] = {
   { TAG_OR,            .string = (char *) "or" },
   { TAG_MOD,           .string = (char *) "mod" },
   { TAG_MUT,           .string = (char *) "mut" },
+  { TAG_DEL,           .string = (char *) "del" },
   { TAG_PRINT,         .string = (char *) "print" },
   { TAG_INPUT,         .string = (char *) "input" },
   { TAG_WHILE,         .string = (char *) "while" },

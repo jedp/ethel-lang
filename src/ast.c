@@ -108,6 +108,12 @@ ast_expr_t *ast_assign(ast_expr_t *ident, ast_expr_t *value, uint8_t flags) {
   return node;
 }
 
+ast_expr_t *ast_delete(ast_expr_t *ident) {
+  ast_expr_t *node = ast_node(AST_DELETE);
+  node->stringval = ident->stringval;
+  return node;
+}
+
 ast_expr_t *ast_if_then(ast_expr_t *if_clause, ast_expr_t *then_clause) {
   ast_expr_t *node = ast_node(AST_IF_THEN);
   node->e1 = if_clause;

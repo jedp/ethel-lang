@@ -11,6 +11,7 @@ env_sym_t *new_sym(const char* name, obj_t *obj, uint8_t flags) {
   sym->name = sym_name;
   sym->flags = flags;
   sym->obj = obj;
+  sym->prev = NULL;
   sym->next = NULL; 
 
   return sym;
@@ -84,7 +85,21 @@ error_t put_env(env_t *env, const char* name, const obj_t *obj, const uint8_t fl
   env_sym_t *top = &(env->symbols[env->top]);
   env_sym_t *new = new_sym(name, (obj_t *) obj, flags);
   new->next = top->next;
+  if (top->next != NULL) top->next->prev = new;
+  new->prev = top;
   top->next = new;
+
+  return NO_ERROR;
+}
+
+error_t del_env(env_t *env, const char* name) {
+  env_sym_t *sym = find_sym(env, name);
+  if (sym == NULL) return ENV_SYMBOL_UNDEFINED;
+
+  env_sym_t *prev = sym->prev;
+  if (sym->next != NULL) sym->next->prev = prev;
+  prev->next = sym->next;
+  free(sym);
 
   return NO_ERROR;
 }

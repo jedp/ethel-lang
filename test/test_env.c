@@ -40,6 +40,29 @@ void test_env_put_get() {
   TEST_ASSERT_EQUAL(42, found->intval);
 }
 
+void test_env_put_del_get() {
+  env_t env;
+  env_init(&env);
+  push_scope(&env);
+
+  obj_t *not_found = get_env(&env, "ethel");
+  TEST_ASSERT_EQUAL(TYPE_UNDEF, not_found->type);
+
+  obj_t *obj = int_obj(42);
+
+  int error = put_env(&env, "ethel", obj, F_NONE);
+  TEST_ASSERT_EQUAL(NO_ERROR, error);
+
+  obj_t *found = get_env(&env, "ethel");
+  TEST_ASSERT_EQUAL(TYPE_INT, found->type);
+  TEST_ASSERT_EQUAL(42, found->intval);
+
+  TEST_ASSERT_EQUAL(NO_ERROR, del_env(&env, "ethel"));
+
+  not_found = get_env(&env, "ethel");
+  TEST_ASSERT_EQUAL(TYPE_UNDEF, not_found->type);
+}
+
 void test_env_scopes() {
   env_t env;
   env_init(&env);
@@ -148,6 +171,7 @@ void test_env(void) {
   RUN_TEST(test_env_init);
   RUN_TEST(test_env_no_scope_error);
   RUN_TEST(test_env_put_get);
+  RUN_TEST(test_env_put_del_get);
   RUN_TEST(test_env_scopes);
   RUN_TEST(test_env_redefinition_error);
 }

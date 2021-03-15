@@ -28,6 +28,7 @@ enum ast_type_enum {
   AST_BOOLEAN,
   AST_CAST,
   AST_ASSIGN,
+  AST_DELETE,
   AST_NEGATE,
   AST_IDENT,
   AST_BLOCK,
@@ -61,6 +62,7 @@ static const char *ast_node_names[] = {
   "BOOLEAN",
   "CAST",
   "ASSIGN",
+  "DELETE",
   "NEGATE",
   "IDENT",
   "BLOCK",
@@ -120,6 +122,7 @@ ast_expr_t *ast_ident(char* name);
 ast_expr_t *ast_block(ast_expr_list_t *es);
 ast_expr_t *ast_reserved_callable(ast_reserved_callable_type_t type, ast_expr_list_t *es);
 ast_expr_t *ast_assign(ast_expr_t *ident, ast_expr_t *value, uint8_t flags);
+ast_expr_t *ast_delete(ast_expr_t *ident);
 ast_expr_t *ast_if_then(ast_expr_t *if_clause, ast_expr_t *then_clause);
 ast_expr_t *ast_if_then_else(ast_expr_t *if_clause, ast_expr_t *then_clause, ast_expr_t *else_clause);
 ast_expr_t *ast_while_loop(ast_expr_t *cond, ast_expr_t *pred);
