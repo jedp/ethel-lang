@@ -6,9 +6,8 @@
 
 env_sym_t *new_sym(const char* name, obj_t *obj, uint8_t flags) {
   env_sym_t *sym = malloc(sizeof(env_sym_t));
-  char* sym_name = malloc(strlen(name) + 1);
-  strcpy(sym_name, name);
-  sym->name = sym_name;
+  sym->name = malloc(strlen(name) + 1);
+  strcpy(sym->name, name);
   sym->flags = flags;
   sym->obj = obj;
   sym->prev = NULL;

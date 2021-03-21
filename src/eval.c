@@ -528,6 +528,8 @@ void eval_while_loop(ast_expr_t *expr, env_t *env, eval_result_t *result) {
 
 void eval_for_loop(ast_expr_t *expr, env_t *env, eval_result_t *result) {
   char* index_name = ((ast_expr_t*) expr->e1)->stringval;
+  eval_result_t *r = malloc(sizeof(eval_result_t));
+  r->obj = undef_obj();
 
   // int from.
   if (((obj_t*)expr->e2)->type != AST_INT) {
@@ -560,7 +562,6 @@ void eval_for_loop(ast_expr_t *expr, env_t *env, eval_result_t *result) {
     result->err = TYPE_POSITIVE_INT_REQUIRED;
     goto error;
   }
-  eval_result_t *r;
 
   // These are both in the same mongo function because I don't want to have to call
   // functions with more than four args.
@@ -569,6 +570,7 @@ void eval_for_loop(ast_expr_t *expr, env_t *env, eval_result_t *result) {
       // Overflow?
       if (i < 0) { result->err = OVERFLOW_ERROR; goto error; }
       index_obj->intval = i;
+      free(r);
       r = eval_expr(expr->e4, env);
       if ((result->err = r->err) != NO_ERROR) {
         pop_scope(env);
@@ -580,6 +582,7 @@ void eval_for_loop(ast_expr_t *expr, env_t *env, eval_result_t *result) {
       // Overflow?
       if (i < 0) { result->err = OVERFLOW_ERROR; goto error; }
       index_obj->intval = i;
+      free(r);
       r = eval_expr(expr->e4, env);
       if ((result->err = r->err) != NO_ERROR) {
         pop_scope(env);
@@ -590,9 +593,11 @@ void eval_for_loop(ast_expr_t *expr, env_t *env, eval_result_t *result) {
 
   pop_scope(env);
   result->obj = r->obj;
+  free(r);
   return;
 
 error:
+  free(r);
   result->obj = undef_obj();
 }
 
@@ -838,6 +843,7 @@ eval_result_t *eval(env_t *env, char *input) {
     pretty_print(ast);
 #endif
 
+  free(r);
   return eval_expr(ast, env);
 }
 

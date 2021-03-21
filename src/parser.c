@@ -181,7 +181,10 @@ ast_expr_t *parse_expr(lexer_t *lexer) {
       advance(lexer);
       if (lexer->token.tag != TAG_END) {
         ast_expr_list_t *es = parse_block(lexer);
-        if (!eat(lexer, TAG_END)) goto error;
+        if (!eat(lexer, TAG_END)) {
+          free(es);
+          goto error;
+        }
         return ast_block(es);
       }
       if (!eat(lexer, TAG_END)) goto error;
@@ -236,7 +239,10 @@ ast_expr_t *parse_expr(lexer_t *lexer) {
         // More than 0 args.
         if (lexer->token.tag != TAG_RPAREN) {
           ast_expr_list_t *es = parse_expr_list(lexer);
-          if (!eat(lexer, TAG_RPAREN)) goto error;
+          if (!eat(lexer, TAG_RPAREN)) {
+            free(es);
+            goto error;
+          }
           return ast_reserved_callable(callable_type, es);
         }
         if (!eat(lexer, TAG_RPAREN)) goto error;

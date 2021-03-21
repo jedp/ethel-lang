@@ -45,7 +45,7 @@ void print_result(obj_t *obj) {
 int main(int argc, char** argv) {
   memset(input, 0, MAX_INPUT);
 
-  char* program = malloc(sizeof(1));
+  char* program = malloc(2);
   program[0] = 0;
   unsigned int indent = 0;
 
@@ -63,7 +63,7 @@ int main(int argc, char** argv) {
     }
     if (!fgets(input, sizeof(input), stdin)) {
       printf("Bye!\n");
-      return -1;
+      goto done;
     }
     size_t program_len = strlen(program) + strlen(input) + 1;
     program = (char*) realloc(program, program_len);
@@ -75,7 +75,7 @@ int main(int argc, char** argv) {
 
     if (result->err != LEX_INCOMPLETE_INPUT) {
       free(program);
-      program = malloc(sizeof(1));
+      program = malloc(2);
       indent = 0;
       program[0] = 0;
 
@@ -86,6 +86,8 @@ int main(int argc, char** argv) {
     }
   }
 
+done:
+  free(program);
   return 0;
 }
 
