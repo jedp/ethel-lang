@@ -68,6 +68,7 @@ void test_env_scopes() {
   env_init(&env);
   push_scope(&env);
   
+  TEST_ASSERT_EQUAL(0, env.top);
   TEST_ASSERT_EQUAL(NO_ERROR, put_env(&env, "one-1", float_obj(1.1), F_NONE));
   TEST_ASSERT_EQUAL(NO_ERROR, put_env(&env, "one-2", float_obj(1.2), F_NONE));
   TEST_ASSERT_EQUAL(NO_ERROR, put_env(&env, "one-3", float_obj(1.3), F_NONE));
@@ -138,6 +139,7 @@ void test_env_scopes() {
   // Sanity check. We should be out of all scopes now.
   TEST_ASSERT_EQUAL(ENV_NO_SCOPE, put_env(&env, "one-new-1", int_obj(42), F_NONE));
   TEST_ASSERT_EQUAL(NO_ERROR, push_scope(&env));
+  TEST_ASSERT_EQUAL(0, env.top);
 
   // And we can push things back in new scopes.
   TEST_ASSERT_EQUAL(NO_ERROR, put_env(&env, "one-new-1", int_obj(42), F_NONE));

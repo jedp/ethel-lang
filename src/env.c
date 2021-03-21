@@ -32,7 +32,16 @@ error_t push_scope(env_t *env) {
 }
 
 error_t pop_scope(env_t *env) {
-  env->symbols[env->top] = *empty_sym();
+  // Delete any symbols at this level.
+  // Don't delete the root node.
+  env_sym_t *next = env->symbols[env->top].next;
+  while (next != NULL) {
+    env_sym_t *temp = next;
+    next = next->next;
+    free(temp->name);
+    free(temp);
+    temp = NULL;
+  }
   env->top -= 1;
 
   return NO_ERROR;
@@ -45,17 +54,13 @@ env_sym_t *find_sym(env_t *env, const char *name) {
 
   // Search back through the scopes to find the name.
   for (int i = env->top; i >= 0; --i) {
-    env_sym_t *last = &(env->symbols[i]);
-    while (last->next != NULL) {
-      if (!strcmp(name, last->name)) {
-        return last;
+    // Start at the node the root points to.
+    env_sym_t *node = env->symbols[i].next;
+    while (node != NULL) {
+      if (!strcmp(name, node->name)) {
+        return node;
       }
-      last = last->next;
-    }
-
-    // Check the last one.
-    if (!strcmp(name, last->name)) {
-      return last;
+      node = node->next;
     }
   }
 
