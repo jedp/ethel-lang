@@ -73,7 +73,6 @@ int main(int argc, char** argv) {
     obj_t *obj = (obj_t*)result->obj;
     indent = result->depth;
 
-
     if (result->err != LEX_INCOMPLETE_INPUT) {
       free(program);
       program = malloc(sizeof(1));

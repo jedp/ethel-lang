@@ -20,6 +20,10 @@ ast_expr_t *ast_node(ast_type_t type) {
 
   node->type = type;
   node->flags = F_NONE;
+  node->e1 = NULL;
+  node->e2 = NULL;
+  node->e3 = NULL;
+  node->e4 = NULL;
   return node;
 }
 

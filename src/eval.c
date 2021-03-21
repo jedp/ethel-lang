@@ -100,7 +100,7 @@ void eval_string_expr(ast_expr_t *expr, eval_result_t *result) {
     return;
   }
   obj_t* obj = malloc(sizeof(obj_t));
-  char* stringval = malloc(strlen(expr->stringval));
+  char* stringval = malloc(strlen(expr->stringval) + 1);
   strcpy(stringval, expr->stringval);
   obj->type = TYPE_STRING;
   obj->stringval = stringval;
@@ -450,7 +450,7 @@ void readln_input(eval_result_t *result) {
     result->err = INPUT_STREAM_ERROR;
   }
   // Trim trailing newline.
-  int len = (int) strlen(s);
+  int len = (int) strlen(s) + 1;
   uint32_t end = len > 0 ? (uint32_t) (len - 1) : 0;
   while (end > 0 && s[end] == '\n') s[end--] = 0;
 

@@ -16,8 +16,8 @@ TESTOBJS = test/unity/unity.o \
 					 test/test.o
 
 CFLAGS = -std=gnu11 -Wall -g3 -Os -I inc
-EXTRA_CFLAGS = -Wshadow -Wdouble-promotion -Wconversion -Wformat -Wno-undef -fno-common
-TESTFLAGS = -I test
+EXTRA_CFLAGS = -Wshadow -Wdouble-promotion -Wconversion -Wformat -Wno-undef -fno-common -fno-omit-frame-pointer -fsanitize=address
+TESTFLAGS = -I test -fno-omit-frame-pointer -fsanitize=address
 LDFLAGS = -lm -lreadline -ldl
 
 all: test repl

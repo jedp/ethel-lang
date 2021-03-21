@@ -30,7 +30,7 @@ void test_eval_assign_immutable(void) {
 }
 
 void test_eval_assign_var(void) {
-  char *program = "begin\nmut x = 32\nx = 33\nend";
+  char *program = "begin\nmut x = 32\nx = 33\nend\n";
   eval_result_t *result = eval_program(program);
   TEST_ASSERT_EQUAL(NO_ERROR, result->err);
 }

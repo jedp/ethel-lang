@@ -101,6 +101,7 @@ ast_expr_list_t *parse_expr_list(lexer_t *lexer) {
     node = next;
   }
 
+  node->next = NULL;
   return root;
 }
 
@@ -123,6 +124,7 @@ ast_expr_list_t *parse_block(lexer_t *lexer) {
   }
 
 done:
+  node->next = NULL;
   return root;
 }
 

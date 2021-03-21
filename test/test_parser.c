@@ -15,7 +15,6 @@ void test_parse_empty(void) {
   TEST_ASSERT_EQUAL(NO_ERROR, parse_result->err);
   TEST_ASSERT_EQUAL(AST_EMPTY, ast->type);
   free(ast);
-  free(parse_result);
 }
 
 void test_parse_add(void) {
