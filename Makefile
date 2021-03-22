@@ -15,8 +15,23 @@ TESTOBJS = test/unity/unity.o \
 					 test/test_env.o \
 					 test/test.o
 
-CFLAGS = -std=gnu11 -Wall -g3 -Os -I inc
-EXTRA_CFLAGS = -Wshadow -Wdouble-promotion -Wconversion -Wformat -Wno-undef -fno-common -fno-omit-frame-pointer -fsanitize=address
+CFLAGS = -std=gnu11 -g3 -Os -I inc
+EXTRA_CFLAGS = \
+ -Wall \
+ -Wformat \
+ -Wshadow \
+ -Wno-undef \
+ -Wcast-qual \
+ -Wcast-align \
+ -Wconversion \
+ -Wdouble-promotion \
+ -Wpointer-arith \
+ -Wwrite-strings \
+ -Wint-to-pointer-cast \
+ --pedantic-errors \
+ -fno-common \
+ -fno-omit-frame-pointer \
+ -fsanitize=address
 TESTFLAGS = -I test -fno-omit-frame-pointer -fsanitize=address
 LDFLAGS = -lm -lreadline -ldl
 

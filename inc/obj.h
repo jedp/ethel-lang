@@ -49,7 +49,7 @@ obj_t *nil_obj();
 obj_t *no_obj();
 obj_t *int_obj(int);
 obj_t *float_obj(float);
-obj_t *string_obj(char*);
+obj_t *string_obj(const char*);
 obj_t *char_obj(char);
 obj_t *boolean_obj(bool);
 

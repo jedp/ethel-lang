@@ -12,34 +12,33 @@ char result_buf[80];
 char input[MAX_INPUT] = "";
 
 void print_result(obj_t *obj) {
-  printf("%s ", obj_type_names[obj->type]);
-
   switch (obj->type) {
     case TYPE_INT:
-      printf("%d\n", obj->intval);
+      printf("%d  ", obj->intval);
       break;
     case TYPE_FLOAT:
-      printf("%f\n", (double) obj->floatval);
+      printf("%f  ", (double) obj->floatval);
       break;
     case TYPE_STRING:
-      printf("%s\n", obj->stringval);
+      printf("%s  ", obj->stringval);
       break;
     case TYPE_CHAR:
       // Range check here.
-      printf("'%c'\n", obj->charval);
+      printf("'%c'  ", obj->charval);
       break;
     case TYPE_BOOLEAN:
       if (obj->intval) {
-        printf("True\n");
+        printf("True  ");
       } else {
-        printf("False\n");
+        printf("False  ");
       }
       break;
     default:
-      // The type was printed. That's fine.
-      printf("\n");
+      // The type is printed. That's fine.
       break;
   }
+
+  printf("(%s)\n", obj_type_names[obj->type]);
 }
 
 int main(int argc, char** argv) {
@@ -81,8 +80,9 @@ int main(int argc, char** argv) {
 
       if (result->err == NO_ERROR && obj->type != TYPE_NOTHING) {
         print_result(obj);
+      } else {
+        printf("%s\n", err_names[result->err]);
       }
-      printf("%s\n", err_names[result->err]);
     }
   }
 

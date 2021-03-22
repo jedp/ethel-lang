@@ -35,9 +35,10 @@ obj_t *float_obj(float f) {
   return obj;
 }
 
-obj_t *string_obj(char* s) {
+obj_t *string_obj(const char* s) {
   obj_t *obj = obj_of(TYPE_STRING);
-  obj->stringval = s;
+  obj->stringval = malloc(strlen(s) + 1);
+  strcpy(obj->stringval, s);
   return obj;
 }
 

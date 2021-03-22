@@ -55,6 +55,20 @@ void eval_char_expr(ast_expr_t *expr, eval_result_t *result) {
   result->obj = char_obj(expr->charval);
 }
 
+void strip_trailing_ws(char* s) {
+  int end = strlen(s) - 1;
+  while (end > 0) {
+    if (s[end] != ' '  &&
+        s[end] != '\t' &&
+        s[end] != '\n') {
+      break;
+    }
+    // Convert trailing whitespace to null, and decrement length by one.
+    s[end] = '\0';
+    end--;
+  }
+}
+
 void int_to_string(obj_t *obj) {
   int i = obj->intval;
   // Longest thing we can print is -2147483648, which is 11 characters + 1 for the null.
@@ -72,12 +86,20 @@ void float_to_string(obj_t *obj) {
 }
 
 error_t string_to_int(obj_t *obj) {
-  char *end;
-  long l = strtol(obj->stringval, &end, 10);
-  // Expect either end of line, or to have encountered a decimal point.
-  if (*end != '\0' && *end != '.') return EVAL_BAD_INPUT;
-  if (l > INT_MAX)  return OVERFLOW_ERROR;
-  if (l < INT_MIN)  return UNDERFLOW_ERROR;
+  char *end = NULL;
+  char *input = malloc(strlen(obj->stringval) + 1);
+  strcpy(input, obj->stringval);
+  strip_trailing_ws(input);
+
+  long l = strtol(input, &end, 10);
+  // Expect to have read to the end of the string or to a decimal point.
+  bool bad_input = (*end != '\0') && (*end != '.');
+  // Can only free input after we're done using the end pointer.
+  free(input);
+
+  if (bad_input) return EVAL_BAD_INPUT;
+  if (l > INT_MAX) return OVERFLOW_ERROR;
+  if (l < INT_MIN) return UNDERFLOW_ERROR;
 
   obj->type = TYPE_INT;
   obj->intval = (int) l;
@@ -85,9 +107,17 @@ error_t string_to_int(obj_t *obj) {
 }
 
 error_t string_to_float(obj_t *obj) {
-  char *end;
-  float f = strtof(obj->stringval, &end);
-  if (*end != '\0') return EVAL_BAD_INPUT;
+  char *end = NULL;
+  char *input = malloc(strlen(obj->stringval) + 1);
+  strcpy(input, obj->stringval);
+  strip_trailing_ws(input);
+
+  float f = strtof(input, &end);
+
+  bool bad_input = *end != '\0';
+  free(input);
+
+  if (bad_input) return EVAL_BAD_INPUT;
 
   obj->type = TYPE_FLOAT;
   obj->floatval = f;
@@ -100,10 +130,9 @@ void eval_string_expr(ast_expr_t *expr, eval_result_t *result) {
     return;
   }
   obj_t* obj = malloc(sizeof(obj_t));
-  char* stringval = malloc(strlen(expr->stringval) + 1);
-  strcpy(stringval, expr->stringval);
   obj->type = TYPE_STRING;
-  obj->stringval = stringval;
+  obj->stringval = malloc(strlen(expr->stringval) + 1);
+  strcpy(obj->stringval, expr->stringval);
   result->obj = obj;
 }
 
@@ -449,12 +478,13 @@ void readln_input(eval_result_t *result) {
   if (getline(&s, &MAX_INPUT_LINE, stdin) == -1) {
     result->err = INPUT_STREAM_ERROR;
   }
+
   // Trim trailing newline.
-  int len = (int) strlen(s) + 1;
-  uint32_t end = len > 0 ? (uint32_t) (len - 1) : 0;
-  while (end > 0 && s[end] == '\n') s[end--] = 0;
+  int end = (int) strlen(s) - 1;
+  while (end >= 0 && s[end] == '\n') s[end--] = '\0';
 
   result->obj = string_obj(s);
+  free(s);
 }
 
 void resolve_callable_expr(ast_expr_t *expr, env_t *env, eval_result_t *result) {
