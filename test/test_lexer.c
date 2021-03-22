@@ -18,7 +18,7 @@ void test_lex_error(void) {
 }
 
 void test_lex_word(void) {
-  char *expr = "for i in 1 to 10 step 2";
+  char *expr = "for i in 1 .. 10 step 2";
   lexer_t lexer;
   lexer_init(&lexer, expr, strlen(expr));
 
@@ -27,7 +27,7 @@ void test_lex_word(void) {
     { .tag = TAG_IDENT,   .string = "i" },
     { .tag = TAG_IN,      .string = "in" },
     { .tag = TAG_INT,     .intval = 1 },
-    { .tag = TAG_TO,      .string = "to" },
+    { .tag = TAG_RANGE },
     { .tag = TAG_INT,     .intval = 10 },
     { .tag = TAG_STEP,    .string = "step" },
     { .tag = TAG_INT,     .intval = 2 },
@@ -38,7 +38,7 @@ void test_lex_word(void) {
     TEST_ASSERT_EQUAL(expected[i].tag, lexer.token.tag);
     if (lexer.token.tag == TAG_INT) {
       TEST_ASSERT_EQUAL(expected[i].intval, lexer.token.intval);
-    } else {
+    } else if (lexer.token.tag != TAG_RANGE) {
       TEST_ASSERT(!strcmp(expected[i].string, lexer.token.string));
     }
     advance(&lexer);
@@ -204,6 +204,29 @@ void test_lex_inequality_nested_expressions(void) {
   }
 }
 
+void test_lex_range(void) {
+  char *expr = "1 .. 10";
+  lexer_t lexer;
+  lexer_init(&lexer, expr, strlen(expr));
+
+  int expected[] = { TAG_INT, TAG_RANGE, TAG_INT };
+
+  for (int i = 0; i < sizeof(expected) / sizeof(expected[0]); i++) {
+    TEST_ASSERT_EQUAL(NO_ERROR, lexer.err);
+    TEST_ASSERT_EQUAL(expected[i], lexer.token.tag);
+    advance(&lexer);
+  }
+
+  // Also without whitespace, so we don't misconstrue this as a broken float.
+  char *expr2 = "1 .. 10";
+  lexer_init(&lexer, expr2, strlen(expr));
+  for (int i = 0; i < sizeof(expected) / sizeof(expected[0]); i++) {
+    TEST_ASSERT_EQUAL(NO_ERROR, lexer.err);
+    TEST_ASSERT_EQUAL(expected[i], lexer.token.tag);
+    advance(&lexer);
+  }
+}
+
 void test_lex_parens(void) {
   char *expr = "(1.24 * ( 3.5-2+ 4 ) + 1) * 2";
   lexer_t lexer;
@@ -297,12 +320,12 @@ void test_lex_comment_only(void) {
 }
 
 void test_lex_begin_end(void) {
-  char *expr = "for i in 1 to 10 do begin   \n  print(i) \n  end";
+  char *expr = "for i in 1 .. 10 do begin   \n  print(i) \n  end";
   lexer_t lexer;
   lexer_init(&lexer, expr, strlen(expr));
 
   int expected[] = { 
-    TAG_FOR, TAG_IDENT, TAG_IN, TAG_INT, TAG_TO, TAG_INT, TAG_DO, TAG_BEGIN, TAG_EOL,
+    TAG_FOR, TAG_IDENT, TAG_IN, TAG_INT, TAG_RANGE, TAG_INT, TAG_DO, TAG_BEGIN, TAG_EOL,
     TAG_PRINT, TAG_LPAREN, TAG_IDENT, TAG_RPAREN, TAG_EOL,
     TAG_END, TAG_EOF
   };
@@ -348,7 +371,6 @@ void test_lex_all_tokens(void) {
     (test_data_t) { .text = "while", .expected_tag = TAG_WHILE },
     (test_data_t) { .text = "for", .expected_tag = TAG_FOR },
     (test_data_t) { .text = "in", .expected_tag = TAG_IN },
-    (test_data_t) { .text = "to", .expected_tag = TAG_TO },
     (test_data_t) { .text = "step", .expected_tag = TAG_STEP },
   };
 
@@ -374,6 +396,7 @@ void test_lexer(void) {
   RUN_TEST(test_lex_arithmetic_no_spaces);
   RUN_TEST(test_lex_inequality);
   RUN_TEST(test_lex_inequality_nested_expressions);
+  RUN_TEST(test_lex_range);
   RUN_TEST(test_lex_parens);
   RUN_TEST(test_lex_parens_no_spaces);
   RUN_TEST(test_lex_assign);

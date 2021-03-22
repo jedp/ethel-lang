@@ -141,14 +141,12 @@ ast_expr_t *ast_while_loop(ast_expr_t *cond, ast_expr_t *pred) {
 }
 
 ast_expr_t *ast_for_loop(ast_expr_t *index,
-                         ast_expr_t *start,
-                         ast_expr_t *end,
+                         ast_expr_t *range,
                          ast_expr_t *pred) {
   ast_expr_t *node = ast_node(AST_FOR_LOOP);
   node->e1 = index;
-  node->e2 = start;
-  node->e3 = end;
-  node->e4 = pred;
+  node->e2 = range;
+  node->e3 = pred;
   return node;
 }
 

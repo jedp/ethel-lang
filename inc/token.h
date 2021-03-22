@@ -47,6 +47,9 @@ enum tag_enum {
   TAG_TYPE_BOOLEAN,
   TAG_AS,
 
+  // Sequence
+  TAG_RANGE,
+
   // Structure
   TAG_IF,
   TAG_THEN,
@@ -54,7 +57,6 @@ enum tag_enum {
   TAG_WHILE,
   TAG_FOR,
   TAG_IN,
-  TAG_TO,
   TAG_STEP,
   TAG_DO,
 
@@ -127,6 +129,9 @@ static const char* tag_names[] = {
   "BOOLEAN-TYPE",
   "AS",
 
+  // Sequence,
+  "RANGE-TO",
+
   // Structure
   "IF",
   "THEN",
@@ -134,7 +139,6 @@ static const char* tag_names[] = {
   "WHILE",
   "FOR",
   "IN",
-  "TO",
   "STEP",
   "DO",
 
@@ -190,7 +194,6 @@ static const token_t reserved[] = {
   { TAG_WHILE,         .string = (char *) "while" },
   { TAG_FOR,           .string = (char *) "for" },
   { TAG_IN,            .string = (char *) "in" },
-  { TAG_TO,            .string = (char *) "to" },
   { TAG_STEP,          .string = (char *) "step" },
   { TAG_DO,            .string = (char *) "do" },
   { TAG_NIL,           .string = (char *) "nil" },

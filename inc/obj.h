@@ -16,9 +16,15 @@ enum obj_type_enum {
   TYPE_CHAR,
   TYPE_STRING,
   TYPE_BOOLEAN,
+  TYPE_RANGE,
   TYPE_IDENT,
   TYPE_MAX,
 };
+
+typedef struct Range {
+  int from;
+  int to;
+} range_t;
 
 typedef struct Obj {
   uint8_t type;
@@ -28,6 +34,7 @@ typedef struct Obj {
     float floatval;
     char* stringval;
     char charval;
+    range_t range;
   };
 } obj_t;
 
@@ -41,6 +48,7 @@ static const char* obj_type_names[TYPE_MAX] = {
   "Char",
   "Str",
   "Bool",
+  "Range",
   "Identifier"
 };
 
@@ -52,6 +60,7 @@ obj_t *float_obj(float);
 obj_t *string_obj(const char*);
 obj_t *char_obj(char);
 obj_t *boolean_obj(bool);
+obj_t *range_obj(int, int);
 
 bool truthy(obj_t *obj);
 

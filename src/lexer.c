@@ -12,7 +12,7 @@ char next_word_buf[MAX_WORD];
 static void unreadch(lexer_t *lexer) {
   lexer->pos--;
   lexer->buf[lexer->pos] = lexer->nextch;
-  lexer->nextch = ' ';
+  lexer->nextch = lexer->pos > 0 ? lexer->buf[lexer->pos-1] : '\0';
 }
 
 static void readch(lexer_t *lexer) {
@@ -87,6 +87,14 @@ static token_t *lex_num(lexer_t *lexer) {
 
   if (lexer->nextch == '.') {
     readch(lexer);
+
+    // Make sure this isn't actually a range!
+    if (lexer->nextch == '.') {
+      unreadch(lexer);
+      unreadch(lexer);
+      goto done;
+    }
+
     do {
       f = f * 10 + (lexer->nextch - '0');
       // What a mess.
@@ -97,6 +105,7 @@ static token_t *lex_num(lexer_t *lexer) {
 
   unreadch(lexer);
 
+done:
   if (!f) {
     lexer->next_token.tag = TAG_INT;
     lexer->next_token.intval = sign * i;
@@ -187,7 +196,7 @@ token_t *get_token(lexer_t *lexer) {
 
   if (ch == '\n') return lex_eol(lexer);
 
-  if (ch == '.' || (ch >= '0' && ch <= '9')) return lex_num(lexer);
+  if (ch >= '0' && ch <= '9') return lex_num(lexer);
 
   if ((ch >= 'a' && ch <= 'z') ||
       (ch >= 'A' && ch <= 'Z')) return lex_word(lexer);
@@ -202,6 +211,14 @@ token_t *get_token(lexer_t *lexer) {
     case '-': return lex_op(lexer, TAG_MINUS);
     case '*': return lex_op(lexer, TAG_TIMES);
     case '/': return lex_op(lexer, TAG_DIVIDE);
+    case '.': {
+      readch(lexer);
+      if (lexer->nextch == '.') {
+        return lex_op(lexer, TAG_RANGE);
+      }
+      unreadch(lexer);
+      return lex_num(lexer);
+    }
     case '<': {
       readch(lexer);
       if (lexer->nextch == '=') {

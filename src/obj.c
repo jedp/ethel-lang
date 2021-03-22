@@ -54,6 +54,13 @@ obj_t *boolean_obj(bool t) {
   return obj;
 }
 
+obj_t *range_obj(int from, int to) {
+  obj_t *obj = obj_of(TYPE_RANGE);
+  obj->range = (range_t) { from, to };
+  printf("range from %d to %d\n", obj->range.from, obj->range.to);
+  return obj;
+}
+
 bool truthy(obj_t *obj) {
   switch(obj->type) {
     case TYPE_NIL: return false;

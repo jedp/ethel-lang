@@ -9,18 +9,25 @@ Very much in progress and not useful yet.
 ```
 make
 ./repl
-> for i in 1 to 10 do if (i mod 7 == 0) then print("Hello, Ethel!")
+> for i in 1..10 do if (i mod 7 == 0) then print("Hello, Ethel!")
 Hello, Ethel!
-Nil
+(Nil)
+> mut guess = input("Guess my age!") as int
+Guess my age! 5
+5  (Int)
+> age = 42
+42  (Int)
+> while (guess != age) do begin
+    if (guess < age) then print("Too low") else print("Too high")
+    guess = input("Guess again") as int
+    end
+Too low
+Guess again 66
+Too high
+Guess again 15
+Too low
+Guess again 42
 Ok
-> age = input("How old are you?") as int
-How old are you? 5
-Integer 5
-Ok
-> if age > 0 and age < 10 then print("You are small")
-You are small
-Ok
->
 ```
 
 Expressions all the way down.
@@ -47,12 +54,10 @@ Ok
 
 - Everything is an expression
 - Environment scopes for variables
-- Immutable variables, except for loop indices
+- Mutable or immutable variables
 - Type casting within reason
 - Input and output
  
 Yet to come:
-- Memory management and GC
-- Functions and stack frames
-- Graphics (stm32f4 LCD driver)
-- Compiler
+- So many things
+

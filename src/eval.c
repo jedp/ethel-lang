@@ -436,6 +436,10 @@ void boolean_or(obj_t *a, obj_t *b, eval_result_t *result) {
   result->obj = boolean_obj(truthy(a) || truthy(b)); 
 }
 
+void range(int from, int to, eval_result_t *result) {
+  result->obj = range_obj(from, to);
+}
+
 int print_args(ast_expr_list_t *args, eval_result_t *result, env_t *env) {
   int printed = 0;
   ast_expr_list_t *node = (ast_expr_list_t*) args;
@@ -561,47 +565,36 @@ void eval_for_loop(ast_expr_t *expr, env_t *env, eval_result_t *result) {
   eval_result_t *r = malloc(sizeof(eval_result_t));
   r->obj = undef_obj();
 
-  // int from.
-  if (((obj_t*)expr->e2)->type != AST_INT) {
-    printf("expected int ; got %d\n", ((obj_t*)expr->e2)->type);
-    result->err = TYPE_INT_REQUIRED;
+  // range
+  if (((obj_t*)expr->e2)->type != AST_RANGE) {
+    result->err = SYNTAX_ERROR;
     goto error;
   }
-  eval_result_t *start = eval_expr(expr->e2, env);
-  if ((result->err = start->err) != NO_ERROR) goto error;
-
-  // int to.
-  if (((obj_t*)expr->e3)->type != AST_INT) {
-    printf("expected int ; got %d\n", ((obj_t*)expr->e3)->type);
-    result->err = TYPE_INT_REQUIRED;
-    goto error;
-  }
-  eval_result_t *end = eval_expr(expr->e3, env);
-  if ((result->err = end->err) != NO_ERROR) goto error;
+  eval_result_t *range = eval_expr(expr->e2, env);
+  if ((result->err = range->err) != NO_ERROR) goto error;
 
   // Push a new scope and store the index variable.
   // We will mutate this variable with each iteration through the loop.
   push_scope(env);
-  obj_t *index_obj = int_obj(start->obj->intval);
+  obj_t *index_obj = int_obj(range->obj->intval);
   // Not mutable in code.
   put_env(env, index_name, index_obj, F_NONE);
 
-  int start_val = start->obj->intval;
-  int end_val = end->obj->intval;
+  int start_val = range->obj->range.from;
+  int end_val = range->obj->range.to;
   if (start_val < 0 || end_val < 0) {
     result->err = TYPE_POSITIVE_INT_REQUIRED;
     goto error;
   }
 
-  // These are both in the same mongo function because I don't want to have to call
-  // functions with more than four args.
   if (start_val <= end_val) {
     for (int i = start_val; i <= end_val; ++i) {
       // Overflow?
       if (i < 0) { result->err = OVERFLOW_ERROR; goto error; }
       index_obj->intval = i;
       free(r);
-      r = eval_expr(expr->e4, env);
+      // Eval predicate.
+      r = eval_expr(expr->e3, env);
       if ((result->err = r->err) != NO_ERROR) {
         pop_scope(env);
         goto error;
@@ -613,7 +606,8 @@ void eval_for_loop(ast_expr_t *expr, env_t *env, eval_result_t *result) {
       if (i < 0) { result->err = OVERFLOW_ERROR; goto error; }
       index_obj->intval = i;
       free(r);
-      r = eval_expr(expr->e4, env);
+      // Eval predicate.
+      r = eval_expr(expr->e3, env);
       if ((result->err = r->err) != NO_ERROR) {
         pop_scope(env);
         goto error;
@@ -723,6 +717,21 @@ eval_result_t *eval_expr(ast_expr_t *expr, env_t *env) {
             eval_result_t *r2 = eval_expr(expr->e2, env);
             if ((result->err = r2->err) != NO_ERROR) goto error;
             cmp(expr->type, r1->obj, r2->obj, result); 
+            if (result->err != NO_ERROR) goto error;
+            break;
+        }
+        case AST_RANGE: {
+            if (((obj_t*)expr->e1)->type != AST_INT) {
+              result->err = TYPE_INT_REQUIRED; goto error;
+            }
+            eval_result_t *r1 = eval_expr(expr->e1, env);
+            if ((result->err = r1->err) != NO_ERROR) goto error;
+            if (((obj_t*)expr->e2)->type != AST_INT) {
+              result->err = TYPE_INT_REQUIRED; goto error;
+            }
+            eval_result_t *r2 = eval_expr(expr->e2, env);
+            if ((result->err = r2->err) != NO_ERROR) goto error;
+            range(r1->obj->intval, r2->obj->intval, result);
             if (result->err != NO_ERROR) goto error;
             break;
         }

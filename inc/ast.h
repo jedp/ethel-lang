@@ -20,6 +20,7 @@ enum ast_type_enum {
   AST_LE,
   AST_EQ,
   AST_NE,
+  AST_RANGE,
   AST_NIL,
   AST_INT,
   AST_FLOAT,
@@ -54,6 +55,7 @@ static const char *ast_node_names[] = {
   "LE",
   "EQ",
   "NE",
+  "RANGE-FROM-TO",
   "NIL",
   "INT",
   "FLOAT",
@@ -126,7 +128,7 @@ ast_expr_t *ast_delete(ast_expr_t *ident);
 ast_expr_t *ast_if_then(ast_expr_t *if_clause, ast_expr_t *then_clause);
 ast_expr_t *ast_if_then_else(ast_expr_t *if_clause, ast_expr_t *then_clause, ast_expr_t *else_clause);
 ast_expr_t *ast_while_loop(ast_expr_t *cond, ast_expr_t *pred);
-ast_expr_t *ast_for_loop(ast_expr_t *index, ast_expr_t *start, ast_expr_t *end, ast_expr_t *pred);
+ast_expr_t *ast_for_loop(ast_expr_t *index, ast_expr_t *range, ast_expr_t *pred);
 ast_expr_t *ast_empty();
 
 #endif

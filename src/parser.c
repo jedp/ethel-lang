@@ -18,6 +18,7 @@ bool is_binop(token_t *token) {
       || token->tag == TAG_MINUS
       || token->tag == TAG_TIMES
       || token->tag == TAG_DIVIDE
+      || token->tag == TAG_RANGE
       || token->tag == TAG_AND
       || token->tag == TAG_OR
       || token->tag == TAG_MOD
@@ -52,6 +53,8 @@ uint8_t binop_preced(token_t *token) {
       return PRECED_AND;
     case TAG_OR:
       return PRECED_OR;
+    case TAG_RANGE:
+      return PRECED_RANGE;
     default:
       return PRECED_NONE;
       break;
@@ -150,19 +153,20 @@ ast_expr_t *_parse_expr(lexer_t *lexer, int min_preced) {
 
     switch(tag) {
       case TAG_AS:     lhs = ast_cast(lhs, _parse_expr(lexer, next_min_preced)); break;
-      case TAG_PLUS:   lhs = ast_expr(AST_ADD, lhs, _parse_expr(lexer, next_min_preced)); break;
-      case TAG_MINUS:  lhs = ast_expr(AST_SUB, lhs, _parse_expr(lexer, next_min_preced)); break;
-      case TAG_TIMES:  lhs = ast_expr(AST_MUL, lhs, _parse_expr(lexer, next_min_preced)); break;
-      case TAG_DIVIDE: lhs = ast_expr(AST_DIV, lhs, _parse_expr(lexer, next_min_preced)); break;
-      case TAG_MOD:    lhs = ast_expr(AST_MOD, lhs, _parse_expr(lexer, next_min_preced)); break;
-      case TAG_AND:    lhs = ast_expr(AST_AND, lhs, _parse_expr(lexer, next_min_preced)); break;
-      case TAG_OR:     lhs = ast_expr(AST_OR,  lhs, _parse_expr(lexer, next_min_preced)); break;
-      case TAG_GT:     lhs = ast_expr(AST_GT,  lhs, _parse_expr(lexer, next_min_preced)); break;
-      case TAG_GE:     lhs = ast_expr(AST_GE,  lhs, _parse_expr(lexer, next_min_preced)); break;
-      case TAG_LT:     lhs = ast_expr(AST_LT,  lhs, _parse_expr(lexer, next_min_preced)); break;
-      case TAG_LE:     lhs = ast_expr(AST_LE,  lhs, _parse_expr(lexer, next_min_preced)); break;
-      case TAG_EQ:     lhs = ast_expr(AST_EQ,  lhs, _parse_expr(lexer, next_min_preced)); break;
-      case TAG_NE:     lhs = ast_expr(AST_NE,  lhs, _parse_expr(lexer, next_min_preced)); break;
+      case TAG_PLUS:   lhs = ast_expr(AST_ADD,   lhs, _parse_expr(lexer, next_min_preced)); break;
+      case TAG_MINUS:  lhs = ast_expr(AST_SUB,   lhs, _parse_expr(lexer, next_min_preced)); break;
+      case TAG_TIMES:  lhs = ast_expr(AST_MUL,   lhs, _parse_expr(lexer, next_min_preced)); break;
+      case TAG_DIVIDE: lhs = ast_expr(AST_DIV,   lhs, _parse_expr(lexer, next_min_preced)); break;
+      case TAG_MOD:    lhs = ast_expr(AST_MOD,   lhs, _parse_expr(lexer, next_min_preced)); break;
+      case TAG_AND:    lhs = ast_expr(AST_AND,   lhs, _parse_expr(lexer, next_min_preced)); break;
+      case TAG_OR:     lhs = ast_expr(AST_OR,    lhs, _parse_expr(lexer, next_min_preced)); break;
+      case TAG_GT:     lhs = ast_expr(AST_GT,    lhs, _parse_expr(lexer, next_min_preced)); break;
+      case TAG_GE:     lhs = ast_expr(AST_GE,    lhs, _parse_expr(lexer, next_min_preced)); break;
+      case TAG_LT:     lhs = ast_expr(AST_LT,    lhs, _parse_expr(lexer, next_min_preced)); break;
+      case TAG_LE:     lhs = ast_expr(AST_LE,    lhs, _parse_expr(lexer, next_min_preced)); break;
+      case TAG_EQ:     lhs = ast_expr(AST_EQ,    lhs, _parse_expr(lexer, next_min_preced)); break;
+      case TAG_NE:     lhs = ast_expr(AST_NE,    lhs, _parse_expr(lexer, next_min_preced)); break;
+      case TAG_RANGE:  lhs = ast_expr(AST_RANGE, lhs, _parse_expr(lexer, next_min_preced)); break;
 
       default:
         printf("what? why this %s?\n", tag_names[tag]);
@@ -223,13 +227,11 @@ ast_expr_t *parse_expr(lexer_t *lexer) {
       ast_expr_t *index = parse_expr(lexer);
       if (index->type != AST_IDENT) goto error;
       if (!eat(lexer, TAG_IN)) goto error;
-      ast_expr_t *start = parse_expr(lexer);
-      if (!eat(lexer, TAG_TO)) goto error;
-      ast_expr_t *end = parse_expr(lexer);
+      ast_expr_t *range = parse_expr(lexer);
       if (!eat(lexer, TAG_DO)) goto error;
       ast_expr_t *pred = parse_expr(lexer);
       if (pred->type == AST_EMPTY) goto error;
-      return ast_for_loop(index, start, end, pred);
+      return ast_for_loop(index, range, pred);
     }
     case TAG_INPUT: {
       ast_reserved_callable_type_t callable_type = ast_callable_type_for_tag(lexer->token.tag);
