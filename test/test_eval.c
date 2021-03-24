@@ -262,6 +262,15 @@ void test_eval_cast_boolean(void) {
   TEST_ASSERT_EQUAL('f', obj->intval);
 }
 
+void test_eval_callable_abs(void) {
+  char *program = "abs(-42)";
+  eval_result_t *result = eval_program(program);
+  TEST_ASSERT_EQUAL(NO_ERROR, result->err);
+
+  obj_t *obj = result->obj;
+  TEST_ASSERT_EQUAL(42, obj->intval);
+}
+
 void test_eval(void) {
   RUN_TEST(test_eval_calculator);
   RUN_TEST(test_eval_assign_immutable);
@@ -283,5 +292,6 @@ void test_eval(void) {
   RUN_TEST(test_eval_cast_string);
   RUN_TEST(test_eval_cast_char);
   RUN_TEST(test_eval_cast_boolean);
+  RUN_TEST(test_eval_callable_abs);
 }
 

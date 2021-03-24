@@ -497,9 +497,9 @@ void resolve_callable_expr(ast_expr_t *expr, env_t *env, eval_result_t *result) 
     return;
   }
 
-  ast_expr_list_t *args = expr->block_exprs;
+  ast_expr_list_t *args = expr->reserved_callable->es;
 
-  switch (expr->intval) {
+  switch (expr->reserved_callable->type) {
     case AST_CALL_PRINT:
       println_args(args, result, env);
       break;

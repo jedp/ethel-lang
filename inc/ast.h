@@ -128,6 +128,11 @@ typedef struct ExprListNode {
   struct ExprListNode *next;
 } ast_expr_list_t;
 
+typedef struct ReservedCallable {
+  ast_type_t type;
+  ast_expr_list_t *es;
+} ast_reserved_callable_t;
+
 typedef struct WhileLoop {
   ast_expr_t *cond;
   ast_expr_t *pred;
@@ -148,6 +153,7 @@ typedef struct Expr {
     ast_binop_args_t *binop_args;
     ast_range_args_t *range;
     ast_cast_args_t *cast_args;
+    ast_reserved_callable_t *reserved_callable;
     ast_if_then_args_t *if_then_args;
     ast_if_then_else_args_t *if_then_else_args;
     ast_while_loop_t *while_loop;

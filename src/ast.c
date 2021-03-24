@@ -131,9 +131,10 @@ ast_expr_t *ast_block(ast_expr_list_t *es) {
 
 ast_expr_t *ast_reserved_callable(ast_reserved_callable_type_t type, ast_expr_list_t *es) {
   ast_expr_t *node = ast_node(AST_RESERVED_CALLABLE);
-  node->intval = (int) type;
-  node->block_exprs = malloc(sizeof(ast_expr_list_t));
-  node->block_exprs = es;
+  node->reserved_callable = malloc(sizeof(ast_reserved_callable_t));
+  node->reserved_callable->type = type;
+  node->reserved_callable->es = malloc(sizeof(ast_expr_list_t));
+  node->reserved_callable->es = es;
   return node;
 }
 
