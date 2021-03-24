@@ -25,10 +25,10 @@ void test_parse_add(void) {
 
   TEST_ASSERT_EQUAL(NO_ERROR, parse_result->err);
   TEST_ASSERT_EQUAL(AST_ADD, ast->type);
-  TEST_ASSERT_EQUAL(AST_INT, ((ast_expr_t*) ast->e1)->type);
-  TEST_ASSERT_EQUAL(1, ((ast_expr_t*) ast->e1)->intval);
-  TEST_ASSERT_EQUAL(AST_INT, ((ast_expr_t*) ast->e2)->type);
-  TEST_ASSERT_EQUAL(2, ((ast_expr_t*) ast->e2)->intval);
+  TEST_ASSERT_EQUAL(AST_INT, ((ast_expr_t*) ast->binop_args->a)->type);
+  TEST_ASSERT_EQUAL(1, ((ast_expr_t*) ast->binop_args->a)->intval);
+  TEST_ASSERT_EQUAL(AST_INT, ((ast_expr_t*) ast->binop_args->b)->type);
+  TEST_ASSERT_EQUAL(2, ((ast_expr_t*) ast->binop_args->b)->intval);
   free(ast);
 }
 
@@ -40,10 +40,10 @@ void test_parse_sub(void) {
 
   TEST_ASSERT_EQUAL(NO_ERROR, parse_result->err);
   TEST_ASSERT_EQUAL(AST_SUB, ast->type);
-  TEST_ASSERT_EQUAL(AST_INT, ((ast_expr_t*) ast->e1)->type);
-  TEST_ASSERT_EQUAL(2, ((ast_expr_t*) ast->e1)->intval);
-  TEST_ASSERT_EQUAL(AST_INT, ((ast_expr_t*) ast->e2)->type);
-  TEST_ASSERT_EQUAL(1, ((ast_expr_t*) ast->e2)->intval);
+  TEST_ASSERT_EQUAL(AST_INT, ((ast_expr_t*) ast->binop_args->a)->type);
+  TEST_ASSERT_EQUAL(2, ((ast_expr_t*) ast->binop_args->a)->intval);
+  TEST_ASSERT_EQUAL(AST_INT, ((ast_expr_t*) ast->binop_args->b)->type);
+  TEST_ASSERT_EQUAL(1, ((ast_expr_t*) ast->binop_args->b)->intval);
   free(ast);
 }
 
@@ -55,10 +55,10 @@ void test_parse_mul(void) {
 
   TEST_ASSERT_EQUAL(NO_ERROR, parse_result->err);
   TEST_ASSERT_EQUAL(AST_MUL, ast->type);
-  TEST_ASSERT_EQUAL(AST_INT, ((ast_expr_t*) ast->e1)->type);
-  TEST_ASSERT_EQUAL(2, ((ast_expr_t*) ast->e1)->intval);
-  TEST_ASSERT_EQUAL(AST_INT, ((ast_expr_t*) ast->e2)->type);
-  TEST_ASSERT_EQUAL(3, ((ast_expr_t*) ast->e2)->intval);
+  TEST_ASSERT_EQUAL(AST_INT, ((ast_expr_t*) ast->binop_args->a)->type);
+  TEST_ASSERT_EQUAL(2, ((ast_expr_t*) ast->binop_args->a)->intval);
+  TEST_ASSERT_EQUAL(AST_INT, ((ast_expr_t*) ast->binop_args->b)->type);
+  TEST_ASSERT_EQUAL(3, ((ast_expr_t*) ast->binop_args->b)->intval);
   free(ast);
 }
 
@@ -70,10 +70,10 @@ void test_parse_div(void) {
 
   TEST_ASSERT_EQUAL(NO_ERROR, parse_result->err);
   TEST_ASSERT_EQUAL(AST_DIV, ast->type);
-  TEST_ASSERT_EQUAL(AST_INT, ((ast_expr_t*) ast->e1)->type);
-  TEST_ASSERT_EQUAL(3, ((ast_expr_t*) ast->e1)->intval);
-  TEST_ASSERT_EQUAL(AST_INT, ((ast_expr_t*) ast->e2)->type);
-  TEST_ASSERT_EQUAL(6, ((ast_expr_t*) ast->e2)->intval);
+  TEST_ASSERT_EQUAL(AST_INT, ((ast_expr_t*) ast->binop_args->a)->type);
+  TEST_ASSERT_EQUAL(3, ((ast_expr_t*) ast->binop_args->a)->intval);
+  TEST_ASSERT_EQUAL(AST_INT, ((ast_expr_t*) ast->binop_args->b)->type);
+  TEST_ASSERT_EQUAL(6, ((ast_expr_t*) ast->binop_args->b)->intval);
   free(ast);
 }
 
@@ -85,8 +85,8 @@ void test_parse_assign(void) {
 
   TEST_ASSERT_EQUAL(NO_ERROR, parse_result->err);
   TEST_ASSERT_EQUAL(AST_ASSIGN, ast->type);
-  TEST_ASSERT_EQUAL(AST_IDENT, ((ast_expr_t*) ast->e1)->type);
-  TEST_ASSERT_EQUAL(AST_ADD, ((ast_expr_t*) ast->e2)->type);
+  TEST_ASSERT_EQUAL(AST_IDENT, ((ast_expr_t*) ast->assignment->ident)->type);
+  TEST_ASSERT_EQUAL(AST_ADD, ((ast_expr_t*) ast->assignment->value)->type);
   free(ast);
 }
 
@@ -98,8 +98,8 @@ void test_parse_if_else(void) {
 
   TEST_ASSERT_EQUAL(NO_ERROR, parse_result->err);
   TEST_ASSERT_EQUAL(AST_IF_THEN, ast->type);
-  TEST_ASSERT_EQUAL(AST_INT, ((ast_expr_t*) ast->e1)->type);
-  TEST_ASSERT_EQUAL(AST_INT, ((ast_expr_t*) ast->e2)->type);
+  TEST_ASSERT_EQUAL(AST_INT, ((ast_expr_t*) ast->if_then_args->cond)->type);
+  TEST_ASSERT_EQUAL(AST_INT, ((ast_expr_t*) ast->if_then_args->pred)->type);
   free(ast);
 }
 
@@ -111,8 +111,8 @@ void test_parse_if_else_assign_expr(void) {
 
   TEST_ASSERT_EQUAL(NO_ERROR, parse_result->err);
   TEST_ASSERT_EQUAL(AST_ASSIGN, ast->type);
-  TEST_ASSERT_EQUAL(AST_IDENT, ((ast_expr_t*) ast->e1)->type);
-  TEST_ASSERT_EQUAL(AST_IF_THEN, ((ast_expr_t*) ast->e2)->type);
+  TEST_ASSERT_EQUAL(AST_IDENT, ((ast_expr_t*) ast->if_then_args->cond)->type);
+  TEST_ASSERT_EQUAL(AST_IF_THEN, ((ast_expr_t*) ast->if_then_args->pred)->type);
   free(ast);
 }
 
@@ -124,9 +124,9 @@ void test_parse_char(void) {
 
   TEST_ASSERT_EQUAL(NO_ERROR, parse_result->err);
   TEST_ASSERT_EQUAL(AST_ASSIGN, ast->type);
-  TEST_ASSERT_EQUAL(AST_IDENT, ((ast_expr_t*) ast->e1)->type);
-  TEST_ASSERT_EQUAL(AST_CHAR, ((ast_expr_t*) ast->e2)->type);
-  TEST_ASSERT_EQUAL('c', ((ast_expr_t*) ast->e2)->charval);
+  TEST_ASSERT_EQUAL(AST_IDENT, ((ast_expr_t*) ast->assignment->ident)->type);
+  TEST_ASSERT_EQUAL(AST_CHAR, ((ast_expr_t*) ast->assignment->value)->type);
+  TEST_ASSERT_EQUAL('c', ((ast_expr_t*) ast->assignment->value)->charval);
   free(ast);
 }
 
@@ -138,9 +138,9 @@ void test_parse_string(void) {
 
   TEST_ASSERT_EQUAL(NO_ERROR, parse_result->err);
   TEST_ASSERT_EQUAL(AST_ASSIGN, ast->type);
-  TEST_ASSERT_EQUAL(AST_IDENT, ((ast_expr_t*) ast->e1)->type);
-  TEST_ASSERT_EQUAL(AST_STRING, ((ast_expr_t*) ast->e2)->type);
-  TEST_ASSERT_EQUAL_STRING("Ethel", ((ast_expr_t*) ast->e2)->stringval);
+  TEST_ASSERT_EQUAL(AST_IDENT, ((ast_expr_t*) ast->assignment->ident)->type);
+  TEST_ASSERT_EQUAL(AST_STRING, ((ast_expr_t*) ast->assignment->value)->type);
+  TEST_ASSERT_EQUAL_STRING("Ethel", ((ast_expr_t*) ast->assignment->value)->stringval);
   free(ast);
 }
 
@@ -152,9 +152,9 @@ void test_parse_boolean_true(void) {
 
   TEST_ASSERT_EQUAL(NO_ERROR, parse_result->err);
   TEST_ASSERT_EQUAL(AST_ASSIGN, ast->type);
-  TEST_ASSERT_EQUAL(AST_IDENT, ((ast_expr_t*) ast->e1)->type);
-  TEST_ASSERT_EQUAL(AST_BOOLEAN, ((ast_expr_t*) ast->e2)->type);
-  TEST_ASSERT_TRUE(((ast_expr_t*) ast->e2)->intval);
+  TEST_ASSERT_EQUAL(AST_IDENT, ((ast_expr_t*) ast->assignment->ident)->type);
+  TEST_ASSERT_EQUAL(AST_BOOLEAN, ((ast_expr_t*) ast->assignment->value)->type);
+  TEST_ASSERT_TRUE(((ast_expr_t*) ast->assignment->value)->intval);
   free(ast);
 }
 
@@ -166,9 +166,9 @@ void test_parse_boolean_false(void) {
 
   TEST_ASSERT_EQUAL(NO_ERROR, parse_result->err);
   TEST_ASSERT_EQUAL(AST_ASSIGN, ast->type);
-  TEST_ASSERT_EQUAL(AST_IDENT, ((ast_expr_t*) ast->e1)->type);
-  TEST_ASSERT_EQUAL(AST_BOOLEAN, ((ast_expr_t*) ast->e2)->type);
-  TEST_ASSERT_FALSE(((ast_expr_t*) ast->e2)->intval);
+  TEST_ASSERT_EQUAL(AST_IDENT, ((ast_expr_t*) ast->assignment->ident)->type);
+  TEST_ASSERT_EQUAL(AST_BOOLEAN, ((ast_expr_t*) ast->assignment->value)->type);
+  TEST_ASSERT_FALSE(((ast_expr_t*) ast->assignment->value)->intval);
   free(ast);
 }
 

@@ -83,7 +83,7 @@ ast_expr_t *parse_start(lexer_t *lexer) {
 
 ast_expr_list_t *empty_expr_list() {
   ast_expr_list_t *node = malloc(sizeof(ast_expr_list_t));
-  node->e = ast_empty();
+  node->root = ast_empty();
   return node;
 }
 
@@ -92,13 +92,13 @@ ast_expr_list_t *parse_expr_list(lexer_t *lexer) {
   ast_expr_list_t *root = node;
 
   ast_expr_t *e = parse_expr(lexer);
-  node->e = e;
+  node->root = e;
   
   while (lexer->token.tag == TAG_COMMA) {
     advance(lexer);
     ast_expr_list_t *next = malloc(sizeof(ast_expr_list_t));
     e = parse_expr(lexer);
-    next->e = e;
+    next->root = e;
 
     node->next = next;
     node = next;
@@ -113,13 +113,13 @@ ast_expr_list_t *parse_block(lexer_t *lexer) {
   ast_expr_list_t *root = node;
 
   ast_expr_t *e = parse_expr(lexer);
-  node->e = e;
+  node->root = e;
 
   while (lexer->token.tag == TAG_EOL) {
     advance(lexer);
     ast_expr_list_t *next = malloc(sizeof(ast_expr_list_t));
     e = parse_expr(lexer);
-    next->e = e;
+    next->root = e;
 
     node->next = next;
     node = next;
@@ -153,20 +153,20 @@ ast_expr_t *_parse_expr(lexer_t *lexer, int min_preced) {
 
     switch(tag) {
       case TAG_AS:     lhs = ast_cast(lhs, _parse_expr(lexer, next_min_preced)); break;
-      case TAG_PLUS:   lhs = ast_expr(AST_ADD,   lhs, _parse_expr(lexer, next_min_preced)); break;
-      case TAG_MINUS:  lhs = ast_expr(AST_SUB,   lhs, _parse_expr(lexer, next_min_preced)); break;
-      case TAG_TIMES:  lhs = ast_expr(AST_MUL,   lhs, _parse_expr(lexer, next_min_preced)); break;
-      case TAG_DIVIDE: lhs = ast_expr(AST_DIV,   lhs, _parse_expr(lexer, next_min_preced)); break;
-      case TAG_MOD:    lhs = ast_expr(AST_MOD,   lhs, _parse_expr(lexer, next_min_preced)); break;
-      case TAG_AND:    lhs = ast_expr(AST_AND,   lhs, _parse_expr(lexer, next_min_preced)); break;
-      case TAG_OR:     lhs = ast_expr(AST_OR,    lhs, _parse_expr(lexer, next_min_preced)); break;
-      case TAG_GT:     lhs = ast_expr(AST_GT,    lhs, _parse_expr(lexer, next_min_preced)); break;
-      case TAG_GE:     lhs = ast_expr(AST_GE,    lhs, _parse_expr(lexer, next_min_preced)); break;
-      case TAG_LT:     lhs = ast_expr(AST_LT,    lhs, _parse_expr(lexer, next_min_preced)); break;
-      case TAG_LE:     lhs = ast_expr(AST_LE,    lhs, _parse_expr(lexer, next_min_preced)); break;
-      case TAG_EQ:     lhs = ast_expr(AST_EQ,    lhs, _parse_expr(lexer, next_min_preced)); break;
-      case TAG_NE:     lhs = ast_expr(AST_NE,    lhs, _parse_expr(lexer, next_min_preced)); break;
-      case TAG_RANGE:  lhs = ast_expr(AST_RANGE, lhs, _parse_expr(lexer, next_min_preced)); break;
+      case TAG_PLUS:   lhs = ast_binop(AST_ADD,   lhs, _parse_expr(lexer, next_min_preced)); break;
+      case TAG_MINUS:  lhs = ast_binop(AST_SUB,   lhs, _parse_expr(lexer, next_min_preced)); break;
+      case TAG_TIMES:  lhs = ast_binop(AST_MUL,   lhs, _parse_expr(lexer, next_min_preced)); break;
+      case TAG_DIVIDE: lhs = ast_binop(AST_DIV,   lhs, _parse_expr(lexer, next_min_preced)); break;
+      case TAG_MOD:    lhs = ast_binop(AST_MOD,   lhs, _parse_expr(lexer, next_min_preced)); break;
+      case TAG_AND:    lhs = ast_binop(AST_AND,   lhs, _parse_expr(lexer, next_min_preced)); break;
+      case TAG_OR:     lhs = ast_binop(AST_OR,    lhs, _parse_expr(lexer, next_min_preced)); break;
+      case TAG_GT:     lhs = ast_binop(AST_GT,    lhs, _parse_expr(lexer, next_min_preced)); break;
+      case TAG_GE:     lhs = ast_binop(AST_GE,    lhs, _parse_expr(lexer, next_min_preced)); break;
+      case TAG_LT:     lhs = ast_binop(AST_LT,    lhs, _parse_expr(lexer, next_min_preced)); break;
+      case TAG_LE:     lhs = ast_binop(AST_LE,    lhs, _parse_expr(lexer, next_min_preced)); break;
+      case TAG_EQ:     lhs = ast_binop(AST_EQ,    lhs, _parse_expr(lexer, next_min_preced)); break;
+      case TAG_NE:     lhs = ast_binop(AST_NE,    lhs, _parse_expr(lexer, next_min_preced)); break;
+      case TAG_RANGE:  lhs = ast_range(lhs, _parse_expr(lexer, next_min_preced)); break;
 
       default:
         printf("what? why this %s?\n", tag_names[tag]);
@@ -436,10 +436,6 @@ void parse_program(char *input, ast_expr_t *ast, parse_result_t *parse_result) {
   // This feels even more wrong.
   ast->type = p->type;
   ast->flags = p->flags;
-  ast->e1 = p->e1;
-  ast->e2 = p->e2;
-  ast->e3 = p->e3;
-  ast->e4 = p->e4;
   // End up assigning the one that isn't null.
   ast->intval = p->intval;
   ast->floatval = p->floatval;

@@ -20,24 +20,48 @@ ast_expr_t *ast_node(ast_type_t type) {
 
   node->type = type;
   node->flags = F_NONE;
-  node->e1 = NULL;
-  node->e2 = NULL;
-  node->e3 = NULL;
-  node->e4 = NULL;
   return node;
 }
 
-ast_expr_t *ast_expr(ast_type_t type, ast_expr_t *e1, ast_expr_t *e2) {
+ast_expr_t *ast_empty() {
+  ast_expr_t *node = ast_node(AST_EMPTY);
+  return node;
+}
+
+ast_expr_t *ast_binop(ast_type_t type, ast_expr_t *a, ast_expr_t *b) {
   ast_expr_t *node = ast_node(type);
-  node->e1 = e1;
-  node->e2 = e2;
+  switch(type) {
+    case AST_ADD:
+    case AST_SUB:
+    case AST_MUL:
+    case AST_DIV:
+    case AST_MOD:
+    case AST_AND:
+    case AST_OR:
+    case AST_GT:
+    case AST_GE:
+    case AST_LT:
+    case AST_LE:
+    case AST_EQ:
+    case AST_NE:
+      node->type = type;
+      break;
+    default:
+      printf("Binop type %d unfamiliar\n", type);
+      return ast_empty();
+  }
+
+  node->binop_args = malloc(sizeof(ast_binop_args_t));
+  node->binop_args->a = a;
+  node->binop_args->b = b;
   return node;
 }
 
-ast_expr_t *ast_cast(ast_expr_t *e1, ast_expr_t *e2) {
+ast_expr_t *ast_cast(ast_expr_t *a, ast_expr_t *b) {
   ast_expr_t *node = ast_node(AST_CAST);
-  node->e1 = e1;
-  node->e2 = e2;
+  node->cast_args = malloc(sizeof(ast_cast_args_t));
+  node->cast_args->a = a;
+  node->cast_args->b = b;
   return node;
 }
 
@@ -90,16 +114,26 @@ ast_expr_t *ast_ident(char* name) {
   return node;
 }
 
+ast_expr_t *ast_range(ast_expr_t *from, ast_expr_t *to) {
+  ast_expr_t *node = ast_node(AST_RANGE);
+  node->range = malloc(sizeof(ast_range_args_t));
+  node->range->from = from;
+  node->range->to = to;
+  return node;
+}
+
 ast_expr_t *ast_block(ast_expr_list_t *es) {
   ast_expr_t *node = ast_node(AST_BLOCK);
-  node->e1 = es;
+  node->block_exprs = malloc(sizeof(ast_expr_list_t));
+  node->block_exprs = es;
   return node;
 }
 
 ast_expr_t *ast_reserved_callable(ast_reserved_callable_type_t type, ast_expr_list_t *es) {
   ast_expr_t *node = ast_node(AST_RESERVED_CALLABLE);
   node->intval = (int) type;
-  node->e1 = es;
+  node->block_exprs = malloc(sizeof(ast_expr_list_t));
+  node->block_exprs = es;
   return node;
 }
 
@@ -107,8 +141,9 @@ ast_expr_t *ast_assign(ast_expr_t *ident, ast_expr_t *value, uint8_t flags) {
   ast_expr_t *node = ast_node(AST_ASSIGN);
   node->stringval = ident->stringval;
   node->flags = flags;
-  node->e1 = ident;
-  node->e2 = value;
+  node->assignment = malloc(sizeof(ast_assign_t));
+  node->assignment->ident = ident;
+  node->assignment->value = value;
   return node;
 }
 
@@ -120,23 +155,26 @@ ast_expr_t *ast_delete(ast_expr_t *ident) {
 
 ast_expr_t *ast_if_then(ast_expr_t *if_clause, ast_expr_t *then_clause) {
   ast_expr_t *node = ast_node(AST_IF_THEN);
-  node->e1 = if_clause;
-  node->e2 = then_clause;
+  node->if_then_args = malloc(sizeof(ast_if_then_args_t));
+  node->if_then_args->cond = if_clause;
+  node->if_then_args->pred = then_clause;
   return node;
 }
 
 ast_expr_t *ast_if_then_else(ast_expr_t *if_clause, ast_expr_t *then_clause, ast_expr_t *else_clause) {
   ast_expr_t *node = ast_node(AST_IF_THEN_ELSE);
-  node->e1 = if_clause;
-  node->e2 = then_clause;
-  node->e3 = else_clause;
+  node->if_then_else_args = malloc(sizeof(ast_if_then_else_args_t));
+  node->if_then_else_args->cond = if_clause;
+  node->if_then_else_args->pred = then_clause;
+  node->if_then_else_args->else_pred = else_clause;
   return node;
 }
 
 ast_expr_t *ast_while_loop(ast_expr_t *cond, ast_expr_t *pred) {
   ast_expr_t *node = ast_node(AST_WHILE_LOOP);
-  node->e1 = cond;
-  node->e2 = pred;
+  node->while_loop = malloc(sizeof(ast_while_loop_t));
+  node->while_loop->cond = cond;
+  node->while_loop->pred = pred;
   return node;
 }
 
@@ -144,14 +182,11 @@ ast_expr_t *ast_for_loop(ast_expr_t *index,
                          ast_expr_t *range,
                          ast_expr_t *pred) {
   ast_expr_t *node = ast_node(AST_FOR_LOOP);
-  node->e1 = index;
-  node->e2 = range;
-  node->e3 = pred;
+  node->for_loop = malloc(sizeof(ast_for_loop_t));
+  node->for_loop->index = index;
+  node->for_loop->range = range;
+  node->for_loop->pred = pred;
   return node;
-}
-
-ast_expr_t *ast_empty() {
-  return ast_expr(AST_EMPTY, 0, 0);
 }
 
 void _pretty_print(ast_expr_t *expr, int indent) {
@@ -172,8 +207,8 @@ void _pretty_print(ast_expr_t *expr, int indent) {
     case AST_MUL:
     case AST_DIV:
       printf("\n");
-      _pretty_print(expr->e1, indent + 1);
-      _pretty_print(expr->e2, indent + 1);
+      _pretty_print(expr->binop_args->a, indent + 1);
+      _pretty_print(expr->binop_args->b, indent + 1);
       for (int i = 0; i < indent * 2; i++) {
         printf(" ");
       }
