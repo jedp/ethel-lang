@@ -7,11 +7,11 @@ typedef uint8_t tag_t;
 enum tag_enum {
   TAG_EOF = 0,
   TAG_EOL,
-
   TAG_COMMENT,
 
   // Identifiers
   TAG_IDENT,
+  TAG_TYPE_NAME,
   TAG_ASSIGN,
   TAG_INVARIABLE,
   TAG_VARIABLE,
@@ -39,6 +39,8 @@ enum tag_enum {
   TAG_TRUE,
   TAG_FALSE,
   TAG_NIL,
+  TAG_LIST,
+  TAG_OF,
 
   // Type declarations
   TAG_TYPE_INT,
@@ -90,11 +92,11 @@ enum tag_enum {
 static const char* tag_names[] = {
   "EOF",
   "EOL",
-
   "COMMENT",
 
   // Identifiers
   "IDENT",
+  "TYPE-NAME",
   "ASSIGN",
   "INVARIABLE",
   "VARIABLE",
@@ -122,6 +124,8 @@ static const char* tag_names[] = {
   "TRUE",
   "FALSE",
   "NIL",
+  "LIST",
+  "OF",
 
   // Type declarations
   "INT-TYPE",
@@ -197,6 +201,8 @@ static const token_t reserved[] = {
   { TAG_IN,            .string = (char *) "in" },
   { TAG_STEP,          .string = (char *) "step" },
   { TAG_NIL,           .string = (char *) "nil" },
+  { TAG_LIST,          .string = (char *) "list" },
+  { TAG_OF,            .string = (char *) "of" },
   { TAG_TYPE_INT,      .string = (char *) "int" },
   { TAG_TYPE_FLOAT,    .string = (char *) "float" },
   { TAG_TYPE_CHAR,     .string = (char *) "char" },

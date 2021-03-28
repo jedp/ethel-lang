@@ -61,6 +61,14 @@ obj_t *range_obj(int from, int to) {
   return obj;
 }
 
+obj_t *list_obj(char* name, void* es) {
+  obj_t *obj = obj_of(TYPE_LIST);
+  obj->list.type_name = malloc(strlen(name) + 1);
+  strcpy(obj->list.type_name, name);
+  obj->list.es = es;
+  return obj;
+}
+
 bool truthy(obj_t *obj) {
   switch(obj->type) {
     case TYPE_NIL: return false;

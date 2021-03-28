@@ -69,6 +69,19 @@ ast_expr_t *ast_nil() {
   return ast_node(AST_NIL);
 }
 
+ast_expr_t *ast_list(char* type_name, ast_expr_list_t *nullable_init_es) {
+  ast_expr_t *node = ast_node(AST_LIST);
+  node->list = malloc(sizeof(ast_list_t));
+  node->list->type_name = malloc(strlen(type_name) + 1);
+  strcpy(node->list->type_name, type_name);
+  if (nullable_init_es != NULL) {
+    node->list->es = nullable_init_es;
+  } else {
+    node->list->es = malloc(sizeof(ast_expr_list_t));
+  }
+  return node;
+}
+
 ast_expr_t *ast_float(float value) {
   ast_expr_t *node = ast_node(AST_FLOAT);
   node->floatval = value;
@@ -108,6 +121,14 @@ ast_expr_t *ast_type(ast_type_t type) {
 
 ast_expr_t *ast_ident(char* name) {
   ast_expr_t *node = ast_node(AST_IDENT);
+  char* node_name = malloc(strlen(name) + 1);
+  strcpy(node_name, name);
+  node->stringval = node_name;
+  return node;
+}
+
+ast_expr_t *ast_type_name(char* name) {
+  ast_expr_t *node = ast_node(AST_TYPE_NAME);
   char* node_name = malloc(strlen(name) + 1);
   strcpy(node_name, name);
   node->stringval = node_name;

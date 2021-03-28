@@ -231,6 +231,21 @@ ast_expr_t *parse_expr(lexer_t *lexer) {
       if (pred->type == AST_EMPTY) goto error;
       return ast_for_loop(index, range, pred);
     }
+    case TAG_LIST: {
+      advance(lexer);
+      if (!eat(lexer, TAG_OF)) goto error;
+      ast_expr_t *type_name = parse_expr(lexer);
+      if (lexer->token.tag == TAG_BEGIN) {
+        eat(lexer, TAG_BEGIN);
+        ast_expr_list_t *es = parse_expr_list(lexer);
+        if (!eat(lexer, TAG_END)) {
+          free(es);
+          goto error;
+        }
+        return ast_list(type_name->stringval, es);
+      }
+      return ast_list(type_name->stringval, NULL);
+    }
     case TAG_INPUT: {
       ast_reserved_callable_type_t callable_type = ast_callable_type_for_tag(lexer->token.tag);
       advance(lexer);
@@ -369,6 +384,11 @@ ast_expr_t *parse_atom(lexer_t *lexer) {
         return ast_reassign(id, parse_expr(lexer));
       }
       return id;
+    }
+    case TAG_TYPE_NAME: {
+      ast_expr_t *type_name = ast_type_name(lexer->token.string);
+      advance(lexer);
+      return type_name;
     }
     case TAG_DEL: {
       advance(lexer);

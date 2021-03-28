@@ -55,6 +55,10 @@ void eval_char_expr(ast_expr_t *expr, eval_result_t *result) {
   result->obj = char_obj(expr->charval);
 }
 
+void eval_list_expr(ast_list_t *list, eval_result_t *result) {
+  result->obj = list_obj(list->type_name, list->es);
+}
+
 void strip_trailing_ws(char* s) {
   int end = strlen(s) - 1;
   while (end > 0) {
@@ -768,6 +772,11 @@ eval_result_t *eval_expr(ast_expr_t *expr, env_t *env) {
             }
             result->obj = obj;
             break;
+        }
+        case AST_LIST: {
+          eval_list_expr(expr->list, result);
+          if (result->err != NO_ERROR) goto error;
+          break;
         }
         case AST_BLOCK: {
             ast_expr_list_t *node = expr->block_exprs;

@@ -22,6 +22,7 @@ enum ast_type_enum {
   AST_NE,
   AST_RANGE,
   AST_NIL,
+  AST_LIST,
   AST_INT,
   AST_FLOAT,
   AST_STRING,
@@ -33,6 +34,7 @@ enum ast_type_enum {
   AST_DELETE,
   AST_NEGATE,
   AST_IDENT,
+  AST_TYPE_NAME,
   AST_BLOCK,
   AST_RESERVED_CALLABLE,
   AST_IF_THEN,
@@ -58,6 +60,7 @@ static const char *ast_node_names[] = {
   "NE",
   "RANGE-FROM-TO",
   "NIL",
+  "LIST",
   "INT",
   "FLOAT",
   "STRING",
@@ -69,6 +72,7 @@ static const char *ast_node_names[] = {
   "DELETE",
   "NEGATE",
   "IDENT",
+  "TYPE-NAME",
   "BLOCK",
   "RESERVED-CALLABLE",
   "IF-THEN",
@@ -130,6 +134,11 @@ typedef struct ExprListNode {
   struct ExprListNode *next;
 } ast_expr_list_t;
 
+typedef struct List {
+  char* type_name;
+  ast_expr_list_t *es;
+} ast_list_t;
+
 typedef struct ReservedCallable {
   ast_reserved_callable_type_t type;
   ast_expr_list_t *es;
@@ -152,6 +161,7 @@ typedef struct Expr {
   union {
     ast_assign_t *assignment;
     ast_expr_list_t *block_exprs;
+    ast_list_t *list;
     ast_binop_args_t *binop_args;
     ast_range_args_t *range;
     ast_cast_args_t *cast_args;
@@ -171,6 +181,7 @@ void pretty_print(ast_expr_t *expr);
 ast_expr_t *ast_binop(ast_type_t type, ast_expr_t *a, ast_expr_t *b);
 ast_expr_t *ast_cast(ast_expr_t *e1, ast_expr_t *e2);
 ast_expr_t *ast_nil();
+ast_expr_t *ast_list(char* type_name, ast_expr_list_t *nullable_init_es);
 ast_expr_t *ast_float(float value);
 ast_expr_t *ast_int(int value);
 ast_expr_t *ast_char(char c);
@@ -178,6 +189,7 @@ ast_expr_t *ast_string(char* s);
 ast_expr_t *ast_boolean(bool t);
 ast_expr_t *ast_type(ast_type_t type);
 ast_expr_t *ast_ident(char* name);
+ast_expr_t *ast_type_name(char* name);
 ast_expr_t *ast_range(ast_expr_t *from, ast_expr_t *to);
 ast_expr_t *ast_block(ast_expr_list_t *es);
 ast_expr_t *ast_reserved_callable(ast_reserved_callable_type_t type, ast_expr_list_t *es);

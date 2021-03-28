@@ -117,16 +117,27 @@ done:
   return &lexer->next_token;
 }
 
-static token_t *lex_word(lexer_t *lexer) {
+static void lex_word_raw(lexer_t *lexer) {
   memset(next_word_buf, 0, MAX_WORD);
   int i = 0;
   do {
     next_word_buf[i++] = lexer->nextch;
     readch(lexer);
   } while (isalnum(lexer->nextch));
-
   unreadch(lexer);
+}
 
+static token_t *lex_word(lexer_t *lexer) {
+  lex_word_raw(lexer);
+
+  // Is it a type declaration following the "of" keyword?
+  if (lexer->token.tag == TAG_OF) {
+    lexer->next_token.tag = TAG_TYPE_NAME;
+    lexer->next_token.string = next_word_buf;
+    return &lexer->next_token;
+  }
+
+  // Is it a reserved word?
   for (int j = 0; j < sizeof(reserved) / sizeof(reserved[0]); j++) {
     if (!strcmp(reserved[j].string, next_word_buf)) { 
       lexer->next_token = reserved[j];
@@ -134,6 +145,7 @@ static token_t *lex_word(lexer_t *lexer) {
     }
   }
 
+  // Otherwise just an identifier created by the user.
   lexer->next_token.tag = TAG_IDENT;
   lexer->next_token.string = next_word_buf;
   return &lexer->next_token;
@@ -309,6 +321,7 @@ void lexer_init(lexer_t *lexer, const char input[], const uint32_t input_size) {
     lexer->buf[i] = input[i];
   }
 
+  lexer->token.tag = TAG_EOF;
   lexer->next_token = *get_token(lexer);
   advance(lexer);
 }
