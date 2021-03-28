@@ -347,20 +347,28 @@ ast_expr_t *parse_atom(lexer_t *lexer) {
       if (!eat(lexer, TAG_RPAREN)) goto error;
       return e;
     }
+    case TAG_INVARIABLE: {
+      advance(lexer);
+      ast_expr_t *id = ast_ident(lexer->token.string);
+      if (!eat(lexer, TAG_IDENT)) goto error;
+      if (!eat(lexer, TAG_ASSIGN)) goto error;
+      ast_expr_t *val = parse_expr(lexer);
+      return ast_assign_val(id, val);
+    }
     case TAG_VARIABLE: {
       advance(lexer);
       ast_expr_t *id = ast_ident(lexer->token.string);
       if (!eat(lexer, TAG_IDENT)) goto error;
       if (!eat(lexer, TAG_ASSIGN)) goto error;
       ast_expr_t *val = parse_expr(lexer);
-      return ast_assign(id, val, F_VAR);
+      return ast_assign_var(id, val);
     }
     case TAG_IDENT: {
       ast_expr_t *id = ast_ident(lexer->token.string);
       advance(lexer);
       if (lexer->token.tag == TAG_ASSIGN) {
         advance(lexer);
-        return ast_assign(id, parse_expr(lexer), F_NONE);
+        return ast_reassign(id, parse_expr(lexer));
       }
       return id;
     }

@@ -78,7 +78,7 @@ void test_parse_div(void) {
 }
 
 void test_parse_assign(void) {
-  char *program = "x = 2 + 2";
+  char *program = "val x = 2 + 2";
   ast_expr_t *ast = malloc(sizeof(ast_expr_t));
   parse_result_t *parse_result = malloc(sizeof(parse_result_t));
   parse_program(program, ast, parse_result);
@@ -104,7 +104,7 @@ void test_parse_if_else(void) {
 }
 
 void test_parse_if_else_assign_expr(void) {
-  char *program = "x = if 1 then 2.0";
+  char *program = "val x = if 1 then 2.0";
   ast_expr_t *ast = malloc(sizeof(ast_expr_t));
   parse_result_t *parse_result = malloc(sizeof(parse_result_t));
   parse_program(program, ast, parse_result);
@@ -117,7 +117,7 @@ void test_parse_if_else_assign_expr(void) {
 }
 
 void test_parse_char(void) {
-  char *program = "c = 'c'";
+  char *program = "val c = 'c'";
   ast_expr_t *ast = malloc(sizeof(ast_expr_t));
   parse_result_t *parse_result = malloc(sizeof(parse_result_t));
   parse_program(program, ast, parse_result);
@@ -131,7 +131,7 @@ void test_parse_char(void) {
 }
 
 void test_parse_string(void) {
-  char *program = "s = \"Ethel\"";
+  char *program = "val s = \"Ethel\"";
   ast_expr_t *ast = malloc(sizeof(ast_expr_t));
   parse_result_t *parse_result = malloc(sizeof(parse_result_t));
   parse_program(program, ast, parse_result);
@@ -145,7 +145,7 @@ void test_parse_string(void) {
 }
 
 void test_parse_boolean_true(void) {
-  char *program = "x = true";
+  char *program = "val x = true";
   ast_expr_t *ast = malloc(sizeof(ast_expr_t));
   parse_result_t *parse_result = malloc(sizeof(parse_result_t));
   parse_program(program, ast, parse_result);
@@ -159,7 +159,7 @@ void test_parse_boolean_true(void) {
 }
 
 void test_parse_boolean_false(void) {
-  char *program = "x = false";
+  char *program = "val x = false";
   ast_expr_t *ast = malloc(sizeof(ast_expr_t));
   parse_result_t *parse_result = malloc(sizeof(parse_result_t));
   parse_program(program, ast, parse_result);

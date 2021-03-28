@@ -266,11 +266,11 @@ void test_lex_parens_no_spaces(void) {
 }
 
 void test_lex_assign(void) {
-  char *expr = "a = 3";
+  char *expr = "val a = 3";
   lexer_t lexer;
   lexer_init(&lexer, expr, strlen(expr));
 
-  int expected[] = { TAG_IDENT, TAG_ASSIGN, TAG_INT };
+  int expected[] = { TAG_INVARIABLE, TAG_IDENT, TAG_ASSIGN, TAG_INT };
   for (int i = 0; i < sizeof(expected) / sizeof(expected[0]); i++) {
     TEST_ASSERT_EQUAL(NO_ERROR, lexer.err);
     TEST_ASSERT_EQUAL(expected[i], lexer.token.tag);
@@ -279,11 +279,11 @@ void test_lex_assign(void) {
 }
 
 void test_lex_line_with_comment(void) {
-  char *expr = "a = 3 ; a comment ... ";
+  char *expr = "val a = 3 ; a comment ... ";
   lexer_t lexer;
   lexer_init(&lexer, expr, strlen(expr));
 
-  int expected[] = { TAG_IDENT, TAG_ASSIGN, TAG_INT };
+  int expected[] = { TAG_INVARIABLE, TAG_IDENT, TAG_ASSIGN, TAG_INT };
   for (int i = 0; i < sizeof(expected) / sizeof(expected[0]); i++) {
     TEST_ASSERT_EQUAL(NO_ERROR, lexer.err);
     TEST_ASSERT_EQUAL(expected[i], lexer.token.tag);
@@ -345,6 +345,8 @@ void test_lex_all_tokens(void) {
   test_data_t test_data[] = {
     (test_data_t) { .text = "x", .expected_tag = TAG_IDENT },
     (test_data_t) { .text = "=", .expected_tag = TAG_ASSIGN },
+    (test_data_t) { .text = "{", .expected_tag = TAG_BEGIN },
+    (test_data_t) { .text = "}", .expected_tag = TAG_END },
     (test_data_t) { .text = "(", .expected_tag = TAG_LPAREN },
     (test_data_t) { .text = ")", .expected_tag = TAG_RPAREN },
     (test_data_t) { .text = ",", .expected_tag = TAG_COMMA },

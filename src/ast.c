@@ -138,10 +138,29 @@ ast_expr_t *ast_reserved_callable(ast_reserved_callable_type_t type, ast_expr_li
   return node;
 }
 
-ast_expr_t *ast_assign(ast_expr_t *ident, ast_expr_t *value, uint8_t flags) {
+ast_expr_t *ast_assign_val(ast_expr_t *ident, ast_expr_t *value) {
   ast_expr_t *node = ast_node(AST_ASSIGN);
   node->stringval = ident->stringval;
-  node->flags = flags;
+  node->flags = F_NONE;
+  node->assignment = malloc(sizeof(ast_assign_t));
+  node->assignment->ident = ident;
+  node->assignment->value = value;
+  return node;
+}
+
+ast_expr_t *ast_assign_var(ast_expr_t *ident, ast_expr_t *value) {
+  ast_expr_t *node = ast_node(AST_ASSIGN);
+  node->stringval = ident->stringval;
+  node->flags = F_VAR;
+  node->assignment = malloc(sizeof(ast_assign_t));
+  node->assignment->ident = ident;
+  node->assignment->value = value;
+  return node;
+}
+
+ast_expr_t *ast_reassign(ast_expr_t *ident, ast_expr_t *value) {
+  ast_expr_t *node = ast_node(AST_REASSIGN);
+  node->stringval = ident->stringval;
   node->assignment = malloc(sizeof(ast_assign_t));
   node->assignment->ident = ident;
   node->assignment->value = value;

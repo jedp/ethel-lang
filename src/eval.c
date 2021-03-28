@@ -808,6 +808,29 @@ eval_result_t *eval_expr(ast_expr_t *expr, env_t *env) {
             }
             break;
         }
+        case AST_REASSIGN: {
+            const char* name = ((ast_expr_t*)expr->assignment->ident)->stringval;
+            obj_t *existing = get_env(env, name);
+            if (existing->type == TYPE_UNDEF) {
+              result->err = ENV_SYMBOL_UNDEFINED;
+              goto error;
+            }
+            eval_result_t *r = eval_expr(expr->assignment->value, env);
+            if ((result->err = r->err) != NO_ERROR) goto error;
+            if (existing->type != r->obj->type) {
+              // TODO: Numerical types.
+              result->err = EVAL_TYPE_ERROR;
+              goto error;
+            }
+            error_t error = put_env(env, name, r->obj, r->obj->flags);
+            result->obj = r->obj;
+            // Store the obj in the result value for the caller.
+            if (error != NO_ERROR) {
+              result->err = error;
+              goto error;
+            }
+            break;
+        }
         case AST_DELETE: {
           error_t error = del_env(env, expr->stringval);
           if (error != NO_ERROR) {

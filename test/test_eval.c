@@ -24,7 +24,7 @@ void test_eval_calculator(void) {
 }
 
 void test_eval_assign_immutable(void) {
-  char *program = "{\nx = 32\nx = 33\n}";
+  char *program = "{\nval x = 32\nx = 33\n}";
   eval_result_t *result = eval_program(program);
   TEST_ASSERT_EQUAL(ENV_SYMBOL_REDEFINED, result->err);
 }
@@ -36,14 +36,14 @@ void test_eval_assign_var(void) {
 }
 
 void test_eval_assign_multiple(void) {
-  char *program = "{\nvar x = 42\ny = 9\nx = y\nwhile (x < 12) do {\nx = x + 1\n}\nx }\n";
+  char *program = "{\nvar x = 42\nval y = 9\nx = y\nwhile (x < 12) do {\nx = x + 1\n}\nx }\n";
   eval_result_t *result = eval_program(program);
   TEST_ASSERT_EQUAL(NO_ERROR, result->err);
   TEST_ASSERT_EQUAL(12, ((obj_t *)result->obj)->intval);
 }
 
 void test_eval_if_else(void) {
-  char *program = "if 12 then x = 5";
+  char *program = "if 12 then val x = 5";
   eval_result_t *result = eval_program(program);
   TEST_ASSERT_EQUAL(NO_ERROR, result->err);
 
@@ -62,7 +62,7 @@ void test_eval_if_else_nil(void) {
 }
 
 void test_eval_if_else_assign(void) {
-  char *program = "if 12 then x = 5";
+  char *program = "if 12 then val x = 5";
   eval_result_t *result = eval_program(program);
   TEST_ASSERT_EQUAL(NO_ERROR, result->err);
 
@@ -71,7 +71,7 @@ void test_eval_if_else_assign(void) {
 }
 
 void test_eval_if_else_assign_expr(void) {
-  char *program = "x = if 12 then 5";
+  char *program = "val x = if 12 then 5";
   eval_result_t *result = eval_program(program);
   TEST_ASSERT_EQUAL(NO_ERROR, result->err);
 
@@ -80,7 +80,7 @@ void test_eval_if_else_assign_expr(void) {
 }
 
 void test_eval_boolean_true(void) {
-  char *program = "x = 1 and (1 or 0) or (0 and 1 or 1)";
+  char *program = "val x = 1 and (1 or 0) or (0 and 1 or 1)";
   eval_result_t *result = eval_program(program);
   TEST_ASSERT_EQUAL(NO_ERROR, result->err);
 
@@ -90,7 +90,7 @@ void test_eval_boolean_true(void) {
 }
 
 void test_eval_boolean_false(void) {
-  char *program = "x = 0 and (1 or 0) or (0 and 1 or 0)";
+  char *program = "val x = 0 and (1 or 0) or (0 and 1 or 0)";
   eval_result_t *result = eval_program(program);
   TEST_ASSERT_EQUAL(NO_ERROR, result->err);
 
@@ -100,7 +100,7 @@ void test_eval_boolean_false(void) {
 }
 
 void test_eval_truthiness(void) {
-  char *program = "x = (\"glug\" or 0) and (4.3 or 0) and (0 or 'c')"; 
+  char *program = "val x = (\"glug\" or 0) and (4.3 or 0) and (0 or 'c')"; 
   eval_result_t *result = eval_program(program);
   TEST_ASSERT_EQUAL(NO_ERROR, result->err);
 
@@ -128,7 +128,7 @@ void test_eval_float_mod(void) {
 }
 
 void test_eval_numeric_comparison(void) {
-  char *program = "if 5 < 3.1 then x = 2 else x = if 5>= 3 then 42 else -1";
+  char *program = "if 5 < 3.1 then val x = 2 else val x = if 5>= 3 then 42 else -1";
 
   eval_result_t *result = eval_program(program);
   TEST_ASSERT_EQUAL(NO_ERROR, result->err);

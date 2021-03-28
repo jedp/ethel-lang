@@ -29,6 +29,7 @@ enum ast_type_enum {
   AST_BOOLEAN,
   AST_CAST,
   AST_ASSIGN,
+  AST_REASSIGN,
   AST_DELETE,
   AST_NEGATE,
   AST_IDENT,
@@ -64,6 +65,7 @@ static const char *ast_node_names[] = {
   "BOOLEAN",
   "CAST",
   "ASSIGN",
+  "REASSIGN",
   "DELETE",
   "NEGATE",
   "IDENT",
@@ -129,7 +131,7 @@ typedef struct ExprListNode {
 } ast_expr_list_t;
 
 typedef struct ReservedCallable {
-  ast_type_t type;
+  ast_reserved_callable_type_t type;
   ast_expr_list_t *es;
 } ast_reserved_callable_t;
 
@@ -179,7 +181,9 @@ ast_expr_t *ast_ident(char* name);
 ast_expr_t *ast_range(ast_expr_t *from, ast_expr_t *to);
 ast_expr_t *ast_block(ast_expr_list_t *es);
 ast_expr_t *ast_reserved_callable(ast_reserved_callable_type_t type, ast_expr_list_t *es);
-ast_expr_t *ast_assign(ast_expr_t *ident, ast_expr_t *value, uint8_t flags);
+ast_expr_t *ast_assign_var(ast_expr_t *ident, ast_expr_t *value);
+ast_expr_t *ast_assign_val(ast_expr_t *ident, ast_expr_t *value);
+ast_expr_t *ast_reassign(ast_expr_t *ident, ast_expr_t *value);
 ast_expr_t *ast_delete(ast_expr_t *ident);
 ast_expr_t *ast_if_then(ast_expr_t *if_clause, ast_expr_t *then_clause);
 ast_expr_t *ast_if_then_else(ast_expr_t *if_clause, ast_expr_t *then_clause, ast_expr_t *else_clause);
