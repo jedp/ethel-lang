@@ -320,12 +320,12 @@ void test_lex_comment_only(void) {
 }
 
 void test_lex_begin_end(void) {
-  char *expr = "for i in 1 .. 10 do {\n  print(i) \n}";
+  char *expr = "for i in 1 .. 10 {\n  print(i) \n}";
   lexer_t lexer;
   lexer_init(&lexer, expr, strlen(expr));
 
   int expected[] = { 
-    TAG_FOR, TAG_IDENT, TAG_IN, TAG_INT, TAG_RANGE, TAG_INT, TAG_DO, TAG_BEGIN, TAG_EOL,
+    TAG_FOR, TAG_IDENT, TAG_IN, TAG_INT, TAG_RANGE, TAG_INT, TAG_BEGIN, TAG_EOL,
     TAG_PRINT, TAG_LPAREN, TAG_IDENT, TAG_RPAREN, TAG_EOL,
     TAG_END, TAG_EOF
   };

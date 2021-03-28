@@ -59,7 +59,6 @@ enum tag_enum {
   TAG_FOR,
   TAG_IN,
   TAG_STEP,
-  TAG_DO,
 
   // Comparison
   TAG_GT,
@@ -197,7 +196,6 @@ static const token_t reserved[] = {
   { TAG_FOR,           .string = (char *) "for" },
   { TAG_IN,            .string = (char *) "in" },
   { TAG_STEP,          .string = (char *) "step" },
-  { TAG_DO,            .string = (char *) "do" },
   { TAG_NIL,           .string = (char *) "nil" },
   { TAG_TYPE_INT,      .string = (char *) "int" },
   { TAG_TYPE_FLOAT,    .string = (char *) "float" },

@@ -217,7 +217,6 @@ ast_expr_t *parse_expr(lexer_t *lexer) {
       advance(lexer);
       ast_expr_t *cond = parse_expr(lexer);
       if (cond->type == AST_EMPTY) goto error;
-      if (!eat(lexer, TAG_DO)) goto error;
       ast_expr_t *pred = parse_expr(lexer);
       if (pred->type == AST_EMPTY) goto error;
       return ast_while_loop(cond, pred);
@@ -228,7 +227,6 @@ ast_expr_t *parse_expr(lexer_t *lexer) {
       if (index->type != AST_IDENT) goto error;
       if (!eat(lexer, TAG_IN)) goto error;
       ast_expr_t *range = parse_expr(lexer);
-      if (!eat(lexer, TAG_DO)) goto error;
       ast_expr_t *pred = parse_expr(lexer);
       if (pred->type == AST_EMPTY) goto error;
       return ast_for_loop(index, range, pred);

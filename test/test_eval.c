@@ -36,7 +36,7 @@ void test_eval_assign_var(void) {
 }
 
 void test_eval_assign_multiple(void) {
-  char *program = "{\nvar x = 42\nval y = 9\nx = y\nwhile (x < 12) do {\nx = x + 1\n}\nx }\n";
+  char *program = "{\nvar x = 42\nval y = 9\nx = y\nwhile (x < 12) {\nx = x + 1\n}\nx }\n";
   eval_result_t *result = eval_program(program);
   TEST_ASSERT_EQUAL(NO_ERROR, result->err);
   TEST_ASSERT_EQUAL(12, ((obj_t *)result->obj)->intval);
