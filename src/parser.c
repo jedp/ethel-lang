@@ -347,7 +347,7 @@ ast_expr_t *parse_atom(lexer_t *lexer) {
       if (!eat(lexer, TAG_RPAREN)) goto error;
       return e;
     }
-    case TAG_MUT: {
+    case TAG_VARIABLE: {
       advance(lexer);
       ast_expr_t *id = ast_ident(lexer->token.string);
       if (!eat(lexer, TAG_IDENT)) goto error;

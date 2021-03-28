@@ -30,13 +30,13 @@ void test_eval_assign_immutable(void) {
 }
 
 void test_eval_assign_var(void) {
-  char *program = "{\nmut x = 32\nx = 33\n}\n";
+  char *program = "{\nvar x = 32\nx = 33\n}\n";
   eval_result_t *result = eval_program(program);
   TEST_ASSERT_EQUAL(NO_ERROR, result->err);
 }
 
 void test_eval_assign_multiple(void) {
-  char *program = "{\nmut x = 42\ny = 9\nx = y\nwhile (x < 12) do {\nx = x + 1\n}\nx }\n";
+  char *program = "{\nvar x = 42\ny = 9\nx = y\nwhile (x < 12) do {\nx = x + 1\n}\nx }\n";
   eval_result_t *result = eval_program(program);
   TEST_ASSERT_EQUAL(NO_ERROR, result->err);
   TEST_ASSERT_EQUAL(12, ((obj_t *)result->obj)->intval);
