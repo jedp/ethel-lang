@@ -179,8 +179,6 @@ typedef struct {
 } token_t;
 
 static const token_t reserved[] = {
-  { TAG_BEGIN,         .string = (char *) "begin" },
-  { TAG_END,           .string = (char *) "end" },
   { TAG_IF,            .string = (char *) "if" },
   { TAG_THEN,          .string = (char *) "then" },
   { TAG_ELSE,          .string = (char *) "else" },

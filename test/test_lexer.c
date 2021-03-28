@@ -320,7 +320,7 @@ void test_lex_comment_only(void) {
 }
 
 void test_lex_begin_end(void) {
-  char *expr = "for i in 1 .. 10 do begin   \n  print(i) \n  end";
+  char *expr = "for i in 1 .. 10 do {\n  print(i) \n}";
   lexer_t lexer;
   lexer_init(&lexer, expr, strlen(expr));
 

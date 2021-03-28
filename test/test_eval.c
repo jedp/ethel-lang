@@ -24,19 +24,19 @@ void test_eval_calculator(void) {
 }
 
 void test_eval_assign_immutable(void) {
-  char *program = "begin\nx = 32\nx = 33\nend";
+  char *program = "{\nx = 32\nx = 33\n}";
   eval_result_t *result = eval_program(program);
   TEST_ASSERT_EQUAL(ENV_SYMBOL_REDEFINED, result->err);
 }
 
 void test_eval_assign_var(void) {
-  char *program = "begin\nmut x = 32\nx = 33\nend\n";
+  char *program = "{\nmut x = 32\nx = 33\n}\n";
   eval_result_t *result = eval_program(program);
   TEST_ASSERT_EQUAL(NO_ERROR, result->err);
 }
 
 void test_eval_assign_multiple(void) {
-  char *program = "begin\nmut x = 42\ny = 9\nx = y\nwhile (x < 12) do begin\nx = x + 1\nend\nx end\n";
+  char *program = "{\nmut x = 42\ny = 9\nx = y\nwhile (x < 12) do {\nx = x + 1\n}\nx }\n";
   eval_result_t *result = eval_program(program);
   TEST_ASSERT_EQUAL(NO_ERROR, result->err);
   TEST_ASSERT_EQUAL(12, ((obj_t *)result->obj)->intval);

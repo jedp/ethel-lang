@@ -203,6 +203,8 @@ token_t *get_token(lexer_t *lexer) {
        
   switch(ch) {
     case ';': return lex_comment(lexer);
+    case '{': return lex_paren(lexer, TAG_BEGIN);
+    case '}': return lex_paren(lexer, TAG_END);
     case '(': return lex_paren(lexer, TAG_LPAREN);
     case ')': return lex_paren(lexer, TAG_RPAREN);
     case ',': return lex_paren(lexer, TAG_COMMA);
