@@ -9,18 +9,18 @@ Very much in progress and not useful yet.
 ```
 make
 ./repl
-> for i in 1..10 do if (i mod 7 == 0) then print("Hello, Ethel!")
+> for i in 1..10 if (i mod 7 == 0) then print("Hello, Ethel!")
 Hello, Ethel!
 (Nil)
-> mut guess = input("Guess my age!") as int
+> var guess = input("Guess my age!") as int
 Guess my age! 5
 5  (Int)
-> age = 42
+> val age = 42
 42  (Int)
-> while (guess != age) do begin
+> while (guess != age) {
     if (guess < age) then print("Too low") else print("Too high")
     guess = input("Guess again") as int
-    end
+    }
 Too low
 Guess again 66
 Too high
@@ -33,7 +33,7 @@ Ok
 Expressions all the way down.
 
 ```
-> x = if age == 5 then y = 4
+> val x = if age == 5 then val y = 4
 Integer 4
 Ok
 > x
