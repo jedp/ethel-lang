@@ -78,6 +78,10 @@ enum tag_enum {
   TAG_BEGIN,
   TAG_END,
 
+  // Fields and methods
+  TAG_FIELD_NAME,
+  TAG_METHOD_NAME,
+
   // Math
   TAG_ABS,
   TAG_SIN,
@@ -162,6 +166,10 @@ static const char* tag_names[] = {
   // Blocks
   "BEGIN",
   "END",
+
+  // Field and method access
+  "FIELD-NAME",
+  "METHOD-NAME",
 
   // Math
   "ABS",

@@ -66,7 +66,7 @@ static token_t *lex_comment(lexer_t *lexer) {
 }
 
 /**
- * Lex the an int or float number.
+ * Lex an int or float number.
  *
  * Float numbers do not need an initial decimal digit.
  * I.e., 0.123 and .123 are equally ok.
@@ -173,6 +173,24 @@ static token_t *lex_char(lexer_t *lexer) {
   return &lexer->next_token;
 }
 
+static token_t *lex_field_or_method(lexer_t *lexer) {
+  lex_word_raw(lexer);
+
+  consume_ws(lexer);
+
+  if (lexer->nextch == '(') {
+    unreadch(lexer);
+    lexer->next_token.tag = TAG_METHOD_NAME;
+    lexer->next_token.string = next_word_buf;
+    return &lexer->next_token;
+  }
+
+  unreadch(lexer);
+  lexer->next_token.tag = TAG_FIELD_NAME;
+  lexer->next_token.string = next_word_buf;
+  return &lexer->next_token;
+}
+
 static token_t *lex_string(lexer_t *lexer) {
   // Eat initial quote.
   readch(lexer);
@@ -230,8 +248,16 @@ token_t *get_token(lexer_t *lexer) {
       if (lexer->nextch == '.') {
         return lex_op(lexer, TAG_RANGE);
       }
-      unreadch(lexer);
-      return lex_num(lexer);
+
+      // Start of a float number?
+      if (lexer->nextch >= '0' && lexer->nextch <= '9') {
+        unreadch(lexer);
+        return lex_num(lexer);
+      }
+
+      // Otherwise start of a field or method access.
+      // No unreadch of the '.'.
+      return lex_field_or_method(lexer);
     }
     case '<': {
       readch(lexer);

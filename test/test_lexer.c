@@ -367,6 +367,45 @@ void test_lex_list_of_with_init(void) {
   }
 }
 
+void test_lex_field_access(void) {
+  char *expr = "val l = x.length";
+  lexer_t lexer;
+  lexer_init(&lexer, expr, strlen(expr));
+
+  int expected[] = {
+    TAG_INVARIABLE, TAG_IDENT, TAG_ASSIGN,
+    TAG_IDENT, TAG_FIELD_NAME
+  };
+  for (int i = 0; i < sizeof(expected) / sizeof(expected[0]); i++) {
+    TEST_ASSERT_EQUAL(NO_ERROR, lexer.err);
+    TEST_ASSERT_EQUAL(expected[i], lexer.token.tag);
+
+    if (lexer.token.tag == TAG_FIELD_NAME) {
+      TEST_ASSERT_EQUAL_STRING("length", lexer.token.string);
+    }
+
+    advance(&lexer);
+  }
+}
+
+void test_lex_method_access(void) {
+  char *expr = "foo.insert(42)";
+  lexer_t lexer;
+  lexer_init(&lexer, expr, strlen(expr));
+
+  int expected[] = {
+    TAG_IDENT, TAG_METHOD_NAME, TAG_LPAREN, TAG_INT, TAG_RPAREN
+  };
+  for (int i = 0; i < sizeof(expected) / sizeof(expected[0]); i++) {
+    TEST_ASSERT_EQUAL(NO_ERROR, lexer.err);
+    TEST_ASSERT_EQUAL(expected[i], lexer.token.tag);
+
+    if (lexer.token.tag == TAG_METHOD_NAME) {
+      TEST_ASSERT_EQUAL_STRING("insert", lexer.token.string);
+    }
+    advance(&lexer);
+  }
+}
 
 void test_lex_all_tokens(void) {
   typedef struct {
@@ -443,6 +482,8 @@ void test_lexer(void) {
   RUN_TEST(test_lex_begin_end);
   RUN_TEST(test_lex_list_of);
   RUN_TEST(test_lex_list_of_with_init);
+  RUN_TEST(test_lex_field_access);
+  RUN_TEST(test_lex_method_access);
   RUN_TEST(test_lex_all_tokens);
 }
 
