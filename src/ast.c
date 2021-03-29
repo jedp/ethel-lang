@@ -71,7 +71,7 @@ ast_expr_t *ast_nil() {
 
 ast_expr_t *ast_list(char* type_name, ast_expr_list_t *nullable_init_es) {
   ast_expr_t *node = ast_node(AST_LIST);
-  node->list = malloc(sizeof(ast_list_t));
+  node->list = malloc(sizeof(ast_expr_list_t));
   node->list->type_name = malloc(strlen(type_name) + 1);
   strcpy(node->list->type_name, type_name);
   if (nullable_init_es != NULL) {
@@ -127,6 +127,21 @@ ast_expr_t *ast_ident(char* name) {
   return node;
 }
 
+ast_expr_t *ast_member_access(ast_expr_t *expr, char* member_name, ast_expr_list_t *args) {
+  ast_expr_t *node = ast_node(AST_APPLY);
+
+  node->application = malloc(sizeof(ast_apply_t));
+  node->application->receiver = expr;
+
+  node->application->member_name = malloc(strlen(member_name) + 1);
+  strcpy(node->application->member_name, member_name);
+
+  node->application->args = malloc(sizeof(ast_expr_list_t));
+  node->application->args = args;
+
+  return node;
+}
+
 ast_expr_t *ast_type_name(char* name) {
   ast_expr_t *node = ast_node(AST_TYPE_NAME);
   char* node_name = malloc(strlen(name) + 1);
@@ -141,6 +156,25 @@ ast_expr_t *ast_range(ast_expr_t *from, ast_expr_t *to) {
   node->range->from = from;
   node->range->to = to;
   return node;
+}
+
+ast_expr_t *ast_method(char* name, ast_expr_list_t *args) {
+  ast_expr_t *node = ast_node(AST_METHOD);
+  node->method = malloc(sizeof(ast_method_t));
+  node->method->name = malloc(strlen(name) + 1);
+  strcpy(node->method->name, name);
+  node->method->args = malloc(sizeof(ast_expr_list_t));
+  node->method->args = args;
+  return node;
+}
+
+ast_expr_t *ast_access(ast_expr_t *object, ast_expr_t *member) {
+  if (member->type != AST_METHOD) {
+    printf("Only method access supported!\n");
+    return ast_empty();
+  }
+
+  return ast_member_access(object, member->method->name, member->method->args);
 }
 
 ast_expr_t *ast_block(ast_expr_list_t *es) {

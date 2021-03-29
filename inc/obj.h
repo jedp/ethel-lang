@@ -22,6 +22,19 @@ enum obj_type_enum {
   TYPE_MAX,
 };
 
+typedef struct Obj obj_t;
+
+typedef struct MethodArg {
+  obj_t *arg;
+  struct MethodArg *next;
+} obj_method_args_t;
+
+typedef struct Method {
+  const char* name;
+  struct Obj *(*callable)(struct Obj *obj, struct MethodArg *args);
+  struct Method *next;
+} obj_method_t;
+
 typedef struct Range {
   int from;
   int to;
@@ -33,8 +46,8 @@ typedef struct ObjList {
 } obj_list_t;
 
 typedef struct Obj {
-  uint8_t type;
-  uint8_t flags;
+  uint16_t type;
+  uint16_t flags;
   union {
     int intval;
     float floatval;
@@ -43,6 +56,7 @@ typedef struct Obj {
     range_t range;
     obj_list_t list;
   };
+  obj_method_t *methods;
 } obj_t;
 
 static const char* obj_type_names[TYPE_MAX] = {

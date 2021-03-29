@@ -33,14 +33,14 @@ Ok
 Expressions all the way down.
 
 ```
-> val x = if age == 5 then val y = 4
-Integer 4
+> val x = if age > 1 then val y = "Ethel".length()
+Integer 5
 Ok
 > x
-Integer 4
+Integer 5
 Ok
 > y
-Integer 4
+Integer 5
 Ok
 >
 ```

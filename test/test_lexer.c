@@ -374,7 +374,7 @@ void test_lex_field_access(void) {
 
   int expected[] = {
     TAG_INVARIABLE, TAG_IDENT, TAG_ASSIGN,
-    TAG_IDENT, TAG_FIELD_NAME
+    TAG_IDENT, TAG_MEMBER_ACCESS, TAG_FIELD_NAME
   };
   for (int i = 0; i < sizeof(expected) / sizeof(expected[0]); i++) {
     TEST_ASSERT_EQUAL(NO_ERROR, lexer.err);
@@ -394,7 +394,7 @@ void test_lex_method_access(void) {
   lexer_init(&lexer, expr, strlen(expr));
 
   int expected[] = {
-    TAG_IDENT, TAG_METHOD_NAME, TAG_LPAREN, TAG_INT, TAG_RPAREN
+    TAG_IDENT, TAG_MEMBER_ACCESS, TAG_METHOD_NAME, TAG_LPAREN, TAG_INT, TAG_RPAREN
   };
   for (int i = 0; i < sizeof(expected) / sizeof(expected[0]); i++) {
     TEST_ASSERT_EQUAL(NO_ERROR, lexer.err);

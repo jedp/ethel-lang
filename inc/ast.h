@@ -23,6 +23,7 @@ enum ast_type_enum {
   AST_RANGE,
   AST_NIL,
   AST_LIST,
+  AST_APPLY,
   AST_INT,
   AST_FLOAT,
   AST_STRING,
@@ -34,6 +35,8 @@ enum ast_type_enum {
   AST_DELETE,
   AST_NEGATE,
   AST_IDENT,
+  AST_FIELD,
+  AST_METHOD,
   AST_TYPE_NAME,
   AST_BLOCK,
   AST_RESERVED_CALLABLE,
@@ -61,6 +64,7 @@ static const char *ast_node_names[] = {
   "RANGE-FROM-TO",
   "NIL",
   "LIST",
+  "APPLY",
   "INT",
   "FLOAT",
   "STRING",
@@ -72,6 +76,8 @@ static const char *ast_node_names[] = {
   "DELETE",
   "NEGATE",
   "IDENT",
+  "FIELD",
+  "METHOD",
   "TYPE-NAME",
   "BLOCK",
   "RESERVED-CALLABLE",
@@ -96,66 +102,82 @@ enum ast_call_type_enum {
   AST_CALL_LOG,
 };
 
-typedef struct Expr ast_expr_t;
+typedef struct AstExpr ast_expr_t;
 
-typedef struct Assign {
+typedef struct AstAssign {
   ast_expr_t *ident;
   ast_expr_t *value;
 } ast_assign_t;
 
-typedef struct BinOpArgs {
+typedef struct AstBinOpArgs {
   ast_expr_t *a;
   ast_expr_t *b;
 } ast_binop_args_t;
 
-typedef struct RangeArgs {
+typedef struct AstRangeArgs {
   ast_expr_t *from;
   ast_expr_t *to;
 } ast_range_args_t;
 
-typedef struct CastArgs {
+typedef struct AstCastArgs {
   ast_expr_t *a;
   ast_expr_t *b;
 } ast_cast_args_t;
 
-typedef struct IfThenArgs {
+typedef struct AstIfThenArgs {
   ast_expr_t *cond;
   ast_expr_t *pred;
 } ast_if_then_args_t;
 
-typedef struct IfThenElseArgs {
+typedef struct AstIfThenElseArgs {
   ast_expr_t *cond;
   ast_expr_t *pred;
   ast_expr_t *else_pred;
 } ast_if_then_else_args_t;
 
-typedef struct ExprListNode {
+typedef struct AstExprListNode {
   ast_expr_t *root;
-  struct ExprListNode *next;
+  struct AstExprListNode *next;
 } ast_expr_list_t;
 
-typedef struct List {
+typedef struct AstList {
   char* type_name;
   ast_expr_list_t *es;
 } ast_list_t;
 
-typedef struct ReservedCallable {
+typedef struct AstReservedCallable {
   ast_reserved_callable_type_t type;
   ast_expr_list_t *es;
 } ast_reserved_callable_t;
 
-typedef struct WhileLoop {
+typedef struct AstWhileLoop {
   ast_expr_t *cond;
   ast_expr_t *pred;
 } ast_while_loop_t;
 
-typedef struct ForLoop {
+typedef struct AstForLoop {
   ast_expr_t *index;
   ast_expr_t *range;
   ast_expr_t *pred;
 } ast_for_loop_t;
 
-typedef struct Expr {
+typedef struct AstField {
+  char* name;
+} ast_field_t;
+
+typedef struct AstMethod {
+  char* name;
+  ast_type_t result_type;
+  ast_expr_list_t *args;
+} ast_method_t;
+
+typedef struct AstApply {
+  ast_expr_t *receiver;
+  char* member_name;
+  ast_expr_list_t *args;
+} ast_apply_t;
+
+typedef struct AstExpr {
   uint8_t type;
   uint8_t flags;
   union {
@@ -170,6 +192,8 @@ typedef struct Expr {
     ast_if_then_else_args_t *if_then_else_args;
     ast_while_loop_t *while_loop;
     ast_for_loop_t *for_loop;
+    ast_method_t *method;
+    ast_apply_t *application;
     int intval;
     float floatval;
     char* stringval;
@@ -189,8 +213,12 @@ ast_expr_t *ast_string(char* s);
 ast_expr_t *ast_boolean(bool t);
 ast_expr_t *ast_type(ast_type_t type);
 ast_expr_t *ast_ident(char* name);
+ast_expr_t *ast_field(char* name);
+ast_expr_t *ast_method(char* name, ast_expr_list_t *args);
+ast_expr_t *ast_member_access(ast_expr_t *receiver, char* member_name, ast_expr_list_t *args);
 ast_expr_t *ast_type_name(char* name);
 ast_expr_t *ast_range(ast_expr_t *from, ast_expr_t *to);
+ast_expr_t *ast_access(ast_expr_t *object, ast_expr_t *member);
 ast_expr_t *ast_block(ast_expr_list_t *es);
 ast_expr_t *ast_reserved_callable(ast_reserved_callable_type_t type, ast_expr_list_t *es);
 ast_expr_t *ast_assign_var(ast_expr_t *ident, ast_expr_t *value);

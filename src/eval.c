@@ -133,10 +133,7 @@ void eval_string_expr(ast_expr_t *expr, eval_result_t *result) {
     result->err = EVAL_TYPE_ERROR;
     return;
   }
-  obj_t* obj = malloc(sizeof(obj_t));
-  obj->type = TYPE_STRING;
-  obj->stringval = malloc(strlen(expr->stringval) + 1);
-  strcpy(obj->stringval, expr->stringval);
+  obj_t* obj = string_obj(expr->stringval);
   result->obj = obj;
 }
 
@@ -442,6 +439,40 @@ void boolean_or(obj_t *a, obj_t *b, eval_result_t *result) {
 
 void range(int from, int to, eval_result_t *result) {
   result->obj = range_obj(from, to);
+}
+
+void apply(ast_expr_t *expr, eval_result_t *result, env_t *env) {
+  if (expr->type != AST_APPLY) {
+    result->err = SYNTAX_ERROR;
+    return;
+  }
+
+  eval_result_t *receiver = eval_expr(expr->application->receiver, env);
+  if ((result->err = receiver->err) != NO_ERROR) {
+    return;
+  }
+
+  obj_t *obj = receiver->obj;
+
+  if (obj->methods == NULL) {
+    result->err = SYNTAX_ERROR;
+    return;
+  }
+
+  char* member_name = expr->application->member_name;
+
+  // Start with a thing with no args
+  obj_method_t *method = obj->methods;
+  while(method != NULL) {
+    if (!strcmp(method->name, member_name)) {
+//      ast_expr_list_t *args = expr->application->args;
+      result->obj = method->callable(obj, NULL);
+      return;
+    }
+    method = method->next;
+  }
+
+  result->err = NO_SUCH_METHOD;
 }
 
 int print_args(ast_expr_list_t *args, eval_result_t *result, env_t *env) {
@@ -839,6 +870,11 @@ eval_result_t *eval_expr(ast_expr_t *expr, env_t *env) {
               goto error;
             }
             break;
+        }
+        case AST_APPLY: {
+          apply(expr, result, env);
+          if (result->err != NO_ERROR) goto error;
+          break;
         }
         case AST_DELETE: {
           error_t error = del_env(env, expr->stringval);

@@ -79,6 +79,7 @@ enum tag_enum {
   TAG_END,
 
   // Fields and methods
+  TAG_MEMBER_ACCESS,
   TAG_FIELD_NAME,
   TAG_METHOD_NAME,
 
@@ -168,6 +169,7 @@ static const char* tag_names[] = {
   "END",
 
   // Field and method access
+  "MEMBER-ACCESS",
   "FIELD-NAME",
   "METHOD-NAME",
 

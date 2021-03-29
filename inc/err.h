@@ -33,6 +33,9 @@ enum error_enum {
   INPUT_STREAM_ERROR,
   INPUT_TOO_LONG,
 
+  NO_SUCH_FIELD,
+  NO_SUCH_METHOD,
+
   SYNTAX_ERROR,
 
   ERR_MAX,
@@ -60,6 +63,8 @@ static const char* err_names[ERR_MAX] = {
   "Char value too large",
   "Input stream error",
   "Input too long",
+  "No such field",
+  "No such method",
   "Syntax error",
 };
 

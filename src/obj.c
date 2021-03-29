@@ -4,10 +4,30 @@
 #include <string.h>
 #include "../inc/obj.h"
 
+const char* METHOD_NAME_LENGTH = "length";
+
+obj_t *str_len(obj_t *string_obj, obj_method_args_t /* ignored */ *args) {
+  return int_obj(strlen(string_obj->stringval));
+}
+
+void make_string_methods(obj_t *obj) {
+  obj_method_t *method = malloc(sizeof(obj_method_t));
+  method->name = METHOD_NAME_LENGTH;
+  method->callable = str_len;
+  method->next = NULL;
+
+  obj->methods = method;
+}
+
 obj_t *obj_of(obj_type_t type) {
   obj_t *obj = malloc(sizeof(obj_t));
   obj->type = type;
   obj->flags = F_NONE;
+  obj->methods = NULL;
+
+  if (obj->type == TYPE_STRING) {
+    make_string_methods(obj);
+  }
   return obj;
 }
 
@@ -57,7 +77,6 @@ obj_t *boolean_obj(bool t) {
 obj_t *range_obj(int from, int to) {
   obj_t *obj = obj_of(TYPE_RANGE);
   obj->range = (range_t) { from, to };
-  printf("range from %d to %d\n", obj->range.from, obj->range.to);
   return obj;
 }
 

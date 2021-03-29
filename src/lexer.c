@@ -127,7 +127,32 @@ static void lex_word_raw(lexer_t *lexer) {
   unreadch(lexer);
 }
 
+static token_t *lex_field_or_method(lexer_t *lexer) {
+  lex_word_raw(lexer);
+
+  consume_ws(lexer);
+
+  if (lexer->nextch == '(') {
+    unreadch(lexer);
+    lexer->next_token.tag = TAG_METHOD_NAME;
+    lexer->next_token.string = next_word_buf;
+    return &lexer->next_token;
+  }
+
+  lexer->next_token.tag = TAG_FIELD_NAME;
+  lexer->next_token.string = next_word_buf;
+  return &lexer->next_token;
+}
+
 static token_t *lex_word(lexer_t *lexer) {
+  // Is it a field or method name following the member access token?
+  // If so, delegate to lex_field_or_method.
+  if (lexer->token.tag == TAG_MEMBER_ACCESS) {
+    unreadch(lexer);
+    return lex_field_or_method(lexer);
+  }
+
+  // Get the word.
   lex_word_raw(lexer);
 
   // Is it a type declaration following the "of" keyword?
@@ -145,7 +170,7 @@ static token_t *lex_word(lexer_t *lexer) {
     }
   }
 
-  // Otherwise just an identifier created by the user.
+  // If none of the above, it's a plain old identifier.
   lexer->next_token.tag = TAG_IDENT;
   lexer->next_token.string = next_word_buf;
   return &lexer->next_token;
@@ -173,21 +198,8 @@ static token_t *lex_char(lexer_t *lexer) {
   return &lexer->next_token;
 }
 
-static token_t *lex_field_or_method(lexer_t *lexer) {
-  lex_word_raw(lexer);
-
-  consume_ws(lexer);
-
-  if (lexer->nextch == '(') {
-    unreadch(lexer);
-    lexer->next_token.tag = TAG_METHOD_NAME;
-    lexer->next_token.string = next_word_buf;
-    return &lexer->next_token;
-  }
-
-  unreadch(lexer);
-  lexer->next_token.tag = TAG_FIELD_NAME;
-  lexer->next_token.string = next_word_buf;
+static token_t *lex_member_access(lexer_t *lexer) {
+  lexer->next_token.tag = TAG_MEMBER_ACCESS;
   return &lexer->next_token;
 }
 
@@ -257,7 +269,7 @@ token_t *get_token(lexer_t *lexer) {
 
       // Otherwise start of a field or method access.
       // No unreadch of the '.'.
-      return lex_field_or_method(lexer);
+      return lex_member_access(lexer);
     }
     case '<': {
       readch(lexer);

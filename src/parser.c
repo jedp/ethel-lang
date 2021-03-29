@@ -27,11 +27,15 @@ bool is_binop(token_t *token) {
       || token->tag == TAG_LT
       || token->tag == TAG_LE
       || token->tag == TAG_EQ
-      || token->tag == TAG_NE;
+      || token->tag == TAG_NE
+      || token->tag == TAG_MEMBER_ACCESS
+      ;
 }
 
 uint8_t binop_preced(token_t *token) {
   switch (token->tag) {
+    case TAG_MEMBER_ACCESS:
+      return PRECED_MEMBER_ACCESS;
     case TAG_AS:
       return PRECED_CAST;
     case TAG_TIMES:
@@ -167,6 +171,7 @@ ast_expr_t *_parse_expr(lexer_t *lexer, int min_preced) {
       case TAG_EQ:     lhs = ast_binop(AST_EQ,    lhs, _parse_expr(lexer, next_min_preced)); break;
       case TAG_NE:     lhs = ast_binop(AST_NE,    lhs, _parse_expr(lexer, next_min_preced)); break;
       case TAG_RANGE:  lhs = ast_range(lhs, _parse_expr(lexer, next_min_preced)); break;
+      case TAG_MEMBER_ACCESS: lhs = ast_access(lhs, _parse_expr(lexer, next_min_preced)); break;
 
       default:
         printf("what? why this %s?\n", tag_names[tag]);
@@ -383,6 +388,24 @@ ast_expr_t *parse_atom(lexer_t *lexer) {
         advance(lexer);
         return ast_reassign(id, parse_expr(lexer));
       }
+      return id;
+    }
+    case TAG_METHOD_NAME: {
+      char* name = malloc(strlen(lexer->token.string) + 1);
+      strcpy(name, lexer->token.string);
+      advance(lexer);
+      if (!eat(lexer, TAG_LPAREN)) { free(name); goto error; }
+      if (lexer->token.tag == TAG_RPAREN) {
+        ast_expr_t *id = ast_method(name, NULL);
+        free(name);
+        advance(lexer);
+        return id;
+      }
+      ast_expr_list_t *args = parse_expr_list(lexer);
+      advance(lexer);
+      if (!eat(lexer, TAG_LPAREN)) { free(name); goto error; }
+      ast_expr_t *id = ast_method(name, args);
+      free(name);
       return id;
     }
     case TAG_TYPE_NAME: {

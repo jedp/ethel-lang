@@ -271,6 +271,33 @@ void test_eval_callable_abs(void) {
   TEST_ASSERT_EQUAL(42, obj->intval);
 }
 
+void test_eval_string_length(void) {
+  char *program = "\"Ethel\".length()";
+  eval_result_t *result = eval_program(program);
+  TEST_ASSERT_EQUAL(NO_ERROR, result->err);
+
+  obj_t *obj = result->obj;
+  TEST_ASSERT_EQUAL(5, obj->intval);
+}
+
+void test_eval_string_var_length(void) {
+  char *program = "{ val s = \"Ethel\"\n s.length() }";
+  eval_result_t *result = eval_program(program);
+  TEST_ASSERT_EQUAL(NO_ERROR, result->err);
+
+  obj_t *obj = result->obj;
+  TEST_ASSERT_EQUAL(5, obj->intval);
+}
+
+void test_eval_string_length_in_expr(void) {
+  char *program = "\"Splunge\".length() * 5";
+  eval_result_t *result = eval_program(program);
+  TEST_ASSERT_EQUAL(NO_ERROR, result->err);
+
+  obj_t *obj = result->obj;
+  TEST_ASSERT_EQUAL(35, obj->intval);
+}
+
 void test_eval(void) {
   RUN_TEST(test_eval_calculator);
   RUN_TEST(test_eval_assign_immutable);
@@ -293,5 +320,8 @@ void test_eval(void) {
   RUN_TEST(test_eval_cast_char);
   RUN_TEST(test_eval_cast_boolean);
   RUN_TEST(test_eval_callable_abs);
+  RUN_TEST(test_eval_string_length);
+  RUN_TEST(test_eval_string_var_length);
+  RUN_TEST(test_eval_string_length_in_expr);
 }
 
