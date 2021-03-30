@@ -316,8 +316,44 @@ void test_eval_list_val_get(void) {
   TEST_ASSERT_EQUAL(2, obj->intval);
 }
 
+void test_eval_list_val_get_out_of_bounds(void) {
+  char *program = "{ val l = list of Int { 1, 2, 3, 4, 5}\nl.get(42) }";
+  eval_result_t *result = eval_program(program);
+  TEST_ASSERT_EQUAL(NO_ERROR, result->err);
+
+  obj_t *obj = result->obj;
+  TEST_ASSERT_EQUAL(TYPE_NIL, obj->type);
+}
+
 void test_eval_list_val_head(void) {
   char *program = "{ val l = list of Int { 1, 2, 3}\nl.head() }";
+  eval_result_t *result = eval_program(program);
+  TEST_ASSERT_EQUAL(NO_ERROR, result->err);
+
+  obj_t *obj = result->obj;
+  TEST_ASSERT_EQUAL(1, obj->intval);
+}
+
+void test_eval_list_val_tail_length(void) {
+  char *program = "{ val l = list of Int { 1, 2, 3}\nl.tail().length() }";
+  eval_result_t *result = eval_program(program);
+  TEST_ASSERT_EQUAL(NO_ERROR, result->err);
+
+  obj_t *obj = result->obj;
+  TEST_ASSERT_EQUAL(2, obj->intval);
+}
+
+void test_eval_list_val_slice_head(void) {
+  char *program = "{ val l = list of Int { 1, 2, 3, 4, 5}\nl.slice(1, 3).head() }";
+  eval_result_t *result = eval_program(program);
+  TEST_ASSERT_EQUAL(NO_ERROR, result->err);
+
+  obj_t *obj = result->obj;
+  TEST_ASSERT_EQUAL(2, obj->intval);
+}
+
+void test_eval_list_val_slice_head_tail_length(void) {
+  char *program = "{ val l = list of Int { 1, 2, 3, 4, 5}\nl.slice(1, 3).tail().length() }";
   eval_result_t *result = eval_program(program);
   TEST_ASSERT_EQUAL(NO_ERROR, result->err);
 
@@ -352,6 +388,10 @@ void test_eval(void) {
   RUN_TEST(test_eval_string_length_in_expr);
   RUN_TEST(test_eval_list_val_length);
   RUN_TEST(test_eval_list_val_get);
+  RUN_TEST(test_eval_list_val_get_out_of_bounds);
   RUN_TEST(test_eval_list_val_head);
+  RUN_TEST(test_eval_list_val_tail_length);
+  RUN_TEST(test_eval_list_val_slice_head);
+  RUN_TEST(test_eval_list_val_slice_head_tail_length);
 }
 

@@ -11,34 +11,56 @@
 char result_buf[80];
 char input[MAX_INPUT] = "";
 
-void print_result(obj_t *obj) {
+void print_value(obj_t *obj) {
   switch (obj->type) {
     case TYPE_INT:
-      printf("%d  ", obj->intval);
+      printf("%d", obj->intval);
       break;
     case TYPE_FLOAT:
-      printf("%f  ", (double) obj->floatval);
+      printf("%f", (double) obj->floatval);
       break;
     case TYPE_STRING:
-      printf("%s  ", obj->stringval);
+      printf("\"%s\"", obj->stringval);
       break;
     case TYPE_CHAR:
       // Range check here.
-      printf("'%c'  ", obj->charval);
+      printf("'%c'", obj->charval);
       break;
     case TYPE_BOOLEAN:
       if (obj->intval) {
-        printf("True  ");
+        printf("True");
       } else {
-        printf("False  ");
+        printf("False");
       }
       break;
     default:
-      // The type is printed. That's fine.
-      break;
+      printf("<%s>", obj_type_names[obj->type]);
+  }
+}
+
+void print_list(obj_t *list_obj) {
+  printf("{ ");
+
+  obj_list_element_t *root = list_obj->list->elems;
+  while(root != NULL) {
+    print_value(root->node);
+    root = root->next;
+
+    if (root != NULL) {
+      printf(", ");
+    }
   }
 
-  printf("(%s)\n", obj_type_names[obj->type]);
+  printf(" }");
+}
+
+void print_result(obj_t *obj) {
+  if (obj->type == TYPE_LIST) {
+    print_list(obj);
+  } else {
+    print_value(obj);
+  }
+  printf("\n");
 }
 
 int main(int argc, char** argv) {

@@ -9,6 +9,7 @@
 #define METHOD_NAME_GET "get"
 #define METHOD_NAME_HEAD "head"
 #define METHOD_NAME_TAIL "tail"
+#define METHOD_NAME_SLICE "slice"
 
 typedef uint8_t obj_type_t;
 enum obj_type_enum {
