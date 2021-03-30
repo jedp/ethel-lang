@@ -14,17 +14,7 @@ obj_t *list_len(obj_t *list_obj, obj_method_args_t /* ignored */ *args) {
   return int_obj(len);
 }
 
-obj_t *list_get(obj_t *list_obj, obj_method_args_t *args) {
-  if (args == NULL || args->arg == NULL) {
-    printf("Null arg to get()\n");
-    return nil_obj();
-  }
-  // Get first arg as int offset.
-  obj_t *arg = args->arg;
-  if (arg->type != TYPE_INT) {
-    return nil_obj();
-  }
-  int offset = arg->intval;
+obj_t *_list_get(obj_t *list_obj, int offset) {
   int i = 0;
   obj_list_element_t *root = list_obj->list->elems;
 
@@ -44,12 +34,26 @@ obj_t *list_get(obj_t *list_obj, obj_method_args_t *args) {
   return nil_obj();
 }
 
+obj_t *list_get(obj_t *list_obj, obj_method_args_t *args) {
+  if (args == NULL || args->arg == NULL) {
+    printf("Null arg to get()\n");
+    return nil_obj();
+  }
+  // Get first arg as int offset.
+  obj_t *arg = args->arg;
+  if (arg->type != TYPE_INT) {
+    return nil_obj();
+  }
+  int offset = arg->intval;
+  return _list_get(list_obj, offset);
+}
+
 obj_t *list_slice(obj_t *list_obj, obj_method_args_t *args) {
   return nil_obj();
 }
 
 obj_t *list_head(obj_t *list_obj, obj_method_args_t *args) {
-  return nil_obj();
+  return _list_get(list_obj, 0);
 }
 
 obj_t *list_tail(obj_t *list_obj, obj_method_args_t *args){
@@ -85,8 +89,14 @@ void make_list_methods(obj_t *list_obj) {
   m_get->name = METHOD_NAME_GET;
   m_get->callable = list_get;
 
-  m_get->next = NULL;
+  obj_method_t *m_head = malloc(sizeof(obj_method_t));
+  m_head->name = METHOD_NAME_HEAD;
+  m_head->callable = list_head;
+
+  // Link methods together.
   m_length->next = m_get;
+  m_get->next = m_head;
+  m_head->next = NULL;
 
   list_obj->methods = m_length;
 }

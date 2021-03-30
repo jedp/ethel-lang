@@ -307,6 +307,24 @@ void test_eval_list_val_length(void) {
   TEST_ASSERT_EQUAL(3, obj->intval);
 }
 
+void test_eval_list_val_get(void) {
+  char *program = "{ val l = list of Int { 1, 2, 3}\nl.get(1) }";
+  eval_result_t *result = eval_program(program);
+  TEST_ASSERT_EQUAL(NO_ERROR, result->err);
+
+  obj_t *obj = result->obj;
+  TEST_ASSERT_EQUAL(2, obj->intval);
+}
+
+void test_eval_list_val_head(void) {
+  char *program = "{ val l = list of Int { 1, 2, 3}\nl.head() }";
+  eval_result_t *result = eval_program(program);
+  TEST_ASSERT_EQUAL(NO_ERROR, result->err);
+
+  obj_t *obj = result->obj;
+  TEST_ASSERT_EQUAL(1, obj->intval);
+}
+
 void test_eval(void) {
   RUN_TEST(test_eval_calculator);
   RUN_TEST(test_eval_assign_immutable);
@@ -333,5 +351,7 @@ void test_eval(void) {
   RUN_TEST(test_eval_string_var_length);
   RUN_TEST(test_eval_string_length_in_expr);
   RUN_TEST(test_eval_list_val_length);
+  RUN_TEST(test_eval_list_val_get);
+  RUN_TEST(test_eval_list_val_head);
 }
 
