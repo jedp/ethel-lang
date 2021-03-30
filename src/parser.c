@@ -239,6 +239,7 @@ ast_expr_t *parse_expr(lexer_t *lexer) {
     case TAG_LIST: {
       advance(lexer);
       if (!eat(lexer, TAG_OF)) goto error;
+      if (lexer->token.tag != TAG_TYPE_NAME) goto error;
       ast_expr_t *type_name = parse_expr(lexer);
       if (lexer->token.tag == TAG_BEGIN) {
         eat(lexer, TAG_BEGIN);

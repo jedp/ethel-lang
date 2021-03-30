@@ -48,6 +48,7 @@ ast_expr_t *ast_binop(ast_type_t type, ast_expr_t *a, ast_expr_t *b) {
       break;
     default:
       printf("Binop type %d unfamiliar\n", type);
+      free(node);
       return ast_empty();
   }
 
@@ -71,7 +72,7 @@ ast_expr_t *ast_nil() {
 
 ast_expr_t *ast_list(char* type_name, ast_expr_list_t *nullable_init_es) {
   ast_expr_t *node = ast_node(AST_LIST);
-  node->list = malloc(sizeof(ast_expr_list_t));
+  node->list = malloc(sizeof(ast_list_t));
   node->list->type_name = malloc(strlen(type_name) + 1);
   strcpy(node->list->type_name, type_name);
   if (nullable_init_es != NULL) {
