@@ -5,6 +5,11 @@
 #include <stdbool.h>
 #include "def.h"
 
+#define METHOD_NAME_LENGTH "length"
+#define METHOD_NAME_GET "get"
+#define METHOD_NAME_HEAD "head"
+#define METHOD_NAME_TAIL "tail"
+
 typedef uint8_t obj_type_t;
 enum obj_type_enum {
   TYPE_UNKNOWN = 0,

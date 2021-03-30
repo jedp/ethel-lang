@@ -402,9 +402,9 @@ ast_expr_t *parse_atom(lexer_t *lexer) {
         advance(lexer);
         return id;
       }
+      // More than 0 args.
       ast_expr_list_t *args = parse_expr_list(lexer);
-      advance(lexer);
-      if (!eat(lexer, TAG_LPAREN)) { free(name); goto error; }
+      if (!eat(lexer, TAG_RPAREN)) { free(name); goto error; }
       ast_expr_t *id = ast_method(name, args);
       free(name);
       return id;

@@ -3,37 +3,16 @@
 #include <stdbool.h>
 #include <string.h>
 #include "../inc/obj.h"
-
-const char* METHOD_NAME_LENGTH = "length";
+#include "../inc/list.h"
 
 obj_t *str_len(obj_t *string_obj, obj_method_args_t /* ignored */ *args) {
   return int_obj(strlen(string_obj->stringval));
-}
-
-obj_t *list_len(obj_t *list_obj, obj_method_args_t /* ignored */ *args) {
-  int len = 0;
-  obj_list_element_t *root = list_obj->list->elems;
-
-  while(root != NULL) {
-    len++;
-    root = root->next;
-  }
-  return int_obj(len);
 }
 
 void make_string_methods(obj_t *obj) {
   obj_method_t *method = malloc(sizeof(obj_method_t));
   method->name = METHOD_NAME_LENGTH;
   method->callable = str_len;
-  method->next = NULL;
-
-  obj->methods = method;
-}
-
-void make_list_methods(obj_t *obj) {
-  obj_method_t *method = malloc(sizeof(obj_method_t));
-  method->name = METHOD_NAME_LENGTH;
-  method->callable = list_len;
   method->next = NULL;
 
   obj->methods = method;

@@ -498,12 +498,34 @@ void apply(ast_expr_t *expr, eval_result_t *result, env_t *env) {
 
   char* member_name = expr->application->member_name;
 
-  // Start with a thing with no args
   obj_method_t *method = obj->methods;
   while(method != NULL) {
     if (!strcmp(method->name, member_name)) {
-//      ast_expr_list_t *args = expr->application->args;
-      result->obj = method->callable(obj, NULL);
+      if (expr->application->args == NULL) {
+        // Zero args.
+        result->obj = method->callable(obj, NULL);
+      } else {
+        // Args to eval.
+        ast_expr_list_t *args = expr->application->args;
+        obj_method_args_t *method_args = malloc(sizeof(obj_method_args_t));
+        obj_method_args_t *method_args_root = method_args;
+
+        while(args != NULL) {
+          eval_result_t *r = eval_expr(args->root, env);
+
+          method_args->arg = r->obj;
+          method_args->next = NULL;
+          args = args->next;
+
+          if (args != NULL) {
+            obj_method_args_t *next_method_args = malloc(sizeof(obj_method_args_t));
+            method_args->next = next_method_args;
+            method_args = next_method_args;
+          }
+        }
+
+        result->obj = method->callable(obj, method_args_root);
+      }
       return;
     }
     method = method->next;

@@ -164,14 +164,13 @@ ast_expr_t *ast_method(char* name, ast_expr_list_t *args) {
   node->method = malloc(sizeof(ast_method_t));
   node->method->name = malloc(strlen(name) + 1);
   strcpy(node->method->name, name);
-  node->method->args = malloc(sizeof(ast_expr_list_t));
   node->method->args = args;
   return node;
 }
 
 ast_expr_t *ast_access(ast_expr_t *object, ast_expr_t *member) {
   if (member->type != AST_METHOD) {
-    printf("Only method access supported!\n");
+    printf("Method access only. Not allowed: '%s'\n", ast_node_names[member->type]);
     return ast_empty();
   }
 
