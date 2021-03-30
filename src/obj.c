@@ -10,10 +10,30 @@ obj_t *str_len(obj_t *string_obj, obj_method_args_t /* ignored */ *args) {
   return int_obj(strlen(string_obj->stringval));
 }
 
+obj_t *list_len(obj_t *list_obj, obj_method_args_t /* ignored */ *args) {
+  int len = 0;
+  obj_list_element_t *root = list_obj->list->elems;
+
+  while(root != NULL) {
+    len++;
+    root = root->next;
+  }
+  return int_obj(len);
+}
+
 void make_string_methods(obj_t *obj) {
   obj_method_t *method = malloc(sizeof(obj_method_t));
   method->name = METHOD_NAME_LENGTH;
   method->callable = str_len;
+  method->next = NULL;
+
+  obj->methods = method;
+}
+
+void make_list_methods(obj_t *obj) {
+  obj_method_t *method = malloc(sizeof(obj_method_t));
+  method->name = METHOD_NAME_LENGTH;
+  method->callable = list_len;
   method->next = NULL;
 
   obj->methods = method;
@@ -25,8 +45,9 @@ obj_t *obj_of(obj_type_t type) {
   obj->flags = F_NONE;
   obj->methods = NULL;
 
-  if (obj->type == TYPE_STRING) {
-    make_string_methods(obj);
+  switch (obj->type) {
+    case TYPE_STRING: make_string_methods(obj); break;
+    case TYPE_LIST:   make_list_methods(obj); break;
   }
   return obj;
 }
@@ -80,11 +101,17 @@ obj_t *range_obj(int from, int to) {
   return obj;
 }
 
-obj_t *list_obj(char* name, void* es) {
+obj_t *list_obj(char* name, obj_list_element_t *elems) {
   obj_t *obj = obj_of(TYPE_LIST);
-  obj->list.type_name = malloc(strlen(name) + 1);
-  strcpy(obj->list.type_name, name);
-  obj->list.es = es;
+  obj_list_t *list = malloc(sizeof(obj_list_t));
+
+  list->type_name = malloc(strlen(name) + 1);
+  strcpy(list->type_name, name);
+
+  list->elems = malloc(sizeof(obj_list_element_t));
+  list->elems = elems;
+
+  obj->list = list;
   return obj;
 }
 

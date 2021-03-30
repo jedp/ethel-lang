@@ -40,9 +40,15 @@ typedef struct Range {
   int to;
 } range_t;
 
+typedef struct ObjListElem {
+  obj_t *node;
+  struct ObjListElem *next;
+} obj_list_element_t;
+
+
 typedef struct ObjList {
   char* type_name;
-  void* es;
+  obj_list_element_t *elems;
 } obj_list_t;
 
 typedef struct Obj {
@@ -54,7 +60,7 @@ typedef struct Obj {
     char* stringval;
     char charval;
     range_t range;
-    obj_list_t list;
+    obj_list_t *list;
   };
   obj_method_t *methods;
 } obj_t;
@@ -83,7 +89,7 @@ obj_t *string_obj(const char*);
 obj_t *char_obj(char);
 obj_t *boolean_obj(bool);
 obj_t *range_obj(int, int);
-obj_t *list_obj(char* type_name, void* es);
+obj_t *list_obj(char* type_name, obj_list_element_t* elems);
 
 bool truthy(obj_t *obj);
 

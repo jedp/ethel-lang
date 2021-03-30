@@ -77,7 +77,7 @@ ast_expr_t *ast_list(char* type_name, ast_expr_list_t *nullable_init_es) {
   if (nullable_init_es != NULL) {
     node->list->es = nullable_init_es;
   } else {
-    node->list->es = malloc(sizeof(ast_expr_list_t));
+    node->list->es = NULL;
   }
   return node;
 }

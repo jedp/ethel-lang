@@ -55,8 +55,45 @@ void eval_char_expr(ast_expr_t *expr, eval_result_t *result) {
   result->obj = char_obj(expr->charval);
 }
 
-void eval_list_expr(ast_list_t *list, eval_result_t *result) {
-  result->obj = list_obj(list->type_name, list->es);
+void eval_list_expr(ast_list_t *list, eval_result_t *result, env_t *env) {
+  if (list->es == NULL) {
+    result->obj = list_obj(list->type_name, NULL);
+    return;
+  }
+
+  obj_list_element_t *elem = malloc(sizeof(obj_list_element_t));
+  obj_list_element_t *root_elem = elem;
+
+  ast_expr_list_t *ast_node = list->es;
+  while(ast_node != NULL) {
+    eval_result_t *r = eval_expr(ast_node->root, env);
+
+    if (r->err != NO_ERROR) {
+      result->err = r->err;
+      result->obj = list_obj(list->type_name, NULL);
+      return;
+    }
+
+    // TODO user-defined types
+    if (strcmp(list->type_name, obj_type_names[r->obj->type])) {
+      result->err = EVAL_TYPE_ERROR;
+      result->obj = list_obj(list->type_name, NULL);
+      return;
+    }
+
+    ast_node = ast_node->next;
+
+    // Link up the nodes on the obj.
+    elem->node = r->obj;
+    if (ast_node != NULL)  {
+      elem->next = malloc(sizeof(obj_list_element_t));
+    } else {
+      elem->next = NULL;
+    }
+    elem = elem->next;
+  }
+
+  result->obj = list_obj(list->type_name, root_elem);
 }
 
 void strip_trailing_ws(char* s) {
@@ -805,7 +842,7 @@ eval_result_t *eval_expr(ast_expr_t *expr, env_t *env) {
             break;
         }
         case AST_LIST: {
-          eval_list_expr(expr->list, result);
+          eval_list_expr(expr->list, result, env);
           if (result->err != NO_ERROR) goto error;
           break;
         }
