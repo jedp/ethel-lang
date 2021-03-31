@@ -33,16 +33,29 @@ Ok
 Expressions all the way down.
 
 ```
+> val age = 42
+42
 > val x = if age > 1 then val y = "Ethel".length()
-Integer 5
-Ok
+5
 > x
-Integer 5
-Ok
+5
 > y
-Integer 5
-Ok
->
+5
+```
+
+Lists
+
+```
+> val l = list of Int { 4, 5, 6, 7, 8, 9 }
+{ 4, 5, 6, 7, 8, 9 }
+> l.tail().slice(2, 4)
+{ 7, 8 }
+> l.tail().slice(2, 4).tail().head()
+8
+> l.removeFirst() * l.head()
+20
+> l
+{ 5, 6, 7, 8, 9 }
 ```
 
 ### Details
