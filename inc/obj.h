@@ -5,12 +5,6 @@
 #include <stdbool.h>
 #include "def.h"
 
-#define METHOD_NAME_LENGTH "length"
-#define METHOD_NAME_GET "get"
-#define METHOD_NAME_HEAD "head"
-#define METHOD_NAME_TAIL "tail"
-#define METHOD_NAME_SLICE "slice"
-
 typedef uint8_t obj_type_t;
 enum obj_type_enum {
   TYPE_UNKNOWN = 0,
@@ -105,7 +99,7 @@ static const static_method_name_t static_method_names[] = {
   { .ident = METHOD_APPEND,        .name = "append" },
   { .ident = METHOD_REMOVE_FIRST,  .name = "removeFirst" },
   { .ident = METHOD_REMOVE_LAST,   .name = "removeLast" },
-  { .ident = METHOD_REMOVE_AT,     .name = "remove" }
+  { .ident = METHOD_REMOVE_AT,     .name = "removeAt" }
 };
 
 static const char* obj_type_names[TYPE_MAX] = {

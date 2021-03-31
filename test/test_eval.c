@@ -308,21 +308,56 @@ void test_eval_list_val_length(void) {
 }
 
 void test_eval_list_val_get(void) {
-  char *program = "{ val l = list of Int { 1, 2, 3}\nl.get(1) }";
+  char *program = "{ val l = list of Int { 1, 2, 3 }\nl.get(0) }";
   eval_result_t *result = eval_program(program);
   TEST_ASSERT_EQUAL(NO_ERROR, result->err);
+  TEST_ASSERT_EQUAL(1, result->obj->intval);
 
-  obj_t *obj = result->obj;
-  TEST_ASSERT_EQUAL(2, obj->intval);
-}
+  char *program1= "{ val l = list of Int { 1, 2, 3 }\nl.get(1) }";
+  eval_result_t *result1 = eval_program(program1);
+  TEST_ASSERT_EQUAL(NO_ERROR, result1->err);
+  TEST_ASSERT_EQUAL(2, result1->obj->intval);
 
-void test_eval_list_val_get_out_of_bounds(void) {
-  char *program = "{ val l = list of Int { 1, 2, 3, 4, 5}\nl.get(42) }";
-  eval_result_t *result = eval_program(program);
-  TEST_ASSERT_EQUAL(NO_ERROR, result->err);
+  char *program2= "{ val l = list of Int { 1, 2, 3 }\nl.get(2) }";
+  eval_result_t *result2 = eval_program(program2);
+  TEST_ASSERT_EQUAL(NO_ERROR, result2->err);
+  TEST_ASSERT_EQUAL(3, result2->obj->intval);
 
-  obj_t *obj = result->obj;
-  TEST_ASSERT_EQUAL(TYPE_NIL, obj->type);
+  char *program3 = "{ val l = list of Int { 1, 2, 3 }\nl.get(-1) }";
+  eval_result_t *result3 = eval_program(program3);
+  TEST_ASSERT_EQUAL(NO_ERROR, result3->err);
+  TEST_ASSERT_EQUAL(3, result3->obj->intval);
+
+  char *program4= "{ val l = list of Int { 1, 2, 3 }\nl.get(-2) }";
+  eval_result_t *result4 = eval_program(program4);
+  TEST_ASSERT_EQUAL(NO_ERROR, result4->err);
+  TEST_ASSERT_EQUAL(2, result4->obj->intval);
+
+  char *program5= "{ val l = list of Int { 1, 2, 3 }\nl.get(-3) }";
+  eval_result_t *result5 = eval_program(program5);
+  TEST_ASSERT_EQUAL(NO_ERROR, result5->err);
+  TEST_ASSERT_EQUAL(1, result5->obj->intval);
+
+  // Edge cases.
+  char *program6 = "{ val l = list of Int\nl.get(0) }";
+  eval_result_t *result6 = eval_program(program6);
+  TEST_ASSERT_EQUAL(NO_ERROR, result6->err);
+  TEST_ASSERT_EQUAL(TYPE_NIL, result6->obj->type);
+
+  char *program7 = "{ val l = list of Int\nl.get(-1) }";
+  eval_result_t *result7 = eval_program(program7);
+  TEST_ASSERT_EQUAL(NO_ERROR, result7->err);
+  TEST_ASSERT_EQUAL(TYPE_NIL, result7->obj->type);
+
+  char *program8 = "{ val l = list of Int { 1, 2, 3 }\nl.get(14) }";
+  eval_result_t *result8 = eval_program(program8);
+  TEST_ASSERT_EQUAL(NO_ERROR, result8->err);
+  TEST_ASSERT_EQUAL(TYPE_NIL, result8->obj->type);
+
+  char *program9 = "{ val l = list of Int { 1, 2, 3 }\nl.get(-5) }";
+  eval_result_t *result9 = eval_program(program9);
+  TEST_ASSERT_EQUAL(NO_ERROR, result9->err);
+  TEST_ASSERT_EQUAL(TYPE_NIL, result9->obj->type);
 }
 
 void test_eval_list_val_head(void) {
@@ -361,6 +396,109 @@ void test_eval_list_val_slice_head_tail_length(void) {
   TEST_ASSERT_EQUAL(1, obj->intval);
 }
 
+void test_eval_list_val_prepend(void) {
+  char *program = "{ val l = list of Int { 1, 2, 3 }\nl.prepend(6)\nl.head() }";
+  eval_result_t *result = eval_program(program);
+  TEST_ASSERT_EQUAL(NO_ERROR, result->err);
+  TEST_ASSERT_EQUAL(6, result->obj->intval);
+
+  char *program2 = "{ val l = list of Int\nl.prepend(8)\nl.head() }";
+  eval_result_t *result2 = eval_program(program2);
+  TEST_ASSERT_EQUAL(NO_ERROR, result2->err);
+  TEST_ASSERT_EQUAL(8, result2->obj->intval);
+}
+
+void test_eval_list_val_append(void) {
+  char *program = "{ val l = list of Int { 1, 2, 3 }\nl.append(6)\nl.get(3) }";
+  eval_result_t *result = eval_program(program);
+  TEST_ASSERT_EQUAL(NO_ERROR, result->err);
+  TEST_ASSERT_EQUAL(6, result->obj->intval);
+
+  char *program2 = "{ val l = list of Int\nl.append(8)\nl.head() }";
+  eval_result_t *result2 = eval_program(program2);
+  TEST_ASSERT_EQUAL(NO_ERROR, result2->err);
+  TEST_ASSERT_EQUAL(8, result2->obj->intval);
+}
+
+void test_eval_list_val_remove_first(void) {
+  char *program = "{ val l = list of Int { 1, 2, 3 }\nl.removeFirst() }";
+  eval_result_t *result = eval_program(program);
+  TEST_ASSERT_EQUAL(NO_ERROR, result->err);
+  TEST_ASSERT_EQUAL(1, result->obj->intval);
+
+  // Edge cases.
+  char *program2 = "{ val l = list of Int\nl.removeFirst() }";
+  eval_result_t *result2 = eval_program(program2);
+  TEST_ASSERT_EQUAL(NO_ERROR, result2->err);
+  TEST_ASSERT_EQUAL(TYPE_NIL, result2->obj->type);
+}
+
+void test_eval_list_val_remove_last(void) {
+  char *program = "{ val l = list of Int { 1, 2, 3 }\nl.removeLast() }";
+  eval_result_t *result = eval_program(program);
+  TEST_ASSERT_EQUAL(NO_ERROR, result->err);
+  TEST_ASSERT_EQUAL(3, result->obj->intval);
+
+  // Edge cases.
+  char *program2 = "{ val l = list of Int\nl.removeLast() }";
+  eval_result_t *result2 = eval_program(program2);
+  TEST_ASSERT_EQUAL(NO_ERROR, result2->err);
+  TEST_ASSERT_EQUAL(TYPE_NIL, result2->obj->type);
+}
+
+void test_eval_list_val_remove_at(void) {
+  char *program = "{ val l = list of Int { 1, 2, 3 }\nl.removeAt(0)\nl.get(0) }";
+  eval_result_t *result = eval_program(program);
+  TEST_ASSERT_EQUAL(NO_ERROR, result->err);
+  TEST_ASSERT_EQUAL(2, result->obj->intval);
+
+  char *program1= "{ val l = list of Int { 1, 2, 3 }\nl.removeAt(1)\nl.get(1) }";
+  eval_result_t *result1 = eval_program(program1);
+  TEST_ASSERT_EQUAL(NO_ERROR, result1->err);
+  TEST_ASSERT_EQUAL(3, result1->obj->intval);
+
+  char *program2= "{ val l = list of Int { 1, 2, 3 }\nl.removeAt(2)\nl.get(1) }";
+  eval_result_t *result2 = eval_program(program2);
+  TEST_ASSERT_EQUAL(NO_ERROR, result2->err);
+  TEST_ASSERT_EQUAL(2, result2->obj->intval);
+
+  char *program3 = "{ val l = list of Int { 1, 2, 3 }\nl.removeAt(-1)\nl.get(-1) }";
+  eval_result_t *result3 = eval_program(program3);
+  TEST_ASSERT_EQUAL(NO_ERROR, result3->err);
+  TEST_ASSERT_EQUAL(2, result3->obj->intval);
+
+  char *program4= "{ val l = list of Int { 1, 2, 3 }\nl.removeAt(-2)\nl.get(1) }";
+  eval_result_t *result4 = eval_program(program4);
+  TEST_ASSERT_EQUAL(NO_ERROR, result4->err);
+  TEST_ASSERT_EQUAL(3, result4->obj->intval);
+
+  char *program5= "{ val l = list of Int { 1, 2, 3 }\nl.removeAt(-3)\nl.get(0) }";
+  eval_result_t *result5 = eval_program(program5);
+  TEST_ASSERT_EQUAL(NO_ERROR, result5->err);
+  TEST_ASSERT_EQUAL(2, result5->obj->intval);
+
+  // Edge cases.
+  char *program6 = "{ val l = list of Int\nl.removeAt(0) }";
+  eval_result_t *result6 = eval_program(program6);
+  TEST_ASSERT_EQUAL(NO_ERROR, result6->err);
+  TEST_ASSERT_EQUAL(TYPE_NIL, result6->obj->type);
+
+  char *program7 = "{ val l = list of Int\nl.removeAt(-1) }";
+  eval_result_t *result7 = eval_program(program7);
+  TEST_ASSERT_EQUAL(NO_ERROR, result7->err);
+  TEST_ASSERT_EQUAL(TYPE_NIL, result7->obj->type);
+
+  char *program8 = "{ val l = list of Int { 1, 2, 3 }\nl.removeAt(14) }";
+  eval_result_t *result8 = eval_program(program8);
+  TEST_ASSERT_EQUAL(NO_ERROR, result8->err);
+  TEST_ASSERT_EQUAL(TYPE_NIL, result8->obj->type);
+
+  char *program9 = "{ val l = list of Int { 1, 2, 3 }\nl.removeAt(-5) }";
+  eval_result_t *result9 = eval_program(program9);
+  TEST_ASSERT_EQUAL(NO_ERROR, result9->err);
+  TEST_ASSERT_EQUAL(TYPE_NIL, result9->obj->type);
+}
+
 void test_eval(void) {
   RUN_TEST(test_eval_calculator);
   RUN_TEST(test_eval_assign_immutable);
@@ -388,10 +526,14 @@ void test_eval(void) {
   RUN_TEST(test_eval_string_length_in_expr);
   RUN_TEST(test_eval_list_val_length);
   RUN_TEST(test_eval_list_val_get);
-  RUN_TEST(test_eval_list_val_get_out_of_bounds);
   RUN_TEST(test_eval_list_val_head);
   RUN_TEST(test_eval_list_val_tail_length);
   RUN_TEST(test_eval_list_val_slice_head);
   RUN_TEST(test_eval_list_val_slice_head_tail_length);
+  RUN_TEST(test_eval_list_val_prepend);
+  RUN_TEST(test_eval_list_val_append);
+  RUN_TEST(test_eval_list_val_remove_first);
+  RUN_TEST(test_eval_list_val_remove_last);
+  RUN_TEST(test_eval_list_val_remove_at);
 }
 

@@ -4,24 +4,64 @@
 #include "../inc/obj.h"
 #include "../inc/list.h"
 
-obj_t *_list_get(obj_t *list_obj, int offset) {
+obj_t *_empty_list(char* type_name) {
+  obj_t *obj = malloc(sizeof(obj_t));
+  obj->type = TYPE_LIST;
+  obj->flags = F_NONE;
+
+  obj_list_t *list = malloc(sizeof(obj_list_t));
+  list->type_name = malloc(strlen(type_name) + 1);
+  strcpy(list->type_name, type_name);
+  list->elems = NULL;
+  obj->list = list;
+  return obj;
+}
+
+obj_list_element_t *_get_elem(obj_t *list_obj, int offset) {
   int i = 0;
   obj_list_element_t *root = list_obj->list->elems;
 
   while (root != NULL) {
     if (i == offset) {
-      return root->node;
+      return root;
     }
     i++;
+
+    if (offset < 0) {
+      printf("This should not happen. Offset is %d.\n", offset);
+      return NULL;
+    }
+
     root = root->next;
   }
 
-  if (offset > i) {
-    printf("Index out of bounds\n");
-    return nil_obj();
+  return NULL;
+}
+
+int _list_len(obj_t *list_obj) {
+  int len = 0;
+  obj_list_element_t *root = list_obj->list->elems;
+
+  while(root != NULL) {
+    len++;
+    root = root->next;
+  }
+  return len;
+}
+
+obj_t *_list_get(obj_t *list_obj, int offset) {
+  if (offset < 0) {
+    int len = _list_len(list_obj);
+    offset = offset + len;
   }
 
-  return nil_obj();
+  if (offset < 0) return nil_obj();
+
+  obj_list_element_t *elem = _get_elem(list_obj, offset);
+
+  if (elem == NULL) return nil_obj();
+
+  return elem->node;
 }
 
 obj_t *_list_slice(obj_t *list_obj, int start, int end) {
@@ -35,8 +75,7 @@ obj_t *_list_slice(obj_t *list_obj, int start, int end) {
 
   while(i != start) {
     if (root == NULL && i != start) {
-      printf("Index out of bounds\n");
-      return nil_obj();
+      return _empty_list(list_obj->list->type_name);
     }
 
     // Advance to the start item.
@@ -76,14 +115,7 @@ obj_t *_list_slice(obj_t *list_obj, int start, int end) {
 }
 
 obj_t *list_len(obj_t *list_obj, obj_method_args_t /* ignored */ *args) {
-  int len = 0;
-  obj_list_element_t *root = list_obj->list->elems;
-
-  while(root != NULL) {
-    len++;
-    root = root->next;
-  }
-  return int_obj(len);
+  return int_obj(_list_len(list_obj));
 }
 
 obj_t *list_get(obj_t *list_obj, obj_method_args_t *args) {
@@ -124,27 +156,132 @@ obj_t *list_head(obj_t *list_obj, obj_method_args_t *args) {
 }
 
 obj_t *list_tail(obj_t *list_obj, obj_method_args_t *args){
+  if (_list_len(list_obj) == 1) {
+    return _empty_list(list_obj->list->type_name);
+  }
   return _list_slice(list_obj, 1, -1);
 }
 
 obj_t *list_prepend(obj_t *list_obj, obj_method_args_t *args) {
-  return nil_obj();
+  if (args == NULL || args->arg == NULL) {
+    printf("Argument missing\n");
+    return nil_obj();
+  }
+
+  if (strcmp(obj_type_names[args->arg->type], list_obj->list->type_name)) {
+    printf("Wrong type\n");
+    return nil_obj();
+  }
+
+  obj_list_element_t *head = _get_elem(list_obj, 0);
+  obj_list_element_t *new_elem = malloc(sizeof(obj_list_element_t));
+  new_elem->node = args->arg;
+  new_elem->next = head;
+  list_obj->list->elems = new_elem;
+
+  return list_obj;
 }
 
 obj_t *list_append(obj_t *list_obj, obj_method_args_t *args) {
-  return nil_obj();
+  if (args == NULL || args->arg == NULL) {
+    printf("Argument missing\n");
+    return nil_obj();
+  }
+
+  if (strcmp(obj_type_names[args->arg->type], list_obj->list->type_name)) {
+    printf("Wrong type\n");
+    return nil_obj();
+  }
+
+  int len = _list_len(list_obj);
+  obj_list_element_t *last = _get_elem(list_obj, len - 1);
+  obj_list_element_t *new_elem = malloc(sizeof(obj_list_element_t));
+  new_elem->node = args->arg;
+  new_elem->next = NULL;
+
+  if (last == NULL) {
+    list_obj->list->elems = new_elem;
+  } else {
+    last->next = new_elem;
+  }
+
+  return list_obj;
 }
 
 obj_t *list_remove_first(obj_t *list_obj, obj_method_args_t *args) {
+  obj_list_element_t *head = _get_elem(list_obj, 0);
+
+  if (head != NULL) {
+    obj_list_element_t *new_head = head->next;
+    list_obj->list->elems = new_head;
+    return head->node;
+  }
   return nil_obj();
 }
 
 obj_t *list_remove_last(obj_t *list_obj, obj_method_args_t *args) {
-  return nil_obj();
+  obj_list_element_t *first = _get_elem(list_obj, 0);
+  if (first == NULL) {
+    return nil_obj();
+  }
+
+  int len = _list_len(list_obj);
+  obj_list_element_t *last = _get_elem(list_obj, len - 1);
+  if (first == last) {
+    printf("first is last\n");
+    obj_t *obj = first->node;
+    list_obj->list->elems = NULL;
+    free(last);
+    first->node = NULL;
+    first->next = NULL;
+    return obj;
+  }
+
+  obj_list_element_t *new_last = _get_elem(list_obj, len - 2);
+  new_last->next = NULL;
+  obj_t *obj = last->node;
+  free(last);
+  last->node = NULL;
+  last->next = NULL;
+  return obj;
 }
 
-obj_t *list_remove(obj_t *list_obj, obj_method_args_t *args) {
-  return nil_obj();
+obj_t *list_remove_at(obj_t *list_obj, obj_method_args_t *args) {
+  if (args == NULL || args->arg == NULL) {
+    printf("Null arg to get()\n");
+    return nil_obj();
+  }
+  // Get first arg as int offset.
+  obj_t *arg = args->arg;
+  if (arg->type != TYPE_INT) {
+    return nil_obj();
+  }
+
+  int offset = arg->intval;
+  int len = _list_len(list_obj);
+
+  // Convert negative offset.
+  if (offset < 0) offset = len + offset;
+  if (offset < 0) return nil_obj();
+
+  // Special cases. Negative offset moves backwards from end: -1 is last elem.
+  if (len == 0) return nil_obj();
+  if (offset >= len) return nil_obj();
+  if (offset == 0) return list_remove_first(list_obj, NULL);
+  if (offset == len - 1) return list_remove_last(list_obj, NULL);
+
+  // If it's not one of those, we can get the previous element and stitch from there.
+  obj_list_element_t *prev = _get_elem(list_obj, offset - 1);
+  obj_list_element_t *target = prev->next;
+  obj_list_element_t *subseq = target->next;
+  prev->next = subseq;
+
+  obj_t *r = target->node;
+
+  free(target);
+  target->node = NULL;
+  target->next = NULL;
+  return r;
 }
 
 static_method get_list_static_method(static_method_ident_t method_id) {
@@ -154,6 +291,11 @@ static_method get_list_static_method(static_method_ident_t method_id) {
     case METHOD_HEAD: return list_head;
     case METHOD_TAIL: return list_tail;
     case METHOD_SLICE: return list_slice;
+    case METHOD_PREPEND: return list_prepend;
+    case METHOD_APPEND: return list_append;
+    case METHOD_REMOVE_FIRST: return list_remove_first;
+    case METHOD_REMOVE_LAST: return list_remove_last;
+    case METHOD_REMOVE_AT: return list_remove_at;
     default: return NULL;
   }
 }
