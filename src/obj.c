@@ -4,19 +4,7 @@
 #include <string.h>
 #include "../inc/obj.h"
 #include "../inc/list.h"
-
-obj_t *str_len(obj_t *string_obj, obj_method_args_t /* ignored */ *args) {
-  return int_obj(strlen(string_obj->stringval));
-}
-
-void make_string_methods(obj_t *obj) {
-  obj_method_t *method = malloc(sizeof(obj_method_t));
-  method->name = METHOD_NAME_LENGTH;
-  method->callable = str_len;
-  method->next = NULL;
-
-  obj->methods = method;
-}
+#include "../inc/str.h"
 
 obj_t *obj_of(obj_type_t type) {
   obj_t *obj = malloc(sizeof(obj_t));
@@ -24,10 +12,6 @@ obj_t *obj_of(obj_type_t type) {
   obj->flags = F_NONE;
   obj->methods = NULL;
 
-  switch (obj->type) {
-    case TYPE_STRING: make_string_methods(obj); break;
-    case TYPE_LIST:   make_list_methods(obj); break;
-  }
   return obj;
 }
 

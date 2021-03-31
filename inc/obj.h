@@ -71,6 +71,43 @@ typedef struct Obj {
   obj_method_t *methods;
 } obj_t;
 
+typedef obj_t* (*static_method)(obj_t *obj, obj_method_args_t *args);
+
+typedef uint8_t static_method_ident_t;
+enum static_method_ident_enum {
+  METHOD_NONE = 0,
+  METHOD_EQUAL,
+  METHOD_LENGTH,
+  METHOD_GET,
+  METHOD_HEAD,
+  METHOD_TAIL,
+  METHOD_SLICE,
+  METHOD_PREPEND,
+  METHOD_APPEND,
+  METHOD_REMOVE_FIRST,
+  METHOD_REMOVE_LAST,
+  METHOD_REMOVE_AT,
+};
+
+typedef struct {
+  static_method_ident_t ident;
+  const char* name;
+} static_method_name_t;
+
+static const static_method_name_t static_method_names[] = {
+  { .ident = METHOD_EQUAL,         .name = "equal" },
+  { .ident = METHOD_LENGTH,        .name = "length" },
+  { .ident = METHOD_GET,           .name = "get" },
+  { .ident = METHOD_HEAD,          .name = "head" },
+  { .ident = METHOD_TAIL,          .name = "tail" },
+  { .ident = METHOD_SLICE,         .name = "slice" },
+  { .ident = METHOD_PREPEND,       .name = "prepend" },
+  { .ident = METHOD_APPEND,        .name = "append" },
+  { .ident = METHOD_REMOVE_FIRST,  .name = "removeFirst" },
+  { .ident = METHOD_REMOVE_LAST,   .name = "removeLast" },
+  { .ident = METHOD_REMOVE_AT,     .name = "remove" }
+};
+
 static const char* obj_type_names[TYPE_MAX] = {
   "Unknown",
   "Nothing",
@@ -85,6 +122,11 @@ static const char* obj_type_names[TYPE_MAX] = {
   "List",
   "Identifier"
 };
+
+typedef struct StaticMethod {
+  const char* name;
+  struct Obj *(*callable)(obj_t *obj, obj_method_args_t *args);
+} obj_static_method_t;
 
 obj_t *undef_obj();
 obj_t *nil_obj();

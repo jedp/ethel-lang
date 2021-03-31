@@ -49,7 +49,6 @@ obj_t *_list_slice(obj_t *list_obj, int start, int end) {
   slice->type = TYPE_LIST;
   slice->flags = F_NONE;
   slice->list = malloc(sizeof(obj_list_t));
-  make_list_methods(slice);
 
   // Give it the same type and put the first elem in it.
   slice->list->type_name = malloc(strlen(list_obj->list->type_name) + 1);
@@ -148,34 +147,14 @@ obj_t *list_remove(obj_t *list_obj, obj_method_args_t *args) {
   return nil_obj();
 }
 
-void make_list_methods(obj_t *list_obj) {
-  obj_method_t *m_length = malloc(sizeof(obj_method_t));
-  m_length->name = METHOD_NAME_LENGTH;
-  m_length->callable = list_len;
-
-  obj_method_t *m_get = malloc(sizeof(obj_method_t));
-  m_get->name = METHOD_NAME_GET;
-  m_get->callable = list_get;
-
-  obj_method_t *m_head = malloc(sizeof(obj_method_t));
-  m_head->name = METHOD_NAME_HEAD;
-  m_head->callable = list_head;
-
-  obj_method_t *m_tail = malloc(sizeof(obj_method_t));
-  m_tail->name = METHOD_NAME_TAIL;
-  m_tail->callable = list_tail;
-
-  obj_method_t *m_slice = malloc(sizeof(obj_method_t));
-  m_slice->name = METHOD_NAME_SLICE;
-  m_slice->callable = list_slice;
-
-  // Link methods together.
-  m_length->next = m_get;
-  m_get->next = m_head;
-  m_head->next = m_tail;
-  m_tail->next = m_slice;
-  m_slice->next = NULL;
-
-  list_obj->methods = m_length;
+static_method get_list_static_method(static_method_ident_t method_id) {
+  switch (method_id) {
+    case METHOD_LENGTH: return list_len;
+    case METHOD_GET: return list_get;
+    case METHOD_HEAD: return list_head;
+    case METHOD_TAIL: return list_tail;
+    case METHOD_SLICE: return list_slice;
+    default: return NULL;
+  }
 }
 

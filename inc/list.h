@@ -1,5 +1,5 @@
-#ifndef __LIST_H
-#define __LIST_H
+#ifndef __OBJ_LIST_H
+#define __OBJ_LIST_H
 
 #include "obj.h"
 
@@ -14,7 +14,7 @@ obj_t *list_remove_head(obj_t *list_obj, obj_method_args_t *args);
 obj_t *list_remove_last(obj_t *list_obj, obj_method_args_t *args);
 obj_t *list_remove(obj_t *list_obj, obj_method_args_t *args);
 
-void make_list_methods(obj_t *list_obj);
+static_method get_list_static_method(static_method_ident_t method_id);
 
 #endif
 

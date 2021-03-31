@@ -9,6 +9,8 @@
 #include "../inc/parser.h"
 #include "../inc/ast.h"
 #include "../inc/env.h"
+#include "../inc/list.h"
+#include "../inc/str.h"
 
 size_t MAX_INPUT_LINE = 80;
 eval_result_t *eval_expr(ast_expr_t *expr, env_t *env);
@@ -491,47 +493,67 @@ void apply(ast_expr_t *expr, eval_result_t *result, env_t *env) {
 
   obj_t *obj = receiver->obj;
 
-  if (obj->methods == NULL) {
-    result->err = SYNTAX_ERROR;
+  // Look up the method identifier.
+  static_method_ident_t method_id = METHOD_NONE;
+  const char* member_name = expr->application->member_name;
+  for (int i = 0; i < sizeof(static_method_names) / sizeof(static_method_names[0]); i++) {
+    if (!strcmp(static_method_names[i].name, member_name)) {
+      method_id = static_method_names[i].ident;
+      goto found;
+    }
+  }
+found:
+  if (method_id == METHOD_NONE) {
+    result->err = NO_SUCH_METHOD;
     return;
   }
 
-  char* member_name = expr->application->member_name;
-
-  obj_method_t *method = obj->methods;
-  while(method != NULL) {
-    if (!strcmp(method->name, member_name)) {
-      if (expr->application->args == NULL) {
-        // Zero args.
-        result->obj = method->callable(obj, NULL);
-      } else {
-        // Args to eval.
-        ast_expr_list_t *args = expr->application->args;
-        obj_method_args_t *method_args = malloc(sizeof(obj_method_args_t));
-        obj_method_args_t *method_args_root = method_args;
-
-        while(args != NULL) {
-          eval_result_t *r = eval_expr(args->root, env);
-
-          method_args->arg = r->obj;
-          method_args->next = NULL;
-          args = args->next;
-
-          if (args != NULL) {
-            obj_method_args_t *next_method_args = malloc(sizeof(obj_method_args_t));
-            method_args->next = next_method_args;
-            method_args = next_method_args;
-          }
-        }
-
-        result->obj = method->callable(obj, method_args_root);
-      }
-      return;
-    }
-    method = method->next;
+  // Now look up the method for the given object type.
+  static_method method;
+  switch(obj->type) {
+    case TYPE_LIST:
+      method = get_list_static_method(method_id);
+      break;
+    case TYPE_STRING:
+      method = get_str_static_method(method_id);
+      break;
+    default:
+      method = NULL;
+      break;
   }
 
-  result->err = NO_SUCH_METHOD;
+  if (method == NULL) {
+    printf("Method not found for that object\n");
+    result->err = NO_SUCH_METHOD;
+    return;
+  }
+
+
+  if (expr->application->args == NULL) {
+    // Zero args.
+    result->obj = method(obj, NULL);
+  } else {
+    // Args to eval.
+    ast_expr_list_t *args = expr->application->args;
+    obj_method_args_t *method_args = malloc(sizeof(obj_method_args_t));
+    obj_method_args_t *method_args_root = method_args;
+
+    while(args != NULL) {
+      eval_result_t *r = eval_expr(args->root, env);
+
+      method_args->arg = r->obj;
+      method_args->next = NULL;
+      args = args->next;
+
+      if (args != NULL) {
+        obj_method_args_t *next_method_args = malloc(sizeof(obj_method_args_t));
+        method_args->next = next_method_args;
+        method_args = next_method_args;
+      }
+    }
+
+    result->obj = method(obj, method_args_root);
+  }
 }
 
 int print_args(ast_expr_list_t *args, eval_result_t *result, env_t *env) {
