@@ -9,6 +9,7 @@
 #include "../inc/parser.h"
 #include "../inc/ast.h"
 #include "../inc/env.h"
+#include "../inc/num.h"
 #include "../inc/list.h"
 #include "../inc/str.h"
 
@@ -316,120 +317,6 @@ done:
   result->obj = obj;
 }
 
-bool is_numeric(obj_t *o) {
-  return o->type == TYPE_INT || o->type == TYPE_FLOAT;
-}
-
-void add(obj_t *a, obj_t *b, eval_result_t *result) {
-  if (!is_numeric(a) || !is_numeric(b)) {
-    result->err = EVAL_TYPE_ERROR;
-    return;
-  }
-
-  if ((a->type == TYPE_INT) && (b->type == TYPE_INT)) {
-    result->obj = int_obj(a->intval + b->intval);
-  } else if ((a->type == TYPE_INT) && (b->type == TYPE_FLOAT)) {
-    result->obj = float_obj(a->intval + b->floatval);
-  } else if ((a->type == TYPE_FLOAT) && (b->type == TYPE_INT)) {
-    result->obj = float_obj(a->floatval + b->intval);
-  } else if ((a->type == TYPE_FLOAT) && (b->type == TYPE_FLOAT)) {
-    result->obj = float_obj(a->floatval + b->floatval);
-  } else {
-    result->err = EVAL_TYPE_ERROR;
-  }
-}
-
-void subtract(obj_t *a, obj_t *b, eval_result_t *result) {
-  if (!is_numeric(a) || !is_numeric(b)) {
-    result->err = EVAL_TYPE_ERROR;
-    return;
-  }
-
-  if (a->type == TYPE_INT && b->type == TYPE_INT) {
-    result->obj = int_obj(a->intval - b->intval);
-  } else if (a->type == TYPE_INT && b->type == TYPE_FLOAT) {
-    result->obj = float_obj(a->intval - b->floatval);
-  } else if (a->type == TYPE_FLOAT && b->type == TYPE_INT) {
-    result->obj = float_obj(a->floatval - b->intval);
-  } else if (a->type == TYPE_FLOAT && b->type == TYPE_FLOAT) {
-    result->obj = float_obj(a->floatval - b->floatval);
-  } else {
-    result->err = EVAL_TYPE_ERROR;
-  }
-}
-
-void multiply(obj_t *a, obj_t *b, eval_result_t *result) {
-  if (!is_numeric(a) || !is_numeric(b)) {
-    result->err = EVAL_TYPE_ERROR;
-    return;
-  }
-
-  if (a->type == TYPE_INT && b->type == TYPE_INT) {
-    result->obj = int_obj(a->intval * b->intval);
-  } else if (a->type == TYPE_INT && b->type == TYPE_FLOAT) {
-    result->obj = float_obj(a->intval * b->floatval);
-  } else if (a->type == TYPE_FLOAT && b->type == TYPE_INT) {
-    result->obj = float_obj(a->floatval * b->intval);
-  } else if (a->type == TYPE_FLOAT && b->type == TYPE_FLOAT) {
-    result->obj = float_obj(a->floatval * b->floatval);
-  } else {
-    result->err = EVAL_TYPE_ERROR;
-  }
-}
-
-void divide(obj_t *a, obj_t *b, eval_result_t *result) {
-  if (!is_numeric(a) || !is_numeric(b)) {
-    result->err = EVAL_TYPE_ERROR;
-    return;
-  }
-
-  if ((b->type == TYPE_INT && b->intval == 0) ||
-      (b->type == TYPE_FLOAT && b->floatval == 0.0f)) {
-    result->err = DIVISION_BY_ZERO;
-    return;
-  }
-
-  if (a->type == TYPE_INT && b->type == TYPE_INT) {
-    // Return an int if possible. I guess?
-    float f_div = (float) a->intval / b->intval;
-    int i_div = a->intval / b->intval;
-    result->obj = (f_div == i_div) ? int_obj(i_div) : float_obj(f_div);
-  } else if (a->type == TYPE_INT && b->type == TYPE_FLOAT) {
-    result->obj = float_obj(a->intval / b->floatval);
-  } else if (a->type == TYPE_FLOAT && b->type == TYPE_INT) {
-    result->obj = float_obj(a->floatval / b->intval);
-  } else if (a->type == TYPE_FLOAT && b->type == TYPE_FLOAT) {
-    result->obj = float_obj(a->floatval / b->floatval);
-  } else {
-    result->err = EVAL_TYPE_ERROR;
-  }
-}
-
-void modulus(obj_t *a, obj_t *b, eval_result_t *result) {
-  if (!is_numeric(a) || !is_numeric(b)) {
-    result->err = EVAL_TYPE_ERROR;
-    return;
-  }
-
-  if ((b->type == TYPE_INT && b->intval == 0) ||
-      (b->type == TYPE_FLOAT && b->floatval == 0.0f)) {
-    result->err = DIVISION_BY_ZERO;
-    return;
-  }
-
-  if (a->type == TYPE_INT && b->type == TYPE_INT) {
-    result->obj = int_obj(a->intval % b->intval);
-  } else if (a->type == TYPE_INT && b->type == TYPE_FLOAT) {
-    result->obj = float_obj((float) fmod(a->intval, (double) b->floatval));
-  } else if (a->type == TYPE_FLOAT && b->type == TYPE_INT) {
-    result->obj = float_obj((float) fmod((double) a->floatval, b->intval));
-  } else if (a->type == TYPE_FLOAT && b->type == TYPE_FLOAT) {
-    result->obj = float_obj((float) fmod((double) a->floatval, (double) b->floatval));
-  } else {
-    result->err = EVAL_TYPE_ERROR;
-  }
-}
-
 void cmp(ast_type_t type, obj_t *a, obj_t *b, eval_result_t *result) {
   if (a->type == TYPE_CHAR && b->type == TYPE_CHAR) {
     switch(type) {
@@ -446,26 +333,22 @@ void cmp(ast_type_t type, obj_t *a, obj_t *b, eval_result_t *result) {
     }
   }
 
-  if (!is_numeric(a) || !is_numeric(b)) {
-    result->err = EVAL_TYPE_ERROR;
-    return;
+  if (is_numeric(a) && is_numeric(b)) {
+    switch(type) {
+      case AST_GT: result->obj = num_gt(a, b); return;
+      case AST_GE: result->obj = num_ge(a, b); return;
+      case AST_LT: result->obj = num_lt(a, b); return;
+      case AST_LE: result->obj = num_le(a, b); return;
+      case AST_NE: result->obj = num_ne(a, b); return;
+      case AST_EQ: result->obj = num_eq(a, b); return;
+      default:
+        printf("what what what???\n");
+        result->obj = boolean_obj(false);
+        return;
+    }
   }
 
-  float x = a->type == TYPE_INT ? a->intval : a->floatval;
-  float y = b->type == TYPE_INT ? b->intval : b->floatval;
-
-  switch(type) {
-    case AST_GT: result->obj = boolean_obj(x >  y); return;
-    case AST_GE: result->obj = boolean_obj(x >= y); return;
-    case AST_LT: result->obj = boolean_obj(x <  y); return;
-    case AST_LE: result->obj = boolean_obj(x <= y); return;
-    case AST_NE: result->obj = boolean_obj(x != y); return;
-    case AST_EQ: result->obj = boolean_obj(x == y); return;
-    default:
-      printf("what what what???\n");
-      result->obj = boolean_obj(false);
-      return;
-  }
+  result->err = EVAL_TYPE_ERROR;
 }
 
 void boolean_and(obj_t *a, obj_t *b, eval_result_t *result) {
@@ -763,8 +646,12 @@ eval_result_t *eval_expr(ast_expr_t *expr, env_t *env) {
             if ((result->err = r1->err) != NO_ERROR) goto error;
             eval_result_t *r2 = eval_expr(expr->binop_args->b, env);
             if ((result->err = r2->err) != NO_ERROR) goto error;
-            add(r1->obj, r2->obj, result);
-            if (result->err != NO_ERROR) goto error;
+            obj_t *r = num_add(r1->obj, r2->obj);
+            if (r->type == TYPE_ERROR && ((result->err = r->errno) != NO_ERROR)) {
+              free(r);
+              goto error;
+            }
+            result->obj = r;
             break;
         }
         case AST_SUB: {
@@ -772,8 +659,12 @@ eval_result_t *eval_expr(ast_expr_t *expr, env_t *env) {
             if ((result->err = r1->err) != NO_ERROR) goto error;
             eval_result_t *r2 = eval_expr(expr->binop_args->b, env);
             if ((result->err = r2->err) != NO_ERROR) goto error;
-            subtract(r1->obj, r2->obj, result);
-            if (result->err != NO_ERROR) goto error;
+            obj_t *r = num_sub(r1->obj, r2->obj);
+            if (r->type == TYPE_ERROR && ((result->err = r->errno) != NO_ERROR)) {
+              free(r);
+              goto error;
+            }
+            result->obj = r;
             break;
         }
         case AST_MUL: {
@@ -781,8 +672,12 @@ eval_result_t *eval_expr(ast_expr_t *expr, env_t *env) {
             if ((result->err = r1->err) != NO_ERROR) goto error;
             eval_result_t *r2 = eval_expr(expr->binop_args->b, env);
             if ((result->err = r2->err) != NO_ERROR) goto error;
-            multiply(r1->obj, r2->obj, result);
-            if (result->err != NO_ERROR) goto error;
+            obj_t *r = num_mul(r1->obj, r2->obj);
+            if (r->type == TYPE_ERROR && ((result->err = r->errno) != NO_ERROR)) {
+              free(r);
+              goto error;
+            }
+            result->obj = r;
             break;
         }
         case AST_DIV: {
@@ -790,8 +685,12 @@ eval_result_t *eval_expr(ast_expr_t *expr, env_t *env) {
             if ((result->err = r1->err) != NO_ERROR) goto error;
             eval_result_t *r2 = eval_expr(expr->binop_args->b, env);
             if ((result->err = r2->err) != NO_ERROR) goto error;
-            divide(r1->obj, r2->obj, result);
-            if (result->err != NO_ERROR) goto error;
+            obj_t *r = num_div(r1->obj, r2->obj);
+            if (r->type == TYPE_ERROR && ((result->err = r->errno) != NO_ERROR)) {
+              free(r);
+              goto error;
+            }
+            result->obj = r;
             break;
         }
         case AST_MOD: {
@@ -799,8 +698,12 @@ eval_result_t *eval_expr(ast_expr_t *expr, env_t *env) {
             if ((result->err = r1->err) != NO_ERROR) goto error;
             eval_result_t *r2 = eval_expr(expr->binop_args->b, env);
             if ((result->err = r2->err) != NO_ERROR) goto error;
-            modulus(r1->obj, r2->obj, result);
-            if (result->err != NO_ERROR) goto error;
+            obj_t *r = num_mod(r1->obj, r2->obj);
+            if (r->type == TYPE_ERROR && ((result->err = r->errno) != NO_ERROR)) {
+              free(r);
+              goto error;
+            }
+            result->obj = r;
             break;
         }
         case AST_AND: {

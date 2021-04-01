@@ -3,6 +3,7 @@
 
 #include <inttypes.h>
 #include <stdbool.h>
+#include "err.h"
 #include "def.h"
 
 typedef uint8_t obj_type_t;
@@ -11,6 +12,7 @@ enum obj_type_enum {
   TYPE_NOTHING,
   TYPE_UNDEF,
   TYPE_NIL,
+  TYPE_ERROR,
   TYPE_INT,
   TYPE_FLOAT,
   TYPE_CHAR,
@@ -55,6 +57,7 @@ typedef struct Obj {
   uint16_t type;
   uint16_t flags;
   union {
+    error_t errno;
     int intval;
     float floatval;
     char* stringval;
@@ -66,11 +69,14 @@ typedef struct Obj {
 } obj_t;
 
 typedef obj_t* (*static_method)(obj_t *obj, obj_method_args_t *args);
+typedef obj_t* (*binop_method)(obj_t *obj, obj_t *other);
+
+obj_t *arg_at(obj_method_args_t *args, int index);
 
 typedef uint8_t static_method_ident_t;
 enum static_method_ident_enum {
   METHOD_NONE = 0,
-  METHOD_EQUAL,
+  METHOD_EQUALS,
   METHOD_LENGTH,
   METHOD_GET,
   METHOD_HEAD,
@@ -89,7 +95,7 @@ typedef struct {
 } static_method_name_t;
 
 static const static_method_name_t static_method_names[] = {
-  { .ident = METHOD_EQUAL,         .name = "equal" },
+  { .ident = METHOD_EQUALS,        .name = "equals" },
   { .ident = METHOD_LENGTH,        .name = "length" },
   { .ident = METHOD_GET,           .name = "get" },
   { .ident = METHOD_HEAD,          .name = "head" },
@@ -107,6 +113,7 @@ static const char* obj_type_names[TYPE_MAX] = {
   "Nothing",
   "Undefined",
   "Nil",
+  "Error",
   "Int",
   "Float",
   "Char",
@@ -125,6 +132,7 @@ typedef struct StaticMethod {
 obj_t *undef_obj();
 obj_t *nil_obj();
 obj_t *no_obj();
+obj_t *error_obj(error_t errno);
 obj_t *int_obj(int);
 obj_t *float_obj(float);
 obj_t *string_obj(const char*);

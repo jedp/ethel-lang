@@ -2,9 +2,22 @@
 #include <stdio.h>
 #include <stdbool.h>
 #include <string.h>
+#include "../inc/err.h"
 #include "../inc/obj.h"
 #include "../inc/list.h"
 #include "../inc/str.h"
+
+obj_t *arg_at(obj_method_args_t *args, int index) {
+  int i = 0;
+  obj_method_args_t *head = args;
+  while(head->arg != NULL) {
+    if (i++ == index) return head->arg;
+
+    head = head->next;
+    if (i > index) return nil_obj();
+  }
+  return nil_obj();
+}
 
 obj_t *obj_of(obj_type_t type) {
   obj_t *obj = malloc(sizeof(obj_t));
@@ -25,6 +38,12 @@ obj_t *no_obj() {
 
 obj_t *nil_obj() {
   return obj_of(TYPE_NIL);
+}
+
+obj_t *error_obj(error_t errno) {
+  obj_t *obj = obj_of(TYPE_ERROR);
+  obj->errno = errno;
+  return obj;
 }
 
 obj_t *int_obj(int i) {

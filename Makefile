@@ -2,6 +2,7 @@
 COMPOBJS = src/lexer.o \
 					 src/ast.o \
 					 src/parser.o \
+					 src/num.o \
 					 src/list.o \
 					 src/str.o \
 					 src/obj.o \
