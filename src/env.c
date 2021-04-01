@@ -1,13 +1,13 @@
 #include <stdio.h>
 #include <stdlib.h>
-#include <strings.h>
 #include "../inc/def.h"
+#include "../inc/str.h"
 #include "../inc/env.h"
 
 env_sym_t *new_sym(const char* name, obj_t *obj, uint8_t flags) {
   env_sym_t *sym = malloc(sizeof(env_sym_t));
-  sym->name = malloc(strlen(name) + 1);
-  strcpy(sym->name, name);
+  sym->name = malloc(c_str_len(name) + 1);
+  c_str_cp(sym->name, name);
   sym->flags = flags;
   sym->obj = obj;
   sym->prev = NULL;
@@ -57,7 +57,7 @@ env_sym_t *find_sym(env_t *env, const char *name) {
     // Start at the node the root points to.
     env_sym_t *node = env->symbols[i].next;
     while (node != NULL) {
-      if (!strcmp(name, node->name)) {
+      if (c_str_eq(name, node->name)) {
         return node;
       }
       node = node->next;

@@ -1,14 +1,14 @@
 #include <stdio.h>
-#include <string.h>
 #include "unity/unity.h"
 #include "test_lexer.h"
+#include "../inc/str.h"
 #include "../inc/err.h"
 #include "../inc/lexer.h"
 
 void test_lex_error(void) {
   char *expr = "if 42 & moo";
   lexer_t lexer;
-  lexer_init(&lexer, expr, strlen(expr));
+  lexer_init(&lexer, expr, c_str_len(expr));
 
   advance(&lexer); // eat "if"
   advance(&lexer); // eat "42"
@@ -20,7 +20,7 @@ void test_lex_error(void) {
 void test_lex_word(void) {
   char *expr = "for i in 1 .. 10 step 2";
   lexer_t lexer;
-  lexer_init(&lexer, expr, strlen(expr));
+  lexer_init(&lexer, expr, c_str_len(expr));
 
   token_t expected[] = {
     { .tag = TAG_FOR,     .string = "for" },
@@ -39,7 +39,7 @@ void test_lex_word(void) {
     if (lexer.token.tag == TAG_INT) {
       TEST_ASSERT_EQUAL(expected[i].intval, lexer.token.intval);
     } else if (lexer.token.tag != TAG_RANGE) {
-      TEST_ASSERT(!strcmp(expected[i].string, lexer.token.string));
+      TEST_ASSERT(c_str_eq(expected[i].string, lexer.token.string));
     }
     advance(&lexer);
   }
@@ -48,7 +48,7 @@ void test_lex_word(void) {
 void test_lex_int(void) {
   char *expr = "3120";
   lexer_t lexer;
-  lexer_init(&lexer, expr, strlen(expr));
+  lexer_init(&lexer, expr, c_str_len(expr));
 
   TEST_ASSERT_EQUAL(TAG_INT, lexer.token.tag);
   TEST_ASSERT_EQUAL(3120, lexer.token.intval);
@@ -57,7 +57,7 @@ void test_lex_int(void) {
 void test_lex_float(void) {
   char *expr = "3.1415";
   lexer_t lexer;
-  lexer_init(&lexer, expr, strlen(expr));
+  lexer_init(&lexer, expr, c_str_len(expr));
 
   TEST_ASSERT_EQUAL(TAG_FLOAT, lexer.token.tag);
   TEST_ASSERT_EQUAL((float) 3.1415, lexer.token.floatval);
@@ -66,7 +66,7 @@ void test_lex_float(void) {
 void test_lex_float_no_leading_decimal(void) {
   char *expr = ".125";
   lexer_t lexer;
-  lexer_init(&lexer, expr, strlen(expr));
+  lexer_init(&lexer, expr, c_str_len(expr));
 
   TEST_ASSERT_EQUAL(TAG_FLOAT, lexer.token.tag);
   TEST_ASSERT_EQUAL((float) 0.125, lexer.token.floatval);
@@ -75,7 +75,7 @@ void test_lex_float_no_leading_decimal(void) {
 void test_lex_char(void) {
   char *expr = "'c'";
   lexer_t lexer;
-  lexer_init(&lexer, expr, strlen(expr));
+  lexer_init(&lexer, expr, c_str_len(expr));
 
   TEST_ASSERT_EQUAL(TAG_CHAR, lexer.token.tag);
   TEST_ASSERT_EQUAL('c', lexer.token.ch);
@@ -84,7 +84,7 @@ void test_lex_char(void) {
 void test_lex_string(void) {
   char *expr = "\"i like pie\"";
   lexer_t lexer;
-  lexer_init(&lexer, expr, strlen(expr));
+  lexer_init(&lexer, expr, c_str_len(expr));
 
   TEST_ASSERT_EQUAL(TAG_STRING, lexer.token.tag);
   TEST_ASSERT_EQUAL_STRING("i like pie", lexer.token.string);
@@ -93,7 +93,7 @@ void test_lex_string(void) {
 void test_lex_true(void) {
   char *expr = "true";
   lexer_t lexer;
-  lexer_init(&lexer, expr, strlen(expr));
+  lexer_init(&lexer, expr, c_str_len(expr));
 
   TEST_ASSERT_EQUAL(TAG_TRUE, lexer.token.tag);
 }
@@ -101,7 +101,7 @@ void test_lex_true(void) {
 void test_lex_false(void) {
   char *expr = "false";
   lexer_t lexer;
-  lexer_init(&lexer, expr, strlen(expr));
+  lexer_init(&lexer, expr, c_str_len(expr));
 
   TEST_ASSERT_EQUAL(TAG_FALSE, lexer.token.tag);
 }
@@ -109,7 +109,7 @@ void test_lex_false(void) {
 void test_lex_arithmetic(void) {
   char *expr = "123 + 2345.67 * 3 - .42 / 5";
   lexer_t lexer;
-  lexer_init(&lexer, expr, strlen(expr));
+  lexer_init(&lexer, expr, c_str_len(expr));
 
   int expected[] = {
     TAG_INT, TAG_PLUS,
@@ -129,7 +129,7 @@ void test_lex_arithmetic(void) {
 void test_lex_arithmetic_no_spaces(void) {
   char *expr = "123+2345.67*3-.42/5";
   lexer_t lexer;
-  lexer_init(&lexer, expr, strlen(expr));
+  lexer_init(&lexer, expr, c_str_len(expr));
 
   int expected[] = {
     TAG_INT, TAG_PLUS,
@@ -149,7 +149,7 @@ void test_lex_arithmetic_no_spaces(void) {
 void test_lex_inequality(void) {
   char *expr = "if a < 1 and b <= 2 and c > 3 and d >= 4";
   lexer_t lexer;
-  lexer_init(&lexer, expr, strlen(expr));
+  lexer_init(&lexer, expr, c_str_len(expr));
 
   int expected[] = {
     TAG_IF, TAG_IDENT, TAG_LT, TAG_INT,
@@ -168,7 +168,7 @@ void test_lex_inequality(void) {
 void test_lex_inequality_no_spaces(void) {
   char *expr = "if a<1 and b<=2 and c>3 and d>=4";
   lexer_t lexer;
-  lexer_init(&lexer, expr, strlen(expr));
+  lexer_init(&lexer, expr, c_str_len(expr));
 
   int expected[] = {
     TAG_IF, TAG_IDENT, TAG_LT, TAG_INT,
@@ -187,7 +187,7 @@ void test_lex_inequality_no_spaces(void) {
 void test_lex_inequality_nested_expressions(void) {
   char *expr = "if (a < 1) and (b<=(2*4)) and c>3 and d>=4";
   lexer_t lexer;
-  lexer_init(&lexer, expr, strlen(expr));
+  lexer_init(&lexer, expr, c_str_len(expr));
 
   int expected[] = {
     TAG_IF, TAG_LPAREN, TAG_IDENT, TAG_LT, TAG_INT, TAG_RPAREN,
@@ -207,7 +207,7 @@ void test_lex_inequality_nested_expressions(void) {
 void test_lex_range(void) {
   char *expr = "1 .. 10";
   lexer_t lexer;
-  lexer_init(&lexer, expr, strlen(expr));
+  lexer_init(&lexer, expr, c_str_len(expr));
 
   int expected[] = { TAG_INT, TAG_RANGE, TAG_INT };
 
@@ -219,7 +219,7 @@ void test_lex_range(void) {
 
   // Also without whitespace, so we don't misconstrue this as a broken float.
   char *expr2 = "1 .. 10";
-  lexer_init(&lexer, expr2, strlen(expr));
+  lexer_init(&lexer, expr2, c_str_len(expr));
   for (int i = 0; i < sizeof(expected) / sizeof(expected[0]); i++) {
     TEST_ASSERT_EQUAL(NO_ERROR, lexer.err);
     TEST_ASSERT_EQUAL(expected[i], lexer.token.tag);
@@ -230,7 +230,7 @@ void test_lex_range(void) {
 void test_lex_parens(void) {
   char *expr = "(1.24 * ( 3.5-2+ 4 ) + 1) * 2";
   lexer_t lexer;
-  lexer_init(&lexer, expr, strlen(expr));
+  lexer_init(&lexer, expr, c_str_len(expr));
 
   int expected[] = {
     TAG_LPAREN, TAG_FLOAT, TAG_TIMES,
@@ -249,7 +249,7 @@ void test_lex_parens(void) {
 void test_lex_parens_no_spaces(void) {
   char *expr = "(1.24*(3.5-2+4)+1)*2";
   lexer_t lexer;
-  lexer_init(&lexer, expr, strlen(expr));
+  lexer_init(&lexer, expr, c_str_len(expr));
 
   int expected[] = {
     TAG_LPAREN, TAG_FLOAT, TAG_TIMES,
@@ -268,7 +268,7 @@ void test_lex_parens_no_spaces(void) {
 void test_lex_assign(void) {
   char *expr = "val a = 3";
   lexer_t lexer;
-  lexer_init(&lexer, expr, strlen(expr));
+  lexer_init(&lexer, expr, c_str_len(expr));
 
   int expected[] = { TAG_INVARIABLE, TAG_IDENT, TAG_ASSIGN, TAG_INT };
   for (int i = 0; i < sizeof(expected) / sizeof(expected[0]); i++) {
@@ -281,7 +281,7 @@ void test_lex_assign(void) {
 void test_lex_line_with_comment(void) {
   char *expr = "val a = 3 ; a comment ... ";
   lexer_t lexer;
-  lexer_init(&lexer, expr, strlen(expr));
+  lexer_init(&lexer, expr, c_str_len(expr));
 
   int expected[] = { TAG_INVARIABLE, TAG_IDENT, TAG_ASSIGN, TAG_INT };
   for (int i = 0; i < sizeof(expected) / sizeof(expected[0]); i++) {
@@ -294,7 +294,7 @@ void test_lex_line_with_comment(void) {
 void test_lex_only_whitespace_input(void) {
   char *expr = "  ";
   lexer_t lexer;
-  lexer_init(&lexer, expr, strlen(expr));
+  lexer_init(&lexer, expr, c_str_len(expr));
 
   TEST_ASSERT_EQUAL(NO_ERROR, lexer.err);
   TEST_ASSERT_EQUAL(TAG_EOF, lexer.token.tag);
@@ -303,7 +303,7 @@ void test_lex_only_whitespace_input(void) {
 void test_lex_no_input(void) {
   char *expr = "";
   lexer_t lexer;
-  lexer_init(&lexer, expr, strlen(expr));
+  lexer_init(&lexer, expr, c_str_len(expr));
 
   TEST_ASSERT_EQUAL(NO_ERROR, lexer.err);
   TEST_ASSERT_EQUAL(TAG_EOF, lexer.token.tag);
@@ -312,7 +312,7 @@ void test_lex_no_input(void) {
 void test_lex_comment_only(void) {
   char *expr = ";";
   lexer_t lexer;
-  lexer_init(&lexer, expr, strlen(expr));
+  lexer_init(&lexer, expr, c_str_len(expr));
 
   TEST_ASSERT_EQUAL(NO_ERROR, lexer.err);
   // TODO not sure about this
@@ -322,7 +322,7 @@ void test_lex_comment_only(void) {
 void test_lex_begin_end(void) {
   char *expr = "for i in 1 .. 10 {\n  print(i) \n}";
   lexer_t lexer;
-  lexer_init(&lexer, expr, strlen(expr));
+  lexer_init(&lexer, expr, c_str_len(expr));
 
   int expected[] = { 
     TAG_FOR, TAG_IDENT, TAG_IN, TAG_INT, TAG_RANGE, TAG_INT, TAG_BEGIN, TAG_EOL,
@@ -339,7 +339,7 @@ void test_lex_begin_end(void) {
 void test_lex_list_of(void) {
   char *expr = "var x = list of glug";
   lexer_t lexer;
-  lexer_init(&lexer, expr, strlen(expr));
+  lexer_init(&lexer, expr, c_str_len(expr));
 
   int expected[] = {
     TAG_VARIABLE, TAG_IDENT, TAG_ASSIGN, TAG_LIST, TAG_OF, TAG_TYPE_NAME
@@ -354,7 +354,7 @@ void test_lex_list_of(void) {
 void test_lex_list_of_with_init(void) {
   char *expr = "val x = list of int { 1, 2, 3}";
   lexer_t lexer;
-  lexer_init(&lexer, expr, strlen(expr));
+  lexer_init(&lexer, expr, c_str_len(expr));
 
   int expected[] = {
     TAG_INVARIABLE, TAG_IDENT, TAG_ASSIGN, TAG_LIST, TAG_OF, TAG_TYPE_NAME,
@@ -370,7 +370,7 @@ void test_lex_list_of_with_init(void) {
 void test_lex_field_access(void) {
   char *expr = "val l = x.length";
   lexer_t lexer;
-  lexer_init(&lexer, expr, strlen(expr));
+  lexer_init(&lexer, expr, c_str_len(expr));
 
   int expected[] = {
     TAG_INVARIABLE, TAG_IDENT, TAG_ASSIGN,
@@ -391,7 +391,7 @@ void test_lex_field_access(void) {
 void test_lex_method_access(void) {
   char *expr = "foo.insert(42)";
   lexer_t lexer;
-  lexer_init(&lexer, expr, strlen(expr));
+  lexer_init(&lexer, expr, c_str_len(expr));
 
   int expected[] = {
     TAG_IDENT, TAG_MEMBER_ACCESS, TAG_METHOD_NAME, TAG_LPAREN, TAG_INT, TAG_RPAREN
@@ -452,7 +452,7 @@ void test_lex_all_tokens(void) {
   int num_data = sizeof(test_data) / sizeof(test_data[0]);
   lexer_t lexer;
   for (int i = 0; i < num_data; ++i) {
-    lexer_init(&lexer, test_data[i].text, strlen(test_data[i].text));
+    lexer_init(&lexer, test_data[i].text, c_str_len(test_data[i].text));
     TEST_ASSERT_EQUAL(test_data[i].expected_tag, lexer.token.tag);
   }
 }

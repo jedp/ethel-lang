@@ -1,12 +1,13 @@
 #include <stdio.h>
-#include <string.h>
 #include <stdlib.h>
+#include "../inc/mem.h"
+#include "../inc/str.h"
 #include "../inc/err.h"
 #include "../inc/obj.h"
 #include "../inc/env.h"
 #include "../inc/eval.h"
 
-#define MAX_INPUT 80
+#define MAX_INPUT 1024
 
 char result_buf[80];
 char input[MAX_INPUT] = "";
@@ -27,7 +28,7 @@ void print_value(obj_t *obj) {
       printf("'%c'", obj->charval);
       break;
     case TYPE_BOOLEAN:
-      if (obj->intval) {
+      if (obj->boolval) {
         printf("True");
       } else {
         printf("False");
@@ -64,7 +65,7 @@ void print_result(obj_t *obj) {
 }
 
 int main(int argc, char** argv) {
-  memset(input, 0, MAX_INPUT);
+  mem_set(input, 0, MAX_INPUT);
 
   char* program = malloc(2);
   program[0] = 0;
@@ -86,9 +87,9 @@ int main(int argc, char** argv) {
       printf("Bye!\n");
       goto done;
     }
-    size_t program_len = strlen(program) + strlen(input) + 1;
+    size_t program_len = c_str_len(program) + c_str_len(input) + 1;
     program = (char*) realloc(program, program_len);
-    strncat(program, input, program_len);
+    c_str_ncat(program, input, program_len);
 
     eval_result_t *result = eval(&env, program);
     obj_t *obj = (obj_t*)result->obj;

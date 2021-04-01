@@ -1,6 +1,7 @@
 #include <stdio.h>
-#include <string.h>
 #include <ctype.h>
+#include "../inc/mem.h"
+#include "../inc/str.h"
 #include "../inc/token.h"
 #include "../inc/lexer.h"
 
@@ -117,7 +118,7 @@ done:
 }
 
 static void lex_word_raw(lexer_t *lexer) {
-  memset(next_word_buf, 0, MAX_WORD);
+  mem_set(next_word_buf, 0, MAX_WORD);
   int i = 0;
   do {
     next_word_buf[i++] = lexer->nextch;
@@ -163,7 +164,7 @@ static token_t *lex_word(lexer_t *lexer) {
 
   // Is it a reserved word?
   for (int j = 0; j < sizeof(reserved) / sizeof(reserved[0]); j++) {
-    if (!strcmp(reserved[j].string, next_word_buf)) { 
+    if (c_str_eq(reserved[j].string, next_word_buf)) {
       lexer->next_token = reserved[j];
       return &lexer->next_token;
     }
@@ -205,7 +206,7 @@ static token_t *lex_member_access(lexer_t *lexer) {
 static token_t *lex_string(lexer_t *lexer) {
   // Eat initial quote.
   readch(lexer);
-  memset(next_word_buf, 0, MAX_WORD);
+  mem_set(next_word_buf, 0, MAX_WORD);
   int i = 0;
   while (lexer->nextch != '"') {
     next_word_buf[i++] = lexer->nextch;
@@ -350,10 +351,10 @@ void lexer_init(lexer_t *lexer, const char input[], const uint32_t input_size) {
   lexer->depth = 1;
   lexer->err = NO_ERROR;
 
-  memset(next_word_buf, 0, MAX_WORD);
-  memset(word_buf, 0, MAX_WORD);
+  mem_set(next_word_buf, 0, MAX_WORD);
+  mem_set(word_buf, 0, MAX_WORD);
 
-  memset(lexer->buf, 0, LEXER_BUF_SIZE);
+  mem_set(lexer->buf, 0, LEXER_BUF_SIZE);
   for (uint8_t i = 0; i < input_size; i++) {
     lexer->buf[i] = input[i];
   }

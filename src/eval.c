@@ -1,5 +1,4 @@
 #include <stdlib.h>
-#include <string.h>
 #include <stdio.h>
 #include <limits.h>
 #include <math.h>
@@ -77,7 +76,7 @@ void eval_list_expr(ast_list_t *list, eval_result_t *result, env_t *env) {
     }
 
     // TODO user-defined types
-    if (strcmp(list->type_name, obj_type_names[r->obj->type])) {
+    if (!c_str_eq(list->type_name, obj_type_names[r->obj->type])) {
       result->err = EVAL_TYPE_ERROR;
       result->obj = list_obj(list->type_name, NULL);
       return;
@@ -99,7 +98,7 @@ void eval_list_expr(ast_list_t *list, eval_result_t *result, env_t *env) {
 }
 
 void strip_trailing_ws(char* s) {
-  int end = strlen(s) - 1;
+  int end = c_str_len(s) - 1;
   while (end > 0) {
     if (s[end] != ' '  &&
         s[end] != '\t' &&
@@ -130,8 +129,8 @@ void float_to_string(obj_t *obj) {
 
 error_t string_to_int(obj_t *obj) {
   char *end = NULL;
-  char *input = malloc(strlen(obj->stringval) + 1);
-  strcpy(input, obj->stringval);
+  char *input = malloc(c_str_len(obj->stringval) + 1);
+  c_str_cp(input, obj->stringval);
   strip_trailing_ws(input);
 
   long l = strtol(input, &end, 10);
@@ -151,8 +150,8 @@ error_t string_to_int(obj_t *obj) {
 
 error_t string_to_float(obj_t *obj) {
   char *end = NULL;
-  char *input = malloc(strlen(obj->stringval) + 1);
-  strcpy(input, obj->stringval);
+  char *input = malloc(c_str_len(obj->stringval) + 1);
+  c_str_cp(input, obj->stringval);
   strip_trailing_ws(input);
 
   float f = strtof(input, &end);
@@ -245,7 +244,7 @@ void cast(obj_t *obj, obj_t *type_obj, eval_result_t *result) {
           result->err = string_to_float(obj);
           goto done;
         case TYPE_CHAR:
-          if (strlen(obj->stringval) > 1) {
+          if (c_str_len(obj->stringval) > 1) {
             result->err = EVAL_TYPE_ERROR;
             goto done;
           }
@@ -254,7 +253,7 @@ void cast(obj_t *obj, obj_t *type_obj, eval_result_t *result) {
         case TYPE_STRING:
           goto done;
         case TYPE_BOOLEAN:
-          obj->boolval = strlen(obj->stringval) > 0 ? 1 : 0;
+          obj->boolval = c_str_len(obj->stringval) > 0 ? 1 : 0;
           goto done;
         default:
           result->err = EVAL_TYPE_ERROR;
@@ -379,7 +378,7 @@ void apply(ast_expr_t *expr, eval_result_t *result, env_t *env) {
   static_method_ident_t method_id = METHOD_NONE;
   const char* member_name = expr->application->member_name;
   for (int i = 0; i < sizeof(static_method_names) / sizeof(static_method_names[0]); i++) {
-    if (!strcmp(static_method_names[i].name, member_name)) {
+    if (c_str_eq(static_method_names[i].name, member_name)) {
       method_id = static_method_names[i].ident;
       goto found;
     }
@@ -482,7 +481,7 @@ void readln_input(eval_result_t *result) {
   }
 
   // Trim trailing newline.
-  int end = (int) strlen(s) - 1;
+  int end = (int) c_str_len(s) - 1;
   while (end >= 0 && s[end] == '\n') s[end--] = '\0';
 
   result->obj = string_obj(s);

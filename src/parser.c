@@ -1,7 +1,7 @@
 #include <stdio.h>
 #include <stdlib.h>
-#include <string.h>
 #include "../inc/def.h"
+#include "../inc/str.h"
 #include "../inc/ast.h"
 #include "../inc/lexer.h"
 #include "../inc/parser.h"
@@ -12,7 +12,7 @@ ast_expr_t *parse_expr(lexer_t *lexer);
 ast_expr_t *parse_atom(lexer_t *lexer);
 ast_expr_t *parse_eof(lexer_t *lexer);
 
-bool is_binop(token_t *token) {
+boolean is_binop(token_t *token) {
   return token->tag == TAG_AS
       || token->tag == TAG_PLUS
       || token->tag == TAG_MINUS
@@ -326,11 +326,11 @@ ast_expr_t *parse_atom(lexer_t *lexer) {
     }
     case TAG_TRUE: {
       advance(lexer);
-      return ast_boolean(true);
+      return ast_boolean(True);
     }
     case TAG_FALSE: {
       advance(lexer);
-      return ast_boolean(false);
+      return ast_boolean(False);
     }
     case TAG_INT: {
       int i = lexer->token.intval;
@@ -392,8 +392,8 @@ ast_expr_t *parse_atom(lexer_t *lexer) {
       return id;
     }
     case TAG_METHOD_NAME: {
-      char* name = malloc(strlen(lexer->token.string) + 1);
-      strcpy(name, lexer->token.string);
+      char* name = malloc(c_str_len(lexer->token.string) + 1);
+      c_str_cp(name, lexer->token.string);
       advance(lexer);
       if (!eat(lexer, TAG_LPAREN)) { free(name); goto error; }
       if (lexer->token.tag == TAG_RPAREN) {
@@ -464,7 +464,7 @@ error:
 void parse_program(char *input, ast_expr_t *ast, parse_result_t *parse_result) {
   lexer_t lexer;
 
-  lexer_init(&lexer, input, strlen(input));
+  lexer_init(&lexer, input, c_str_len(input));
 
   // Lexer error. Don't parse.
   if (lexer.err != NO_ERROR) {
@@ -487,6 +487,7 @@ void parse_program(char *input, ast_expr_t *ast, parse_result_t *parse_result) {
   ast->type = p->type;
   ast->flags = p->flags;
   // End up assigning the one that isn't null.
+  ast->boolval = p->boolval;
   ast->intval = p->intval;
   ast->floatval = p->floatval;
   ast->stringval = p->stringval;

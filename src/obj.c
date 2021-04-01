@@ -1,6 +1,5 @@
 #include <stdlib.h>
 #include <stdio.h>
-#include <string.h>
 #include "../inc/err.h"
 #include "../inc/obj.h"
 #include "../inc/list.h"
@@ -59,8 +58,8 @@ obj_t *float_obj(float f) {
 
 obj_t *string_obj(const char* s) {
   obj_t *obj = obj_of(TYPE_STRING);
-  obj->stringval = malloc(strlen(s) + 1);
-  strcpy(obj->stringval, s);
+  obj->stringval = malloc(c_str_len(s) + 1);
+  c_str_cp(obj->stringval, s);
   return obj;
 }
 
@@ -86,8 +85,8 @@ obj_t *list_obj(char* name, obj_list_element_t *elems) {
   obj_t *obj = obj_of(TYPE_LIST);
   obj_list_t *list = malloc(sizeof(obj_list_t));
 
-  list->type_name = malloc(strlen(name) + 1);
-  strcpy(list->type_name, name);
+  list->type_name = malloc(c_str_len(name) + 1);
+  c_str_cp(list->type_name, name);
 
   list->elems = malloc(sizeof(obj_list_element_t));
   list->elems = elems;
@@ -101,7 +100,7 @@ boolean truthy(obj_t *obj) {
     case TYPE_NIL: return False;
     case TYPE_INT: return obj->intval != 0;
     case TYPE_FLOAT: return obj->floatval != 0;
-    case TYPE_STRING: return strlen(obj->stringval) > 0;
+    case TYPE_STRING: return c_str_len(obj->stringval) > 0;
     case TYPE_CHAR: return obj->charval != 0x0;
     case TYPE_BOOLEAN: return obj->boolval;
     default:

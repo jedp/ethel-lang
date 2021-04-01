@@ -1,18 +1,20 @@
 
 COMPOBJS = src/mem.o \
-					 src/lexer.o \
-					 src/ast.o \
-					 src/parser.o \
+					 src/str.o \
 					 src/num.o \
 					 src/list.o \
-					 src/str.o \
+					 src/lexer.o \
+					 src/parser.o \
+					 src/env.o \
 					 src/obj.o \
-					 src/eval.o \
-					 src/env.o
+					 src/ast.o \
+					 src/eval.o
 
 REPLOBJS = src/repl.o
 
 TESTOBJS = test/unity/unity.o \
+					 test/test_str.o \
+					 test/test_mem.o \
 					 test/test_lexer.o \
 					 test/test_parser.o \
 					 test/test_eval.o \

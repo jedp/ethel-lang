@@ -1,5 +1,4 @@
 #include <stdio.h>
-#include <string.h>
 #include "unity/unity.h"
 #include "test_eval.h"
 #include "../inc/env.h"

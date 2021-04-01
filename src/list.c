@@ -1,6 +1,6 @@
 #include <stdlib.h>
 #include <stdio.h>
-#include <string.h>
+#include "../inc/str.h"
 #include "../inc/obj.h"
 #include "../inc/list.h"
 
@@ -10,8 +10,8 @@ obj_t *_empty_list(char* type_name) {
   obj->flags = F_NONE;
 
   obj_list_t *list = malloc(sizeof(obj_list_t));
-  list->type_name = malloc(strlen(type_name) + 1);
-  strcpy(list->type_name, type_name);
+  list->type_name = malloc(c_str_len(type_name) + 1);
+  c_str_cp(list->type_name, type_name);
   list->elems = NULL;
   obj->list = list;
   return obj;
@@ -90,8 +90,8 @@ obj_t *_list_slice(obj_t *list_obj, int start, int end) {
   slice->list = malloc(sizeof(obj_list_t));
 
   // Give it the same type and put the first elem in it.
-  slice->list->type_name = malloc(strlen(list_obj->list->type_name) + 1);
-  strcpy(slice->list->type_name, list_obj->list->type_name);
+  slice->list->type_name = malloc(c_str_len(list_obj->list->type_name) + 1);
+  c_str_cp(slice->list->type_name, list_obj->list->type_name);
   slice->list->elems = malloc(sizeof(obj_list_t));
 
   obj_list_element_t *curr = slice->list->elems;
@@ -168,7 +168,7 @@ obj_t *list_prepend(obj_t *list_obj, obj_method_args_t *args) {
     return nil_obj();
   }
 
-  if (strcmp(obj_type_names[args->arg->type], list_obj->list->type_name)) {
+  if (!c_str_eq(obj_type_names[args->arg->type], list_obj->list->type_name)) {
     printf("Wrong type\n");
     return nil_obj();
   }
@@ -188,7 +188,7 @@ obj_t *list_append(obj_t *list_obj, obj_method_args_t *args) {
     return nil_obj();
   }
 
-  if (strcmp(obj_type_names[args->arg->type], list_obj->list->type_name)) {
+  if (!c_str_eq(obj_type_names[args->arg->type], list_obj->list->type_name)) {
     printf("Wrong type\n");
     return nil_obj();
   }

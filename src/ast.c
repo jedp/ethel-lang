@@ -1,6 +1,6 @@
 #include <stdlib.h>
-#include <strings.h>
 #include <stdio.h>
+#include "../inc/str.h"
 #include "../inc/def.h"
 #include "../inc/ast.h"
 
@@ -72,8 +72,8 @@ ast_expr_t *ast_nil() {
 ast_expr_t *ast_list(char* type_name, ast_expr_list_t *nullable_init_es) {
   ast_expr_t *node = ast_node(AST_LIST);
   node->list = malloc(sizeof(ast_list_t));
-  node->list->type_name = malloc(strlen(type_name) + 1);
-  strcpy(node->list->type_name, type_name);
+  node->list->type_name = malloc(c_str_len(type_name) + 1);
+  c_str_cp(node->list->type_name, type_name);
   if (nullable_init_es != NULL) {
     node->list->es = nullable_init_es;
   } else {
@@ -102,8 +102,8 @@ ast_expr_t *ast_char(char c) {
 
 ast_expr_t *ast_string(char* s) {
   ast_expr_t *node = ast_node(AST_STRING);
-  char* stringval = malloc(strlen(s) + 1);
-  strcpy(stringval, s);
+  char* stringval = malloc(c_str_len(s) + 1);
+  c_str_cp(stringval, s);
   node->stringval = stringval;
   return node;
 }
@@ -121,8 +121,8 @@ ast_expr_t *ast_type(ast_type_t type) {
 
 ast_expr_t *ast_ident(char* name) {
   ast_expr_t *node = ast_node(AST_IDENT);
-  char* node_name = malloc(strlen(name) + 1);
-  strcpy(node_name, name);
+  char* node_name = malloc(c_str_len(name) + 1);
+  c_str_cp(node_name, name);
   node->stringval = node_name;
   return node;
 }
@@ -133,8 +133,8 @@ ast_expr_t *ast_member_access(ast_expr_t *expr, char* member_name, ast_expr_list
   node->application = malloc(sizeof(ast_apply_t));
   node->application->receiver = expr;
 
-  node->application->member_name = malloc(strlen(member_name) + 1);
-  strcpy(node->application->member_name, member_name);
+  node->application->member_name = malloc(c_str_len(member_name) + 1);
+  c_str_cp(node->application->member_name, member_name);
 
   node->application->args = malloc(sizeof(ast_expr_list_t));
   node->application->args = args;
@@ -144,8 +144,8 @@ ast_expr_t *ast_member_access(ast_expr_t *expr, char* member_name, ast_expr_list
 
 ast_expr_t *ast_type_name(char* name) {
   ast_expr_t *node = ast_node(AST_TYPE_NAME);
-  char* node_name = malloc(strlen(name) + 1);
-  strcpy(node_name, name);
+  char* node_name = malloc(c_str_len(name) + 1);
+  c_str_cp(node_name, name);
   node->stringval = node_name;
   return node;
 }
@@ -161,8 +161,8 @@ ast_expr_t *ast_range(ast_expr_t *from, ast_expr_t *to) {
 ast_expr_t *ast_method(char* name, ast_expr_list_t *args) {
   ast_expr_t *node = ast_node(AST_METHOD);
   node->method = malloc(sizeof(ast_method_t));
-  node->method->name = malloc(strlen(name) + 1);
-  strcpy(node->method->name, name);
+  node->method->name = malloc(c_str_len(name) + 1);
+  c_str_cp(node->method->name, name);
   node->method->args = args;
   return node;
 }
