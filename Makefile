@@ -1,5 +1,6 @@
 
-COMPOBJS = src/lexer.o \
+COMPOBJS = src/mem.o \
+					 src/lexer.o \
 					 src/ast.o \
 					 src/parser.o \
 					 src/num.o \
