@@ -1,7 +1,6 @@
 #include <stdlib.h>
 #include <stdio.h>
 #include <limits.h>
-#include <math.h>
 #include "../inc/err.h"
 #include "../inc/eval.h"
 #include "../inc/parser.h"

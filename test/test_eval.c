@@ -122,8 +122,9 @@ void test_eval_float_mod(void) {
   eval_result_t *result = eval_program(program);
   TEST_ASSERT_EQUAL(NO_ERROR, result->err);
 
+  // Modulus is always an int in our world.
   obj_t *obj = result->obj;
-  TEST_ASSERT_FLOAT_WITHIN(0.001, 1.2, obj->floatval);
+  TEST_ASSERT_EQUAL(1, obj->intval);
 }
 
 void test_eval_numeric_comparison(void) {

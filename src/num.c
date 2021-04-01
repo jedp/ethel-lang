@@ -1,5 +1,4 @@
 #include <stdlib.h>
-#include <math.h>
 #include "../inc/obj.h"
 #include "../inc/num.h"
 
@@ -113,15 +112,15 @@ obj_t *num_mod(obj_t *obj, obj_t *other) {
   }
 
   if ((obj->type == TYPE_INT) && (other->type == TYPE_FLOAT)) {
-    return float_obj((float) fmod(obj->intval, other->floatval));
+    return int_obj(obj->intval % (int) other->floatval);
   }
 
   if ((obj->type == TYPE_FLOAT) && (other->type == TYPE_INT)) {
-    return float_obj((float) fmod(obj->floatval, other->intval));
+    return int_obj((int) obj->floatval % other->intval);
   }
 
   if ((obj->type == TYPE_FLOAT) && (other->type == TYPE_FLOAT)) {
-    return float_obj((float) fmod(obj->floatval, other->floatval));
+    return int_obj((int) obj->floatval % (int) other->floatval);
   }
 
   return error_obj(EVAL_TYPE_ERROR);
