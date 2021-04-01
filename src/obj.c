@@ -1,6 +1,5 @@
 #include <stdlib.h>
 #include <stdio.h>
-#include <stdbool.h>
 #include <string.h>
 #include "../inc/err.h"
 #include "../inc/obj.h"
@@ -71,9 +70,9 @@ obj_t *char_obj(char c) {
   return obj;
 }
 
-obj_t *boolean_obj(bool t) {
+obj_t *boolean_obj(boolean t) {
   obj_t *obj = obj_of(TYPE_BOOLEAN);
-  obj->intval = t ? 1 : 0;
+  obj->boolval = t;
   return obj;
 }
 
@@ -97,17 +96,17 @@ obj_t *list_obj(char* name, obj_list_element_t *elems) {
   return obj;
 }
 
-bool truthy(obj_t *obj) {
+boolean truthy(obj_t *obj) {
   switch(obj->type) {
-    case TYPE_NIL: return false;
+    case TYPE_NIL: return False;
     case TYPE_INT: return obj->intval != 0;
     case TYPE_FLOAT: return obj->floatval != 0;
     case TYPE_STRING: return strlen(obj->stringval) > 0;
     case TYPE_CHAR: return obj->charval != 0x0;
-    case TYPE_BOOLEAN: return obj->intval == 1;
+    case TYPE_BOOLEAN: return obj->boolval;
     default:
       printf("Unknown type: %d\n", obj->type);
-      return false;
+      return False;
       break;
   }
 }

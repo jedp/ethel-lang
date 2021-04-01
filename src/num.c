@@ -3,7 +3,7 @@
 #include "../inc/obj.h"
 #include "../inc/num.h"
 
-bool is_numeric(obj_t *obj) {
+boolean is_numeric(obj_t *obj) {
   return obj->type == TYPE_INT || obj->type == TYPE_FLOAT;
 }
 

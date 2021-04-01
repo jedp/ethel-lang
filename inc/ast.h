@@ -2,7 +2,7 @@
 #define _AST_H
 
 #include <inttypes.h>
-#include <stdbool.h>
+#include "def.h"
 
 typedef uint8_t ast_type_t;
 enum ast_type_enum {
@@ -195,6 +195,7 @@ typedef struct AstExpr {
     ast_method_t *method;
     ast_apply_t *application;
     int intval;
+    int boolval;
     float floatval;
     char* stringval;
     char charval;
@@ -210,7 +211,7 @@ ast_expr_t *ast_float(float value);
 ast_expr_t *ast_int(int value);
 ast_expr_t *ast_char(char c);
 ast_expr_t *ast_string(char* s);
-ast_expr_t *ast_boolean(bool t);
+ast_expr_t *ast_boolean(boolean t);
 ast_expr_t *ast_type(ast_type_t type);
 ast_expr_t *ast_ident(char* name);
 ast_expr_t *ast_field(char* name);

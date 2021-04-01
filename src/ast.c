@@ -1,6 +1,5 @@
 #include <stdlib.h>
 #include <strings.h>
-#include <stdbool.h>
 #include <stdio.h>
 #include "../inc/def.h"
 #include "../inc/ast.h"
@@ -13,7 +12,7 @@ ast_expr_t *ast_node(ast_type_t type) {
     case AST_FLOAT:   node->floatval = 0.0;  break;
     case AST_CHAR:    node->charval = 0;     break;
     case AST_STRING:  node->stringval = "";  break;
-    case AST_BOOLEAN: node->intval = 0;      break;
+    case AST_BOOLEAN: node->boolval = 0;     break;
     // Other nodes are not initialized.
     default: break;
   }
@@ -109,9 +108,9 @@ ast_expr_t *ast_string(char* s) {
   return node;
 }
 
-ast_expr_t *ast_boolean(bool t) {
+ast_expr_t *ast_boolean(boolean t) {
   ast_expr_t *node = ast_node(AST_BOOLEAN);
-  node->intval = t ? 1 : 0;
+  node->boolval = t ? 1 : 0;
   return node;
 }
 

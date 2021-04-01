@@ -2,7 +2,6 @@
 #define __OBJ_H
 
 #include <inttypes.h>
-#include <stdbool.h>
 #include "err.h"
 #include "def.h"
 
@@ -59,6 +58,7 @@ typedef struct Obj {
   union {
     error_t errno;
     int intval;
+    int boolval;
     float floatval;
     char* stringval;
     char charval;
@@ -137,11 +137,11 @@ obj_t *int_obj(int);
 obj_t *float_obj(float);
 obj_t *string_obj(const char*);
 obj_t *char_obj(char);
-obj_t *boolean_obj(bool);
+obj_t *boolean_obj(boolean);
 obj_t *range_obj(int, int);
 obj_t *list_obj(char* type_name, obj_list_element_t* elems);
 
-bool truthy(obj_t *obj);
+boolean truthy(obj_t *obj);
 
 #endif
 

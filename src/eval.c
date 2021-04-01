@@ -1,4 +1,3 @@
-#include <stdbool.h>
 #include <stdlib.h>
 #include <string.h>
 #include <stdio.h>
@@ -31,7 +30,7 @@ void eval_boolean_expr(ast_expr_t *expr, eval_result_t *result) {
     result->err = EVAL_TYPE_ERROR;
     return;
   }
-  result->obj = boolean_obj(expr->intval == 1);
+  result->obj = boolean_obj(expr->boolval);
 }
 
 void eval_int_expr(ast_expr_t *expr, eval_result_t *result) {
@@ -137,7 +136,7 @@ error_t string_to_int(obj_t *obj) {
 
   long l = strtol(input, &end, 10);
   // Expect to have read to the end of the string or to a decimal point.
-  bool bad_input = (*end != '\0') && (*end != '.');
+  boolean bad_input = (*end != '\0') && (*end != '.');
   // Can only free input after we're done using the end pointer.
   free(input);
 
@@ -158,7 +157,7 @@ error_t string_to_float(obj_t *obj) {
 
   float f = strtof(input, &end);
 
-  bool bad_input = *end != '\0';
+  boolean bad_input = *end != '\0';
   free(input);
 
   if (bad_input) return EVAL_BAD_INPUT;
@@ -193,20 +192,20 @@ void cast(obj_t *obj, obj_t *type_obj, eval_result_t *result) {
         case TYPE_INT:
           goto done;
         case TYPE_FLOAT:
-          obj->floatval= (float) obj->intval;
+          obj->floatval = (float) obj->intval;
           goto done;
         case TYPE_CHAR:
           if (obj->intval < 0 || obj->intval > 255) {
             result->err = VALUE_TOO_LARGE_FOR_CHAR;
             goto done;
           }
-          obj->charval= (char) obj->intval;
+          obj->charval = (char) obj->intval;
           goto done;
         case TYPE_STRING:
           int_to_string(obj);
           goto done;
         case TYPE_BOOLEAN:
-          obj->intval = obj->intval ? 1 : 0;
+          obj->boolval = obj->intval ? 1 : 0;
           goto done;
         default:
           result->err = EVAL_TYPE_ERROR;
@@ -229,7 +228,7 @@ void cast(obj_t *obj, obj_t *type_obj, eval_result_t *result) {
           float_to_string(obj);
           goto done;
         case TYPE_BOOLEAN:
-          obj->intval = (obj->floatval != 0.0f) ? (int) 1 : (int) 0;
+          obj->boolval = (obj->floatval != 0.0f) ? (int) 1 : (int) 0;
           goto done;
         default:
           result->err = EVAL_TYPE_ERROR;
@@ -255,7 +254,7 @@ void cast(obj_t *obj, obj_t *type_obj, eval_result_t *result) {
         case TYPE_STRING:
           goto done;
         case TYPE_BOOLEAN:
-          obj->intval = strlen(obj->stringval) > 0 ? 1 : 0;
+          obj->boolval = strlen(obj->stringval) > 0 ? 1 : 0;
           goto done;
         default:
           result->err = EVAL_TYPE_ERROR;
@@ -279,7 +278,7 @@ void cast(obj_t *obj, obj_t *type_obj, eval_result_t *result) {
           goto done;
         }
         case TYPE_BOOLEAN:
-          obj->intval = obj->charval != 0 ? 1 : 0;
+          obj->boolval = obj->charval != 0 ? 1 : 0;
           goto done;
         default:
           result->err = EVAL_TYPE_ERROR;
@@ -328,7 +327,7 @@ void cmp(ast_type_t type, obj_t *a, obj_t *b, eval_result_t *result) {
       case AST_EQ: result->obj = boolean_obj(a->charval == b->charval); return;
       default:
         printf("what what what???\n");
-        result->obj = boolean_obj(false);
+        result->obj = boolean_obj(False);
         return;
     }
   }
@@ -343,7 +342,7 @@ void cmp(ast_type_t type, obj_t *a, obj_t *b, eval_result_t *result) {
       case AST_EQ: result->obj = num_eq(a, b); return;
       default:
         printf("what what what???\n");
-        result->obj = boolean_obj(false);
+        result->obj = boolean_obj(False);
         return;
     }
   }
@@ -460,7 +459,7 @@ int print_args(ast_expr_list_t *args, eval_result_t *result, env_t *env) {
         case TYPE_FLOAT: printf("%f ", (double) r->obj->floatval); break;
         case TYPE_CHAR: printf("%c ", r->obj->charval); break;
         case TYPE_STRING: printf("%s ", r->obj->stringval); break;
-        case TYPE_BOOLEAN: printf("%s ", r->obj->intval ? "true" : "false"); break;
+        case TYPE_BOOLEAN: printf("%s ", r->obj->boolval ? "true" : "false"); break;
         case TYPE_NIL: printf("Nil "); break;
         default: printf("?? "); break;
       }

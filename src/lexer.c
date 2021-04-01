@@ -1,5 +1,4 @@
 #include <stdio.h>
-#include <stdbool.h>
 #include <string.h>
 #include <ctype.h>
 #include "../inc/token.h"
@@ -219,15 +218,15 @@ static token_t *lex_string(lexer_t *lexer) {
   return &lexer->next_token;
 }
 
-bool is_whitespace(char c) {
+boolean is_whitespace(char c) {
   switch(c) {
     case ' ':
     case '\t':
     case '\r':
     case '\n':
-      return true;
+      return True;
   }
-  return false;
+  return False;
 }
 
 token_t *get_token(lexer_t *lexer) {
@@ -334,15 +333,15 @@ void advance(lexer_t *lexer) {
   }
 }
 
-bool eat(lexer_t *lexer, tag_t t) {
+boolean eat(lexer_t *lexer, tag_t t) {
   if (lexer->token.tag != t) {
     lexer->err_pos = (int) lexer->pos;
     lexer->err = LEX_ERROR;
-    return false;
+    return False;
   }
 
   advance(lexer);
-  return true;
+  return True;
 }
 
 void lexer_init(lexer_t *lexer, const char input[], const uint32_t input_size) {

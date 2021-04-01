@@ -2,8 +2,8 @@
 #define __LEXER_H
 
 #include <inttypes.h>
-#include <stdbool.h>
 #include "err.h"
+#include "def.h"
 #include "token.h"
 
 #define LEXER_BUF_SIZE 128
@@ -23,7 +23,7 @@ void lexer_init(lexer_t *lexer, const char input[], const uint32_t input_size);
 
 void advance(lexer_t *lexer);
 
-bool eat(lexer_t *lexer, tag_t t);
+boolean eat(lexer_t *lexer, tag_t t);
 
 tag_t peek_token_type(lexer_t *lexer);
 
