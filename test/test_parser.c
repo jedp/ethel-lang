@@ -18,7 +18,7 @@ void test_parse_empty(void) {
   parse_result_t *parse_result = mem_alloc(sizeof(parse_result_t));
   parse_program(program, ast, parse_result);
 
-  TEST_ASSERT_EQUAL(NO_ERROR, parse_result->err);
+  TEST_ASSERT_EQUAL(ERR_NO_ERROR, parse_result->err);
   TEST_ASSERT_EQUAL(AST_EMPTY, ast->type);
   mem_free(ast);
 }
@@ -29,7 +29,7 @@ void test_parse_add(void) {
   parse_result_t *parse_result = mem_alloc(sizeof(parse_result_t));
   parse_program(program, ast, parse_result);
 
-  TEST_ASSERT_EQUAL(NO_ERROR, parse_result->err);
+  TEST_ASSERT_EQUAL(ERR_NO_ERROR, parse_result->err);
   TEST_ASSERT_EQUAL(AST_ADD, ast->type);
   TEST_ASSERT_EQUAL(AST_INT, ((ast_expr_t*) ast->binop_args->a)->type);
   TEST_ASSERT_EQUAL(1, ((ast_expr_t*) ast->binop_args->a)->intval);
@@ -44,7 +44,7 @@ void test_parse_sub(void) {
   parse_result_t *parse_result = mem_alloc(sizeof(parse_result_t));
   parse_program(program, ast, parse_result);
 
-  TEST_ASSERT_EQUAL(NO_ERROR, parse_result->err);
+  TEST_ASSERT_EQUAL(ERR_NO_ERROR, parse_result->err);
   TEST_ASSERT_EQUAL(AST_SUB, ast->type);
   TEST_ASSERT_EQUAL(AST_INT, ((ast_expr_t*) ast->binop_args->a)->type);
   TEST_ASSERT_EQUAL(2, ((ast_expr_t*) ast->binop_args->a)->intval);
@@ -59,7 +59,7 @@ void test_parse_mul(void) {
   parse_result_t *parse_result = mem_alloc(sizeof(parse_result_t));
   parse_program(program, ast, parse_result);
 
-  TEST_ASSERT_EQUAL(NO_ERROR, parse_result->err);
+  TEST_ASSERT_EQUAL(ERR_NO_ERROR, parse_result->err);
   TEST_ASSERT_EQUAL(AST_MUL, ast->type);
   TEST_ASSERT_EQUAL(AST_INT, ((ast_expr_t*) ast->binop_args->a)->type);
   TEST_ASSERT_EQUAL(2, ((ast_expr_t*) ast->binop_args->a)->intval);
@@ -74,7 +74,7 @@ void test_parse_div(void) {
   parse_result_t *parse_result = mem_alloc(sizeof(parse_result_t));
   parse_program(program, ast, parse_result);
 
-  TEST_ASSERT_EQUAL(NO_ERROR, parse_result->err);
+  TEST_ASSERT_EQUAL(ERR_NO_ERROR, parse_result->err);
   TEST_ASSERT_EQUAL(AST_DIV, ast->type);
   TEST_ASSERT_EQUAL(AST_INT, ((ast_expr_t*) ast->binop_args->a)->type);
   TEST_ASSERT_EQUAL(3, ((ast_expr_t*) ast->binop_args->a)->intval);
@@ -89,7 +89,7 @@ void test_parse_assign(void) {
   parse_result_t *parse_result = mem_alloc(sizeof(parse_result_t));
   parse_program(program, ast, parse_result);
 
-  TEST_ASSERT_EQUAL(NO_ERROR, parse_result->err);
+  TEST_ASSERT_EQUAL(ERR_NO_ERROR, parse_result->err);
   TEST_ASSERT_EQUAL(AST_ASSIGN, ast->type);
   TEST_ASSERT_EQUAL(AST_IDENT, ((ast_expr_t*) ast->assignment->ident)->type);
   TEST_ASSERT_EQUAL(AST_ADD, ((ast_expr_t*) ast->assignment->value)->type);
@@ -102,7 +102,7 @@ void test_parse_if_else(void) {
   parse_result_t *parse_result = mem_alloc(sizeof(parse_result_t));
   parse_program(program, ast, parse_result);
 
-  TEST_ASSERT_EQUAL(NO_ERROR, parse_result->err);
+  TEST_ASSERT_EQUAL(ERR_NO_ERROR, parse_result->err);
   TEST_ASSERT_EQUAL(AST_IF_THEN, ast->type);
   TEST_ASSERT_EQUAL(AST_INT, ((ast_expr_t*) ast->if_then_args->cond)->type);
   TEST_ASSERT_EQUAL(AST_INT, ((ast_expr_t*) ast->if_then_args->pred)->type);
@@ -115,7 +115,7 @@ void test_parse_if_else_assign_expr(void) {
   parse_result_t *parse_result = mem_alloc(sizeof(parse_result_t));
   parse_program(program, ast, parse_result);
 
-  TEST_ASSERT_EQUAL(NO_ERROR, parse_result->err);
+  TEST_ASSERT_EQUAL(ERR_NO_ERROR, parse_result->err);
   TEST_ASSERT_EQUAL(AST_ASSIGN, ast->type);
   TEST_ASSERT_EQUAL(AST_IDENT, ((ast_expr_t*) ast->if_then_args->cond)->type);
   TEST_ASSERT_EQUAL(AST_IF_THEN, ((ast_expr_t*) ast->if_then_args->pred)->type);
@@ -128,7 +128,7 @@ void test_parse_char(void) {
   parse_result_t *parse_result = mem_alloc(sizeof(parse_result_t));
   parse_program(program, ast, parse_result);
 
-  TEST_ASSERT_EQUAL(NO_ERROR, parse_result->err);
+  TEST_ASSERT_EQUAL(ERR_NO_ERROR, parse_result->err);
   TEST_ASSERT_EQUAL(AST_ASSIGN, ast->type);
   TEST_ASSERT_EQUAL(AST_IDENT, ((ast_expr_t*) ast->assignment->ident)->type);
   TEST_ASSERT_EQUAL(AST_CHAR, ((ast_expr_t*) ast->assignment->value)->type);
@@ -142,7 +142,7 @@ void test_parse_string(void) {
   parse_result_t *parse_result = mem_alloc(sizeof(parse_result_t));
   parse_program(program, ast, parse_result);
 
-  TEST_ASSERT_EQUAL(NO_ERROR, parse_result->err);
+  TEST_ASSERT_EQUAL(ERR_NO_ERROR, parse_result->err);
   TEST_ASSERT_EQUAL(AST_ASSIGN, ast->type);
   TEST_ASSERT_EQUAL(AST_IDENT, ((ast_expr_t*) ast->assignment->ident)->type);
   TEST_ASSERT_EQUAL(AST_STRING, ((ast_expr_t*) ast->assignment->value)->type);
@@ -157,7 +157,7 @@ void test_parse_boolean_true(void) {
   parse_result_t *parse_result = mem_alloc(sizeof(parse_result_t));
   parse_program(program, ast, parse_result);
 
-  TEST_ASSERT_EQUAL(NO_ERROR, parse_result->err);
+  TEST_ASSERT_EQUAL(ERR_NO_ERROR, parse_result->err);
   TEST_ASSERT_EQUAL(AST_ASSIGN, ast->type);
   TEST_ASSERT_EQUAL(AST_IDENT, ((ast_expr_t*) ast->assignment->ident)->type);
   TEST_ASSERT_EQUAL(AST_BOOLEAN, ((ast_expr_t*) ast->assignment->value)->type);
@@ -171,7 +171,7 @@ void test_parse_boolean_false(void) {
   parse_result_t *parse_result = mem_alloc(sizeof(parse_result_t));
   parse_program(program, ast, parse_result);
 
-  TEST_ASSERT_EQUAL(NO_ERROR, parse_result->err);
+  TEST_ASSERT_EQUAL(ERR_NO_ERROR, parse_result->err);
   TEST_ASSERT_EQUAL(AST_ASSIGN, ast->type);
   TEST_ASSERT_EQUAL(AST_IDENT, ((ast_expr_t*) ast->assignment->ident)->type);
   TEST_ASSERT_EQUAL(AST_BOOLEAN, ((ast_expr_t*) ast->assignment->value)->type);
@@ -185,7 +185,7 @@ void test_parse_array_decl(void) {
   parse_result_t *parse_result = mem_alloc(sizeof(parse_result_t));
   parse_program(program, ast, parse_result);
 
-  TEST_ASSERT_EQUAL(NO_ERROR, parse_result->err);
+  TEST_ASSERT_EQUAL(ERR_NO_ERROR, parse_result->err);
   TEST_ASSERT_EQUAL(AST_ASSIGN, ast->type);
   TEST_ASSERT_EQUAL(AST_IDENT, ((ast_expr_t*) ast->assignment->ident)->type);
   TEST_ASSERT_EQUAL(AST_BYTEARRAY_DECL, ((ast_expr_t*) ast->assignment->value)->type);
@@ -199,7 +199,7 @@ void test_parse_seq_elem(void) {
   parse_result_t *parse_result = mem_alloc(sizeof(parse_result_t));
   parse_program(program, ast, parse_result);
 
-  TEST_ASSERT_EQUAL(NO_ERROR, parse_result->err);
+  TEST_ASSERT_EQUAL(ERR_NO_ERROR, parse_result->err);
   TEST_ASSERT_EQUAL(AST_SEQ_ELEM, ast->type);
   TEST_ASSERT_EQUAL(AST_IDENT, ((ast_expr_t*) ast->seq_elem->ident)->type);
   TEST_ASSERT_EQUAL(AST_IF_THEN_ELSE, ((ast_expr_t*) ast->seq_elem->index)->type);
@@ -211,7 +211,7 @@ void test_parse_seq_elem_access(void) {
   parse_result_t *parse_result = mem_alloc(sizeof(parse_result_t));
   parse_program(program, ast, parse_result);
 
-  TEST_ASSERT_EQUAL(NO_ERROR, parse_result->err);
+  TEST_ASSERT_EQUAL(ERR_NO_ERROR, parse_result->err);
   TEST_ASSERT_EQUAL(AST_ASSIGN, ast->type);
   TEST_ASSERT_EQUAL(AST_IDENT, ((ast_expr_t*) ast->assignment->ident)->type);
   TEST_ASSERT_EQUAL(AST_SEQ_ELEM, ((ast_expr_t*) ast->assignment->value)->type);
@@ -223,7 +223,7 @@ void test_parse_seq_elem_assign(void) {
   parse_result_t *parse_result = mem_alloc(sizeof(parse_result_t));
   parse_program(program, ast, parse_result);
 
-  TEST_ASSERT_EQUAL(NO_ERROR, parse_result->err);
+  TEST_ASSERT_EQUAL(ERR_NO_ERROR, parse_result->err);
   TEST_ASSERT_EQUAL(AST_REASSIGN, ast->type);
   TEST_ASSERT_EQUAL(AST_SEQ_ELEM, ((ast_expr_t*) ast->assignment->ident)->type);
   TEST_ASSERT_EQUAL(AST_INT, ((ast_expr_t*) ast->assignment->value)->type);

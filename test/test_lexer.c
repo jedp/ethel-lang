@@ -14,7 +14,7 @@ void test_lex_error(void) {
   advance(&lexer); // eat "42"
 
   TEST_ASSERT_EQUAL(TAG_EOF, lexer.token.tag);
-  TEST_ASSERT_EQUAL(LEX_UNEXPECTED_TOKEN, lexer.err);
+  TEST_ASSERT_EQUAL(ERR_LEX_UNEXPECTED_TOKEN, lexer.err);
 }
 
 void test_lex_word(void) {
@@ -34,7 +34,7 @@ void test_lex_word(void) {
   };
 
   for (int i = 0; i < sizeof(expected) / sizeof(expected[0]); i++) {
-    TEST_ASSERT_EQUAL(NO_ERROR, lexer.err);
+    TEST_ASSERT_EQUAL(ERR_NO_ERROR, lexer.err);
     TEST_ASSERT_EQUAL(expected[i].tag, lexer.token.tag);
     if (lexer.token.tag == TAG_INT) {
       TEST_ASSERT_EQUAL(expected[i].intval, lexer.token.intval);
@@ -120,7 +120,7 @@ void test_lex_arithmetic(void) {
   };
 
   for (int i = 0; i < sizeof(expected) / sizeof(expected[0]); i++) {
-    TEST_ASSERT_EQUAL(NO_ERROR, lexer.err);
+    TEST_ASSERT_EQUAL(ERR_NO_ERROR, lexer.err);
     TEST_ASSERT_EQUAL(expected[i], lexer.token.tag);
     advance(&lexer);
   }
@@ -140,7 +140,7 @@ void test_lex_arithmetic_no_spaces(void) {
   };
 
   for (int i = 0; i < sizeof(expected) / sizeof(expected[0]); i++) {
-    TEST_ASSERT_EQUAL(NO_ERROR, lexer.err);
+    TEST_ASSERT_EQUAL(ERR_NO_ERROR, lexer.err);
     TEST_ASSERT_EQUAL(expected[i], lexer.token.tag);
     advance(&lexer);
   }
@@ -159,7 +159,7 @@ void test_lex_inequality(void) {
   };
 
   for (int i = 0; i < sizeof(expected) / sizeof(expected[0]); i++) {
-    TEST_ASSERT_EQUAL(NO_ERROR, lexer.err);
+    TEST_ASSERT_EQUAL(ERR_NO_ERROR, lexer.err);
     TEST_ASSERT_EQUAL(expected[i], lexer.token.tag);
     advance(&lexer);
   }
@@ -178,7 +178,7 @@ void test_lex_inequality_no_spaces(void) {
   };
 
   for (int i = 0; i < sizeof(expected) / sizeof(expected[0]); i++) {
-    TEST_ASSERT_EQUAL(NO_ERROR, lexer.err);
+    TEST_ASSERT_EQUAL(ERR_NO_ERROR, lexer.err);
     TEST_ASSERT_EQUAL(expected[i], lexer.token.tag);
     advance(&lexer);
   }
@@ -198,7 +198,7 @@ void test_lex_inequality_nested_expressions(void) {
   };
 
   for (int i = 0; i < sizeof(expected) / sizeof(expected[0]); i++) {
-    TEST_ASSERT_EQUAL(NO_ERROR, lexer.err);
+    TEST_ASSERT_EQUAL(ERR_NO_ERROR, lexer.err);
     TEST_ASSERT_EQUAL(expected[i], lexer.token.tag);
     advance(&lexer);
   }
@@ -212,7 +212,7 @@ void test_lex_range(void) {
   int expected[] = { TAG_INT, TAG_RANGE, TAG_INT };
 
   for (int i = 0; i < sizeof(expected) / sizeof(expected[0]); i++) {
-    TEST_ASSERT_EQUAL(NO_ERROR, lexer.err);
+    TEST_ASSERT_EQUAL(ERR_NO_ERROR, lexer.err);
     TEST_ASSERT_EQUAL(expected[i], lexer.token.tag);
     advance(&lexer);
   }
@@ -221,7 +221,7 @@ void test_lex_range(void) {
   char *expr2 = "1 .. 10";
   lexer_init(&lexer, expr2, c_str_len(expr));
   for (int i = 0; i < sizeof(expected) / sizeof(expected[0]); i++) {
-    TEST_ASSERT_EQUAL(NO_ERROR, lexer.err);
+    TEST_ASSERT_EQUAL(ERR_NO_ERROR, lexer.err);
     TEST_ASSERT_EQUAL(expected[i], lexer.token.tag);
     advance(&lexer);
   }
@@ -240,7 +240,7 @@ void test_lex_parens(void) {
   };
 
   for (int i = 0; i < sizeof(expected) / sizeof(expected[0]); i++) {
-    TEST_ASSERT_EQUAL(NO_ERROR, lexer.err);
+    TEST_ASSERT_EQUAL(ERR_NO_ERROR, lexer.err);
     TEST_ASSERT_EQUAL(expected[i], lexer.token.tag);
     advance(&lexer);
   }
@@ -259,7 +259,7 @@ void test_lex_parens_no_spaces(void) {
   };
 
   for (int i = 0; i < sizeof(expected) / sizeof(expected[0]); i++) {
-    TEST_ASSERT_EQUAL(NO_ERROR, lexer.err);
+    TEST_ASSERT_EQUAL(ERR_NO_ERROR, lexer.err);
     TEST_ASSERT_EQUAL(expected[i], lexer.token.tag);
     advance(&lexer);
   }
@@ -272,7 +272,7 @@ void test_lex_assign(void) {
 
   int expected[] = { TAG_INVARIABLE, TAG_IDENT, TAG_ASSIGN, TAG_INT };
   for (int i = 0; i < sizeof(expected) / sizeof(expected[0]); i++) {
-    TEST_ASSERT_EQUAL(NO_ERROR, lexer.err);
+    TEST_ASSERT_EQUAL(ERR_NO_ERROR, lexer.err);
     TEST_ASSERT_EQUAL(expected[i], lexer.token.tag);
     advance(&lexer);
   }
@@ -285,7 +285,7 @@ void test_lex_line_with_comment(void) {
 
   int expected[] = { TAG_INVARIABLE, TAG_IDENT, TAG_ASSIGN, TAG_INT };
   for (int i = 0; i < sizeof(expected) / sizeof(expected[0]); i++) {
-    TEST_ASSERT_EQUAL(NO_ERROR, lexer.err);
+    TEST_ASSERT_EQUAL(ERR_NO_ERROR, lexer.err);
     TEST_ASSERT_EQUAL(expected[i], lexer.token.tag);
     advance(&lexer);
   }
@@ -296,7 +296,7 @@ void test_lex_only_whitespace_input(void) {
   lexer_t lexer;
   lexer_init(&lexer, expr, c_str_len(expr));
 
-  TEST_ASSERT_EQUAL(NO_ERROR, lexer.err);
+  TEST_ASSERT_EQUAL(ERR_NO_ERROR, lexer.err);
   TEST_ASSERT_EQUAL(TAG_EOF, lexer.token.tag);
 }
 
@@ -305,7 +305,7 @@ void test_lex_no_input(void) {
   lexer_t lexer;
   lexer_init(&lexer, expr, c_str_len(expr));
 
-  TEST_ASSERT_EQUAL(NO_ERROR, lexer.err);
+  TEST_ASSERT_EQUAL(ERR_NO_ERROR, lexer.err);
   TEST_ASSERT_EQUAL(TAG_EOF, lexer.token.tag);
 }
 
@@ -314,7 +314,7 @@ void test_lex_comment_only(void) {
   lexer_t lexer;
   lexer_init(&lexer, expr, c_str_len(expr));
 
-  TEST_ASSERT_EQUAL(NO_ERROR, lexer.err);
+  TEST_ASSERT_EQUAL(ERR_NO_ERROR, lexer.err);
   // TODO not sure about this
   TEST_ASSERT_EQUAL(TAG_EOL, lexer.token.tag);
 }
@@ -330,7 +330,7 @@ void test_lex_begin_end(void) {
     TAG_END, TAG_EOF
   };
   for (int i = 0; i < sizeof(expected) / sizeof(expected[0]); i++) {
-    TEST_ASSERT_EQUAL(NO_ERROR, lexer.err);
+    TEST_ASSERT_EQUAL(ERR_NO_ERROR, lexer.err);
     TEST_ASSERT_EQUAL(expected[i], lexer.token.tag);
     advance(&lexer);
   }
@@ -345,7 +345,7 @@ void test_lex_list_of(void) {
     TAG_VARIABLE, TAG_IDENT, TAG_ASSIGN, TAG_LIST, TAG_OF, TAG_TYPE_NAME
   };
   for (int i = 0; i < sizeof(expected) / sizeof(expected[0]); i++) {
-    TEST_ASSERT_EQUAL(NO_ERROR, lexer.err);
+    TEST_ASSERT_EQUAL(ERR_NO_ERROR, lexer.err);
     TEST_ASSERT_EQUAL(expected[i], lexer.token.tag);
     advance(&lexer);
   }
@@ -361,7 +361,7 @@ void test_lex_list_of_with_init(void) {
     TAG_BEGIN, TAG_INT, TAG_COMMA, TAG_INT, TAG_COMMA, TAG_INT, TAG_END
   };
   for (int i = 0; i < sizeof(expected) / sizeof(expected[0]); i++) {
-    TEST_ASSERT_EQUAL(NO_ERROR, lexer.err);
+    TEST_ASSERT_EQUAL(ERR_NO_ERROR, lexer.err);
     TEST_ASSERT_EQUAL(expected[i], lexer.token.tag);
     advance(&lexer);
   }
@@ -377,7 +377,7 @@ void test_lex_field_access(void) {
     TAG_IDENT, TAG_MEMBER_ACCESS, TAG_FIELD_NAME
   };
   for (int i = 0; i < sizeof(expected) / sizeof(expected[0]); i++) {
-    TEST_ASSERT_EQUAL(NO_ERROR, lexer.err);
+    TEST_ASSERT_EQUAL(ERR_NO_ERROR, lexer.err);
     TEST_ASSERT_EQUAL(expected[i], lexer.token.tag);
 
     if (lexer.token.tag == TAG_FIELD_NAME) {
@@ -397,7 +397,7 @@ void test_lex_method_access(void) {
     TAG_IDENT, TAG_MEMBER_ACCESS, TAG_METHOD_NAME, TAG_LPAREN, TAG_INT, TAG_RPAREN
   };
   for (int i = 0; i < sizeof(expected) / sizeof(expected[0]); i++) {
-    TEST_ASSERT_EQUAL(NO_ERROR, lexer.err);
+    TEST_ASSERT_EQUAL(ERR_NO_ERROR, lexer.err);
     TEST_ASSERT_EQUAL(expected[i], lexer.token.tag);
 
     if (lexer.token.tag == TAG_METHOD_NAME) {
@@ -417,7 +417,7 @@ void test_lex_array_access(void) {
     TAG_IDENT, TAG_LBRACKET, TAG_INT, TAG_RBRACKET
   };
   for (int i = 0; i < sizeof(expected) / sizeof(expected[0]); i++) {
-    TEST_ASSERT_EQUAL(NO_ERROR, lexer.err);
+    TEST_ASSERT_EQUAL(ERR_NO_ERROR, lexer.err);
     TEST_ASSERT_EQUAL(expected[i], lexer.token.tag);
     advance(&lexer);
   }
@@ -433,7 +433,7 @@ void test_lex_array_constructor(void) {
     TAG_ARR_DECL, TAG_LPAREN, TAG_INT, TAG_RPAREN
   };
   for (int i = 0; i < sizeof(expected) / sizeof(expected[0]); i++) {
-    TEST_ASSERT_EQUAL(NO_ERROR, lexer.err);
+    TEST_ASSERT_EQUAL(ERR_NO_ERROR, lexer.err);
     TEST_ASSERT_EQUAL(expected[i], lexer.token.tag);
     advance(&lexer);
   }

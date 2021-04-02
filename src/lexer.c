@@ -37,7 +37,7 @@ static void consume_ws(lexer_t *lexer) {
 
 static token_t *lexer_error(lexer_t *lexer) {
   lexer->next_token.tag = TAG_EOF;
-  lexer->err = LEX_UNEXPECTED_TOKEN;
+  lexer->err = ERR_LEX_UNEXPECTED_TOKEN;
   // The error was at the previous pos.
   lexer->err_pos = lexer->pos > 0 ? lexer->pos - 1 : 0;
   return &lexer->next_token;
@@ -338,7 +338,7 @@ void advance(lexer_t *lexer) {
 boolean eat(lexer_t *lexer, tag_t t) {
   if (lexer->token.tag != t) {
     lexer->err_pos = (int) lexer->pos;
-    lexer->err = LEX_ERROR;
+    lexer->err = ERR_LEX_ERROR;
     return False;
   }
 
@@ -350,7 +350,7 @@ void lexer_init(lexer_t *lexer, const char input[], const uint32_t input_size) {
   lexer->pos = 0;
   lexer->err_pos = 0;
   lexer->depth = 1;
-  lexer->err = NO_ERROR;
+  lexer->err = ERR_NO_ERROR;
 
   mem_set(next_word_buf, 0, MAX_WORD);
   mem_set(word_buf, 0, MAX_WORD);

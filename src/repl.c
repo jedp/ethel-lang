@@ -94,13 +94,13 @@ int main(int argc, char** argv) {
     obj_t *obj = (obj_t*)result->obj;
     indent = result->depth;
 
-    if (result->err != LEX_INCOMPLETE_INPUT) {
+    if (result->err != ERR_LEX_INCOMPLETE_INPUT) {
       mem_free(program);
       program = mem_alloc(2);
       indent = 0;
       program[0] = 0;
 
-      if (result->err == NO_ERROR && obj->type != TYPE_NOTHING) {
+      if (result->err == ERR_NO_ERROR && obj->type != TYPE_NOTHING) {
         print_result(obj);
       } else {
         printf("%s\n", err_names[result->err]);

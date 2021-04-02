@@ -203,7 +203,7 @@ ast_expr_t *parse_expr(lexer_t *lexer) {
     case TAG_END: {
       // This ends up getting parsed recursively by the BEGIN handler.
       // Treat it as a no-op.
-      lexer->err = NO_ERROR;
+      lexer->err = ERR_NO_ERROR;
       lexer->depth--;
       return ast_empty();
     }
@@ -289,10 +289,10 @@ error:
   // Incomplete input?
   if (lexer->depth > 1 &&
       (lexer->token.tag == TAG_EOF || lexer->token.tag == TAG_EOL)) {
-    lexer->err = LEX_INCOMPLETE_INPUT;
+    lexer->err = ERR_LEX_INCOMPLETE_INPUT;
   } else {
     printf("Expected atom or block; got %s.\n", tag_names[lexer->token.tag]);
-    lexer->err = LEX_ERROR;
+    lexer->err = ERR_LEX_ERROR;
   }
 
   return ast_empty();
@@ -471,10 +471,10 @@ error:
   // Incomplete input?
   if (lexer->depth > 1 &&
       (lexer->token.tag == TAG_EOF || lexer->token.tag == TAG_EOL)) {
-    lexer->err = LEX_INCOMPLETE_INPUT;
+    lexer->err = ERR_LEX_INCOMPLETE_INPUT;
   } else {
     printf("Expected atom or block; got %s.\n", tag_names[lexer->token.tag]);
-    lexer->err = LEX_ERROR;
+    lexer->err = ERR_LEX_ERROR;
   }
 
   return ast_empty();
@@ -486,7 +486,7 @@ void parse_program(char *input, ast_expr_t *ast, parse_result_t *parse_result) {
   lexer_init(&lexer, input, c_str_len(input));
 
   // Lexer error. Don't parse.
-  if (lexer.err != NO_ERROR) {
+  if (lexer.err != ERR_NO_ERROR) {
     parse_result->err = lexer.err;
     parse_result->pos = lexer.pos;
     return;
@@ -498,7 +498,7 @@ void parse_program(char *input, ast_expr_t *ast, parse_result_t *parse_result) {
   parse_result->err = lexer.err;
   parse_result->pos = lexer.pos;
   parse_result->depth = lexer.depth;
-  if (lexer.err == LEX_INCOMPLETE_INPUT) {
+  if (lexer.err == ERR_LEX_INCOMPLETE_INPUT) {
     return;
   }
 

@@ -17,7 +17,7 @@ eval_result_t *eval_expr(ast_expr_t *expr, env_t *env);
 
 void eval_nil_expr(ast_expr_t *expr, eval_result_t *result) {
   if (expr->type != AST_NIL) {
-    result->err = EVAL_TYPE_ERROR;
+    result->err = ERR_EVAL_TYPE_ERROR;
     return;
   }
   obj_t* obj = mem_alloc(sizeof(obj_t));
@@ -27,7 +27,7 @@ void eval_nil_expr(ast_expr_t *expr, eval_result_t *result) {
 
 void eval_boolean_expr(ast_expr_t *expr, eval_result_t *result) {
   if (expr->type != AST_BOOLEAN) {
-    result->err = EVAL_TYPE_ERROR;
+    result->err = ERR_EVAL_TYPE_ERROR;
     return;
   }
   result->obj = boolean_obj(expr->boolval);
@@ -35,7 +35,7 @@ void eval_boolean_expr(ast_expr_t *expr, eval_result_t *result) {
 
 void eval_int_expr(ast_expr_t *expr, eval_result_t *result) {
   if (expr->type != AST_INT) {
-    result->err = EVAL_TYPE_ERROR;
+    result->err = ERR_EVAL_TYPE_ERROR;
     return;
   }
   result->obj = int_obj(expr->intval);
@@ -43,7 +43,7 @@ void eval_int_expr(ast_expr_t *expr, eval_result_t *result) {
 
 void eval_float_expr(ast_expr_t *expr, eval_result_t *result) {
   if (expr->type != AST_FLOAT) {
-    result->err = EVAL_TYPE_ERROR;
+    result->err = ERR_EVAL_TYPE_ERROR;
     return;
   }
   result->obj = float_obj(expr->floatval);
@@ -51,7 +51,7 @@ void eval_float_expr(ast_expr_t *expr, eval_result_t *result) {
 
 void eval_char_expr(ast_expr_t *expr, eval_result_t *result) {
   if (expr->type != AST_CHAR) {
-    result->err = EVAL_TYPE_ERROR;
+    result->err = ERR_EVAL_TYPE_ERROR;
     return;
   }
   result->obj = char_obj(expr->charval);
@@ -70,7 +70,7 @@ void eval_list_expr(ast_list_t *list, eval_result_t *result, env_t *env) {
   while(ast_node != NULL) {
     eval_result_t *r = eval_expr(ast_node->root, env);
 
-    if (r->err != NO_ERROR) {
+    if (r->err != ERR_NO_ERROR) {
       result->err = r->err;
       result->obj = list_obj(list->type_name, NULL);
       return;
@@ -78,7 +78,7 @@ void eval_list_expr(ast_list_t *list, eval_result_t *result, env_t *env) {
 
     // TODO user-defined types
     if (!c_str_eq(list->type_name, obj_type_names[r->obj->type])) {
-      result->err = EVAL_TYPE_ERROR;
+      result->err = ERR_EVAL_TYPE_ERROR;
       result->obj = list_obj(list->type_name, NULL);
       return;
     }
@@ -142,13 +142,13 @@ error_t string_to_int(obj_t *obj) {
   // Can only free input after we're done using the end pointer.
   mem_free(input);
 
-  if (bad_input) return EVAL_BAD_INPUT;
-  if (l > INT_MAX) return OVERFLOW_ERROR;
-  if (l < INT_MIN) return UNDERFLOW_ERROR;
+  if (bad_input) return ERR_EVAL_BAD_INPUT;
+  if (l > INT_MAX) return ERR_OVERFLOW_ERROR;
+  if (l < INT_MIN) return ERR_UNDERFLOW_ERROR;
 
   obj->type = TYPE_INT;
   obj->intval = (int) l;
-  return NO_ERROR;
+  return ERR_NO_ERROR;
 }
 
 error_t string_to_float(obj_t *obj) {
@@ -162,16 +162,16 @@ error_t string_to_float(obj_t *obj) {
   boolean bad_input = *end != '\0';
   mem_free(input);
 
-  if (bad_input) return EVAL_BAD_INPUT;
+  if (bad_input) return ERR_EVAL_BAD_INPUT;
 
   obj->type = TYPE_FLOAT;
   obj->floatval = f;
-  return NO_ERROR;
+  return ERR_NO_ERROR;
 }
 
 void eval_string_expr(ast_expr_t *expr, eval_result_t *result) {
   if (expr->type != AST_STRING) {
-    result->err = EVAL_TYPE_ERROR;
+    result->err = ERR_EVAL_TYPE_ERROR;
     return;
   }
   obj_t* obj = string_obj(expr->bytearray);
@@ -184,7 +184,7 @@ void cast(obj_t *obj, obj_t *type_obj, eval_result_t *result) {
       || type_obj->type == TYPE_CHAR
       || type_obj->type == TYPE_STRING
       || type_obj->type == TYPE_BOOLEAN)) {
-    result->err = EVAL_TYPE_ERROR;
+    result->err = ERR_EVAL_TYPE_ERROR;
     return;
   }
 
@@ -198,7 +198,7 @@ void cast(obj_t *obj, obj_t *type_obj, eval_result_t *result) {
           goto done;
         case TYPE_CHAR:
           if (obj->intval < 0 || obj->intval > 255) {
-            result->err = VALUE_TOO_LARGE_FOR_CHAR;
+            result->err = ERR_VALUE_TOO_LARGE_FOR_CHAR;
             goto done;
           }
           obj->charval = (char) obj->intval;
@@ -210,21 +210,21 @@ void cast(obj_t *obj, obj_t *type_obj, eval_result_t *result) {
           obj->boolval = obj->intval ? 1 : 0;
           goto done;
         default:
-          result->err = EVAL_TYPE_ERROR;
+          result->err = ERR_EVAL_TYPE_ERROR;
           goto done;
       }
       break;
     case TYPE_FLOAT:
       switch (type_obj->type) {
         case TYPE_INT:
-          if (obj->floatval > INT_MAX) { result->err = OVERFLOW_ERROR; goto done; }
-          if (obj->floatval < INT_MIN) { result->err = OVERFLOW_ERROR; goto done; }
+          if (obj->floatval > INT_MAX) { result->err = ERR_OVERFLOW_ERROR; goto done; }
+          if (obj->floatval < INT_MIN) { result->err = ERR_OVERFLOW_ERROR; goto done; }
           obj->intval = (int) obj->floatval;
           goto done;
         case TYPE_FLOAT:
           goto done;
         case TYPE_CHAR:
-          result->err = EVAL_TYPE_ERROR;
+          result->err = ERR_EVAL_TYPE_ERROR;
           goto done;
         case TYPE_STRING:
           float_to_string(obj);
@@ -233,7 +233,7 @@ void cast(obj_t *obj, obj_t *type_obj, eval_result_t *result) {
           obj->boolval = (obj->floatval != 0.0f) ? (int) 1 : (int) 0;
           goto done;
         default:
-          result->err = EVAL_TYPE_ERROR;
+          result->err = ERR_EVAL_TYPE_ERROR;
           goto done;
       }
       break;
@@ -248,7 +248,7 @@ void cast(obj_t *obj, obj_t *type_obj, eval_result_t *result) {
           goto done;
         case TYPE_CHAR:
           if (obj->bytearray->size > 1) {
-            result->err = EVAL_TYPE_ERROR;
+            result->err = ERR_EVAL_TYPE_ERROR;
             goto done;
           }
           obj->charval = obj->bytearray->data[0];
@@ -259,7 +259,7 @@ void cast(obj_t *obj, obj_t *type_obj, eval_result_t *result) {
           obj->boolval = obj->bytearray->size > 0 ? 1 : 0;
           goto done;
         default:
-          result->err = EVAL_TYPE_ERROR;
+          result->err = ERR_EVAL_TYPE_ERROR;
           goto done;
       }
       break;
@@ -283,7 +283,7 @@ void cast(obj_t *obj, obj_t *type_obj, eval_result_t *result) {
           obj->boolval = obj->charval != 0 ? 1 : 0;
           goto done;
         default:
-          result->err = EVAL_TYPE_ERROR;
+          result->err = ERR_EVAL_TYPE_ERROR;
           goto done;
       }
       break;
@@ -304,17 +304,17 @@ void cast(obj_t *obj, obj_t *type_obj, eval_result_t *result) {
         case TYPE_BOOLEAN:
           goto done;
         default:
-          result->err = EVAL_TYPE_ERROR;
+          result->err = ERR_EVAL_TYPE_ERROR;
           goto done;
       }
       break;
     default:
-      result->err = EVAL_TYPE_ERROR;
+      result->err = ERR_EVAL_TYPE_ERROR;
       break;
   }
 
 done:
-  if (result->err == NO_ERROR) obj->type = type_obj->type;
+  if (result->err == ERR_NO_ERROR) obj->type = type_obj->type;
   result->obj = obj;
 }
 
@@ -349,7 +349,7 @@ void cmp(ast_type_t type, obj_t *a, obj_t *b, eval_result_t *result) {
     }
   }
 
-  result->err = EVAL_TYPE_ERROR;
+  result->err = ERR_EVAL_TYPE_ERROR;
 }
 
 void boolean_and(obj_t *a, obj_t *b, eval_result_t *result) {
@@ -366,12 +366,12 @@ void range(int from, int to, eval_result_t *result) {
 
 void apply(ast_expr_t *expr, eval_result_t *result, env_t *env) {
   if (expr->type != AST_APPLY) {
-    result->err = SYNTAX_ERROR;
+    result->err = ERR_SYNTAX_ERROR;
     return;
   }
 
   eval_result_t *receiver = eval_expr(expr->application->receiver, env);
-  if ((result->err = receiver->err) != NO_ERROR) {
+  if ((result->err = receiver->err) != ERR_NO_ERROR) {
     return;
   }
 
@@ -388,7 +388,7 @@ void apply(ast_expr_t *expr, eval_result_t *result, env_t *env) {
   }
 found:
   if (method_id == METHOD_NONE) {
-    result->err = NO_SUCH_METHOD;
+    result->err = ERR_NO_SUCH_METHOD;
     return;
   }
 
@@ -411,7 +411,7 @@ found:
 
   if (method == NULL) {
     printf("Method not found for that object\n");
-    result->err = NO_SUCH_METHOD;
+    result->err = ERR_NO_SUCH_METHOD;
     return;
   }
 
@@ -450,7 +450,7 @@ int print_args(ast_expr_list_t *args, eval_result_t *result, env_t *env) {
     while(node != NULL) {
       eval_result_t *r = eval_expr(node->root, env);
 
-      if (r->err != NO_ERROR) {
+      if (r->err != ERR_NO_ERROR) {
         result->err = r->err;
         result->obj = undef_obj();
         return printed;
@@ -483,7 +483,7 @@ void println_args(ast_expr_list_t *args, eval_result_t *result, env_t *env) {
 void readln_input(eval_result_t *result) {
   char* s = mem_alloc(MAX_INPUT_LINE);
   if (getline(&s, &MAX_INPUT_LINE, stdin) == -1) {
-    result->err = INPUT_STREAM_ERROR;
+    result->err = ERR_INPUT_STREAM_ERROR;
   }
 
   // Trim trailing newline.
@@ -496,7 +496,7 @@ void readln_input(eval_result_t *result) {
 
 void resolve_callable_expr(ast_expr_t *expr, env_t *env, eval_result_t *result) {
   if (expr->type != AST_RESERVED_CALLABLE) {
-    result->err = EVAL_TYPE_ERROR;
+    result->err = ERR_EVAL_TYPE_ERROR;
     return;
   }
 
@@ -531,7 +531,7 @@ void resolve_callable_expr(ast_expr_t *expr, env_t *env, eval_result_t *result) 
   return;
 
 error:
-      result->err = AST_TYPE_UNHANDLED;
+      result->err = ERR_AST_TYPE_UNHANDLED;
       result->obj = undef_obj();
 }
 
@@ -539,11 +539,11 @@ void eval_while_loop(ast_expr_t *expr, env_t *env, eval_result_t *result) {
   eval_result_t *cond;
   eval_result_t *r;
   result->obj = nil_obj();
-  result->err = NO_ERROR;
+  result->err = ERR_NO_ERROR;
 
   for(;;) {
     cond = eval_expr(expr->while_loop->cond, env);
-    if (cond->err != NO_ERROR) {
+    if (cond->err != ERR_NO_ERROR) {
       result->err = cond->err;
       result->obj = undef_obj();
       return;
@@ -552,7 +552,7 @@ void eval_while_loop(ast_expr_t *expr, env_t *env, eval_result_t *result) {
     if (!truthy(cond->obj)) return;
 
     r = eval_expr(expr->while_loop->pred, env);
-    if (r->err != NO_ERROR) {
+    if (r->err != ERR_NO_ERROR) {
       result->err = r->err;
       result->obj = undef_obj();
       return;
@@ -569,11 +569,11 @@ void eval_for_loop(ast_expr_t *expr, env_t *env, eval_result_t *result) {
 
   // range
   if (((obj_t*)expr->for_loop->range)->type != AST_RANGE) {
-    result->err = SYNTAX_ERROR;
+    result->err = ERR_SYNTAX_ERROR;
     goto error;
   }
   eval_result_t *range = eval_expr(expr->for_loop->range, env);
-  if ((result->err = range->err) != NO_ERROR) goto error;
+  if ((result->err = range->err) != ERR_NO_ERROR) goto error;
 
   // Push a new scope and store the index variable.
   // We will mutate this variable with each iteration through the loop.
@@ -585,19 +585,19 @@ void eval_for_loop(ast_expr_t *expr, env_t *env, eval_result_t *result) {
   int start_val = range->obj->range.from;
   int end_val = range->obj->range.to;
   if (start_val < 0 || end_val < 0) {
-    result->err = TYPE_POSITIVE_INT_REQUIRED;
+    result->err = ERR_TYPE_POSITIVE_INT_REQUIRED;
     goto error;
   }
 
   if (start_val <= end_val) {
     for (int i = start_val; i <= end_val; ++i) {
       // Overflow?
-      if (i < 0) { result->err = OVERFLOW_ERROR; goto error; }
+      if (i < 0) { result->err = ERR_OVERFLOW_ERROR; goto error; }
       index_obj->intval = i;
       mem_free(r);
       // Eval predicate.
       r = eval_expr(expr->for_loop->pred, env);
-      if ((result->err = r->err) != NO_ERROR) {
+      if ((result->err = r->err) != ERR_NO_ERROR) {
         pop_scope(env);
         goto error;
       }
@@ -605,12 +605,12 @@ void eval_for_loop(ast_expr_t *expr, env_t *env, eval_result_t *result) {
   } else {
     for (int i = start_val; i >= end_val; --i) {
       // Overflow?
-      if (i < 0) { result->err = OVERFLOW_ERROR; goto error; }
+      if (i < 0) { result->err = ERR_OVERFLOW_ERROR; goto error; }
       index_obj->intval = i;
       mem_free(r);
       // Eval predicate.
       r = eval_expr(expr->for_loop->pred, env);
-      if ((result->err = r->err) != NO_ERROR) {
+      if ((result->err = r->err) != ERR_NO_ERROR) {
         pop_scope(env);
         goto error;
       }
@@ -629,7 +629,7 @@ error:
 
 eval_result_t *eval_expr(ast_expr_t *expr, env_t *env) {
     eval_result_t *result = mem_alloc(sizeof(eval_result_t));
-    result->err = NO_ERROR;
+    result->err = ERR_NO_ERROR;
 
     switch(expr->type) {
         case AST_EMPTY: {
@@ -638,20 +638,20 @@ eval_result_t *eval_expr(ast_expr_t *expr, env_t *env) {
         }
         case AST_CAST: {
             eval_result_t *r1 = eval_expr(expr->cast_args->a, env);
-            if ((result->err = r1->err) != NO_ERROR) goto error;
+            if ((result->err = r1->err) != ERR_NO_ERROR) goto error;
             eval_result_t *r2 = eval_expr(expr->cast_args->b, env);
-            if ((result->err = r2->err) != NO_ERROR) goto error;
+            if ((result->err = r2->err) != ERR_NO_ERROR) goto error;
             cast(r1->obj, r2->obj, result);
-            if (result->err != NO_ERROR) goto error;
+            if (result->err != ERR_NO_ERROR) goto error;
             break;
         }
         case AST_ADD: {
             eval_result_t *r1 = eval_expr(expr->binop_args->a, env);
-            if ((result->err = r1->err) != NO_ERROR) goto error;
+            if ((result->err = r1->err) != ERR_NO_ERROR) goto error;
             eval_result_t *r2 = eval_expr(expr->binop_args->b, env);
-            if ((result->err = r2->err) != NO_ERROR) goto error;
+            if ((result->err = r2->err) != ERR_NO_ERROR) goto error;
             obj_t *r = num_add(r1->obj, r2->obj);
-            if (r->type == TYPE_ERROR && ((result->err = r->errno) != NO_ERROR)) {
+            if (r->type == TYPE_ERROR && ((result->err = r->errno) != ERR_NO_ERROR)) {
               mem_free(r);
               goto error;
             }
@@ -660,11 +660,11 @@ eval_result_t *eval_expr(ast_expr_t *expr, env_t *env) {
         }
         case AST_SUB: {
             eval_result_t *r1 = eval_expr(expr->binop_args->a, env);
-            if ((result->err = r1->err) != NO_ERROR) goto error;
+            if ((result->err = r1->err) != ERR_NO_ERROR) goto error;
             eval_result_t *r2 = eval_expr(expr->binop_args->b, env);
-            if ((result->err = r2->err) != NO_ERROR) goto error;
+            if ((result->err = r2->err) != ERR_NO_ERROR) goto error;
             obj_t *r = num_sub(r1->obj, r2->obj);
-            if (r->type == TYPE_ERROR && ((result->err = r->errno) != NO_ERROR)) {
+            if (r->type == TYPE_ERROR && ((result->err = r->errno) != ERR_NO_ERROR)) {
               mem_free(r);
               goto error;
             }
@@ -673,11 +673,11 @@ eval_result_t *eval_expr(ast_expr_t *expr, env_t *env) {
         }
         case AST_MUL: {
             eval_result_t *r1 = eval_expr(expr->binop_args->a, env);
-            if ((result->err = r1->err) != NO_ERROR) goto error;
+            if ((result->err = r1->err) != ERR_NO_ERROR) goto error;
             eval_result_t *r2 = eval_expr(expr->binop_args->b, env);
-            if ((result->err = r2->err) != NO_ERROR) goto error;
+            if ((result->err = r2->err) != ERR_NO_ERROR) goto error;
             obj_t *r = num_mul(r1->obj, r2->obj);
-            if (r->type == TYPE_ERROR && ((result->err = r->errno) != NO_ERROR)) {
+            if (r->type == TYPE_ERROR && ((result->err = r->errno) != ERR_NO_ERROR)) {
               mem_free(r);
               goto error;
             }
@@ -686,11 +686,11 @@ eval_result_t *eval_expr(ast_expr_t *expr, env_t *env) {
         }
         case AST_DIV: {
             eval_result_t *r1 = eval_expr(expr->binop_args->a, env);
-            if ((result->err = r1->err) != NO_ERROR) goto error;
+            if ((result->err = r1->err) != ERR_NO_ERROR) goto error;
             eval_result_t *r2 = eval_expr(expr->binop_args->b, env);
-            if ((result->err = r2->err) != NO_ERROR) goto error;
+            if ((result->err = r2->err) != ERR_NO_ERROR) goto error;
             obj_t *r = num_div(r1->obj, r2->obj);
-            if (r->type == TYPE_ERROR && ((result->err = r->errno) != NO_ERROR)) {
+            if (r->type == TYPE_ERROR && ((result->err = r->errno) != ERR_NO_ERROR)) {
               mem_free(r);
               goto error;
             }
@@ -699,11 +699,11 @@ eval_result_t *eval_expr(ast_expr_t *expr, env_t *env) {
         }
         case AST_MOD: {
             eval_result_t *r1 = eval_expr(expr->binop_args->a, env);
-            if ((result->err = r1->err) != NO_ERROR) goto error;
+            if ((result->err = r1->err) != ERR_NO_ERROR) goto error;
             eval_result_t *r2 = eval_expr(expr->binop_args->b, env);
-            if ((result->err = r2->err) != NO_ERROR) goto error;
+            if ((result->err = r2->err) != ERR_NO_ERROR) goto error;
             obj_t *r = num_mod(r1->obj, r2->obj);
-            if (r->type == TYPE_ERROR && ((result->err = r->errno) != NO_ERROR)) {
+            if (r->type == TYPE_ERROR && ((result->err = r->errno) != ERR_NO_ERROR)) {
               mem_free(r);
               goto error;
             }
@@ -712,20 +712,20 @@ eval_result_t *eval_expr(ast_expr_t *expr, env_t *env) {
         }
         case AST_AND: {
             eval_result_t *r1 = eval_expr(expr->binop_args->a, env);
-            if ((result->err = r1->err) != NO_ERROR) goto error;
+            if ((result->err = r1->err) != ERR_NO_ERROR) goto error;
             eval_result_t *r2 = eval_expr(expr->binop_args->b, env);
-            if ((result->err = r2->err) != NO_ERROR) goto error;
+            if ((result->err = r2->err) != ERR_NO_ERROR) goto error;
             boolean_and(r1->obj, r2->obj, result); 
-            if (result->err != NO_ERROR) goto error;
+            if (result->err != ERR_NO_ERROR) goto error;
             break;
         }
         case AST_OR: {
             eval_result_t *r1 = eval_expr(expr->binop_args->a, env);
-            if ((result->err = r1->err) != NO_ERROR) goto error;
+            if ((result->err = r1->err) != ERR_NO_ERROR) goto error;
             eval_result_t *r2 = eval_expr(expr->binop_args->b, env);
-            if ((result->err = r2->err) != NO_ERROR) goto error;
+            if ((result->err = r2->err) != ERR_NO_ERROR) goto error;
             boolean_or(r1->obj, r2->obj, result); 
-            if (result->err != NO_ERROR) goto error;
+            if (result->err != ERR_NO_ERROR) goto error;
             break;
         }
         case AST_GT:
@@ -735,26 +735,26 @@ eval_result_t *eval_expr(ast_expr_t *expr, env_t *env) {
         case AST_NE:
         case AST_EQ: {
             eval_result_t *r1 = eval_expr(expr->binop_args->a, env);
-            if ((result->err = r1->err) != NO_ERROR) goto error;
+            if ((result->err = r1->err) != ERR_NO_ERROR) goto error;
             eval_result_t *r2 = eval_expr(expr->binop_args->b, env);
-            if ((result->err = r2->err) != NO_ERROR) goto error;
+            if ((result->err = r2->err) != ERR_NO_ERROR) goto error;
             cmp(expr->type, r1->obj, r2->obj, result); 
-            if (result->err != NO_ERROR) goto error;
+            if (result->err != ERR_NO_ERROR) goto error;
             break;
         }
         case AST_RANGE: {
             if (((obj_t*)expr->range->from)->type != AST_INT) {
-              result->err = TYPE_INT_REQUIRED; goto error;
+              result->err = ERR_TYPE_INT_REQUIRED; goto error;
             }
             eval_result_t *r1 = eval_expr(expr->range->from, env);
-            if ((result->err = r1->err) != NO_ERROR) goto error;
+            if ((result->err = r1->err) != ERR_NO_ERROR) goto error;
             if (((obj_t*)expr->range->to)->type != AST_INT) {
-              result->err = TYPE_INT_REQUIRED; goto error;
+              result->err = ERR_TYPE_INT_REQUIRED; goto error;
             }
             eval_result_t *r2 = eval_expr(expr->range->to, env);
-            if ((result->err = r2->err) != NO_ERROR) goto error;
+            if ((result->err = r2->err) != ERR_NO_ERROR) goto error;
             range(r1->obj->intval, r2->obj->intval, result);
-            if (result->err != NO_ERROR) goto error;
+            if (result->err != ERR_NO_ERROR) goto error;
             break;
         }
         case AST_NIL: {
@@ -767,26 +767,26 @@ eval_result_t *eval_expr(ast_expr_t *expr, env_t *env) {
         }
         case AST_INT:
             eval_int_expr(expr, result);
-            if (result->err != NO_ERROR) goto error;
+            if (result->err != ERR_NO_ERROR) goto error;
             break;
         case AST_FLOAT:
             eval_float_expr(expr, result);
-            if (result->err != NO_ERROR) goto error;
+            if (result->err != ERR_NO_ERROR) goto error;
             break;
         case AST_CHAR:
             eval_char_expr(expr, result);
-            if (result->err != NO_ERROR) goto error;
+            if (result->err != ERR_NO_ERROR) goto error;
             break;
         case AST_STRING:
             eval_string_expr(expr, result);
-            if (result->err != NO_ERROR) goto error;
+            if (result->err != ERR_NO_ERROR) goto error;
             break;
         case AST_IDENT: {
             // Look up the identifier by name in the environment.
             const char* name = bytearray_to_c_str(expr->bytearray);
             obj_t *obj = get_env(env, name);
             if (obj->type == TYPE_UNDEF) {
-              result->err = ENV_SYMBOL_UNDEFINED;
+              result->err = ERR_ENV_SYMBOL_UNDEFINED;
               goto error;
             }
             result->obj = obj;
@@ -794,10 +794,10 @@ eval_result_t *eval_expr(ast_expr_t *expr, env_t *env) {
         }
         case AST_BYTEARRAY_DECL: {
           if (((obj_t*)expr->range->from)->type != AST_INT) {
-            result->err = TYPE_INT_REQUIRED; goto error;
+            result->err = ERR_TYPE_INT_REQUIRED; goto error;
           }
           eval_result_t *size = eval_expr(expr->range->from, env);
-          if ((result->err = size->err) != NO_ERROR) goto error;
+          if ((result->err = size->err) != ERR_NO_ERROR) goto error;
           result->obj = bytearray_obj(size->obj->intval, NULL);
           break;
         }
@@ -805,17 +805,17 @@ eval_result_t *eval_expr(ast_expr_t *expr, env_t *env) {
           const char* name = bytearray_to_c_str(expr->seq_elem->ident->bytearray);
           obj_t *a = get_env(env, name);
           if (a->type == TYPE_UNDEF) {
-            result->err = ENV_SYMBOL_UNDEFINED;
+            result->err = ERR_ENV_SYMBOL_UNDEFINED;
             goto error;
           }
           if (a->type != TYPE_BYTEARRAY && a->type != TYPE_STRING) {
-            result->err = TYPE_SEQUENCE_REQUIRED;
+            result->err = ERR_TYPE_SEQUENCE_REQUIRED;
             goto error;
           }
 
           int offset = expr->seq_elem->index->intval;
           if (a->bytearray->size <= offset) {
-            result->err = INDEX_OUT_OF_RANGE;
+            result->err = ERR_INDEX_OUT_OF_RANGE;
             goto error;
           }
           result->obj = char_obj(a->bytearray->data[offset]);
@@ -823,7 +823,7 @@ eval_result_t *eval_expr(ast_expr_t *expr, env_t *env) {
         }
         case AST_LIST: {
           eval_list_expr(expr->list, result, env);
-          if (result->err != NO_ERROR) goto error;
+          if (result->err != ERR_NO_ERROR) goto error;
           break;
         }
         case AST_BLOCK: {
@@ -831,7 +831,7 @@ eval_result_t *eval_expr(ast_expr_t *expr, env_t *env) {
             push_scope(env);
             while (node != NULL) {
               eval_result_t *r = eval_expr(node->root, env);
-              if ((result->err = r->err) != NO_ERROR) {
+              if ((result->err = r->err) != ERR_NO_ERROR) {
                 pop_scope(env);
                 goto error;
               }
@@ -845,7 +845,7 @@ eval_result_t *eval_expr(ast_expr_t *expr, env_t *env) {
         }
         case AST_RESERVED_CALLABLE: {
           resolve_callable_expr(expr, env, result);
-          if (result->err != NO_ERROR) goto error;
+          if (result->err != ERR_NO_ERROR) goto error;
           break;
         }
         case AST_ASSIGN: {
@@ -855,11 +855,11 @@ eval_result_t *eval_expr(ast_expr_t *expr, env_t *env) {
             const char* name = bytearray_to_c_str(((ast_expr_t*)expr->assignment->ident)->bytearray);
             // Eval the object now and save the result as a primitive value.
             eval_result_t *r = eval_expr(expr->assignment->value, env);
-            if ((result->err = r->err) != NO_ERROR) goto error;
+            if ((result->err = r->err) != ERR_NO_ERROR) goto error;
             error_t error = put_env(env, name, r->obj, expr->flags);
             result->obj = r->obj;
             // Store the obj in the result value for the caller.
-            if (error != NO_ERROR) {
+            if (error != ERR_NO_ERROR) {
               result->err = error;
               goto error;
             }
@@ -870,20 +870,20 @@ eval_result_t *eval_expr(ast_expr_t *expr, env_t *env) {
             const char* name = bytearray_to_c_str(((ast_expr_t*)expr->assignment->ident)->bytearray);
             obj_t *existing = get_env(env, name);
             if (existing->type == TYPE_UNDEF) {
-              result->err = ENV_SYMBOL_UNDEFINED;
+              result->err = ERR_ENV_SYMBOL_UNDEFINED;
               goto error;
             }
             eval_result_t *r = eval_expr(expr->assignment->value, env);
-            if ((result->err = r->err) != NO_ERROR) goto error;
+            if ((result->err = r->err) != ERR_NO_ERROR) goto error;
             if (existing->type != r->obj->type) {
               // TODO: Numerical types.
-              result->err = EVAL_TYPE_ERROR;
+              result->err = ERR_EVAL_TYPE_ERROR;
               goto error;
             }
             error_t error = put_env(env, name, r->obj, r->obj->flags);
             result->obj = r->obj;
             // Store the obj in the result value for the caller.
-            if (error != NO_ERROR) {
+            if (error != ERR_NO_ERROR) {
               result->err = error;
               goto error;
             }
@@ -891,12 +891,12 @@ eval_result_t *eval_expr(ast_expr_t *expr, env_t *env) {
         }
         case AST_APPLY: {
           apply(expr, result, env);
-          if (result->err != NO_ERROR) goto error;
+          if (result->err != ERR_NO_ERROR) goto error;
           break;
         }
         case AST_DELETE: {
           error_t error = del_env(env, bytearray_to_c_str(expr->bytearray));
-          if (error != NO_ERROR) {
+          if (error != ERR_NO_ERROR) {
             result->err = error;
             goto error;
           }
@@ -906,11 +906,11 @@ eval_result_t *eval_expr(ast_expr_t *expr, env_t *env) {
         case AST_IF_THEN: {
           eval_result_t *if_val = eval_expr(expr->if_then_args->cond, env);
           result->err = if_val->err;
-          if (result->err != NO_ERROR) goto error;
+          if (result->err != ERR_NO_ERROR) goto error;
           if (truthy(if_val->obj)) {
             eval_result_t *then_val = eval_expr(expr->if_then_else_args->pred, env);
             result->err = then_val->err;
-            if (result->err != NO_ERROR) goto error;
+            if (result->err != ERR_NO_ERROR) goto error;
             result->obj = then_val->obj;
             break;
           }
@@ -919,15 +919,15 @@ eval_result_t *eval_expr(ast_expr_t *expr, env_t *env) {
         }
         case AST_IF_THEN_ELSE: {
           eval_result_t *if_val = eval_expr(expr->if_then_else_args->cond, env);
-          if ((result->err = if_val->err) != NO_ERROR) goto error;
+          if ((result->err = if_val->err) != ERR_NO_ERROR) goto error;
           if (truthy(if_val->obj)) {
             eval_result_t *then_val = eval_expr(expr->if_then_else_args->pred, env);
-            if ((result->err = then_val->err) != NO_ERROR) goto error;
+            if ((result->err = then_val->err) != ERR_NO_ERROR) goto error;
             result->obj = then_val->obj;
             break;
           } else {
             eval_result_t *else_val = eval_expr(expr->if_then_else_args->else_pred, env);
-            if ((result->err = else_val->err) != NO_ERROR) goto error;
+            if ((result->err = else_val->err) != ERR_NO_ERROR) goto error;
             result->obj = else_val->obj;
             break;
           }
@@ -941,7 +941,7 @@ eval_result_t *eval_expr(ast_expr_t *expr, env_t *env) {
           eval_for_loop(expr, env, result);
           break;
         default:
-          result->err = EVAL_UNHANDLED_OBJECT;
+          result->err = ERR_EVAL_UNHANDLED_OBJECT;
           break;
     }
 
@@ -958,7 +958,7 @@ eval_result_t *eval(env_t *env, char *input) {
   r->err = parse_result->err;
   r->depth = parse_result->depth;
 
-  if (parse_result->err != NO_ERROR) {
+  if (parse_result->err != ERR_NO_ERROR) {
     r->obj = no_obj();
     return r;
   }
