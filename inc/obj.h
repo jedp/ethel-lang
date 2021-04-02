@@ -15,6 +15,7 @@ enum obj_type_enum {
   TYPE_INT,
   TYPE_FLOAT,
   TYPE_CHAR,
+  TYPE_BYTEARRAY,
   TYPE_STRING,
   TYPE_BOOLEAN,
   TYPE_RANGE,
@@ -46,7 +47,6 @@ typedef struct ObjListElem {
   struct ObjListElem *next;
 } obj_list_element_t;
 
-
 typedef struct ObjList {
   char* type_name;
   obj_list_element_t *elems;
@@ -64,6 +64,7 @@ typedef struct Obj {
     char charval;
     range_t range;
     obj_list_t *list;
+    bytearray_t *bytearray;
   };
   obj_method_t *methods;
 } obj_t;
@@ -117,6 +118,7 @@ static const char* obj_type_names[TYPE_MAX] = {
   "Int",
   "Float",
   "Char",
+  "Bytearray",
   "Str",
   "Bool",
   "Range",
@@ -135,8 +137,9 @@ obj_t *no_obj();
 obj_t *error_obj(error_t errno);
 obj_t *int_obj(int);
 obj_t *float_obj(float);
-obj_t *string_obj(const char*);
 obj_t *char_obj(char);
+obj_t *bytearray_obj(dim_t size, uint8_t *data);
+obj_t *string_obj(const char*);
 obj_t *boolean_obj(boolean);
 obj_t *range_obj(int, int);
 obj_t *list_obj(char* type_name, obj_list_element_t* elems);

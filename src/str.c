@@ -30,9 +30,8 @@ void c_str_cp(char* dst, const char* src) {
 void c_str_ncp(char* dst, const char* src, dim_t n) {
   unsigned char *p1 = (unsigned char *) dst;
   const unsigned char *p2 = (const unsigned char *) src;
-  dim_t copied = 0;
 
-  while((copied++ < n) && (*p1++ = *p2++) != 0);
+  while((n-- > 0) && (*p1++ = *p2++) != 0);
   // If we only copied n bytes, add the trailing null.
   if (*p1 != 0) *p1 = 0;
 }

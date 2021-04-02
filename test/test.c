@@ -1,6 +1,7 @@
 #include "unity/unity.h"
 #include "test_mem.h"
 #include "test_str.h"
+#include "test_bytearray.h"
 #include "test_lexer.h"
 #include "test_parser.h"
 #include "test_eval.h"
@@ -17,6 +18,7 @@ int main(int argc, char** argv) {
 
   test_mem();
   test_str();
+  test_bytearray();
   test_lexer();
   test_parser();
   test_eval();

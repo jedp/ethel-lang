@@ -1,4 +1,5 @@
 #include <stdio.h>
+#include <stdint.h>
 #include "../inc/mem.h"
 #include "../inc/err.h"
 #include "../inc/obj.h"
@@ -41,6 +42,17 @@ obj_t *nil_obj() {
 obj_t *error_obj(error_t errno) {
   obj_t *obj = obj_of(TYPE_ERROR);
   obj->errno = errno;
+  return obj;
+}
+
+obj_t *bytearray_obj(dim_t size, uint8_t *data) {
+  obj_t *obj = obj_of(TYPE_BYTEARRAY);
+  bytearray_t *a = mem_alloc(size + 4);
+  a->size = size;
+  if (data) {
+    mem_cp(a->data, data, size);
+  }
+  obj->bytearray = a;
   return obj;
 }
 

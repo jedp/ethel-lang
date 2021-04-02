@@ -15,6 +15,7 @@ REPLOBJS = src/repl.o
 TESTOBJS = test/unity/unity.o \
 					 test/test_str.o \
 					 test/test_mem.o \
+					 test/test_bytearray.o \
 					 test/test_lexer.o \
 					 test/test_parser.o \
 					 test/test_eval.o \
