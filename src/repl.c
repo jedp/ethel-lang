@@ -1,5 +1,4 @@
 #include <stdio.h>
-#include <stdlib.h>
 #include "../inc/mem.h"
 #include "../inc/str.h"
 #include "../inc/err.h"
@@ -67,7 +66,7 @@ void print_result(obj_t *obj) {
 int main(int argc, char** argv) {
   mem_set(input, 0, MAX_INPUT);
 
-  char* program = malloc(2);
+  char* program = mem_alloc(2);
   program[0] = 0;
   unsigned int indent = 0;
 
@@ -88,7 +87,7 @@ int main(int argc, char** argv) {
       goto done;
     }
     size_t program_len = c_str_len(program) + c_str_len(input) + 1;
-    program = (char*) realloc(program, program_len);
+    program = (char*) mem_realloc(program, program_len);
     c_str_ncat(program, input, program_len);
 
     eval_result_t *result = eval(&env, program);
@@ -96,8 +95,8 @@ int main(int argc, char** argv) {
     indent = result->depth;
 
     if (result->err != LEX_INCOMPLETE_INPUT) {
-      free(program);
-      program = malloc(2);
+      mem_free(program);
+      program = mem_alloc(2);
       indent = 0;
       program[0] = 0;
 
@@ -110,7 +109,7 @@ int main(int argc, char** argv) {
   }
 
 done:
-  free(program);
+  mem_free(program);
   return 0;
 }
 

@@ -1,12 +1,12 @@
 #include <stdio.h>
-#include <stdlib.h>
+#include "../inc/mem.h"
 #include "../inc/def.h"
 #include "../inc/str.h"
 #include "../inc/env.h"
 
 env_sym_t *new_sym(const char* name, obj_t *obj, uint8_t flags) {
-  env_sym_t *sym = malloc(sizeof(env_sym_t));
-  sym->name = malloc(c_str_len(name) + 1);
+  env_sym_t *sym = mem_alloc(sizeof(env_sym_t));
+  sym->name = mem_alloc(c_str_len(name) + 1);
   c_str_cp(sym->name, name);
   sym->flags = flags;
   sym->obj = obj;
@@ -38,8 +38,8 @@ error_t pop_scope(env_t *env) {
   while (next != NULL) {
     env_sym_t *temp = next;
     next = next->next;
-    free(temp->name);
-    free(temp);
+    mem_free(temp->name);
+    mem_free(temp);
     temp = NULL;
   }
   env->top -= 1;
@@ -103,7 +103,7 @@ error_t del_env(env_t *env, const char* name) {
   env_sym_t *prev = sym->prev;
   if (sym->next != NULL) sym->next->prev = prev;
   prev->next = sym->next;
-  free(sym);
+  mem_free(sym);
 
   return NO_ERROR;
 }

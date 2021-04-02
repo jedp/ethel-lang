@@ -1,5 +1,5 @@
-#include <stdlib.h>
 #include <stdio.h>
+#include "../inc/mem.h"
 #include "../inc/err.h"
 #include "../inc/obj.h"
 #include "../inc/list.h"
@@ -18,7 +18,7 @@ obj_t *arg_at(obj_method_args_t *args, int index) {
 }
 
 obj_t *obj_of(obj_type_t type) {
-  obj_t *obj = malloc(sizeof(obj_t));
+  obj_t *obj = mem_alloc(sizeof(obj_t));
   obj->type = type;
   obj->flags = F_NONE;
   obj->methods = NULL;
@@ -58,7 +58,7 @@ obj_t *float_obj(float f) {
 
 obj_t *string_obj(const char* s) {
   obj_t *obj = obj_of(TYPE_STRING);
-  obj->stringval = malloc(c_str_len(s) + 1);
+  obj->stringval = mem_alloc(c_str_len(s) + 1);
   c_str_cp(obj->stringval, s);
   return obj;
 }
@@ -83,12 +83,12 @@ obj_t *range_obj(int from, int to) {
 
 obj_t *list_obj(char* name, obj_list_element_t *elems) {
   obj_t *obj = obj_of(TYPE_LIST);
-  obj_list_t *list = malloc(sizeof(obj_list_t));
+  obj_list_t *list = mem_alloc(sizeof(obj_list_t));
 
-  list->type_name = malloc(c_str_len(name) + 1);
+  list->type_name = mem_alloc(c_str_len(name) + 1);
   c_str_cp(list->type_name, name);
 
-  list->elems = malloc(sizeof(obj_list_element_t));
+  list->elems = mem_alloc(sizeof(obj_list_element_t));
   list->elems = elems;
 
   obj->list = list;

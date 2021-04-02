@@ -1,6 +1,6 @@
 #include <stdio.h>
-#include <stdlib.h>
 #include "../inc/def.h"
+#include "../inc/mem.h"
 #include "../inc/str.h"
 #include "../inc/ast.h"
 #include "../inc/lexer.h"
@@ -86,7 +86,7 @@ ast_expr_t *parse_start(lexer_t *lexer) {
 }
 
 ast_expr_list_t *empty_expr_list() {
-  ast_expr_list_t *node = malloc(sizeof(ast_expr_list_t));
+  ast_expr_list_t *node = mem_alloc(sizeof(ast_expr_list_t));
   node->root = ast_empty();
   return node;
 }
@@ -100,7 +100,7 @@ ast_expr_list_t *parse_expr_list(lexer_t *lexer) {
   
   while (lexer->token.tag == TAG_COMMA) {
     advance(lexer);
-    ast_expr_list_t *next = malloc(sizeof(ast_expr_list_t));
+    ast_expr_list_t *next = mem_alloc(sizeof(ast_expr_list_t));
     e = parse_expr(lexer);
     next->root = e;
 
@@ -121,7 +121,7 @@ ast_expr_list_t *parse_block(lexer_t *lexer) {
 
   while (lexer->token.tag == TAG_EOL) {
     advance(lexer);
-    ast_expr_list_t *next = malloc(sizeof(ast_expr_list_t));
+    ast_expr_list_t *next = mem_alloc(sizeof(ast_expr_list_t));
     e = parse_expr(lexer);
     next->root = e;
 
@@ -191,7 +191,7 @@ ast_expr_t *parse_expr(lexer_t *lexer) {
       if (lexer->token.tag != TAG_END) {
         ast_expr_list_t *es = parse_block(lexer);
         if (!eat(lexer, TAG_END)) {
-          free(es);
+          mem_free(es);
           goto error;
         }
         return ast_block(es);
@@ -245,7 +245,7 @@ ast_expr_t *parse_expr(lexer_t *lexer) {
         eat(lexer, TAG_BEGIN);
         ast_expr_list_t *es = parse_expr_list(lexer);
         if (!eat(lexer, TAG_END)) {
-          free(es);
+          mem_free(es);
           goto error;
         }
         return ast_list(type_name->stringval, es);
@@ -261,7 +261,7 @@ ast_expr_t *parse_expr(lexer_t *lexer) {
         if (lexer->token.tag != TAG_RPAREN) {
           ast_expr_list_t *es = parse_expr_list(lexer);
           if (!eat(lexer, TAG_RPAREN)) {
-            free(es);
+            mem_free(es);
             goto error;
           }
           return ast_reserved_callable(callable_type, es);
@@ -392,21 +392,21 @@ ast_expr_t *parse_atom(lexer_t *lexer) {
       return id;
     }
     case TAG_METHOD_NAME: {
-      char* name = malloc(c_str_len(lexer->token.string) + 1);
+      char* name = mem_alloc(c_str_len(lexer->token.string) + 1);
       c_str_cp(name, lexer->token.string);
       advance(lexer);
-      if (!eat(lexer, TAG_LPAREN)) { free(name); goto error; }
+      if (!eat(lexer, TAG_LPAREN)) { mem_free(name); goto error; }
       if (lexer->token.tag == TAG_RPAREN) {
         ast_expr_t *id = ast_method(name, NULL);
-        free(name);
+        mem_free(name);
         advance(lexer);
         return id;
       }
       // More than 0 args.
       ast_expr_list_t *args = parse_expr_list(lexer);
-      if (!eat(lexer, TAG_RPAREN)) { free(name); goto error; }
+      if (!eat(lexer, TAG_RPAREN)) { mem_free(name); goto error; }
       ast_expr_t *id = ast_method(name, args);
-      free(name);
+      mem_free(name);
       return id;
     }
     case TAG_TYPE_NAME: {

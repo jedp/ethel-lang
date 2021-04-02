@@ -1,6 +1,6 @@
-#include <stdlib.h>
 #include "unity/unity.h"
 #include "test_str.h"
+#include "../inc/mem.h"
 #include "../inc/str.h"
 
 void test_c_str_len(void) {
@@ -22,14 +22,14 @@ void test_c_str_eq(void) {
 
 void test_c_str_cp(void) {
   char* src = "I like pie!";
-  char* dst = malloc(12);
+  char* dst = mem_alloc(12);
   c_str_cp(dst, src);
 
   TEST_ASSERT_EQUAL(True, c_str_eq(dst, src));
 }
 
 void test_c_str_ncat(void) {
-  char* dst = malloc(80);
+  char* dst = mem_alloc(80);
   dst[0]= '\0';
   
   c_str_ncat(dst, "I ", 2);

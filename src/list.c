@@ -1,16 +1,16 @@
-#include <stdlib.h>
 #include <stdio.h>
+#include "../inc/mem.h"
 #include "../inc/str.h"
 #include "../inc/obj.h"
 #include "../inc/list.h"
 
 obj_t *_empty_list(char* type_name) {
-  obj_t *obj = malloc(sizeof(obj_t));
+  obj_t *obj = mem_alloc(sizeof(obj_t));
   obj->type = TYPE_LIST;
   obj->flags = F_NONE;
 
-  obj_list_t *list = malloc(sizeof(obj_list_t));
-  list->type_name = malloc(c_str_len(type_name) + 1);
+  obj_list_t *list = mem_alloc(sizeof(obj_list_t));
+  list->type_name = mem_alloc(c_str_len(type_name) + 1);
   c_str_cp(list->type_name, type_name);
   list->elems = NULL;
   obj->list = list;
@@ -84,15 +84,15 @@ obj_t *_list_slice(obj_t *list_obj, int start, int end) {
   }
 
   // Allocate a new list to return.
-  obj_t *slice = malloc(sizeof(obj_t));
+  obj_t *slice = mem_alloc(sizeof(obj_t));
   slice->type = TYPE_LIST;
   slice->flags = F_NONE;
-  slice->list = malloc(sizeof(obj_list_t));
+  slice->list = mem_alloc(sizeof(obj_list_t));
 
   // Give it the same type and put the first elem in it.
-  slice->list->type_name = malloc(c_str_len(list_obj->list->type_name) + 1);
+  slice->list->type_name = mem_alloc(c_str_len(list_obj->list->type_name) + 1);
   c_str_cp(slice->list->type_name, list_obj->list->type_name);
-  slice->list->elems = malloc(sizeof(obj_list_t));
+  slice->list->elems = mem_alloc(sizeof(obj_list_t));
 
   obj_list_element_t *curr = slice->list->elems;
   curr->node = root->node;
@@ -100,7 +100,7 @@ obj_t *_list_slice(obj_t *list_obj, int start, int end) {
   // Up to but not including end.
   i++;
   while (root->next != NULL && i != end) {
-    obj_list_element_t *list_next = malloc(sizeof(obj_list_element_t));
+    obj_list_element_t *list_next = mem_alloc(sizeof(obj_list_element_t));
     list_next->node = root->next->node;
     curr->next = list_next;
     curr = list_next;
@@ -174,7 +174,7 @@ obj_t *list_prepend(obj_t *list_obj, obj_method_args_t *args) {
   }
 
   obj_list_element_t *head = _get_elem(list_obj, 0);
-  obj_list_element_t *new_elem = malloc(sizeof(obj_list_element_t));
+  obj_list_element_t *new_elem = mem_alloc(sizeof(obj_list_element_t));
   new_elem->node = args->arg;
   new_elem->next = head;
   list_obj->list->elems = new_elem;
@@ -195,7 +195,7 @@ obj_t *list_append(obj_t *list_obj, obj_method_args_t *args) {
 
   int len = _list_len(list_obj);
   obj_list_element_t *last = _get_elem(list_obj, len - 1);
-  obj_list_element_t *new_elem = malloc(sizeof(obj_list_element_t));
+  obj_list_element_t *new_elem = mem_alloc(sizeof(obj_list_element_t));
   new_elem->node = args->arg;
   new_elem->next = NULL;
 
@@ -231,7 +231,7 @@ obj_t *list_remove_last(obj_t *list_obj, obj_method_args_t *args) {
     printf("first is last\n");
     obj_t *obj = first->node;
     list_obj->list->elems = NULL;
-    free(last);
+    mem_free(last);
     first->node = NULL;
     first->next = NULL;
     return obj;
@@ -240,7 +240,7 @@ obj_t *list_remove_last(obj_t *list_obj, obj_method_args_t *args) {
   obj_list_element_t *new_last = _get_elem(list_obj, len - 2);
   new_last->next = NULL;
   obj_t *obj = last->node;
-  free(last);
+  mem_free(last);
   last->node = NULL;
   last->next = NULL;
   return obj;
@@ -278,7 +278,7 @@ obj_t *list_remove_at(obj_t *list_obj, obj_method_args_t *args) {
 
   obj_t *r = target->node;
 
-  free(target);
+  mem_free(target);
   target->node = NULL;
   target->next = NULL;
   return r;

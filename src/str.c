@@ -1,4 +1,3 @@
-#include <stdlib.h>
 #include <stdio.h>
 #include "../inc/obj.h"
 #include "../inc/str.h"

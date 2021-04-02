@@ -1,7 +1,8 @@
-#include <stdlib.h>
 #include <stdio.h>
+#include <stdlib.h>
 #include <limits.h>
 #include "../inc/err.h"
+#include "../inc/mem.h"
 #include "../inc/eval.h"
 #include "../inc/parser.h"
 #include "../inc/ast.h"
@@ -18,7 +19,7 @@ void eval_nil_expr(ast_expr_t *expr, eval_result_t *result) {
     result->err = EVAL_TYPE_ERROR;
     return;
   }
-  obj_t* obj = malloc(sizeof(obj_t));
+  obj_t* obj = mem_alloc(sizeof(obj_t));
   obj->type = TYPE_NIL;
   result->obj = obj;
 }
@@ -61,7 +62,7 @@ void eval_list_expr(ast_list_t *list, eval_result_t *result, env_t *env) {
     return;
   }
 
-  obj_list_element_t *elem = malloc(sizeof(obj_list_element_t));
+  obj_list_element_t *elem = mem_alloc(sizeof(obj_list_element_t));
   obj_list_element_t *root_elem = elem;
 
   ast_expr_list_t *ast_node = list->es;
@@ -86,7 +87,7 @@ void eval_list_expr(ast_list_t *list, eval_result_t *result, env_t *env) {
     // Link up the nodes on the obj.
     elem->node = r->obj;
     if (ast_node != NULL)  {
-      elem->next = malloc(sizeof(obj_list_element_t));
+      elem->next = mem_alloc(sizeof(obj_list_element_t));
     } else {
       elem->next = NULL;
     }
@@ -113,7 +114,7 @@ void strip_trailing_ws(char* s) {
 void int_to_string(obj_t *obj) {
   int i = obj->intval;
   // Longest thing we can print is -2147483648, which is 11 characters + 1 for the null.
-  obj->stringval = malloc(12);
+  obj->stringval = mem_alloc(12);
   snprintf(obj->stringval, 12, "%d", i);
   obj->type = TYPE_STRING;
 }
@@ -121,14 +122,14 @@ void int_to_string(obj_t *obj) {
 void float_to_string(obj_t *obj) {
   float f = obj->floatval;
   int len = snprintf(NULL, 0, "%f", f);
-  obj->stringval = malloc(len + 1);
+  obj->stringval = mem_alloc(len + 1);
   snprintf(obj->stringval, len + 1, "%f", f);
   obj->type = TYPE_STRING;
 }
 
 error_t string_to_int(obj_t *obj) {
   char *end = NULL;
-  char *input = malloc(c_str_len(obj->stringval) + 1);
+  char *input = mem_alloc(c_str_len(obj->stringval) + 1);
   c_str_cp(input, obj->stringval);
   strip_trailing_ws(input);
 
@@ -136,7 +137,7 @@ error_t string_to_int(obj_t *obj) {
   // Expect to have read to the end of the string or to a decimal point.
   boolean bad_input = (*end != '\0') && (*end != '.');
   // Can only free input after we're done using the end pointer.
-  free(input);
+  mem_free(input);
 
   if (bad_input) return EVAL_BAD_INPUT;
   if (l > INT_MAX) return OVERFLOW_ERROR;
@@ -149,14 +150,14 @@ error_t string_to_int(obj_t *obj) {
 
 error_t string_to_float(obj_t *obj) {
   char *end = NULL;
-  char *input = malloc(c_str_len(obj->stringval) + 1);
+  char *input = mem_alloc(c_str_len(obj->stringval) + 1);
   c_str_cp(input, obj->stringval);
   strip_trailing_ws(input);
 
   float f = strtof(input, &end);
 
   boolean bad_input = *end != '\0';
-  free(input);
+  mem_free(input);
 
   if (bad_input) return EVAL_BAD_INPUT;
 
@@ -271,7 +272,7 @@ void cast(obj_t *obj, obj_t *type_obj, eval_result_t *result) {
           goto done;
         case TYPE_STRING: {
           char c = obj->charval;
-          obj->stringval = malloc(2);
+          obj->stringval = mem_alloc(2);
           snprintf(obj->stringval, 2, "%c", c);
           goto done;
         }
@@ -415,7 +416,7 @@ found:
   } else {
     // Args to eval.
     ast_expr_list_t *args = expr->application->args;
-    obj_method_args_t *method_args = malloc(sizeof(obj_method_args_t));
+    obj_method_args_t *method_args = mem_alloc(sizeof(obj_method_args_t));
     obj_method_args_t *method_args_root = method_args;
 
     while(args != NULL) {
@@ -426,7 +427,7 @@ found:
       args = args->next;
 
       if (args != NULL) {
-        obj_method_args_t *next_method_args = malloc(sizeof(obj_method_args_t));
+        obj_method_args_t *next_method_args = mem_alloc(sizeof(obj_method_args_t));
         method_args->next = next_method_args;
         method_args = next_method_args;
       }
@@ -474,7 +475,7 @@ void println_args(ast_expr_list_t *args, eval_result_t *result, env_t *env) {
 }
 
 void readln_input(eval_result_t *result) {
-  char* s = malloc(MAX_INPUT_LINE);
+  char* s = mem_alloc(MAX_INPUT_LINE);
   if (getline(&s, &MAX_INPUT_LINE, stdin) == -1) {
     result->err = INPUT_STREAM_ERROR;
   }
@@ -484,7 +485,7 @@ void readln_input(eval_result_t *result) {
   while (end >= 0 && s[end] == '\n') s[end--] = '\0';
 
   result->obj = string_obj(s);
-  free(s);
+  mem_free(s);
 }
 
 void resolve_callable_expr(ast_expr_t *expr, env_t *env, eval_result_t *result) {
@@ -557,7 +558,7 @@ void eval_while_loop(ast_expr_t *expr, env_t *env, eval_result_t *result) {
 
 void eval_for_loop(ast_expr_t *expr, env_t *env, eval_result_t *result) {
   char* index_name = ((ast_expr_t*) expr->for_loop->index)->stringval;
-  eval_result_t *r = malloc(sizeof(eval_result_t));
+  eval_result_t *r = mem_alloc(sizeof(eval_result_t));
   r->obj = undef_obj();
 
   // range
@@ -587,7 +588,7 @@ void eval_for_loop(ast_expr_t *expr, env_t *env, eval_result_t *result) {
       // Overflow?
       if (i < 0) { result->err = OVERFLOW_ERROR; goto error; }
       index_obj->intval = i;
-      free(r);
+      mem_free(r);
       // Eval predicate.
       r = eval_expr(expr->for_loop->pred, env);
       if ((result->err = r->err) != NO_ERROR) {
@@ -600,7 +601,7 @@ void eval_for_loop(ast_expr_t *expr, env_t *env, eval_result_t *result) {
       // Overflow?
       if (i < 0) { result->err = OVERFLOW_ERROR; goto error; }
       index_obj->intval = i;
-      free(r);
+      mem_free(r);
       // Eval predicate.
       r = eval_expr(expr->for_loop->pred, env);
       if ((result->err = r->err) != NO_ERROR) {
@@ -612,16 +613,16 @@ void eval_for_loop(ast_expr_t *expr, env_t *env, eval_result_t *result) {
 
   pop_scope(env);
   result->obj = r->obj;
-  free(r);
+  mem_free(r);
   return;
 
 error:
-  free(r);
+  mem_free(r);
   result->obj = undef_obj();
 }
 
 eval_result_t *eval_expr(ast_expr_t *expr, env_t *env) {
-    eval_result_t *result = malloc(sizeof(eval_result_t));
+    eval_result_t *result = mem_alloc(sizeof(eval_result_t));
     result->err = NO_ERROR;
 
     switch(expr->type) {
@@ -645,7 +646,7 @@ eval_result_t *eval_expr(ast_expr_t *expr, env_t *env) {
             if ((result->err = r2->err) != NO_ERROR) goto error;
             obj_t *r = num_add(r1->obj, r2->obj);
             if (r->type == TYPE_ERROR && ((result->err = r->errno) != NO_ERROR)) {
-              free(r);
+              mem_free(r);
               goto error;
             }
             result->obj = r;
@@ -658,7 +659,7 @@ eval_result_t *eval_expr(ast_expr_t *expr, env_t *env) {
             if ((result->err = r2->err) != NO_ERROR) goto error;
             obj_t *r = num_sub(r1->obj, r2->obj);
             if (r->type == TYPE_ERROR && ((result->err = r->errno) != NO_ERROR)) {
-              free(r);
+              mem_free(r);
               goto error;
             }
             result->obj = r;
@@ -671,7 +672,7 @@ eval_result_t *eval_expr(ast_expr_t *expr, env_t *env) {
             if ((result->err = r2->err) != NO_ERROR) goto error;
             obj_t *r = num_mul(r1->obj, r2->obj);
             if (r->type == TYPE_ERROR && ((result->err = r->errno) != NO_ERROR)) {
-              free(r);
+              mem_free(r);
               goto error;
             }
             result->obj = r;
@@ -684,7 +685,7 @@ eval_result_t *eval_expr(ast_expr_t *expr, env_t *env) {
             if ((result->err = r2->err) != NO_ERROR) goto error;
             obj_t *r = num_div(r1->obj, r2->obj);
             if (r->type == TYPE_ERROR && ((result->err = r->errno) != NO_ERROR)) {
-              free(r);
+              mem_free(r);
               goto error;
             }
             result->obj = r;
@@ -697,7 +698,7 @@ eval_result_t *eval_expr(ast_expr_t *expr, env_t *env) {
             if ((result->err = r2->err) != NO_ERROR) goto error;
             obj_t *r = num_mod(r1->obj, r2->obj);
             if (r->type == TYPE_ERROR && ((result->err = r->errno) != NO_ERROR)) {
-              free(r);
+              mem_free(r);
               goto error;
             }
             result->obj = r;
@@ -914,10 +915,10 @@ error:
 
 eval_result_t *eval(env_t *env, char *input) {
   ast_expr_t *ast = ast_empty();
-  parse_result_t *parse_result = malloc(sizeof(parse_result_t));
+  parse_result_t *parse_result = mem_alloc(sizeof(parse_result_t));
   parse_program(input, ast, parse_result);
 
-  eval_result_t *r = malloc(sizeof(eval_result_t));
+  eval_result_t *r = mem_alloc(sizeof(eval_result_t));
   r->err = parse_result->err;
   r->depth = parse_result->depth;
 
@@ -930,7 +931,7 @@ eval_result_t *eval(env_t *env, char *input) {
     pretty_print(ast);
 #endif
 
-  free(r);
+  mem_free(r);
   return eval_expr(ast, env);
 }
 

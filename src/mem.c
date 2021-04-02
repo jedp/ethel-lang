@@ -6,6 +6,14 @@ void* mem_alloc(dim_t size) {
   return malloc(size);
 }
 
+void* mem_realloc(void *b, dim_t size) {
+  return realloc(b, size);
+}
+
+void mem_free(void *b) {
+  free(b);
+}
+
 void mem_set(void *b, int val, dim_t len) {
   unsigned char *p = b;
   while (len-- > 0) *p++ = val;

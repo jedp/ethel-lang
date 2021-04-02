@@ -1,4 +1,3 @@
-#include <stdlib.h>
 #include "unity/unity.h"
 #include "test_mem.h"
 #include "../inc/mem.h"
