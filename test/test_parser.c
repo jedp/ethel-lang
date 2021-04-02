@@ -224,9 +224,10 @@ void test_parse_seq_elem_assign(void) {
   parse_program(program, ast, parse_result);
 
   TEST_ASSERT_EQUAL(ERR_NO_ERROR, parse_result->err);
-  TEST_ASSERT_EQUAL(AST_REASSIGN, ast->type);
-  TEST_ASSERT_EQUAL(AST_SEQ_ELEM, ((ast_expr_t*) ast->assignment->ident)->type);
-  TEST_ASSERT_EQUAL(AST_INT, ((ast_expr_t*) ast->assignment->value)->type);
+  TEST_ASSERT_EQUAL(AST_SEQ_ELEM_ASSIGN, ast->type);
+  TEST_ASSERT_EQUAL(AST_IDENT, ((ast_expr_t*) ast->assign_elem->seq)->type);
+  TEST_ASSERT_EQUAL(AST_MUL, ((ast_expr_t*) ast->assign_elem->offset)->type);
+  TEST_ASSERT_EQUAL(AST_INT, ((ast_expr_t*) ast->assign_elem->value)->type);
 }
 
 void test_parser(void) {

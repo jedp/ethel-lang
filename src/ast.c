@@ -234,6 +234,15 @@ ast_expr_t *ast_reassign(ast_expr_t *ident, ast_expr_t *value) {
   return node;
 }
 
+ast_expr_t *ast_assign_elem(ast_expr_t *seq, ast_expr_t *offset, ast_expr_t *value) {
+  ast_expr_t *node = ast_node(AST_SEQ_ELEM_ASSIGN);
+  node->assign_elem = mem_alloc(sizeof(ast_assign_elem_t));
+  node->assign_elem->seq = seq;
+  node->assign_elem->offset = offset;
+  node->assign_elem->value = value;
+  return node;
+}
+
 ast_expr_t *ast_delete(ast_expr_t *ident) {
   ast_expr_t *node = ast_node(AST_DELETE);
   node->bytearray = ident->bytearray;

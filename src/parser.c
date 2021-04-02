@@ -395,13 +395,13 @@ ast_expr_t *parse_atom(lexer_t *lexer) {
       // Identifier in sequence access?
       if (lexer->token.tag == TAG_LBRACKET) {
         ast_expr_t *index = parse_expr(lexer);
-        ast_expr_t *access = ast_seq_elem(id, index);
-        // Sequence element in assignment?
         if (lexer->token.tag == TAG_ASSIGN) {
           advance(lexer);
-          return ast_reassign(access, parse_expr(lexer));
+          // Sequence elem assignment.
+          return ast_assign_elem(id, index, parse_expr(lexer));
         }
-        return access;
+        // Sequence elem access.
+        return ast_seq_elem(id, index);
       }
       // Identifier in assignment?
       if (lexer->token.tag == TAG_ASSIGN) {

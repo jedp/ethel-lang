@@ -515,6 +515,23 @@ void test_eval_arr_decl(void) {
   TEST_ASSERT_EQUAL('\0', result2->obj->charval);
 }
 
+void test_eval_arr_assign(void) {
+  // Assign with int.
+  char *program = "{ val a = arr(12)\n a[4] = 42\n a[4] }";
+  eval_result_t *result = eval_program(program);
+
+  TEST_ASSERT_EQUAL(ERR_NO_ERROR, result->err);
+  TEST_ASSERT_EQUAL('*', result->obj->charval);
+
+  // Assign with char.
+  char *program2= "{ val a = arr(12)\n a[3] = 'x'\n a[3] }";
+  eval_result_t *result2= eval_program(program2);
+
+  TEST_ASSERT_EQUAL(ERR_NO_ERROR, result2->err);
+  TEST_ASSERT_EQUAL(TYPE_CHAR, result2->obj->type);
+  TEST_ASSERT_EQUAL('x', result2->obj->charval);
+}
+
 void test_eval(void) {
   RUN_TEST(test_eval_calculator);
   RUN_TEST(test_eval_assign_immutable);
@@ -552,5 +569,6 @@ void test_eval(void) {
   RUN_TEST(test_eval_list_val_remove_last);
   RUN_TEST(test_eval_list_val_remove_at);
   RUN_TEST(test_eval_arr_decl);
+  RUN_TEST(test_eval_arr_assign);
 }
 

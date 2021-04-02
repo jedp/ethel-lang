@@ -38,6 +38,7 @@ enum ast_type_enum {
   AST_NEGATE,
   AST_IDENT,
   AST_SEQ_ELEM,
+  AST_SEQ_ELEM_ASSIGN,
   AST_FIELD,
   AST_METHOD,
   AST_TYPE_NAME,
@@ -82,6 +83,7 @@ static const char *ast_node_names[] = {
   "NEGATE",
   "IDENT",
   "SEQUENCE-ELEM",
+  "SEQUENCE-ELEM-ASSIGN",
   "FIELD",
   "METHOD",
   "TYPE-NAME",
@@ -171,10 +173,16 @@ typedef struct AstArrayDecl {
   ast_expr_t *size;
 } ast_array_decl_t;
 
-typedef struct SeqElem {
+typedef struct AstSeqElem {
   ast_expr_t *ident;
   ast_expr_t *index;
 } ast_seq_elem_t;
+
+typedef struct AstAssignElem {
+  ast_expr_t *seq;
+  ast_expr_t *offset;
+  ast_expr_t *value;
+} ast_assign_elem_t;
 
 typedef struct AstField {
   char* name;
@@ -209,6 +217,7 @@ typedef struct __attribute__((__packed__)) AstExpr {
     ast_for_loop_t *for_loop;
     ast_array_decl_t *array_decl;
     ast_seq_elem_t *seq_elem;
+    ast_assign_elem_t *assign_elem;
     ast_method_t *method;
     ast_apply_t *application;
     int intval;
@@ -229,6 +238,7 @@ ast_expr_t *ast_int(int value);
 ast_expr_t *ast_char(char c);
 ast_expr_t *ast_string(char* s);
 ast_expr_t *ast_array_decl(ast_expr_t *size);
+ast_expr_t *ast_assign_elem(ast_expr_t *seq, ast_expr_t *offset, ast_expr_t *value);
 ast_expr_t *ast_boolean(boolean t);
 ast_expr_t *ast_type(ast_type_t type);
 ast_expr_t *ast_ident(char* name);

@@ -57,6 +57,22 @@ void eval_char_expr(ast_expr_t *expr, eval_result_t *result) {
   result->obj = char_obj(expr->charval);
 }
 
+byte eval_byte_expr(ast_expr_t *expr, eval_result_t *result) {
+  switch(expr->type) {
+    case AST_CHAR:
+      return expr->charval;
+      return 0xFF;
+    case AST_INT: {
+      if (expr->intval > 255)  { result->err = ERR_OVERFLOW_ERROR; return 0xFF; }
+      if (expr->intval < -127) { result->err = ERR_UNDERFLOW_ERROR; return 0xFF; }
+      return (char) expr->intval;
+    }
+    default:
+      result->err = ERR_EVAL_TYPE_ERROR;
+      return 0xFF;
+  }
+}
+
 void eval_list_expr(ast_list_t *list, eval_result_t *result, env_t *env) {
   if (list->es == NULL) {
     result->obj = list_obj(list->type_name, NULL);
@@ -821,6 +837,30 @@ eval_result_t *eval_expr(ast_expr_t *expr, env_t *env) {
           result->obj = char_obj(a->bytearray->data[offset]);
           break;
         }
+        case AST_SEQ_ELEM_ASSIGN: {
+          const char* name = bytearray_to_c_str(expr->assign_elem->seq->bytearray);
+          obj_t *a = get_env(env, name);
+          if (a->type == TYPE_UNDEF) {
+            result->err = ERR_ENV_SYMBOL_UNDEFINED;
+            goto error;
+          }
+          if (a->type != TYPE_BYTEARRAY && a->type != TYPE_STRING) {
+            result->err = ERR_TYPE_SEQUENCE_REQUIRED;
+            goto error;
+          }
+
+          int offset = expr->seq_elem->index->intval;
+          if (a->bytearray->size <= offset) {
+            result->err = ERR_INDEX_OUT_OF_RANGE;
+            goto error;
+          }
+
+          byte c = eval_byte_expr(expr->assign_elem->value, result);
+          if (result->err != ERR_NO_ERROR) goto error;
+          a->bytearray->data[offset] = c;
+          result->obj = char_obj(c);
+          break;
+        }
         case AST_LIST: {
           eval_list_expr(expr->list, result, env);
           if (result->err != ERR_NO_ERROR) goto error;
@@ -866,7 +906,6 @@ eval_result_t *eval_expr(ast_expr_t *expr, env_t *env) {
             break;
         }
         case AST_REASSIGN: {
-            // TODO: arr[x] = y
             const char* name = bytearray_to_c_str(((ast_expr_t*)expr->assignment->ident)->bytearray);
             obj_t *existing = get_env(env, name);
             if (existing->type == TYPE_UNDEF) {
