@@ -3,13 +3,14 @@
 #include <limits.h>
 #include "../inc/err.h"
 #include "../inc/mem.h"
+#include "../inc/num.h"
+#include "../inc/arr.h"
+#include "../inc/list.h"
+#include "../inc/str.h"
 #include "../inc/eval.h"
 #include "../inc/parser.h"
 #include "../inc/ast.h"
 #include "../inc/env.h"
-#include "../inc/num.h"
-#include "../inc/list.h"
-#include "../inc/str.h"
 
 size_t MAX_INPUT_LINE = 80;
 eval_result_t *eval_expr(ast_expr_t *expr, env_t *env);
@@ -394,6 +395,9 @@ found:
   // Now look up the method for the given object type.
   static_method method;
   switch(obj->type) {
+    case TYPE_BYTEARRAY:
+      method = get_arr_static_method(method_id);
+      break;
     case TYPE_LIST:
       method = get_list_static_method(method_id);
       break;
@@ -788,6 +792,35 @@ eval_result_t *eval_expr(ast_expr_t *expr, env_t *env) {
             result->obj = obj;
             break;
         }
+        case AST_BYTEARRAY_DECL: {
+          if (((obj_t*)expr->range->from)->type != AST_INT) {
+            result->err = TYPE_INT_REQUIRED; goto error;
+          }
+          eval_result_t *size = eval_expr(expr->range->from, env);
+          if ((result->err = size->err) != NO_ERROR) goto error;
+          result->obj = bytearray_obj(size->obj->intval, NULL);
+          break;
+        }
+        case AST_SEQ_ELEM: {
+          const char* name = bytearray_to_c_str(expr->seq_elem->ident->bytearray);
+          obj_t *a = get_env(env, name);
+          if (a->type == TYPE_UNDEF) {
+            result->err = ENV_SYMBOL_UNDEFINED;
+            goto error;
+          }
+          if (a->type != TYPE_BYTEARRAY && a->type != TYPE_STRING) {
+            result->err = TYPE_SEQUENCE_REQUIRED;
+            goto error;
+          }
+
+          int offset = expr->seq_elem->index->intval;
+          if (a->bytearray->size <= offset) {
+            result->err = INDEX_OUT_OF_RANGE;
+            goto error;
+          }
+          result->obj = char_obj(a->bytearray->data[offset]);
+          break;
+        }
         case AST_LIST: {
           eval_list_expr(expr->list, result, env);
           if (result->err != NO_ERROR) goto error;
@@ -833,6 +866,7 @@ eval_result_t *eval_expr(ast_expr_t *expr, env_t *env) {
             break;
         }
         case AST_REASSIGN: {
+            // TODO: arr[x] = y
             const char* name = bytearray_to_c_str(((ast_expr_t*)expr->assignment->ident)->bytearray);
             obj_t *existing = get_env(env, name);
             if (existing->type == TYPE_UNDEF) {

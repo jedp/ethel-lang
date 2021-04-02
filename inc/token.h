@@ -42,6 +42,9 @@ enum tag_enum {
   TAG_LIST,
   TAG_OF,
 
+  // Array constructor
+  TAG_ARR_DECL,
+
   // Type declarations
   TAG_TYPE_INT,
   TAG_TYPE_FLOAT,
@@ -52,6 +55,10 @@ enum tag_enum {
 
   // Sequence
   TAG_RANGE,
+
+  // Element access
+  TAG_LBRACKET,
+  TAG_RBRACKET,
 
   // Structure
   TAG_IF,
@@ -132,6 +139,9 @@ static const char* tag_names[] = {
   "LIST",
   "OF",
 
+  // Array constructor
+  "ARRAY-DECL",
+
   // Type declarations
   "INT-TYPE",
   "FLOAT-TYPE",
@@ -140,8 +150,12 @@ static const char* tag_names[] = {
   "BOOLEAN-TYPE",
   "AS",
 
-  // Sequence,
+  // Sequence
   "RANGE-TO",
+
+  // Element access
+  "OPEN_BRACKET",
+  "CLOSE_BRACKET",
 
   // Structure
   "IF",
@@ -213,6 +227,7 @@ static const token_t reserved[] = {
   { TAG_NIL,           .string = (char *) "nil" },
   { TAG_LIST,          .string = (char *) "list" },
   { TAG_OF,            .string = (char *) "of" },
+  { TAG_ARR_DECL,      .string = (char *) "arr" },
   { TAG_TYPE_INT,      .string = (char *) "int" },
   { TAG_TYPE_FLOAT,    .string = (char *) "float" },
   { TAG_TYPE_CHAR,     .string = (char *) "char" },

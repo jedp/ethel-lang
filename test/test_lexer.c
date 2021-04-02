@@ -407,6 +407,38 @@ void test_lex_method_access(void) {
   }
 }
 
+void test_lex_array_access(void) {
+  char *expr = "val e = a[42]";
+  lexer_t lexer;
+  lexer_init(&lexer, expr, c_str_len(expr));
+
+  int expected[] = {
+    TAG_INVARIABLE, TAG_IDENT, TAG_ASSIGN,
+    TAG_IDENT, TAG_LBRACKET, TAG_INT, TAG_RBRACKET
+  };
+  for (int i = 0; i < sizeof(expected) / sizeof(expected[0]); i++) {
+    TEST_ASSERT_EQUAL(NO_ERROR, lexer.err);
+    TEST_ASSERT_EQUAL(expected[i], lexer.token.tag);
+    advance(&lexer);
+  }
+}
+
+void test_lex_array_constructor(void) {
+  char *expr = "val a = arr(16)";
+  lexer_t lexer;
+  lexer_init(&lexer, expr, c_str_len(expr));
+
+  int expected[] = {
+    TAG_INVARIABLE, TAG_IDENT, TAG_ASSIGN,
+    TAG_ARR_DECL, TAG_LPAREN, TAG_INT, TAG_RPAREN
+  };
+  for (int i = 0; i < sizeof(expected) / sizeof(expected[0]); i++) {
+    TEST_ASSERT_EQUAL(NO_ERROR, lexer.err);
+    TEST_ASSERT_EQUAL(expected[i], lexer.token.tag);
+    advance(&lexer);
+  }
+}
+
 void test_lex_all_tokens(void) {
   typedef struct {
     char* text;
@@ -484,6 +516,8 @@ void test_lexer(void) {
   RUN_TEST(test_lex_list_of_with_init);
   RUN_TEST(test_lex_field_access);
   RUN_TEST(test_lex_method_access);
+  RUN_TEST(test_lex_array_access);
+  RUN_TEST(test_lex_array_constructor);
   RUN_TEST(test_lex_all_tokens);
 }
 

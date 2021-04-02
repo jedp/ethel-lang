@@ -27,6 +27,8 @@ enum ast_type_enum {
   AST_INT,
   AST_FLOAT,
   AST_STRING,
+  AST_BYTEARRAY_DECL,
+  AST_BYTEARRAY,
   AST_CHAR,
   AST_BOOLEAN,
   AST_CAST,
@@ -35,6 +37,7 @@ enum ast_type_enum {
   AST_DELETE,
   AST_NEGATE,
   AST_IDENT,
+  AST_SEQ_ELEM,
   AST_FIELD,
   AST_METHOD,
   AST_TYPE_NAME,
@@ -68,6 +71,8 @@ static const char *ast_node_names[] = {
   "INT",
   "FLOAT",
   "STRING",
+  "BYTE-ARRAY-DECLARATION",
+  "BYTE-ARRAY",
   "CHAR",
   "BOOLEAN",
   "CAST",
@@ -76,6 +81,7 @@ static const char *ast_node_names[] = {
   "DELETE",
   "NEGATE",
   "IDENT",
+  "SEQUENCE-ELEM",
   "FIELD",
   "METHOD",
   "TYPE-NAME",
@@ -161,6 +167,15 @@ typedef struct AstForLoop {
   ast_expr_t *pred;
 } ast_for_loop_t;
 
+typedef struct AstArrayDecl {
+  ast_expr_t *size;
+} ast_array_decl_t;
+
+typedef struct SeqElem {
+  ast_expr_t *ident;
+  ast_expr_t *index;
+} ast_seq_elem_t;
+
 typedef struct AstField {
   char* name;
 } ast_field_t;
@@ -192,6 +207,8 @@ typedef struct __attribute__((__packed__)) AstExpr {
     ast_if_then_else_args_t *if_then_else_args;
     ast_while_loop_t *while_loop;
     ast_for_loop_t *for_loop;
+    ast_array_decl_t *array_decl;
+    ast_seq_elem_t *seq_elem;
     ast_method_t *method;
     ast_apply_t *application;
     int intval;
@@ -211,9 +228,11 @@ ast_expr_t *ast_float(float value);
 ast_expr_t *ast_int(int value);
 ast_expr_t *ast_char(char c);
 ast_expr_t *ast_string(char* s);
+ast_expr_t *ast_array_decl(ast_expr_t *size);
 ast_expr_t *ast_boolean(boolean t);
 ast_expr_t *ast_type(ast_type_t type);
 ast_expr_t *ast_ident(char* name);
+ast_expr_t *ast_seq_elem(ast_expr_t *ident, ast_expr_t *index);
 ast_expr_t *ast_field(char* name);
 ast_expr_t *ast_method(char* name, ast_expr_list_t *args);
 ast_expr_t *ast_member_access(ast_expr_t *receiver, char* member_name, ast_expr_list_t *args);

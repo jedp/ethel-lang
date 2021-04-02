@@ -58,6 +58,31 @@ Lists
 { 5, 6, 7, 8, 9 }
 ```
 
+Byte Arrays and Strings
+
+```
+> val a = arr(4)
+ByteArray(4)
+> a.length()
+4
+> a[2]
+0x00
+> a[2] = 'c'
+'c'
+> a[2]
+'c'
+> del a
+<Nil>
+> val a = arr(4) { 'o', 'h', 'a', 'i' }
+ByteArray(4)
+> print(a)
+"ohai"
+> a[1] = 'm'
+'m'
+> print(a)
+"omai"
+```
+
 ### Details
 
 - Lexer

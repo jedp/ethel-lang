@@ -6,6 +6,12 @@
 #include "../inc/str.h"
 #include "../inc/parser.h"
 
+#define USING_PROGRAM(text) \
+    char *program = text; \
+    ast_expr_t *ast = mem_alloc(sizeof(ast_expr_t)); \
+    parse_result_t *parse_result = mem_alloc(sizeof(parse_result_t)); \
+    parse_program(program, ast, parse_result);
+  
 void test_parse_empty(void) {
   char *program = "  ";
   ast_expr_t *ast = mem_alloc(sizeof(ast_expr_t));
@@ -155,7 +161,7 @@ void test_parse_boolean_true(void) {
   TEST_ASSERT_EQUAL(AST_ASSIGN, ast->type);
   TEST_ASSERT_EQUAL(AST_IDENT, ((ast_expr_t*) ast->assignment->ident)->type);
   TEST_ASSERT_EQUAL(AST_BOOLEAN, ((ast_expr_t*) ast->assignment->value)->type);
-  TEST_ASSERT_TRUE(((ast_expr_t*) ast->assignment->value)->intval);
+  TEST_ASSERT_TRUE(((ast_expr_t*) ast->assignment->value)->boolval);
   mem_free(ast);
 }
 
@@ -169,8 +175,58 @@ void test_parse_boolean_false(void) {
   TEST_ASSERT_EQUAL(AST_ASSIGN, ast->type);
   TEST_ASSERT_EQUAL(AST_IDENT, ((ast_expr_t*) ast->assignment->ident)->type);
   TEST_ASSERT_EQUAL(AST_BOOLEAN, ((ast_expr_t*) ast->assignment->value)->type);
-  TEST_ASSERT_FALSE(((ast_expr_t*) ast->assignment->value)->intval);
+  TEST_ASSERT_FALSE(((ast_expr_t*) ast->assignment->value)->boolval);
   mem_free(ast);
+}
+
+void test_parse_array_decl(void) {
+  char *program = "val a = arr(12)";
+  ast_expr_t *ast = mem_alloc(sizeof(ast_expr_t));
+  parse_result_t *parse_result = mem_alloc(sizeof(parse_result_t));
+  parse_program(program, ast, parse_result);
+
+  TEST_ASSERT_EQUAL(NO_ERROR, parse_result->err);
+  TEST_ASSERT_EQUAL(AST_ASSIGN, ast->type);
+  TEST_ASSERT_EQUAL(AST_IDENT, ((ast_expr_t*) ast->assignment->ident)->type);
+  TEST_ASSERT_EQUAL(AST_BYTEARRAY_DECL, ((ast_expr_t*) ast->assignment->value)->type);
+  TEST_ASSERT_EQUAL(AST_INT, ((ast_expr_t*) ast->assignment->value->array_decl->size)->type);
+  mem_free(ast);
+}
+
+void test_parse_seq_elem(void) {
+  char *program = "a [ if (foo) then 0 else 1 ]";
+  ast_expr_t *ast = mem_alloc(sizeof(ast_expr_t));
+  parse_result_t *parse_result = mem_alloc(sizeof(parse_result_t));
+  parse_program(program, ast, parse_result);
+
+  TEST_ASSERT_EQUAL(NO_ERROR, parse_result->err);
+  TEST_ASSERT_EQUAL(AST_SEQ_ELEM, ast->type);
+  TEST_ASSERT_EQUAL(AST_IDENT, ((ast_expr_t*) ast->seq_elem->ident)->type);
+  TEST_ASSERT_EQUAL(AST_IF_THEN_ELSE, ((ast_expr_t*) ast->seq_elem->index)->type);
+}
+
+void test_parse_seq_elem_access(void) {
+  char *program = "val e = a[ 5 * 5 ]";
+  ast_expr_t *ast = mem_alloc(sizeof(ast_expr_t));
+  parse_result_t *parse_result = mem_alloc(sizeof(parse_result_t));
+  parse_program(program, ast, parse_result);
+
+  TEST_ASSERT_EQUAL(NO_ERROR, parse_result->err);
+  TEST_ASSERT_EQUAL(AST_ASSIGN, ast->type);
+  TEST_ASSERT_EQUAL(AST_IDENT, ((ast_expr_t*) ast->assignment->ident)->type);
+  TEST_ASSERT_EQUAL(AST_SEQ_ELEM, ((ast_expr_t*) ast->assignment->value)->type);
+}
+
+void test_parse_seq_elem_assign(void) {
+  char *program = "a[ 5 * 5 ] = 123";
+  ast_expr_t *ast = mem_alloc(sizeof(ast_expr_t));
+  parse_result_t *parse_result = mem_alloc(sizeof(parse_result_t));
+  parse_program(program, ast, parse_result);
+
+  TEST_ASSERT_EQUAL(NO_ERROR, parse_result->err);
+  TEST_ASSERT_EQUAL(AST_REASSIGN, ast->type);
+  TEST_ASSERT_EQUAL(AST_SEQ_ELEM, ((ast_expr_t*) ast->assignment->ident)->type);
+  TEST_ASSERT_EQUAL(AST_INT, ((ast_expr_t*) ast->assignment->value)->type);
 }
 
 void test_parser(void) {
@@ -186,5 +242,9 @@ void test_parser(void) {
   RUN_TEST(test_parse_string);
   RUN_TEST(test_parse_boolean_true);
   RUN_TEST(test_parse_boolean_false);
+  RUN_TEST(test_parse_array_decl);
+  RUN_TEST(test_parse_seq_elem);
+  RUN_TEST(test_parse_seq_elem_access);
+  RUN_TEST(test_parse_seq_elem_assign);
 }
 

@@ -20,6 +20,7 @@ enum error_enum {
 
   TYPE_UNSUPPORTED,
   TYPE_INT_REQUIRED,
+  TYPE_SEQUENCE_REQUIRED,
   TYPE_POSITIVE_INT_REQUIRED,
 
   EVAL_UNHANDLED_OBJECT,
@@ -32,6 +33,7 @@ enum error_enum {
   VALUE_TOO_LARGE_FOR_CHAR,
   INPUT_STREAM_ERROR,
   INPUT_TOO_LONG,
+  INDEX_OUT_OF_RANGE,
 
   NO_SUCH_FIELD,
   NO_SUCH_METHOD,
@@ -53,6 +55,7 @@ static const char* err_names[ERR_MAX] = {
   "Symbol undefined",
   "Type unsupported",
   "Integer argument required",
+  "Sequence type required for operation",
   "Positive integer argument required",
   "Evaluation error",
   "Types incompatible for operation",
@@ -63,6 +66,7 @@ static const char* err_names[ERR_MAX] = {
   "Char value too large",
   "Input stream error",
   "Input too long",
+  "Index out of range",
   "No such field",
   "No such method",
   "Syntax error",

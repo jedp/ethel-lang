@@ -1,12 +1,13 @@
 
 COMPOBJS = src/mem.o \
-					 src/str.o \
+					 src/obj.o \
 					 src/num.o \
+					 src/arr.o \
+					 src/str.o \
 					 src/list.o \
 					 src/lexer.o \
 					 src/parser.o \
 					 src/env.o \
-					 src/obj.o \
 					 src/ast.o \
 					 src/eval.o
 

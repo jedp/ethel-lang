@@ -117,7 +117,7 @@ static const char* obj_type_names[TYPE_MAX] = {
   "Int",
   "Float",
   "Char",
-  "Bytearray",
+  "Byte Array",
   "Str",
   "Bool",
   "Range",

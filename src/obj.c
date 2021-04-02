@@ -51,6 +51,8 @@ obj_t *bytearray_obj(dim_t size, uint8_t *data) {
   a->size = size;
   if (data) {
     mem_cp(a->data, data, size);
+  } else {
+    mem_set(a->data, '\0', size);
   }
   obj->bytearray = a;
   return obj;

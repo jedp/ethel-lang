@@ -1,6 +1,7 @@
 #include <stdio.h>
 #include "../inc/def.h"
 #include "../inc/mem.h"
+#include "../inc/arr.h"
 #include "../inc/str.h"
 #include "../inc/ast.h"
 #include "../inc/lexer.h"
@@ -236,6 +237,13 @@ ast_expr_t *parse_expr(lexer_t *lexer) {
       if (pred->type == AST_EMPTY) goto error;
       return ast_for_loop(index, range, pred);
     }
+    case TAG_ARR_DECL: {
+      advance(lexer);
+      if (!eat(lexer, TAG_LPAREN)) goto error;
+      ast_expr_t *size = parse_expr(lexer);
+      if (!eat(lexer, TAG_RPAREN)) goto error;
+      return ast_array_decl(size);
+    }
     case TAG_LIST: {
       advance(lexer);
       if (!eat(lexer, TAG_OF)) goto error;
@@ -359,6 +367,12 @@ ast_expr_t *parse_atom(lexer_t *lexer) {
       if (!eat(lexer, TAG_RPAREN)) goto error;
       return e;
     }
+    case TAG_LBRACKET: {
+      advance(lexer);
+      ast_expr_t *e = parse_expr(lexer);
+      if (!eat(lexer, TAG_RBRACKET)) goto error;
+      return e;
+    }
     case TAG_INVARIABLE: {
       advance(lexer);
       ast_expr_t *id = ast_ident(lexer->token.string);
@@ -378,6 +392,18 @@ ast_expr_t *parse_atom(lexer_t *lexer) {
     case TAG_IDENT: {
       ast_expr_t *id = ast_ident(lexer->token.string);
       advance(lexer);
+      // Identifier in sequence access?
+      if (lexer->token.tag == TAG_LBRACKET) {
+        ast_expr_t *index = parse_expr(lexer);
+        ast_expr_t *access = ast_seq_elem(id, index);
+        // Sequence element in assignment?
+        if (lexer->token.tag == TAG_ASSIGN) {
+          advance(lexer);
+          return ast_reassign(access, parse_expr(lexer));
+        }
+        return access;
+      }
+      // Identifier in assignment?
       if (lexer->token.tag == TAG_ASSIGN) {
         advance(lexer);
         return ast_reassign(id, parse_expr(lexer));

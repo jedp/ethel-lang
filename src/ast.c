@@ -12,6 +12,7 @@ ast_expr_t *ast_node(ast_type_t type) {
     case AST_FLOAT:   node->floatval = 0.0;  break;
     case AST_CHAR:    node->charval = 0;     break;
     case AST_BOOLEAN: node->boolval = 0;     break;
+    case AST_BYTEARRAY:
     case AST_STRING: {
                       node->bytearray = c_str_to_bytearray("");
                       break;
@@ -103,6 +104,13 @@ ast_expr_t *ast_char(char c) {
   return node;
 }
 
+ast_expr_t *ast_array_decl(ast_expr_t *size) {
+  ast_expr_t *node = ast_node(AST_BYTEARRAY_DECL);
+  node->array_decl = mem_alloc(sizeof(ast_array_decl_t));
+  node->array_decl->size = size;
+  return node;
+}
+
 ast_expr_t *ast_string(char* s) {
   ast_expr_t *node = ast_node(AST_STRING);
   node->bytearray = c_str_to_bytearray(s);
@@ -152,6 +160,14 @@ ast_expr_t *ast_range(ast_expr_t *from, ast_expr_t *to) {
   node->range = mem_alloc(sizeof(ast_range_args_t));
   node->range->from = from;
   node->range->to = to;
+  return node;
+}
+
+ast_expr_t *ast_seq_elem(ast_expr_t *ident, ast_expr_t *index) {
+  ast_expr_t *node = ast_node(AST_SEQ_ELEM);
+  node->seq_elem = mem_alloc(sizeof(ast_seq_elem_t));
+  node->seq_elem->ident = ident;
+  node->seq_elem->index = index;
   return node;
 }
 
