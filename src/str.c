@@ -1,4 +1,5 @@
 #include <stdio.h>
+#include "../inc/mem.h"
 #include "../inc/obj.h"
 #include "../inc/str.h"
 
@@ -44,8 +45,29 @@ char* c_str_ncat(char *a, const char *b, dim_t n) {
   return s;
 }
 
+bytearray_t *bytearray_alloc(dim_t size) {
+  bytearray_t *a = mem_alloc(size + 4);
+  a->size = size;
+  mem_set(a->data, '\0', size);
+  return a;
+}
+
+char* bytearray_to_c_str(bytearray_t *a) {
+  char* s = mem_alloc(a->size + 1);
+  mem_cp(s, a->data, a->size);
+  s[a->size] = '\0';
+  return s;
+}
+
+bytearray_t *c_str_to_bytearray(const char* s) {
+  dim_t size = c_str_len(s);
+  bytearray_t *a = bytearray_alloc(size);
+  mem_cp(a->data, (uint8_t*) s, size);
+  return a;
+}
+
 obj_t *str_len(obj_t *str_obj, obj_method_args_t *args) {
-  return int_obj((int) c_str_len(str_obj->stringval));
+  return int_obj(str_obj->bytearray->size);
 }
 
 obj_t *str_eq(obj_t *str_obj, obj_method_args_t *args) {

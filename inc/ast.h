@@ -177,9 +177,9 @@ typedef struct AstApply {
   ast_expr_list_t *args;
 } ast_apply_t;
 
-typedef struct AstExpr {
-  uint8_t type;
-  uint8_t flags;
+typedef struct __attribute__((__packed__)) AstExpr {
+  uint16_t type;
+  uint16_t flags;
   union {
     ast_assign_t *assignment;
     ast_expr_list_t *block_exprs;
@@ -197,8 +197,8 @@ typedef struct AstExpr {
     int intval;
     int boolval;
     float floatval;
-    char* stringval;
     char charval;
+    bytearray_t *bytearray;
   };
 } ast_expr_t;
 

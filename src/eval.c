@@ -114,23 +114,25 @@ void strip_trailing_ws(char* s) {
 void int_to_string(obj_t *obj) {
   int i = obj->intval;
   // Longest thing we can print is -2147483648, which is 11 characters + 1 for the null.
-  obj->stringval = mem_alloc(12);
-  snprintf(obj->stringval, 12, "%d", i);
+  char* s = mem_alloc(12);
+  snprintf(s, 12, "%d", i);
   obj->type = TYPE_STRING;
+  obj->bytearray = c_str_to_bytearray(s);
 }
 
 void float_to_string(obj_t *obj) {
   float f = obj->floatval;
   int len = snprintf(NULL, 0, "%f", f);
-  obj->stringval = mem_alloc(len + 1);
-  snprintf(obj->stringval, len + 1, "%f", f);
+  char* s = mem_alloc(len + 1);
+  snprintf(s, len + 1, "%f", f);
   obj->type = TYPE_STRING;
+  obj->bytearray = c_str_to_bytearray(s);
 }
 
 error_t string_to_int(obj_t *obj) {
   char *end = NULL;
-  char *input = mem_alloc(c_str_len(obj->stringval) + 1);
-  c_str_cp(input, obj->stringval);
+  char *input = mem_alloc(obj->bytearray->size + 1);
+  c_str_cp(input, bytearray_to_c_str(obj->bytearray));
   strip_trailing_ws(input);
 
   long l = strtol(input, &end, 10);
@@ -150,8 +152,8 @@ error_t string_to_int(obj_t *obj) {
 
 error_t string_to_float(obj_t *obj) {
   char *end = NULL;
-  char *input = mem_alloc(c_str_len(obj->stringval) + 1);
-  c_str_cp(input, obj->stringval);
+  char *input = mem_alloc(obj->bytearray->size + 1);
+  c_str_cp(input, bytearray_to_c_str(obj->bytearray));
   strip_trailing_ws(input);
 
   float f = strtof(input, &end);
@@ -171,7 +173,7 @@ void eval_string_expr(ast_expr_t *expr, eval_result_t *result) {
     result->err = EVAL_TYPE_ERROR;
     return;
   }
-  obj_t* obj = string_obj(expr->stringval);
+  obj_t* obj = string_obj(expr->bytearray);
   result->obj = obj;
 }
 
@@ -244,16 +246,16 @@ void cast(obj_t *obj, obj_t *type_obj, eval_result_t *result) {
           result->err = string_to_float(obj);
           goto done;
         case TYPE_CHAR:
-          if (c_str_len(obj->stringval) > 1) {
+          if (obj->bytearray->size > 1) {
             result->err = EVAL_TYPE_ERROR;
             goto done;
           }
-          obj->charval = obj->stringval[0];
+          obj->charval = obj->bytearray->data[0];
           goto done;
         case TYPE_STRING:
           goto done;
         case TYPE_BOOLEAN:
-          obj->boolval = c_str_len(obj->stringval) > 0 ? 1 : 0;
+          obj->boolval = obj->bytearray->size > 0 ? 1 : 0;
           goto done;
         default:
           result->err = EVAL_TYPE_ERROR;
@@ -272,8 +274,8 @@ void cast(obj_t *obj, obj_t *type_obj, eval_result_t *result) {
           goto done;
         case TYPE_STRING: {
           char c = obj->charval;
-          obj->stringval = mem_alloc(2);
-          snprintf(obj->stringval, 2, "%c", c);
+          obj->bytearray = bytearray_alloc(1);
+          obj->bytearray->data[0] = c;
           goto done;
         }
         case TYPE_BOOLEAN:
@@ -296,7 +298,7 @@ void cast(obj_t *obj, obj_t *type_obj, eval_result_t *result) {
           obj->charval = obj->intval ? 't' : 'f';
           goto done;
         case TYPE_STRING:
-          obj->stringval = obj->intval ? "true" : "false";
+          obj->bytearray = c_str_to_bytearray(obj->intval ? "true" : "false");
           goto done;
         case TYPE_BOOLEAN:
           goto done;
@@ -457,7 +459,7 @@ int print_args(ast_expr_list_t *args, eval_result_t *result, env_t *env) {
         case TYPE_INT: printf("%d ", r->obj->intval); break;
         case TYPE_FLOAT: printf("%f ", (double) r->obj->floatval); break;
         case TYPE_CHAR: printf("%c ", r->obj->charval); break;
-        case TYPE_STRING: printf("%s ", r->obj->stringval); break;
+        case TYPE_STRING: printf("%s ", bytearray_to_c_str(r->obj->bytearray)); break;
         case TYPE_BOOLEAN: printf("%s ", r->obj->boolval ? "true" : "false"); break;
         case TYPE_NIL: printf("Nil "); break;
         default: printf("?? "); break;
@@ -484,7 +486,7 @@ void readln_input(eval_result_t *result) {
   int end = (int) c_str_len(s) - 1;
   while (end >= 0 && s[end] == '\n') s[end--] = '\0';
 
-  result->obj = string_obj(s);
+  result->obj = string_obj(c_str_to_bytearray(s));
   mem_free(s);
 }
 
@@ -557,7 +559,7 @@ void eval_while_loop(ast_expr_t *expr, env_t *env, eval_result_t *result) {
 }
 
 void eval_for_loop(ast_expr_t *expr, env_t *env, eval_result_t *result) {
-  char* index_name = ((ast_expr_t*) expr->for_loop->index)->stringval;
+  char* index_name = bytearray_to_c_str(((ast_expr_t*) expr->for_loop->index)->bytearray);
   eval_result_t *r = mem_alloc(sizeof(eval_result_t));
   r->obj = undef_obj();
 
@@ -777,7 +779,7 @@ eval_result_t *eval_expr(ast_expr_t *expr, env_t *env) {
             break;
         case AST_IDENT: {
             // Look up the identifier by name in the environment.
-            const char* name = expr->stringval;
+            const char* name = bytearray_to_c_str(expr->bytearray);
             obj_t *obj = get_env(env, name);
             if (obj->type == TYPE_UNDEF) {
               result->err = ENV_SYMBOL_UNDEFINED;
@@ -817,7 +819,7 @@ eval_result_t *eval_expr(ast_expr_t *expr, env_t *env) {
             // Save the expression associated with the identifier.
             // The mutability flags are on the associated expression e2,
             // and these need to be copied over to the new object.
-            const char* name = ((ast_expr_t*)expr->assignment->ident)->stringval;
+            const char* name = bytearray_to_c_str(((ast_expr_t*)expr->assignment->ident)->bytearray);
             // Eval the object now and save the result as a primitive value.
             eval_result_t *r = eval_expr(expr->assignment->value, env);
             if ((result->err = r->err) != NO_ERROR) goto error;
@@ -831,7 +833,7 @@ eval_result_t *eval_expr(ast_expr_t *expr, env_t *env) {
             break;
         }
         case AST_REASSIGN: {
-            const char* name = ((ast_expr_t*)expr->assignment->ident)->stringval;
+            const char* name = bytearray_to_c_str(((ast_expr_t*)expr->assignment->ident)->bytearray);
             obj_t *existing = get_env(env, name);
             if (existing->type == TYPE_UNDEF) {
               result->err = ENV_SYMBOL_UNDEFINED;
@@ -859,7 +861,7 @@ eval_result_t *eval_expr(ast_expr_t *expr, env_t *env) {
           break;
         }
         case AST_DELETE: {
-          error_t error = del_env(env, expr->stringval);
+          error_t error = del_env(env, bytearray_to_c_str(expr->bytearray));
           if (error != NO_ERROR) {
             result->err = error;
             goto error;

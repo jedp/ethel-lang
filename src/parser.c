@@ -248,9 +248,9 @@ ast_expr_t *parse_expr(lexer_t *lexer) {
           mem_free(es);
           goto error;
         }
-        return ast_list(type_name->stringval, es);
+        return ast_list(bytearray_to_c_str(type_name->bytearray), es);
       }
-      return ast_list(type_name->stringval, NULL);
+      return ast_list(bytearray_to_c_str(type_name->bytearray), NULL);
     }
     case TAG_INPUT: {
       ast_reserved_callable_type_t callable_type = ast_callable_type_for_tag(lexer->token.tag);
@@ -290,13 +290,6 @@ error:
   return ast_empty();
 }
 
-/*
- * F -> int
- * F -> float
- * F -> ident
- * F -> ( E )
- * F -> callable ( expr-list )
- */
 ast_expr_t *parse_atom(lexer_t *lexer) {
 
   switch (lexer->token.tag) {
@@ -490,7 +483,7 @@ void parse_program(char *input, ast_expr_t *ast, parse_result_t *parse_result) {
   ast->boolval = p->boolval;
   ast->intval = p->intval;
   ast->floatval = p->floatval;
-  ast->stringval = p->stringval;
   ast->charval = p->charval;
+  ast->bytearray = p->bytearray;
 }
 

@@ -11,8 +11,11 @@ ast_expr_t *ast_node(ast_type_t type) {
     case AST_INT:     node->intval = 0;      break;
     case AST_FLOAT:   node->floatval = 0.0;  break;
     case AST_CHAR:    node->charval = 0;     break;
-    case AST_STRING:  node->stringval = "";  break;
     case AST_BOOLEAN: node->boolval = 0;     break;
+    case AST_STRING: {
+                      node->bytearray = c_str_to_bytearray("");
+                      break;
+                     }
     // Other nodes are not initialized.
     default: break;
   }
@@ -102,9 +105,7 @@ ast_expr_t *ast_char(char c) {
 
 ast_expr_t *ast_string(char* s) {
   ast_expr_t *node = ast_node(AST_STRING);
-  char* stringval = mem_alloc(c_str_len(s) + 1);
-  c_str_cp(stringval, s);
-  node->stringval = stringval;
+  node->bytearray = c_str_to_bytearray(s);
   return node;
 }
 
@@ -121,9 +122,7 @@ ast_expr_t *ast_type(ast_type_t type) {
 
 ast_expr_t *ast_ident(char* name) {
   ast_expr_t *node = ast_node(AST_IDENT);
-  char* node_name = mem_alloc(c_str_len(name) + 1);
-  c_str_cp(node_name, name);
-  node->stringval = node_name;
+  node->bytearray = c_str_to_bytearray(name);
   return node;
 }
 
@@ -144,9 +143,7 @@ ast_expr_t *ast_member_access(ast_expr_t *expr, char* member_name, ast_expr_list
 
 ast_expr_t *ast_type_name(char* name) {
   ast_expr_t *node = ast_node(AST_TYPE_NAME);
-  char* node_name = mem_alloc(c_str_len(name) + 1);
-  c_str_cp(node_name, name);
-  node->stringval = node_name;
+  node->bytearray = c_str_to_bytearray(name);
   return node;
 }
 
@@ -194,7 +191,7 @@ ast_expr_t *ast_reserved_callable(ast_reserved_callable_type_t type, ast_expr_li
 
 ast_expr_t *ast_assign_val(ast_expr_t *ident, ast_expr_t *value) {
   ast_expr_t *node = ast_node(AST_ASSIGN);
-  node->stringval = ident->stringval;
+  node->bytearray = ident->bytearray;
   node->flags = F_NONE;
   node->assignment = mem_alloc(sizeof(ast_assign_t));
   node->assignment->ident = ident;
@@ -204,7 +201,7 @@ ast_expr_t *ast_assign_val(ast_expr_t *ident, ast_expr_t *value) {
 
 ast_expr_t *ast_assign_var(ast_expr_t *ident, ast_expr_t *value) {
   ast_expr_t *node = ast_node(AST_ASSIGN);
-  node->stringval = ident->stringval;
+  node->bytearray = ident->bytearray;
   node->flags = F_VAR;
   node->assignment = mem_alloc(sizeof(ast_assign_t));
   node->assignment->ident = ident;
@@ -214,7 +211,7 @@ ast_expr_t *ast_assign_var(ast_expr_t *ident, ast_expr_t *value) {
 
 ast_expr_t *ast_reassign(ast_expr_t *ident, ast_expr_t *value) {
   ast_expr_t *node = ast_node(AST_REASSIGN);
-  node->stringval = ident->stringval;
+  node->bytearray = ident->bytearray;
   node->assignment = mem_alloc(sizeof(ast_assign_t));
   node->assignment->ident = ident;
   node->assignment->value = value;
@@ -223,7 +220,7 @@ ast_expr_t *ast_reassign(ast_expr_t *ident, ast_expr_t *value) {
 
 ast_expr_t *ast_delete(ast_expr_t *ident) {
   ast_expr_t *node = ast_node(AST_DELETE);
-  node->stringval = ident->stringval;
+  node->bytearray = ident->bytearray;
   return node;
 }
 

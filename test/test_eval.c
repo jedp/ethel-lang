@@ -1,6 +1,7 @@
 #include <stdio.h>
 #include "unity/unity.h"
 #include "test_eval.h"
+#include "../inc/str.h"
 #include "../inc/env.h"
 #include "../inc/eval.h"
 
@@ -159,7 +160,7 @@ void test_eval_cast_int(void) {
 
   obj = eval_program("-99 as string")->obj;
   TEST_ASSERT_EQUAL(TYPE_STRING, obj->type);
-  TEST_ASSERT_EQUAL_STRING("-99", obj->stringval);
+  TEST_ASSERT_EQUAL_STRING("-99", bytearray_to_c_str(obj->bytearray));
 
   obj = eval_program("99 as char")->obj;
   TEST_ASSERT_EQUAL(TYPE_CHAR, obj->type);
@@ -183,7 +184,7 @@ void test_eval_cast_float(void) {
 
   obj = eval_program("-42.02 as string")->obj;
   TEST_ASSERT_EQUAL(TYPE_STRING, obj->type);
-  TEST_ASSERT_EQUAL_STRING("-42.020000", obj->stringval);
+  TEST_ASSERT_EQUAL_STRING("-42.020000", bytearray_to_c_str(obj->bytearray));
 
   obj = eval_program("-42.99 as boolean")->obj;
   TEST_ASSERT_EQUAL(TYPE_BOOLEAN, obj->type);
@@ -203,7 +204,7 @@ void test_eval_cast_string(void) {
 
   obj = eval_program("\"-42.1\" as string")->obj;
   TEST_ASSERT_EQUAL(TYPE_STRING, obj->type);
-  TEST_ASSERT_EQUAL_STRING("-42.1", obj->stringval);
+  TEST_ASSERT_EQUAL_STRING("-42.1", bytearray_to_c_str(obj->bytearray));
 
   obj = eval_program("\"-42.99\" as boolean")->obj;
   TEST_ASSERT_EQUAL(TYPE_BOOLEAN, obj->type);
@@ -223,7 +224,7 @@ void test_eval_cast_char(void) {
 
   obj = eval_program("'c' as string")->obj;
   TEST_ASSERT_EQUAL(TYPE_STRING, obj->type);
-  TEST_ASSERT_EQUAL_STRING("c", obj->stringval);
+  TEST_ASSERT_EQUAL_STRING("c", bytearray_to_c_str(obj->bytearray));
 
   obj = eval_program("'c' as boolean")->obj;
   TEST_ASSERT_EQUAL(TYPE_BOOLEAN, obj->type);
@@ -249,10 +250,10 @@ void test_eval_cast_boolean(void) {
 
   obj = eval_program("true as string")->obj;
   TEST_ASSERT_EQUAL(TYPE_STRING, obj->type);
-  TEST_ASSERT_EQUAL_STRING("true", obj->stringval);
+  TEST_ASSERT_EQUAL_STRING("true", bytearray_to_c_str(obj->bytearray));
   obj = eval_program("false as string")->obj;
   TEST_ASSERT_EQUAL(TYPE_STRING, obj->type);
-  TEST_ASSERT_EQUAL_STRING("false", obj->stringval);
+  TEST_ASSERT_EQUAL_STRING("false", bytearray_to_c_str(obj->bytearray));
 
   obj = eval_program("true as char")->obj;
   TEST_ASSERT_EQUAL(TYPE_CHAR, obj->type);

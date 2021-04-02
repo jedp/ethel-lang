@@ -3,6 +3,7 @@
 #include "test_parser.h"
 #include "../inc/err.h"
 #include "../inc/mem.h"
+#include "../inc/str.h"
 #include "../inc/parser.h"
 
 void test_parse_empty(void) {
@@ -139,7 +140,8 @@ void test_parse_string(void) {
   TEST_ASSERT_EQUAL(AST_ASSIGN, ast->type);
   TEST_ASSERT_EQUAL(AST_IDENT, ((ast_expr_t*) ast->assignment->ident)->type);
   TEST_ASSERT_EQUAL(AST_STRING, ((ast_expr_t*) ast->assignment->value)->type);
-  TEST_ASSERT_EQUAL_STRING("Ethel", ((ast_expr_t*) ast->assignment->value)->stringval);
+  TEST_ASSERT_EQUAL_STRING("Ethel",
+      bytearray_to_c_str(((ast_expr_t*) ast->assignment->value)->bytearray));
   mem_free(ast);
 }
 

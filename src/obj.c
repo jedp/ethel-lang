@@ -68,10 +68,12 @@ obj_t *float_obj(float f) {
   return obj;
 }
 
-obj_t *string_obj(const char* s) {
+obj_t *string_obj(bytearray_t *src) {
   obj_t *obj = obj_of(TYPE_STRING);
-  obj->stringval = mem_alloc(c_str_len(s) + 1);
-  c_str_cp(obj->stringval, s);
+  bytearray_t *a = mem_alloc(src->size + 4);
+  a->size = src->size;
+  mem_cp(a->data, src->data, src->size);
+  obj->bytearray = a;
   return obj;
 }
 
@@ -112,7 +114,7 @@ boolean truthy(obj_t *obj) {
     case TYPE_NIL: return False;
     case TYPE_INT: return obj->intval != 0;
     case TYPE_FLOAT: return obj->floatval != 0;
-    case TYPE_STRING: return c_str_len(obj->stringval) > 0;
+    case TYPE_STRING: return obj->bytearray->size > 0;
     case TYPE_CHAR: return obj->charval != 0x0;
     case TYPE_BOOLEAN: return obj->boolval;
     default:

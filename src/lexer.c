@@ -1,4 +1,3 @@
-#include <stdio.h>
 #include <ctype.h>
 #include "../inc/mem.h"
 #include "../inc/str.h"

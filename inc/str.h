@@ -18,6 +18,12 @@ void c_str_cp(char* dst, const char* src);
  */
 char* c_str_ncat(char *a, const char *b, dim_t n);
 
+bytearray_t *bytearray_alloc(dim_t size);
+
+char* bytearray_to_c_str(bytearray_t *a);
+
+bytearray_t *c_str_to_bytearray(const char* s);
+
 obj_t *str_len(obj_t *str_obj, obj_method_args_t *args);
 obj_t *str_eq(obj_t *str_obj, obj_method_args_t *args);
 
