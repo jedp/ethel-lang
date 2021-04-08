@@ -17,8 +17,8 @@ Guess my age! 5
 5  (Int)
 > val age = 42
 42  (Int)
-> while (guess != age) {
-    if (guess < age) then print("Too low") else print("Too high")
+> while guess != age {
+    if guess < age then print("Too low") else print("Too high")
     guess = input("Guess again") as int
     }
 Too low
