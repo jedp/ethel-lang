@@ -12,6 +12,7 @@ enum obj_type_enum {
   TYPE_UNDEF,
   TYPE_NIL,
   TYPE_ERROR,
+  TYPE_FN,
   TYPE_INT,
   TYPE_FLOAT,
   TYPE_CHAR,
@@ -22,6 +23,24 @@ enum obj_type_enum {
   TYPE_LIST,
   TYPE_IDENT,
   TYPE_MAX,
+};
+
+static const char* obj_type_names[TYPE_MAX] = {
+  "Unknown",
+  "Nothing",
+  "Undefined",
+  "Nil",
+  "Error",
+  "Function",
+  "Int",
+  "Float",
+  "Char",
+  "Byte Array",
+  "Str",
+  "Bool",
+  "Range",
+  "List",
+  "Identifier"
 };
 
 typedef struct Obj obj_t;
@@ -108,23 +127,6 @@ static const static_method_name_t static_method_names[] = {
   { .ident = METHOD_REMOVE_LAST,   .name = "removeLast" },
   { .ident = METHOD_REMOVE_AT,     .name = "removeAt" },
   { .ident = METHOD_DUMP,          .name = "dump" },
-};
-
-static const char* obj_type_names[TYPE_MAX] = {
-  "Unknown",
-  "Nothing",
-  "Undefined",
-  "Nil",
-  "Error",
-  "Int",
-  "Float",
-  "Char",
-  "Byte Array",
-  "Str",
-  "Bool",
-  "Range",
-  "List",
-  "Identifier"
 };
 
 typedef struct StaticMethod {

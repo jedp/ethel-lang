@@ -111,6 +111,33 @@ ast_expr_list_t *empty_expr_list() {
   return node;
 }
 
+ast_fn_arg_decl_t *parse_fn_arg_decl(lexer_t *lexer) {
+  ast_fn_arg_decl_t *node = mem_alloc(sizeof(ast_fn_arg_decl_t));
+  ast_fn_arg_decl_t *root = node;
+  node->name = NULL;
+  node->next = NULL;
+
+  if (lexer->token.tag != TAG_IDENT) return NULL;
+
+  node->name = mem_alloc(sizeof(lexer->token.string) + 1);
+  c_str_cp(node->name, lexer->token.string);
+  advance(lexer);
+
+  while (lexer->token.tag == TAG_COMMA) {
+    advance(lexer);
+
+    node->next = mem_alloc(sizeof(ast_fn_arg_decl_t));
+    node = node->next;
+
+    node->name = mem_alloc(sizeof(lexer->token.string) + 1);
+    c_str_cp(node->name, lexer->token.string);
+    advance(lexer);
+  }
+
+  node->next = NULL;
+  return root;
+}
+
 ast_expr_list_t *parse_expr_list(lexer_t *lexer) {
   ast_expr_list_t *node = empty_expr_list();
   ast_expr_list_t *root = node;
@@ -443,6 +470,24 @@ ast_expr_t *parse_atom(lexer_t *lexer) {
         return ast_reassign(id, parse_expr(lexer));
       }
       return id;
+    }
+    case TAG_FN: {
+      advance(lexer);
+      if (!eat(lexer, TAG_LPAREN)) goto error;
+      ast_fn_arg_decl_t *args = mem_alloc(sizeof(ast_fn_arg_decl_t));
+      args = NULL;
+      if (lexer->token.tag != TAG_RPAREN) {
+        args = parse_fn_arg_decl(lexer);
+      }
+      if (!eat(lexer, TAG_RPAREN)) { mem_free(args); goto error; }
+      if (!eat(lexer, TAG_BEGIN)) goto error;
+      if (lexer->token.tag == TAG_END) {
+        advance(lexer);
+        return ast_lambda(args, NULL);
+      }
+      ast_expr_list_t *es = parse_block(lexer);
+      if (!eat(lexer, TAG_END)) { mem_free(args); mem_free(es); goto error; }
+      return ast_lambda(args, es);
     }
     case TAG_METHOD_NAME: {
       char* name = mem_alloc(c_str_len(lexer->token.string) + 1);

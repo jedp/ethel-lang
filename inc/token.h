@@ -38,6 +38,7 @@ enum tag_enum {
   TAG_BITWISE_NOT,
 
   // Types
+  TAG_FN,
   TAG_BIN,
   TAG_HEX,
   TAG_INT,
@@ -150,6 +151,8 @@ static const char* tag_names[] = {
   "BITWISE_NOT",
 
   // Types
+  "FUNCTION",
+  "BIN",
   "HEX",
   "INT",
   "FLOAT",
@@ -236,6 +239,7 @@ typedef struct {
 } token_t;
 
 static const token_t reserved[] = {
+  { TAG_FN,            .string = (char *) "fn" },
   { TAG_IF,            .string = (char *) "if" },
   { TAG_THEN,          .string = (char *) "then" },
   { TAG_ELSE,          .string = (char *) "else" },

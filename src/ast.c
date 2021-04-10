@@ -220,6 +220,15 @@ ast_expr_t *ast_block(ast_expr_list_t *es) {
   return node;
 }
 
+ast_expr_t *ast_lambda(ast_fn_arg_decl_t *argnames,
+                       ast_expr_list_t *es) {
+  ast_expr_t *node = ast_node(AST_LAMBDA);
+  node->lambda = mem_alloc(sizeof(ast_lambda_t));
+  node->lambda->argnames = argnames;
+  node->lambda->block_exprs = es;
+  return node;
+}
+
 ast_expr_t *ast_reserved_callable(ast_reserved_callable_type_t type, ast_expr_list_t *es) {
   ast_expr_t *node = ast_node(AST_RESERVED_CALLABLE);
   node->reserved_callable = mem_alloc(sizeof(ast_reserved_callable_t));

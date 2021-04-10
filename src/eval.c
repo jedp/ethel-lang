@@ -155,6 +155,23 @@ void eval_list_expr(ast_list_t *list, eval_result_t *result, env_t *env) {
   result->obj = list_obj(list->type_name, root_elem);
 }
 
+void eval_block_expr(ast_expr_list_t *block_exprs, eval_result_t *result, env_t *env) {
+  ast_expr_list_t *node = block_exprs;
+  push_scope(env);
+  while (node != NULL) {
+    eval_result_t *r = eval_expr(node->root, env);
+    if ((result->err = r->err) != ERR_NO_ERROR) {
+      pop_scope(env);
+      return;
+    }
+
+    // The last object in the block is its value.
+    result->obj = r->obj;
+    node = node->next;
+  }
+  pop_scope(env);
+}
+
 void strip_trailing_ws(char* s) {
   int end = c_str_len(s) - 1;
   while (end > 0) {
@@ -1086,21 +1103,15 @@ eval_result_t *eval_expr(ast_expr_t *expr, env_t *env) {
           break;
         }
         case AST_BLOCK: {
-            ast_expr_list_t *node = expr->block_exprs;
-            push_scope(env);
-            while (node != NULL) {
-              eval_result_t *r = eval_expr(node->root, env);
-              if ((result->err = r->err) != ERR_NO_ERROR) {
-                pop_scope(env);
-                goto error;
-              }
-
-              // The last object in the block is its value.
-              result->obj = r->obj;
-              node = node->next;
-            }
-            pop_scope(env);
-            break;
+          eval_block_expr(expr->block_exprs, result, env);
+          if (result->err != ERR_NO_ERROR) goto error;
+          break;
+        }
+        case AST_LAMBDA: {
+                           printf("placeholder\n");
+          eval_block_expr(expr->lambda->block_exprs, result, env);
+          if (result->err != ERR_NO_ERROR) goto error;
+          break;
         }
         case AST_RESERVED_CALLABLE: {
           resolve_callable_expr(expr, env, result);

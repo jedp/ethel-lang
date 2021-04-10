@@ -30,6 +30,9 @@ static char* byte_repr(char c) {
 
 void print_value(obj_t *obj) {
   switch (obj->type) {
+    case TYPE_FN:
+      printf("Function");
+      break;
     case TYPE_INT:
       printf("%d", obj->intval);
       break;

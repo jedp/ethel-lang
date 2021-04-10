@@ -231,6 +231,7 @@ void test_parse_seq_elem(void) {
   TEST_ASSERT_EQUAL(AST_SEQ_ELEM, ast->type);
   TEST_ASSERT_EQUAL(AST_IDENT, ((ast_expr_t*) ast->seq_elem->ident)->type);
   TEST_ASSERT_EQUAL(AST_IF_THEN_ELSE, ((ast_expr_t*) ast->seq_elem->index)->type);
+  mem_free(ast);
 }
 
 void test_parse_seq_elem_access(void) {
@@ -243,6 +244,7 @@ void test_parse_seq_elem_access(void) {
   TEST_ASSERT_EQUAL(AST_ASSIGN, ast->type);
   TEST_ASSERT_EQUAL(AST_IDENT, ((ast_expr_t*) ast->assignment->ident)->type);
   TEST_ASSERT_EQUAL(AST_SEQ_ELEM, ((ast_expr_t*) ast->assignment->value)->type);
+  mem_free(ast);
 }
 
 void test_parse_seq_elem_assign(void) {
@@ -256,6 +258,41 @@ void test_parse_seq_elem_assign(void) {
   TEST_ASSERT_EQUAL(AST_IDENT, ((ast_expr_t*) ast->assign_elem->seq)->type);
   TEST_ASSERT_EQUAL(AST_MUL, ((ast_expr_t*) ast->assign_elem->offset)->type);
   TEST_ASSERT_EQUAL(AST_INT, ((ast_expr_t*) ast->assign_elem->value)->type);
+  mem_free(ast);
+}
+
+void test_parse_empty_lambda(void) {
+  char *program = "val x = fn() { }";
+  ast_expr_t *ast = mem_alloc(sizeof(ast_expr_t));
+  parse_result_t *parse_result = mem_alloc(sizeof(parse_result_t));
+  parse_program(program, ast, parse_result);
+
+  TEST_ASSERT_EQUAL(ERR_NO_ERROR, parse_result->err);
+  TEST_ASSERT_EQUAL(AST_ASSIGN, ast->type);
+  TEST_ASSERT_EQUAL(AST_IDENT, ((ast_expr_t*) ast->assignment->ident)->type);
+  TEST_ASSERT_EQUAL(AST_LAMBDA, ((ast_expr_t*) ast->assignment->value)->type);
+  ast_lambda_t *lambda = (ast_lambda_t*) ast->assignment->value->lambda;
+  TEST_ASSERT_NULL(lambda->argnames);
+  TEST_ASSERT_NULL(lambda->block_exprs);
+  mem_free(ast);
+}
+
+void test_parse_lambda(void) {
+  char *program = "val x = fn(a, b, c) { val r = a + b + c\nr }";
+  ast_expr_t *ast = mem_alloc(sizeof(ast_expr_t));
+  parse_result_t *parse_result = mem_alloc(sizeof(parse_result_t));
+  parse_program(program, ast, parse_result);
+
+  TEST_ASSERT_EQUAL(ERR_NO_ERROR, parse_result->err);
+  TEST_ASSERT_EQUAL(AST_ASSIGN, ast->type);
+  TEST_ASSERT_EQUAL(AST_IDENT, ((ast_expr_t*) ast->assignment->ident)->type);
+  TEST_ASSERT_EQUAL(AST_LAMBDA, ((ast_expr_t*) ast->assignment->value)->type);
+  ast_lambda_t *lambda = (ast_lambda_t*) ast->assignment->value->lambda;
+  TEST_ASSERT_EQUAL_STRING("a", lambda->argnames->name);
+  TEST_ASSERT_EQUAL_STRING("b", lambda->argnames->next->name);
+  TEST_ASSERT_EQUAL_STRING("c", lambda->argnames->next->next->name);
+  TEST_ASSERT_EQUAL(AST_IDENT, lambda->block_exprs->next->root->type);
+  mem_free(ast);
 }
 
 void test_parser(void) {
@@ -277,5 +314,7 @@ void test_parser(void) {
   RUN_TEST(test_parse_seq_elem);
   RUN_TEST(test_parse_seq_elem_access);
   RUN_TEST(test_parse_seq_elem_assign);
+  RUN_TEST(test_parse_empty_lambda);
+  RUN_TEST(test_parse_lambda);
 }
 

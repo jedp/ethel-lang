@@ -30,6 +30,7 @@ enum ast_type_enum {
   AST_NIL,
   AST_LIST,
   AST_APPLY,
+  AST_LAMBDA,
   AST_INT,
   AST_FLOAT,
   AST_STRING,
@@ -81,6 +82,7 @@ static const char *ast_node_names[] = {
   "NIL",
   "LIST",
   "APPLY",
+  "LAMBDA",
   "INT",
   "FLOAT",
   "STRING",
@@ -188,6 +190,16 @@ typedef struct AstForLoop {
   ast_expr_t *pred;
 } ast_for_loop_t;
 
+typedef struct AstFnArgDecl {
+  char *name;
+  struct AstFnArgDecl *next;
+} ast_fn_arg_decl_t;
+
+typedef struct AstLambda {
+  ast_fn_arg_decl_t *argnames;
+  ast_expr_list_t *block_exprs;
+} ast_lambda_t;
+
 typedef struct AstArrayDecl {
   ast_expr_t *size;
 } ast_array_decl_t;
@@ -240,6 +252,7 @@ typedef struct __attribute__((__packed__)) AstExpr {
     ast_assign_elem_t *assign_elem;
     ast_method_t *method;
     ast_apply_t *application;
+    ast_lambda_t *lambda;
     int intval;
     int boolval;
     float floatval;
@@ -265,6 +278,7 @@ ast_expr_t *ast_type(ast_type_t type);
 ast_expr_t *ast_ident(char* name);
 ast_expr_t *ast_seq_elem(ast_expr_t *ident, ast_expr_t *index);
 ast_expr_t *ast_field(char* name);
+ast_expr_t *ast_lambda(ast_fn_arg_decl_t *args, ast_expr_list_t *es);
 ast_expr_t *ast_method(char* name, ast_expr_list_t *args);
 ast_expr_t *ast_member_access(ast_expr_t *receiver, char* member_name, ast_expr_list_t *args);
 ast_expr_t *ast_type_name(char* name);
