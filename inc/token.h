@@ -166,7 +166,6 @@ static const char* tag_names[] = {
   "FOR",
   "IN",
   "STEP",
-  "DO",
 
   // Comparison
   "GT",
@@ -174,6 +173,7 @@ static const char* tag_names[] = {
   "GE",
   "LE",
   "EQ",
+  "NE",
 
   // IO
   "DUMP",
