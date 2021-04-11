@@ -101,7 +101,102 @@ obj_t *str_eq(obj_t *str_obj, obj_method_args_t *args) {
   return boolean_obj(False);
 }
 
-obj_t *arr_dump(obj_t *arr_obj, obj_method_args_t *args) {
+obj_t *byte_dump(obj_t *byte_obj) {
+  // 'x' -> "120  0x78  11111111"
+  bytearray_t *a = bytearray_alloc(19);
+
+  // Three-digit decimal representation.
+  // Do not print leading zeroes, because that looks octal.
+  int v = byte_obj->charval;
+  a->data[2] = '0';  // Edge case.
+  for (int i = 0; i < 3; i++) {
+    if (v) {
+      a->data[2 - i] = '0' + (v % 10);
+      v = v / 10;
+    } else {
+      a->data[2 - i] = ' ';
+    }
+  }
+
+  a->data[3] = ' ';
+  a->data[4] = ' ';
+
+  // Hex value.
+  a->data[5] = '0';
+  a->data[6] = 'x';
+  a->data[7] = hex_char((byte_obj->charval & 0xf0) >> 4);
+  a->data[8] = hex_char(byte_obj->charval & 0xf);
+
+  a->data[9] = ' ';
+  a->data[10] = ' ';
+
+  v = byte_obj->charval;
+  for (int i = 0; i < 8; i++) {
+    char b = (v & (1 << (7-i))) >> (7-i) ? '1' : '0';
+    a->data[11 + i] = b;
+  }
+
+  return string_obj(a);
+}
+
+obj_t *int32_dump(obj_t *int_obj) {
+  // 2147483647 -> "0x7fffffff  01111111 11111111 11111111 11111111"
+  bytearray_t *a = bytearray_alloc(47);
+
+  a->data[0] = '0';
+  a->data[1] = 'x';
+
+  int v = int_obj->intval;
+  for (int i = 0; i < 8; i++) {
+    a->data[9 - i] = hex_char(v & 0xf);
+    v >>= 4;
+  }
+
+  a->data[10] = ' ';
+  a->data[11] = ' ';
+
+  v = int_obj->intval;
+  int offset = 11;
+  for (int i = 0; i < 32; i++) {
+    // Separate binary digits into groups of 8.
+    if (i % 8 == 0) {
+      a->data[offset] = ' ';
+      offset++;
+    }
+    char b = (v & (1 << (31-i))) >> (31-i) ? '1' : '0';
+    a->data[offset] = b;
+    offset++;
+  }
+
+  return string_obj(a);
+}
+
+obj_t *float32_dump(obj_t *float_obj) {
+  bytearray_t *a = bytearray_alloc(40);
+
+  unsigned int *p = (unsigned int *) &(float_obj->floatval);
+  unsigned int v = *p;
+
+  int offset = 0;
+  for (int i = 0; i < 32; i++) {
+    switch(i) {
+      case 1: // Sign bit; Start exponent
+      case 9: // End exponent
+        a->data[offset++] = ' ';
+        a->data[offset++] = ' ';
+        break;
+      default:
+        break;
+    }
+    char b = (v & (1 << (31-i))) >> (31-i) ? '1' : '0';
+    a->data[offset] = b;
+    offset++;
+  }
+
+  return string_obj(a);
+}
+
+obj_t *arr_dump(obj_t *arr_obj) {
   // Each row represents 16 bytes and is represented with 80 chars, e.g.,
   // 00000000  23 69 6e 63 6c 75 64 65  20 3c 73 74 64 69 6f 2e  |#include <stdio.|
   // 00000010  68 3e 0a                                          |h>.|
@@ -111,7 +206,7 @@ obj_t *arr_dump(obj_t *arr_obj, obj_method_args_t *args) {
   // We we need 79 bytes to store the representation for 16 bytes.
   dim_t byte_rows = (arr_obj->bytearray->size / 16) + ((arr_obj->bytearray->size % 16) ? 1 : 0);
   dim_t size = byte_rows * 79;
-  bytearray_t *ba = bytearray_alloc(size);
+  bytearray_t *ba = bytearray_alloc(size - 1);
 
   dim_t row = 0;
   for (dim_t i = 0; i < arr_obj->bytearray->size; i+=16) {
@@ -162,7 +257,11 @@ obj_t *arr_dump(obj_t *arr_obj, obj_method_args_t *args) {
       j++;
     }
     ba->data[row * 79 + 61 + j] = '|';
-    ba->data[row * 79 + 61 + j + 1] = '\n';
+
+    // No newline after last line.
+    if (row < byte_rows - 1) {
+      ba->data[row * 79 + 61 + j + 1] = '\n';
+    }
     row++;
   }
 

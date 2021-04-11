@@ -30,7 +30,9 @@ Guess again 42
 Ok
 ```
 
-Expressions all the way down.
+### Features
+
+#### Expressions all the way down
 
 ```
 > val age = 42
@@ -43,7 +45,7 @@ Expressions all the way down.
 5
 ```
 
-Lists
+#### Lists
 
 ```
 > val l = list of Int { 4, 5, 6, 7, 8, 9 }
@@ -58,7 +60,7 @@ Lists
 { 5, 6, 7, 8, 9 }
 ```
 
-Byte Arrays and Strings
+#### Byte Arrays and Strings
 
 ```
 > val a = arr(4)
@@ -83,19 +85,21 @@ ByteArray(4)
 "omai"
 ```
 
-### Details
+#### Dumps of internal representation
 
-- Lexer
-- Recursive-descent parser with precedence climbing
-- AST
-- REPL
-
-- Everything is an expression
-- Environment scopes for variables
-- Mutable or immutable variables
-- Type casting within reason
-- Input and output
- 
-Yet to come:
-- So many things
+```
+> dump("This is the quickening!")
+00000000  54 68 69 73 20 69 73 20  74 68 65 20 71 75 69 63  |This.is.the.quic|
+00000010  6b 65 6e 69 6e 67 21                              |kening!|
+> dump(arr(40))
+00000000  00 00 00 00 00 00 00 00  00 00 00 00 00 00 00 00  |................|
+00000010  00 00 00 00 00 00 00 00  00 00 00 00 00 00 00 00  |................|
+00000020  00 00 00 00 00 00 00 00                           |........|
+> dump('x')
+120  0x78  01111000
+> dump(42)
+0x0000002a  00000000 00000000 00000000 00101010
+> dump(-6.8)
+1  10000001  10110011001100110011010
+```
 

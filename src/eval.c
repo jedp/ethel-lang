@@ -504,14 +504,24 @@ void dump_args(ast_expr_list_t *args, eval_result_t *result, env_t *env) {
   }
 
   eval_result_t *r = eval_expr(args->root, env);
-  if (r->obj->type != TYPE_BYTEARRAY && r->obj->type != TYPE_STRING) {
-    printf("Not a bytearray.\n");
-    result->obj = nil_obj();
-    return;
+  switch(r->obj->type) {
+    case TYPE_CHAR:
+      result->obj = byte_dump(r->obj);
+      break;
+    case TYPE_INT:
+      result->obj = int32_dump(r->obj);
+      break;
+    case TYPE_FLOAT:
+      result->obj = float32_dump(r->obj);
+      return;
+    case TYPE_STRING:
+    case TYPE_BYTEARRAY:
+      result->obj = arr_dump(r->obj);
+      break;
+    default:
+      printf("Cannot dump object of type %s.\n", obj_type_names[r->obj->type]);
+      result->obj = nil_obj();
   }
-  obj_t *s = arr_dump(r->obj, NULL);
-
-  result->obj = s;
 }
 
 void readln_input(eval_result_t *result) {

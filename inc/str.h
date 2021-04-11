@@ -26,7 +26,16 @@ char* c_str_ncat(char *a, const char *b, dim_t n);
 void fmt_hex(bytearray_t *a, dim_t start, dim_t end, int n);
 
 /* Return a canonical hexdump of the array as a string. */
-obj_t *arr_dump(obj_t *arr_obj, obj_method_args_t *args);
+obj_t *arr_dump(obj_t *arr_obj);
+
+/* Return a decimal, hex, and binary dump of the byte as a string. */
+obj_t *byte_dump(obj_t *byte_obj);
+
+/* Return a hex and binary dump of the int as a string. */
+obj_t *int32_dump(obj_t *int_obj);
+
+/* Return a binary dump of the float as a string. */
+obj_t *float32_dump(obj_t *float_obj);
 
 bytearray_t *bytearray_alloc(dim_t size);
 
