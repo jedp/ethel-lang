@@ -256,6 +256,10 @@ token_t *get_token(lexer_t *lexer) {
     case '-': return lex_op(lexer, TAG_MINUS);
     case '*': return lex_op(lexer, TAG_TIMES);
     case '/': return lex_op(lexer, TAG_DIVIDE);
+    case '&': return lex_op(lexer, TAG_BITWISE_AND);
+    case '|': return lex_op(lexer, TAG_BITWISE_OR);
+    case '^': return lex_op(lexer, TAG_BITWISE_XOR);
+    case '~': return lex_op(lexer, TAG_BITWISE_NOT);
     case '.': {
       readch(lexer);
       if (lexer->nextch == '.') {
@@ -277,6 +281,9 @@ token_t *get_token(lexer_t *lexer) {
       if (lexer->nextch == '=') {
         return lex_op(lexer, TAG_LE);
       }
+      if (lexer->nextch == '<') {
+        return lex_op(lexer, TAG_BITWISE_SHL);
+      }
       unreadch(lexer);
       return lex_op(lexer, TAG_LT);
     }
@@ -284,6 +291,9 @@ token_t *get_token(lexer_t *lexer) {
       readch(lexer);
       if (lexer->nextch == '=') {
         return lex_op(lexer, TAG_GE);
+      }
+      if (lexer->nextch == '>') {
+        return lex_op(lexer, TAG_BITWISE_SHR);
       }
       unreadch(lexer);
       return lex_op(lexer, TAG_GT);

@@ -22,7 +22,7 @@ enum tag_enum {
   TAG_RPAREN,
   TAG_COMMA,
 
-  // Addition and multiplication
+  // Arithmetic
   TAG_PLUS,
   TAG_MINUS,
   TAG_TIMES,
@@ -30,6 +30,12 @@ enum tag_enum {
   TAG_MOD,
   TAG_AND,
   TAG_OR,
+  TAG_BITWISE_SHL,
+  TAG_BITWISE_SHR,
+  TAG_BITWISE_AND,
+  TAG_BITWISE_OR,
+  TAG_BITWISE_XOR,
+  TAG_BITWISE_NOT,
 
   // Types
   TAG_INT,
@@ -120,7 +126,7 @@ static const char* tag_names[] = {
   "RPAREN",
   "COMMA",
 
-  // Addition and multiplication
+  // Arithmetic
   "PLUS",
   "MINUS",
   "TIMES",
@@ -128,6 +134,12 @@ static const char* tag_names[] = {
   "MOD",
   "AND",
   "OR",
+  "BITWISE_SHL",
+  "BITWISE_SHR",
+  "BITWISE_AND",
+  "BITWISE_OR",
+  "BITWISE_XOR",
+  "BITWISE_NOT",
 
   // Types
   "INT",

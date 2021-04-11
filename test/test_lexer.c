@@ -6,7 +6,7 @@
 #include "../inc/lexer.h"
 
 void test_lex_error(void) {
-  char *expr = "if 42 & moo";
+  char *expr = "if 42 @ moo";
   lexer_t lexer;
   lexer_init(&lexer, expr, c_str_len(expr));
 
@@ -457,6 +457,12 @@ void test_lex_all_tokens(void) {
     (test_data_t) { .text = "-", .expected_tag = TAG_MINUS },
     (test_data_t) { .text = "*", .expected_tag = TAG_TIMES },
     (test_data_t) { .text = "/", .expected_tag = TAG_DIVIDE },
+    (test_data_t) { .text = "&", .expected_tag = TAG_BITWISE_AND },
+    (test_data_t) { .text = "|", .expected_tag = TAG_BITWISE_OR },
+    (test_data_t) { .text = "^", .expected_tag = TAG_BITWISE_XOR },
+    (test_data_t) { .text = "~", .expected_tag = TAG_BITWISE_NOT },
+    (test_data_t) { .text = "<<", .expected_tag = TAG_BITWISE_SHL },
+    (test_data_t) { .text = ">>", .expected_tag = TAG_BITWISE_SHR },
     (test_data_t) { .text = "==", .expected_tag = TAG_EQ },
     (test_data_t) { .text = "!=", .expected_tag = TAG_NE },
     (test_data_t) { .text = "<", .expected_tag = TAG_LT },
