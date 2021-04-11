@@ -20,7 +20,10 @@ void print_value(obj_t *obj) {
       printf("%f", (double) obj->floatval);
       break;
     case TYPE_STRING:
-      printf("\"%s\"", bytearray_to_c_str(obj->bytearray));
+      printf("%s", bytearray_to_c_str(obj->bytearray));
+      break;
+    case TYPE_BYTEARRAY:
+      printf("Byte Array");
       break;
     case TYPE_CHAR:
       // Range check here.

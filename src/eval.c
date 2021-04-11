@@ -5,8 +5,8 @@
 #include "../inc/mem.h"
 #include "../inc/num.h"
 #include "../inc/arr.h"
-#include "../inc/list.h"
 #include "../inc/str.h"
+#include "../inc/list.h"
 #include "../inc/eval.h"
 #include "../inc/parser.h"
 #include "../inc/ast.h"
@@ -482,6 +482,7 @@ int print_args(ast_expr_list_t *args, eval_result_t *result, env_t *env) {
         case TYPE_STRING: printf("%s ", bytearray_to_c_str(r->obj->bytearray)); break;
         case TYPE_BOOLEAN: printf("%s ", r->obj->boolval ? "true" : "false"); break;
         case TYPE_NIL: printf("Nil "); break;
+        case TYPE_BYTEARRAY: printf("%s", r->obj->bytearray->data);
         default: printf("?? "); break;
       }
       node = node->next;
@@ -494,6 +495,23 @@ int print_args(ast_expr_list_t *args, eval_result_t *result, env_t *env) {
 void println_args(ast_expr_list_t *args, eval_result_t *result, env_t *env) {
   print_args(args, result, env);
   printf("\n");
+}
+
+void dump_args(ast_expr_list_t *args, eval_result_t *result, env_t *env) {
+  if (args->root == NULL) {
+    result->obj = nil_obj();
+    return;
+  }
+
+  eval_result_t *r = eval_expr(args->root, env);
+  if (r->obj->type != TYPE_BYTEARRAY && r->obj->type != TYPE_STRING) {
+    printf("Not a bytearray.\n");
+    result->obj = nil_obj();
+    return;
+  }
+  obj_t *s = arr_dump(r->obj, NULL);
+
+  result->obj = s;
 }
 
 void readln_input(eval_result_t *result) {
@@ -519,6 +537,9 @@ void resolve_callable_expr(ast_expr_t *expr, env_t *env, eval_result_t *result) 
   ast_expr_list_t *args = expr->reserved_callable->es;
 
   switch (expr->reserved_callable->type) {
+    case AST_CALL_DUMP:
+      dump_args(args, result, env);
+      break;
     case AST_CALL_PRINT:
       println_args(args, result, env);
       break;

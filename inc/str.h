@@ -1,6 +1,7 @@
 #ifndef __OBJ_STR_H
 #define __OBJ_STR_H
 
+#include "def.h"
 #include "obj.h"
 
 /* Return the length of a c string, not including the terminating null.  */
@@ -17,6 +18,15 @@ void c_str_cp(char* dst, const char* src);
  * copying no more than n chars, then add the trailing null.
  */
 char* c_str_ncat(char *a, const char *b, dim_t n);
+
+/*
+ * Convert decimal value n to hex representation, and print it at buf[start:end].
+ * Pad with zeros.
+ */
+void fmt_hex(bytearray_t *a, dim_t start, dim_t end, int n);
+
+/* Return a canonical hexdump of the array as a string. */
+obj_t *arr_dump(obj_t *arr_obj, obj_method_args_t *args);
 
 bytearray_t *bytearray_alloc(dim_t size);
 

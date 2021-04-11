@@ -78,6 +78,7 @@ enum tag_enum {
   TAG_NE,
 
   // IO
+  TAG_DUMP,
   TAG_PRINT,
   TAG_INPUT,
 
@@ -175,6 +176,7 @@ static const char* tag_names[] = {
   "EQ",
 
   // IO
+  "DUMP",
   "PRINT",
   "INPUT",
 
@@ -218,6 +220,7 @@ static const token_t reserved[] = {
   { TAG_INVARIABLE,    .string = (char *) "val" },
   { TAG_VARIABLE,      .string = (char *) "var" },
   { TAG_DEL,           .string = (char *) "del" },
+  { TAG_DUMP,          .string = (char *) "dump" },
   { TAG_PRINT,         .string = (char *) "print" },
   { TAG_INPUT,         .string = (char *) "input" },
   { TAG_WHILE,         .string = (char *) "while" },

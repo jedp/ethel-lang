@@ -38,10 +38,27 @@ void test_c_str_ncat(void) {
   TEST_ASSERT_EQUAL(True, c_str_eq(dst, "I like pi"));
 }
 
+void test_c_str_bytearray_round_trip(void) {
+  char *cstr = "I like pie";
+  bytearray_t *a = c_str_to_bytearray(cstr);
+
+  TEST_ASSERT_EQUAL_STRING(cstr, bytearray_to_c_str(a));
+}
+
+void test_str_arr_dump(void) {
+  bytearray_t *a = c_str_to_bytearray("I like traffic lights.");
+  char *expected = "00000000  49 20 6c 69 6b 65 20 74  72 61 66 66 69 63 20 6c  |I.like.traffic.l|\n00000010  69 67 68 74 73 2e                                 |ights.|\n";
+
+  obj_t *s = arr_dump(string_obj(a), NULL);
+  TEST_ASSERT_EQUAL_STRING(expected, bytearray_to_c_str(s->bytearray));
+}
+
 void test_str(void) {
   RUN_TEST(test_c_str_len);
   RUN_TEST(test_c_str_eq);
   RUN_TEST(test_c_str_cp);
   RUN_TEST(test_c_str_ncat);
+  RUN_TEST(test_c_str_bytearray_round_trip);
+  RUN_TEST(test_str_arr_dump);
 }
 
