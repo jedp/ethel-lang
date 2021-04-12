@@ -110,6 +110,8 @@ static const char *ast_node_names[] = {
 typedef uint8_t ast_reserved_callable_type_t;
 enum ast_call_type_enum {
   AST_CALL_UNDEFINED = 0,
+  AST_CALL_TO_HEX,
+  AST_CALL_TO_BIN,
   AST_CALL_DUMP,
   AST_CALL_PRINT,
   AST_CALL_INPUT,

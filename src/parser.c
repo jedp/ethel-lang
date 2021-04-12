@@ -84,6 +84,8 @@ uint8_t binop_preced(token_t *token) {
 
 ast_reserved_callable_type_t ast_callable_type_for_tag(tag_t tag) {
   switch (tag) {
+    case TAG_TO_HEX: return AST_CALL_TO_HEX;
+    case TAG_TO_BIN: return AST_CALL_TO_BIN;
     case TAG_DUMP: return AST_CALL_DUMP;
     case TAG_PRINT: return AST_CALL_PRINT;
     case TAG_INPUT: return AST_CALL_INPUT;
@@ -478,6 +480,8 @@ ast_expr_t *parse_atom(lexer_t *lexer) {
     case TAG_EXP: 
     case TAG_LN: 
     case TAG_LOG:
+    case TAG_TO_HEX:
+    case TAG_TO_BIN:
     case TAG_DUMP:
     case TAG_PRINT: {
       ast_reserved_callable_type_t callable_type = ast_callable_type_for_tag(lexer->token.tag);

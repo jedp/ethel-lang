@@ -52,6 +52,28 @@ void eval_abs(ast_expr_t *expr, eval_result_t *result, env_t *env) {
   }
 }
 
+static void eval_to_hex(ast_expr_t *expr, eval_result_t *result, env_t *env) {
+  eval_result_t *r = eval_expr(expr, env);
+
+  if (r->obj->type != TYPE_INT) {
+    result->err = ERR_EVAL_TYPE_ERROR;
+    return;
+  }
+
+  result->obj = string_obj(int_to_hex(r->obj->intval));
+}
+
+static void eval_to_bin(ast_expr_t *expr, eval_result_t *result, env_t *env) {
+  eval_result_t *r = eval_expr(expr, env);
+
+  if (r->obj->type != TYPE_INT) {
+    result->err = ERR_EVAL_TYPE_ERROR;
+    return;
+  }
+
+  result->obj = string_obj(int_to_bin(r->obj->intval));
+}
+
 void eval_int_expr(ast_expr_t *expr, eval_result_t *result) {
   if (expr->type != AST_INT) {
     result->err = ERR_EVAL_TYPE_ERROR;
@@ -655,6 +677,12 @@ void resolve_callable_expr(ast_expr_t *expr, env_t *env, eval_result_t *result) 
   ast_expr_list_t *args = expr->reserved_callable->es;
 
   switch (expr->reserved_callable->type) {
+    case AST_CALL_TO_HEX:
+      eval_to_hex(args->root, result, env);
+      break;
+    case AST_CALL_TO_BIN:
+      eval_to_bin(args->root, result, env);
+      break;
     case AST_CALL_DUMP:
       dump_args(args, result, env);
       break;
