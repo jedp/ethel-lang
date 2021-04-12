@@ -85,6 +85,19 @@ ByteArray(4)
 "omai"
 ```
 
+#### Bitwise operators
+
+```
+> val a = arr(4)
+Byte Array
+> a[0] = 255
+'�'
+> 2345 & a[0]
+41
+> 1 << 4
+16
+```
+
 #### Dumps of internal representation
 
 ```

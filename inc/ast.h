@@ -14,6 +14,12 @@ enum ast_type_enum {
   AST_MOD,
   AST_AND,
   AST_OR,
+  AST_BITWISE_SHL,
+  AST_BITWISE_SHR,
+  AST_BITWISE_AND,
+  AST_BITWISE_OR,
+  AST_BITWISE_XOR,
+  AST_BITWISE_NOT,
   AST_GT,
   AST_GE,
   AST_LT,
@@ -59,6 +65,12 @@ static const char *ast_node_names[] = {
   "MOD",
   "AND",
   "OR",
+  "BITWISE-SHL",
+  "BITWISE-SHR",
+  "BITWISE-AND",
+  "BITWISE-OR",
+  "BITWISE-XOR",
+  "BITWISE-NOT",
   "GT",
   "GE",
   "LT",
@@ -117,6 +129,10 @@ typedef struct AstAssign {
   ast_expr_t *ident;
   ast_expr_t *value;
 } ast_assign_t;
+
+typedef struct AstUnaryArg {
+  ast_expr_t *a;
+} ast_unary_arg_t;
 
 typedef struct AstBinOpArgs {
   ast_expr_t *a;
@@ -208,6 +224,7 @@ typedef struct __attribute__((__packed__)) AstExpr {
     ast_assign_t *assignment;
     ast_expr_list_t *block_exprs;
     ast_list_t *list;
+    ast_unary_arg_t *unary_arg;
     ast_binop_args_t *binop_args;
     ast_range_args_t *range;
     ast_cast_args_t *cast_args;
@@ -230,6 +247,7 @@ typedef struct __attribute__((__packed__)) AstExpr {
 } ast_expr_t;
 
 void pretty_print(ast_expr_t *expr);
+ast_expr_t *ast_unary(ast_type_t type, ast_expr_t *a);
 ast_expr_t *ast_binop(ast_type_t type, ast_expr_t *a, ast_expr_t *b);
 ast_expr_t *ast_cast(ast_expr_t *e1, ast_expr_t *e2);
 ast_expr_t *ast_nil();

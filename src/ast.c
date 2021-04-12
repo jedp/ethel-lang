@@ -31,6 +31,24 @@ ast_expr_t *ast_empty() {
   return node;
 }
 
+ast_expr_t *ast_unary(ast_type_t type, ast_expr_t *a) {
+  ast_expr_t *node = ast_node(type);
+  switch(type) {
+    case AST_NEGATE:
+    case AST_BITWISE_NOT:
+      node->type = type;
+      break;
+    default:
+      printf("Unary type %d unfamiliar\n", type);
+      mem_free(node);
+      return ast_empty();
+  }
+
+  node->unary_arg = mem_alloc(sizeof(ast_unary_arg_t));
+  node->unary_arg->a = a;
+  return node;
+}
+
 ast_expr_t *ast_binop(ast_type_t type, ast_expr_t *a, ast_expr_t *b) {
   ast_expr_t *node = ast_node(type);
   switch(type) {
@@ -41,6 +59,12 @@ ast_expr_t *ast_binop(ast_type_t type, ast_expr_t *a, ast_expr_t *b) {
     case AST_MOD:
     case AST_AND:
     case AST_OR:
+    case AST_BITWISE_OR:
+    case AST_BITWISE_XOR:
+    case AST_BITWISE_AND:
+    case AST_BITWISE_NOT:
+    case AST_BITWISE_SHL:
+    case AST_BITWISE_SHR:
     case AST_GT:
     case AST_GE:
     case AST_LT:

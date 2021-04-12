@@ -33,6 +33,25 @@ void eval_boolean_expr(ast_expr_t *expr, eval_result_t *result) {
   result->obj = boolean_obj(expr->boolval);
 }
 
+void eval_abs(ast_expr_t *expr, eval_result_t *result, env_t *env) {
+  eval_result_t *r = eval_expr(expr, env);
+
+  switch (r->obj->type) {
+    case TYPE_INT:
+        result->obj = int_obj(r->obj->intval < 0 ? -1 * r->obj->intval : r->obj->intval);
+        break;
+    case TYPE_FLOAT:
+        result->obj = float_obj(r->obj->floatval < 0 ? -1 * r->obj->floatval : r->obj->floatval);
+        break;
+    case TYPE_BOOLEAN:
+        result->obj = boolean_obj(r->obj->intval < 0 ? -1 * r->obj->intval : r->obj->intval);
+        break;
+    default:
+        result->err = ERR_EVAL_TYPE_ERROR;
+        break;
+  }
+}
+
 void eval_int_expr(ast_expr_t *expr, eval_result_t *result) {
   if (expr->type != AST_INT) {
     result->err = ERR_EVAL_TYPE_ERROR;
@@ -376,6 +395,95 @@ void boolean_or(obj_t *a, obj_t *b, eval_result_t *result) {
   result->obj = boolean_obj(truthy(a) || truthy(b)); 
 }
 
+void negate(obj_t *a, eval_result_t *result) {
+  if (a->type == TYPE_INT) {
+    result->obj = int_obj(-(a->intval));
+  } else if (a->type == TYPE_FLOAT) {
+    result->obj = float_obj(-(a->floatval));
+  } else {
+    result->err = ERR_EVAL_TYPE_ERROR;
+  }
+}
+
+void bitwise_or(obj_t *a, obj_t *b, eval_result_t *result) {
+  if (a->type == TYPE_INT && b->type == TYPE_INT) {
+    result->obj = int_obj(a->intval | b->intval);
+  } else if (a->type == TYPE_INT && b->type == TYPE_CHAR) {
+    result->obj = int_obj(a->intval | (unsigned char) b->charval);
+  } else if (a->type == TYPE_CHAR && b->type == TYPE_INT) {
+    result->obj = int_obj((unsigned char) a->charval | b->intval);
+  } else if (a->type == TYPE_CHAR && b->type == TYPE_CHAR) {
+    result->obj = char_obj(a->charval | b->charval);
+  } else {
+    result->err = ERR_EVAL_TYPE_ERROR;
+  }
+}
+
+void bitwise_xor(obj_t *a, obj_t *b, eval_result_t *result) {
+  if (a->type == TYPE_INT && b->type == TYPE_INT) {
+    result->obj = int_obj(a->intval ^ b->intval);
+  } else if (a->type == TYPE_INT && b->type == TYPE_CHAR) {
+    result->obj = int_obj(a->intval ^ (unsigned char) b->charval);
+  } else if (a->type == TYPE_CHAR && b->type == TYPE_INT) {
+    result->obj = int_obj((unsigned char) a->charval ^ b->intval);
+  } else if (a->type == TYPE_CHAR && b->type == TYPE_CHAR) {
+    result->obj = char_obj(a->charval ^ b->charval);
+  } else {
+    result->err = ERR_EVAL_TYPE_ERROR;
+  }
+}
+
+void bitwise_and(obj_t *a, obj_t *b, eval_result_t *result) {
+  if (a->type == TYPE_INT && b->type == TYPE_INT) {
+    result->obj = int_obj(a->intval & b->intval);
+  } else if (a->type == TYPE_INT && b->type == TYPE_CHAR) {
+    result->obj = int_obj(a->intval & (unsigned char) b->charval);
+  } else if (a->type == TYPE_CHAR && b->type == TYPE_INT) {
+    result->obj = int_obj((unsigned char) a->charval & b->intval);
+  } else if (a->type == TYPE_CHAR && b->type == TYPE_CHAR) {
+    result->obj = char_obj(a->charval & b->charval);
+  } else {
+    result->err = ERR_EVAL_TYPE_ERROR;
+  }
+}
+
+void bitwise_shl(obj_t *a, obj_t *b, eval_result_t *result) {
+  if (a->type == TYPE_INT && b->type == TYPE_INT) {
+    result->obj = int_obj(a->intval << b->intval);
+  } else if (a->type == TYPE_INT && b->type == TYPE_CHAR) {
+    result->obj = int_obj(a->intval << (unsigned char) b->charval);
+  } else if (a->type == TYPE_CHAR && b->type == TYPE_INT) {
+    result->obj = int_obj((unsigned char) a->charval << b->intval);
+  } else if (a->type == TYPE_CHAR && b->type == TYPE_CHAR) {
+    result->obj = char_obj(a->charval << b->charval);
+  } else {
+    result->err = ERR_EVAL_TYPE_ERROR;
+  }
+}
+void bitwise_shr(obj_t *a, obj_t *b, eval_result_t *result) {
+  if (a->type == TYPE_INT && b->type == TYPE_INT) {
+    result->obj = int_obj(a->intval >> b->intval);
+  } else if (a->type == TYPE_INT && b->type == TYPE_CHAR) {
+    result->obj = int_obj(a->intval >> (unsigned char) b->charval);
+  } else if (a->type == TYPE_CHAR && b->type == TYPE_INT) {
+    result->obj = int_obj((unsigned char) a->charval >> b->intval);
+  } else if (a->type == TYPE_CHAR && b->type == TYPE_CHAR) {
+    result->obj = char_obj(a->charval >> b->charval);
+  } else {
+    result->err = ERR_EVAL_TYPE_ERROR;
+  }
+}
+
+void bitwise_not(obj_t *a, eval_result_t *result) {
+  if (a->type == TYPE_INT) {
+    result->obj = int_obj(~a->intval);
+  } else if (a->type == TYPE_CHAR) {
+    result->obj = char_obj(~ (unsigned char) a->charval);
+  } else {
+    result->err = ERR_EVAL_TYPE_ERROR;
+  }
+}
+
 void range(int from, int to, eval_result_t *result) {
   result->obj = range_obj(from, to);
 }
@@ -561,14 +669,7 @@ void resolve_callable_expr(ast_expr_t *expr, env_t *env, eval_result_t *result) 
       break;
     }
     case AST_CALL_ABS:
-      if (args->root->type == AST_INT) {
-        result->obj = int_obj(args->root->intval < 0 ? -1 * args->root->intval : args->root->intval);
-      } else if (args->root->type == AST_INT)  {
-        result->obj = int_obj(args->root->floatval < 0 ? -1 * (int) args->root->floatval : (int) args->root->floatval);
-      } else {
-        printf("What is this slish?\n");
-        goto error;
-      }
+      eval_abs(args->root, result, env);
       break;
     default:
       goto error;
@@ -772,6 +873,65 @@ eval_result_t *eval_expr(ast_expr_t *expr, env_t *env) {
             eval_result_t *r2 = eval_expr(expr->binop_args->b, env);
             if ((result->err = r2->err) != ERR_NO_ERROR) goto error;
             boolean_or(r1->obj, r2->obj, result); 
+            if (result->err != ERR_NO_ERROR) goto error;
+            break;
+        }
+        case AST_NEGATE: {
+            eval_result_t *r1 = eval_expr(expr->binop_args->a, env);
+            if ((result->err = r1->err) != ERR_NO_ERROR) goto error;
+            negate(r1->obj, result);
+            if (result->err != ERR_NO_ERROR) goto error;
+            break;
+        }
+        case AST_BITWISE_NOT: {
+            eval_result_t *r1 = eval_expr(expr->binop_args->a, env);
+            if ((result->err = r1->err) != ERR_NO_ERROR) goto error;
+            bitwise_not(r1->obj, result);
+            if (result->err != ERR_NO_ERROR) goto error;
+            break;
+        }
+        case AST_BITWISE_SHL: {
+            eval_result_t *r1 = eval_expr(expr->binop_args->a, env);
+            if ((result->err = r1->err) != ERR_NO_ERROR) goto error;
+            eval_result_t *r2 = eval_expr(expr->binop_args->b, env);
+            if ((result->err = r2->err) != ERR_NO_ERROR) goto error;
+            bitwise_shl(r1->obj, r2->obj, result);
+            if (result->err != ERR_NO_ERROR) goto error;
+            break;
+        }
+        case AST_BITWISE_SHR: {
+            eval_result_t *r1 = eval_expr(expr->binop_args->a, env);
+            if ((result->err = r1->err) != ERR_NO_ERROR) goto error;
+            eval_result_t *r2 = eval_expr(expr->binop_args->b, env);
+            if ((result->err = r2->err) != ERR_NO_ERROR) goto error;
+            bitwise_shr(r1->obj, r2->obj, result);
+            if (result->err != ERR_NO_ERROR) goto error;
+            break;
+        }
+        case AST_BITWISE_OR: {
+            eval_result_t *r1 = eval_expr(expr->binop_args->a, env);
+            if ((result->err = r1->err) != ERR_NO_ERROR) goto error;
+            eval_result_t *r2 = eval_expr(expr->binop_args->b, env);
+            if ((result->err = r2->err) != ERR_NO_ERROR) goto error;
+            bitwise_or(r1->obj, r2->obj, result);
+            if (result->err != ERR_NO_ERROR) goto error;
+            break;
+        }
+        case AST_BITWISE_XOR: {
+            eval_result_t *r1 = eval_expr(expr->binop_args->a, env);
+            if ((result->err = r1->err) != ERR_NO_ERROR) goto error;
+            eval_result_t *r2 = eval_expr(expr->binop_args->b, env);
+            if ((result->err = r2->err) != ERR_NO_ERROR) goto error;
+            bitwise_xor(r1->obj, r2->obj, result);
+            if (result->err != ERR_NO_ERROR) goto error;
+            break;
+        }
+        case AST_BITWISE_AND: {
+            eval_result_t *r1 = eval_expr(expr->binop_args->a, env);
+            if ((result->err = r1->err) != ERR_NO_ERROR) goto error;
+            eval_result_t *r2 = eval_expr(expr->binop_args->b, env);
+            if ((result->err = r2->err) != ERR_NO_ERROR) goto error;
+            bitwise_and(r1->obj, r2->obj, result);
             if (result->err != ERR_NO_ERROR) goto error;
             break;
         }

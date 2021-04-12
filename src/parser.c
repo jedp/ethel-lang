@@ -23,6 +23,11 @@ boolean is_binop(token_t *token) {
       || token->tag == TAG_AND
       || token->tag == TAG_OR
       || token->tag == TAG_MOD
+      || token->tag == TAG_BITWISE_SHL
+      || token->tag == TAG_BITWISE_SHR
+      || token->tag == TAG_BITWISE_OR
+      || token->tag == TAG_BITWISE_XOR
+      || token->tag == TAG_BITWISE_AND
       || token->tag == TAG_GT
       || token->tag == TAG_GE
       || token->tag == TAG_LT
@@ -54,6 +59,17 @@ uint8_t binop_preced(token_t *token) {
     case TAG_EQ:
     case TAG_NE:
       return PRECED_EQ;
+    case TAG_BITWISE_AND:
+      return PRECED_BITWISE_AND;
+    case TAG_BITWISE_XOR:
+      return PRECED_BITWISE_XOR;
+    case TAG_BITWISE_OR:
+      return PRECED_BITWISE_OR;
+    case TAG_BITWISE_NOT:
+      return PRECED_BITWISE_NOT;
+    case TAG_BITWISE_SHL:
+    case TAG_BITWISE_SHR:
+      return PRECED_BITWISE_SHIFT;
     case TAG_AND:
       return PRECED_AND;
     case TAG_OR:
@@ -158,22 +174,27 @@ ast_expr_t *_parse_expr(lexer_t *lexer, int min_preced) {
     advance(lexer);
 
     switch(tag) {
-      case TAG_AS:     lhs = ast_cast(lhs, _parse_expr(lexer, next_min_preced)); break;
-      case TAG_PLUS:   lhs = ast_binop(AST_ADD,   lhs, _parse_expr(lexer, next_min_preced)); break;
-      case TAG_MINUS:  lhs = ast_binop(AST_SUB,   lhs, _parse_expr(lexer, next_min_preced)); break;
-      case TAG_TIMES:  lhs = ast_binop(AST_MUL,   lhs, _parse_expr(lexer, next_min_preced)); break;
-      case TAG_DIVIDE: lhs = ast_binop(AST_DIV,   lhs, _parse_expr(lexer, next_min_preced)); break;
-      case TAG_MOD:    lhs = ast_binop(AST_MOD,   lhs, _parse_expr(lexer, next_min_preced)); break;
-      case TAG_AND:    lhs = ast_binop(AST_AND,   lhs, _parse_expr(lexer, next_min_preced)); break;
-      case TAG_OR:     lhs = ast_binop(AST_OR,    lhs, _parse_expr(lexer, next_min_preced)); break;
-      case TAG_GT:     lhs = ast_binop(AST_GT,    lhs, _parse_expr(lexer, next_min_preced)); break;
-      case TAG_GE:     lhs = ast_binop(AST_GE,    lhs, _parse_expr(lexer, next_min_preced)); break;
-      case TAG_LT:     lhs = ast_binop(AST_LT,    lhs, _parse_expr(lexer, next_min_preced)); break;
-      case TAG_LE:     lhs = ast_binop(AST_LE,    lhs, _parse_expr(lexer, next_min_preced)); break;
-      case TAG_EQ:     lhs = ast_binop(AST_EQ,    lhs, _parse_expr(lexer, next_min_preced)); break;
-      case TAG_NE:     lhs = ast_binop(AST_NE,    lhs, _parse_expr(lexer, next_min_preced)); break;
-      case TAG_RANGE:  lhs = ast_range(lhs, _parse_expr(lexer, next_min_preced)); break;
-      case TAG_MEMBER_ACCESS: lhs = ast_access(lhs, _parse_expr(lexer, next_min_preced)); break;
+      case TAG_PLUS:           lhs = ast_binop(AST_ADD,           lhs, _parse_expr(lexer, next_min_preced)); break;
+      case TAG_MINUS:          lhs = ast_binop(AST_SUB,           lhs, _parse_expr(lexer, next_min_preced)); break;
+      case TAG_TIMES:          lhs = ast_binop(AST_MUL,           lhs, _parse_expr(lexer, next_min_preced)); break;
+      case TAG_DIVIDE:         lhs = ast_binop(AST_DIV,           lhs, _parse_expr(lexer, next_min_preced)); break;
+      case TAG_MOD:            lhs = ast_binop(AST_MOD,           lhs, _parse_expr(lexer, next_min_preced)); break;
+      case TAG_BITWISE_OR:     lhs = ast_binop(AST_BITWISE_OR,    lhs, _parse_expr(lexer, next_min_preced)); break;
+      case TAG_BITWISE_XOR:    lhs = ast_binop(AST_BITWISE_XOR,   lhs, _parse_expr(lexer, next_min_preced)); break;
+      case TAG_BITWISE_AND:    lhs = ast_binop(AST_BITWISE_AND,   lhs, _parse_expr(lexer, next_min_preced)); break;
+      case TAG_BITWISE_SHL:    lhs = ast_binop(AST_BITWISE_SHL,   lhs, _parse_expr(lexer, next_min_preced)); break;
+      case TAG_BITWISE_SHR:    lhs = ast_binop(AST_BITWISE_SHR,   lhs, _parse_expr(lexer, next_min_preced)); break;
+      case TAG_AND:            lhs = ast_binop(AST_AND,           lhs, _parse_expr(lexer, next_min_preced)); break;
+      case TAG_OR:             lhs = ast_binop(AST_OR,            lhs, _parse_expr(lexer, next_min_preced)); break;
+      case TAG_GT:             lhs = ast_binop(AST_GT,            lhs, _parse_expr(lexer, next_min_preced)); break;
+      case TAG_GE:             lhs = ast_binop(AST_GE,            lhs, _parse_expr(lexer, next_min_preced)); break;
+      case TAG_LT:             lhs = ast_binop(AST_LT,            lhs, _parse_expr(lexer, next_min_preced)); break;
+      case TAG_LE:             lhs = ast_binop(AST_LE,            lhs, _parse_expr(lexer, next_min_preced)); break;
+      case TAG_EQ:             lhs = ast_binop(AST_EQ,            lhs, _parse_expr(lexer, next_min_preced)); break;
+      case TAG_NE:             lhs = ast_binop(AST_NE,            lhs, _parse_expr(lexer, next_min_preced)); break;
+      case TAG_AS:             lhs = ast_cast(                    lhs, _parse_expr(lexer, next_min_preced)); break;
+      case TAG_RANGE:          lhs = ast_range(                   lhs, _parse_expr(lexer, next_min_preced)); break;
+      case TAG_MEMBER_ACCESS:  lhs = ast_access(                  lhs, _parse_expr(lexer, next_min_preced)); break;
 
       default:
         printf("what? why this %s?\n", tag_names[tag]);
@@ -354,13 +375,13 @@ ast_expr_t *parse_atom(lexer_t *lexer) {
       advance(lexer);
       return e;
     }
-    // TODO: Not actually right - doesn't do -(3+2), for example
     case TAG_MINUS: {
       advance(lexer);
-      ast_expr_t *e = parse_atom(lexer);
-      if (e->type == AST_INT) e->intval *= -1;
-      if (e->type == AST_FLOAT) e->floatval *= -1;
-      return e;
+      return ast_unary(AST_NEGATE, parse_atom(lexer));
+    }
+    case TAG_BITWISE_NOT: {
+      advance(lexer);
+      return ast_unary(AST_BITWISE_NOT, parse_atom(lexer));
     }
     case TAG_LPAREN: {
       advance(lexer);
