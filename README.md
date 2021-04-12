@@ -90,8 +90,8 @@ ByteArray(4)
 ```
 > val a = arr(4)
 Byte Array
-> a[0] = 0xff
-'�'
+> a[0] = 255
+0xff
 > 2345 & a[0]
 41
 > 1 << 4

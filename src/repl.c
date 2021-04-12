@@ -11,6 +11,23 @@
 char result_buf[80];
 char input[MAX_INPUT] = "";
 
+static char* byte_repr(char c) {
+  if (c >= ' ' && c <= '~') {
+    char* s = mem_alloc(2);
+    s[0] = c;
+    s[1] = '\0';
+    return s;
+  }
+
+  char* s = mem_alloc(5);
+  s[0] = '0';
+  s[1] = 'x';
+  s[2] = hex_char((c & 0xf0) >> 4);
+  s[3] = hex_char(c & 0xf);
+  s[4] = '\0';
+  return s;
+}
+
 void print_value(obj_t *obj) {
   switch (obj->type) {
     case TYPE_INT:
@@ -27,7 +44,7 @@ void print_value(obj_t *obj) {
       break;
     case TYPE_CHAR:
       // Range check here.
-      printf("'%c'", obj->charval);
+      printf("%s", byte_repr(obj->charval));
       break;
     case TYPE_BOOLEAN:
       if (obj->boolval) {

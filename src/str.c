@@ -45,9 +45,8 @@ char* c_str_ncat(char *a, const char *b, dim_t n) {
   return s;
 }
 
-/* Convert the decimal value in 0..15 to a hex character. */
-static byte hex_char(int v) {
-  switch(v) {
+byte hex_char(int n) {
+  switch(n) {
     case 0:  return '0';
     case 1:  return '1';
     case 2:  return '2';

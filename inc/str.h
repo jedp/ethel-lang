@@ -19,6 +19,9 @@ void c_str_cp(char* dst, const char* src);
  */
 char* c_str_ncat(char *a, const char *b, dim_t n);
 
+/* Convert the decimal value in 0..15 to a hex character. */
+byte hex_char(int n);
+
 /*
  * Convert a hex string to an int.
  *
