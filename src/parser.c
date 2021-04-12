@@ -355,6 +355,16 @@ ast_expr_t *parse_atom(lexer_t *lexer) {
       advance(lexer);
       return ast_boolean(False);
     }
+    case TAG_HEX: {
+      ast_expr_t *e = ast_int(hex_to_int(lexer->token.string));
+      advance(lexer);
+      return e;
+    }
+    case TAG_BIN: {
+      ast_expr_t *e = ast_int(bin_to_int(lexer->token.string));
+      advance(lexer);
+      return e;
+    }
     case TAG_INT: {
       int i = lexer->token.intval;
       advance(lexer);

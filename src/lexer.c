@@ -64,6 +64,42 @@ static token_t *lex_comment(lexer_t *lexer) {
   return lex_eol(lexer);
 }
 
+static void lex_word_raw(lexer_t *lexer) {
+  mem_set(next_word_buf, 0, MAX_WORD);
+  int i = 0;
+  do {
+    next_word_buf[i++] = lexer->nextch;
+    readch(lexer);
+  } while (isalnum(lexer->nextch));
+  unreadch(lexer);
+}
+
+static token_t *lex_base(lexer_t *lexer, tag_t which) {
+  mem_set(next_word_buf, 0, MAX_WORD);
+  int i = 0;
+
+  if (which == TAG_HEX) {
+    do {
+      char c = lexer->nextch;
+      if (c >= 'A' && c <= 'F') c = c - 'A' + 'a';
+      next_word_buf[i++] = c;
+      readch(lexer);
+    } while ((lexer->nextch >= '0' && lexer->nextch <= '9') ||
+             (lexer->nextch >= 'a' && lexer->nextch <= 'f') ||
+             (lexer->nextch >= 'A' && lexer->nextch <= 'F'));
+  } else if (which == TAG_BIN) {
+    do {
+      next_word_buf[i++] = lexer->nextch; readch(lexer);
+    } while (lexer->nextch == '0' || lexer->nextch == '1');
+  }
+  unreadch(lexer);
+
+  lexer->next_token.tag = which;
+  lexer->next_token.string = next_word_buf;
+
+  return &lexer->next_token;
+}
+
 /**
  * Lex an int or float number.
  *
@@ -114,16 +150,6 @@ done:
   }
 
   return &lexer->next_token;
-}
-
-static void lex_word_raw(lexer_t *lexer) {
-  mem_set(next_word_buf, 0, MAX_WORD);
-  int i = 0;
-  do {
-    next_word_buf[i++] = lexer->nextch;
-    readch(lexer);
-  } while (isalnum(lexer->nextch));
-  unreadch(lexer);
 }
 
 static token_t *lex_field_or_method(lexer_t *lexer) {
@@ -236,6 +262,21 @@ token_t *get_token(lexer_t *lexer) {
   if (ch == 0) return lex_eof(lexer);
 
   if (ch == '\n') return lex_eol(lexer);
+
+  if (ch == '0') {
+    readch(lexer);
+    switch (lexer->nextch) {
+      case 'x':
+        readch(lexer);
+        return lex_base(lexer, TAG_HEX);
+      case 'b':
+        readch(lexer);
+        return lex_base(lexer, TAG_BIN);
+      default:
+        unreadch(lexer);
+        break;
+    }
+  }
 
   if (ch >= '0' && ch <= '9') return lex_num(lexer);
 

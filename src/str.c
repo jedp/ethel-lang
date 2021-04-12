@@ -68,8 +68,86 @@ static byte hex_char(int v) {
   }
 }
 
-void fmt_hex(bytearray_t *a, dim_t start, dim_t end, int n) {
+int hex_to_int(char* s) {
+  int strlen = c_str_len(s);
+  int val = 0;
+  int j;
+  for (int i = 0; i < 8 && i < strlen; i++) {
+    switch(s[strlen - 1 - i]) {
+      case '0': j =  0; break;
+      case '1': j =  1; break;
+      case '2': j =  2; break;
+      case '3': j =  3; break;
+      case '4': j =  4; break;
+      case '5': j =  5; break;
+      case '6': j =  6; break;
+      case '7': j =  7; break;
+      case '8': j =  8; break;
+      case '9': j =  9; break;
+      case 'a': j = 10; break;
+      case 'b': j = 11; break;
+      case 'c': j = 12; break;
+      case 'd': j = 13; break;
+      case 'e': j = 14; break;
+      case 'f': j = 15; break;
+      default:
+        printf("'%c' in \"%s\"? what?\n", s[strlen - 1 - i], s);
+        break;
+    }
+    val += (j << i*4);
+  }
 
+  return val;
+}
+
+int bin_to_int(char* s) {
+  int strlen = c_str_len(s);
+  int val = 0;
+  int j;
+  for (int i = 0; i < 32 && i < strlen; i++) {
+    switch(s[strlen - 1 - i]) {
+      case '0': j = 0; break;
+      case '1': j = 1; break;
+      default:
+        printf("'%c' in \"%s\"? what?\n", s[strlen - 1 - i], s);
+        break;
+    }
+    val += j << i;
+  }
+
+  return val;
+}
+
+bytearray_t *int_to_bin(unsigned int n) {
+  int digits = 1;
+  for (int i = 0; i < 32; i++) {
+    if (n & (1 << i)) digits = i + 1;
+  }
+  bytearray_t *a = bytearray_alloc(digits + 2);
+
+  a->data[0] = '0';
+  a->data[1] = 'b';
+  for (int i = 0; i < digits; i++) {
+    a->data[digits + 1 - i] = ((n & (1 << i)) >> i) ? '1' : '0';
+  }
+
+  return a;
+}
+
+bytearray_t *int_to_hex(unsigned int n) {
+  int digits = 1;
+  for (int i = 0; i < 8; i++) {
+    if (n & (0xf << i*4)) digits = i + 1;
+  }
+  bytearray_t *a = bytearray_alloc(digits + 2);
+
+  a->data[0] = '0';
+  a->data[1] = 'x';
+  for (int i = 0; i < digits; i++) {
+    a->data[digits + 1 - i] = hex_char((n & (0xf << i*4)) >> i*4);
+  }
+
+  return a;
 }
 
 bytearray_t *bytearray_alloc(dim_t size) {

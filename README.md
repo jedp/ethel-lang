@@ -90,12 +90,16 @@ ByteArray(4)
 ```
 > val a = arr(4)
 Byte Array
-> a[0] = 255
+> a[0] = 0xff
 '�'
 > 2345 & a[0]
 41
 > 1 << 4
 16
+> 0b11110101 ^ 0b00110011
+198
+> dump(198)
+0x000000c6  00000000 00000000 00000000 11000110
 ```
 
 #### Dumps of internal representation

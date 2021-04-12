@@ -38,6 +38,8 @@ enum tag_enum {
   TAG_BITWISE_NOT,
 
   // Types
+  TAG_BIN,
+  TAG_HEX,
   TAG_INT,
   TAG_FLOAT,
   TAG_CHAR,
@@ -52,6 +54,8 @@ enum tag_enum {
   TAG_ARR_DECL,
 
   // Type declarations
+  TAG_TYPE_BIN,
+  TAG_TYPE_HEX,
   TAG_TYPE_INT,
   TAG_TYPE_FLOAT,
   TAG_TYPE_CHAR,
@@ -142,6 +146,7 @@ static const char* tag_names[] = {
   "BITWISE_NOT",
 
   // Types
+  "HEX",
   "INT",
   "FLOAT",
   "CHAR",

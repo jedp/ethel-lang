@@ -122,6 +122,34 @@ void test_parse_if_else_assign_expr(void) {
   mem_free(ast);
 }
 
+void test_parse_hex(void) {
+  char *program = "val x = 0x8fff";
+  ast_expr_t *ast = mem_alloc(sizeof(ast_expr_t));
+  parse_result_t *parse_result = mem_alloc(sizeof(parse_result_t));
+  parse_program(program, ast, parse_result);
+
+  TEST_ASSERT_EQUAL(ERR_NO_ERROR, parse_result->err);
+  TEST_ASSERT_EQUAL(AST_ASSIGN, ast->type);
+  TEST_ASSERT_EQUAL(AST_IDENT, ((ast_expr_t*) ast->assignment->ident)->type);
+  TEST_ASSERT_EQUAL(AST_INT, ((ast_expr_t*) ast->assignment->value)->type);
+  TEST_ASSERT_EQUAL(36863, ((ast_expr_t*) ast->assignment->value)->intval);
+  mem_free(ast);
+}
+
+void test_parse_bin(void) {
+  char *program = "val x = 0b1000";
+  ast_expr_t *ast = mem_alloc(sizeof(ast_expr_t));
+  parse_result_t *parse_result = mem_alloc(sizeof(parse_result_t));
+  parse_program(program, ast, parse_result);
+
+  TEST_ASSERT_EQUAL(ERR_NO_ERROR, parse_result->err);
+  TEST_ASSERT_EQUAL(AST_ASSIGN, ast->type);
+  TEST_ASSERT_EQUAL(AST_IDENT, ((ast_expr_t*) ast->assignment->ident)->type);
+  TEST_ASSERT_EQUAL(AST_INT, ((ast_expr_t*) ast->assignment->value)->type);
+  TEST_ASSERT_EQUAL(8, ((ast_expr_t*) ast->assignment->value)->intval);
+  mem_free(ast);
+}
+
 void test_parse_char(void) {
   char *program = "val c = 'c'";
   ast_expr_t *ast = mem_alloc(sizeof(ast_expr_t));
@@ -240,6 +268,8 @@ void test_parser(void) {
   RUN_TEST(test_parse_if_else);
   RUN_TEST(test_parse_if_else_assign_expr);
   RUN_TEST(test_parse_char);
+  RUN_TEST(test_parse_hex);
+  RUN_TEST(test_parse_bin);
   RUN_TEST(test_parse_string);
   RUN_TEST(test_parse_boolean_true);
   RUN_TEST(test_parse_boolean_false);

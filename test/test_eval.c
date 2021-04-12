@@ -533,21 +533,21 @@ void test_eval_arr_assign(void) {
 }
 
 void test_eval_bitwise_or(void) {
-  char *program = "4 | 8";
+  char *program = "4 | 0x8";
   eval_result_t *result = eval_program(program);
   TEST_ASSERT_EQUAL(ERR_NO_ERROR, result->err);
   TEST_ASSERT_EQUAL(12, result->obj->intval);
 }
 
 void test_eval_bitwise_xor(void) {
-  char *program = "15 ^ 7";
+  char *program = "15 ^ 0b0111";
   eval_result_t *result = eval_program(program);
   TEST_ASSERT_EQUAL(ERR_NO_ERROR, result->err);
   TEST_ASSERT_EQUAL(8, result->obj->intval);
 }
 
 void test_eval_bitwise_and(void) {
-  char *program = "15 & 7";
+  char *program = "15 & 0x07";
   eval_result_t *result = eval_program(program);
   TEST_ASSERT_EQUAL(ERR_NO_ERROR, result->err);
   TEST_ASSERT_EQUAL(7, result->obj->intval);
@@ -561,7 +561,7 @@ void test_eval_bitwise_not(void) {
 }
 
 void test_eval_bitwise_shl(void) {
-  char *program = "1 << 4";
+  char *program = "0x1 << 0x4";
   eval_result_t *result = eval_program(program);
   TEST_ASSERT_EQUAL(ERR_NO_ERROR, result->err);
   TEST_ASSERT_EQUAL(16, result->obj->intval);

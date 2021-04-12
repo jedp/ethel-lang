@@ -45,11 +45,32 @@ void test_lex_word(void) {
   }
 }
 
+void test_lex_hex(void) {
+  char *expr = "0xCafE42";
+  lexer_t lexer;
+  lexer_init(&lexer, expr, c_str_len(expr));
+
+  TEST_ASSERT_EQUAL(ERR_NO_ERROR, lexer.err);
+  TEST_ASSERT_EQUAL(TAG_HEX, lexer.token.tag);
+  TEST_ASSERT_EQUAL_STRING("cafe42", lexer.token.string);
+}
+
+void test_lex_bin(void) {
+  char *expr = "0b1101101";
+  lexer_t lexer;
+  lexer_init(&lexer, expr, c_str_len(expr));
+
+  TEST_ASSERT_EQUAL(ERR_NO_ERROR, lexer.err);
+  TEST_ASSERT_EQUAL(TAG_BIN, lexer.token.tag);
+  TEST_ASSERT_EQUAL_STRING("1101101", lexer.token.string);
+}
+
 void test_lex_int(void) {
   char *expr = "3120";
   lexer_t lexer;
   lexer_init(&lexer, expr, c_str_len(expr));
 
+  TEST_ASSERT_EQUAL(ERR_NO_ERROR, lexer.err);
   TEST_ASSERT_EQUAL(TAG_INT, lexer.token.tag);
   TEST_ASSERT_EQUAL(3120, lexer.token.intval);
 }
@@ -59,6 +80,7 @@ void test_lex_float(void) {
   lexer_t lexer;
   lexer_init(&lexer, expr, c_str_len(expr));
 
+  TEST_ASSERT_EQUAL(ERR_NO_ERROR, lexer.err);
   TEST_ASSERT_EQUAL(TAG_FLOAT, lexer.token.tag);
   TEST_ASSERT_EQUAL((float) 3.1415, lexer.token.floatval);
 }
@@ -68,6 +90,7 @@ void test_lex_float_no_leading_decimal(void) {
   lexer_t lexer;
   lexer_init(&lexer, expr, c_str_len(expr));
 
+  TEST_ASSERT_EQUAL(ERR_NO_ERROR, lexer.err);
   TEST_ASSERT_EQUAL(TAG_FLOAT, lexer.token.tag);
   TEST_ASSERT_EQUAL((float) 0.125, lexer.token.floatval);
 }
@@ -77,6 +100,7 @@ void test_lex_char(void) {
   lexer_t lexer;
   lexer_init(&lexer, expr, c_str_len(expr));
 
+  TEST_ASSERT_EQUAL(ERR_NO_ERROR, lexer.err);
   TEST_ASSERT_EQUAL(TAG_CHAR, lexer.token.tag);
   TEST_ASSERT_EQUAL('c', lexer.token.ch);
 }
@@ -86,6 +110,7 @@ void test_lex_string(void) {
   lexer_t lexer;
   lexer_init(&lexer, expr, c_str_len(expr));
 
+  TEST_ASSERT_EQUAL(ERR_NO_ERROR, lexer.err);
   TEST_ASSERT_EQUAL(TAG_STRING, lexer.token.tag);
   TEST_ASSERT_EQUAL_STRING("i like pie", lexer.token.string);
 }
@@ -95,6 +120,7 @@ void test_lex_true(void) {
   lexer_t lexer;
   lexer_init(&lexer, expr, c_str_len(expr));
 
+  TEST_ASSERT_EQUAL(ERR_NO_ERROR, lexer.err);
   TEST_ASSERT_EQUAL(TAG_TRUE, lexer.token.tag);
 }
 
@@ -103,6 +129,7 @@ void test_lex_false(void) {
   lexer_t lexer;
   lexer_init(&lexer, expr, c_str_len(expr));
 
+  TEST_ASSERT_EQUAL(ERR_NO_ERROR, lexer.err);
   TEST_ASSERT_EQUAL(TAG_FALSE, lexer.token.tag);
 }
 
@@ -499,6 +526,8 @@ void test_lexer(void) {
   RUN_TEST(test_lex_error);
   RUN_TEST(test_lex_word);
   RUN_TEST(test_lex_int);
+  RUN_TEST(test_lex_hex);
+  RUN_TEST(test_lex_bin);
   RUN_TEST(test_lex_float);
   RUN_TEST(test_lex_float_no_leading_decimal);
   RUN_TEST(test_lex_char);

@@ -20,10 +20,26 @@ void c_str_cp(char* dst, const char* src);
 char* c_str_ncat(char *a, const char *b, dim_t n);
 
 /*
- * Convert decimal value n to hex representation, and print it at buf[start:end].
- * Pad with zeros.
+ * Convert a hex string to an int.
+ *
+ * Because this is going into an int32, we can only accommodate 8 chars (nybbles).
+ * Extra leading digits will be ignored. Least signficant digits will be parsed.
  */
-void fmt_hex(bytearray_t *a, dim_t start, dim_t end, int n);
+int hex_to_int(char* s);
+
+/*
+ * Convert a binary string to an int.
+ *
+ * Because this is going into an int32, we can only accommodate 32 chars.
+ * Extra leading digits will be ignored. Least significant digits will be parsed.
+ */
+int bin_to_int(char* s);
+
+/* Convert an int to a binary string. Uses the least number of digits possible. */
+bytearray_t *int_to_bin(unsigned int n);
+
+/* Convert an int to a hex string. Uses the least number of digits possible. */
+bytearray_t *int_to_hex(unsigned int n);
 
 /* Return a canonical hexdump of the array as a string. */
 obj_t *arr_dump(obj_t *arr_obj);
