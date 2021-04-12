@@ -92,6 +92,10 @@ enum tag_enum {
   TAG_PRINT,
   TAG_INPUT,
 
+  // Formatting
+  TAG_TO_HEX,
+  TAG_TO_BIN,
+
   // Blocks
   TAG_BEGIN,
   TAG_END,
@@ -197,6 +201,10 @@ static const char* tag_names[] = {
   "PRINT",
   "INPUT",
 
+  // Formatting
+  "TO-HEX",
+  "TO-BIN",
+
   // Blocks
   "BEGIN",
   "END",
@@ -240,6 +248,8 @@ static const token_t reserved[] = {
   { TAG_DUMP,          .string = (char *) "dump" },
   { TAG_PRINT,         .string = (char *) "print" },
   { TAG_INPUT,         .string = (char *) "input" },
+  { TAG_TO_HEX,        .string = (char *) "hex" },
+  { TAG_TO_BIN,        .string = (char *) "bin" },
   { TAG_WHILE,         .string = (char *) "while" },
   { TAG_FOR,           .string = (char *) "for" },
   { TAG_IN,            .string = (char *) "in" },
