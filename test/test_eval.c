@@ -272,6 +272,26 @@ void test_eval_callable_abs(void) {
   TEST_ASSERT_EQUAL(42, obj->intval);
 }
 
+void test_eval_callable_hex(void) {
+  char *program = "hex(-199)";
+  eval_result_t *result = eval_program(program);
+  TEST_ASSERT_EQUAL(ERR_NO_ERROR, result->err);
+
+  obj_t *obj = result->obj;
+  TEST_ASSERT_EQUAL(TYPE_STRING, obj->type);
+  TEST_ASSERT_EQUAL_STRING("0xffffff39", bytearray_to_c_str(obj->bytearray));
+}
+
+void test_eval_callable_bin(void) {
+  char *program = "bin(177)";
+  eval_result_t *result = eval_program(program);
+  TEST_ASSERT_EQUAL(ERR_NO_ERROR, result->err);
+
+  obj_t *obj = result->obj;
+  TEST_ASSERT_EQUAL(TYPE_STRING, obj->type);
+  TEST_ASSERT_EQUAL_STRING("0b10110001", bytearray_to_c_str(obj->bytearray));
+}
+
 void test_eval_string_length(void) {
   char *program = "\"Ethel\".length()";
   eval_result_t *result = eval_program(program);
@@ -596,6 +616,8 @@ void test_eval(void) {
   RUN_TEST(test_eval_cast_char);
   RUN_TEST(test_eval_cast_boolean);
   RUN_TEST(test_eval_callable_abs);
+  RUN_TEST(test_eval_callable_hex);
+  RUN_TEST(test_eval_callable_bin);
   RUN_TEST(test_eval_string_length);
   RUN_TEST(test_eval_string_var_length);
   RUN_TEST(test_eval_string_length_in_expr);
