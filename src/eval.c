@@ -172,6 +172,37 @@ void eval_block_expr(ast_expr_list_t *block_exprs, eval_result_t *result, env_t 
   pop_scope(env);
 }
 
+void eval_func_def(ast_func_def_t *func_def, eval_result_t *result, env_t *env) {
+  result->obj = func_obj((void *) func_def);
+}
+
+void eval_func_call(ast_func_call_t *func_call, eval_result_t *result, env_t *env) {
+  obj_t *obj = get_env(env, bytearray_to_c_str(func_call->name));
+
+  ast_func_def_t *fn = (ast_func_def_t *) obj->func_ptr;
+
+  push_scope(env);
+
+  ast_fn_arg_decl_t *argnames = fn->argnames;
+  ast_expr_list_t *callargs = func_call->args;
+  while (argnames != NULL) {
+    if (callargs == NULL) {
+      result->err = ERR_WRONG_ARG_COUNT;
+      return;
+    }
+    char* name = argnames->name;
+    eval_result_t *r = eval_expr(callargs->root, env);
+    put_env(env, name, r->obj, F_NONE);
+
+    argnames = argnames->next;
+    callargs = callargs->next;
+  }
+
+  eval_block_expr(fn->block_exprs, result, env);
+
+  pop_scope(env);
+}
+
 void strip_trailing_ws(char* s) {
   int end = c_str_len(s) - 1;
   while (end > 0) {
@@ -1107,9 +1138,14 @@ eval_result_t *eval_expr(ast_expr_t *expr, env_t *env) {
           if (result->err != ERR_NO_ERROR) goto error;
           break;
         }
-        case AST_LAMBDA: {
-                           printf("placeholder\n");
-          eval_block_expr(expr->lambda->block_exprs, result, env);
+        case AST_FUNCTION_DEF: {
+          // Wrap the function pointer in an obj.
+          eval_func_def(expr->func_def, result, env);
+          if (result->err != ERR_NO_ERROR) goto error;
+          break;
+        }
+        case AST_FUNCTION_CALL: {
+          eval_func_call(expr->func_call, result, env);
           if (result->err != ERR_NO_ERROR) goto error;
           break;
         }
@@ -1123,11 +1159,19 @@ eval_result_t *eval_expr(ast_expr_t *expr, env_t *env) {
             // The mutability flags are on the associated expression e2,
             // and these need to be copied over to the new object.
             const char* name = bytearray_to_c_str(((ast_expr_t*)expr->assignment->ident)->bytearray);
-            // Eval the object now and save the result as a primitive value.
-            eval_result_t *r = eval_expr(expr->assignment->value, env);
-            if ((result->err = r->err) != ERR_NO_ERROR) goto error;
-            error_t error = put_env(env, name, r->obj, expr->flags);
-            result->obj = r->obj;
+            error_t error = ERR_NO_ERROR;
+            // If it's a function, put a pointer to the code in the env.
+            if (expr->assignment->value->type == AST_FUNCTION_DEF) {
+              eval_func_def(expr->assignment->value->func_def, result, env);
+              if (result->err != ERR_NO_ERROR) goto error;
+              error = put_env(env, name, result->obj, F_NONE);
+            } else {
+              eval_result_t *r = eval_expr(expr->assignment->value, env);
+              if ((result->err = r->err) != ERR_NO_ERROR) goto error;
+              error = put_env(env, name, r->obj, expr->flags);
+              result->obj = r->obj;
+            }
+            // Otherwise eval the object now and save the primitive value in the env.
             // Store the obj in the result value for the caller.
             if (error != ERR_NO_ERROR) {
               result->err = error;

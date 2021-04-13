@@ -261,7 +261,7 @@ void test_parse_seq_elem_assign(void) {
   mem_free(ast);
 }
 
-void test_parse_empty_lambda(void) {
+void test_parse_empty_func(void) {
   char *program = "val x = fn() { }";
   ast_expr_t *ast = mem_alloc(sizeof(ast_expr_t));
   parse_result_t *parse_result = mem_alloc(sizeof(parse_result_t));
@@ -270,14 +270,14 @@ void test_parse_empty_lambda(void) {
   TEST_ASSERT_EQUAL(ERR_NO_ERROR, parse_result->err);
   TEST_ASSERT_EQUAL(AST_ASSIGN, ast->type);
   TEST_ASSERT_EQUAL(AST_IDENT, ((ast_expr_t*) ast->assignment->ident)->type);
-  TEST_ASSERT_EQUAL(AST_LAMBDA, ((ast_expr_t*) ast->assignment->value)->type);
-  ast_lambda_t *lambda = (ast_lambda_t*) ast->assignment->value->lambda;
-  TEST_ASSERT_NULL(lambda->argnames);
-  TEST_ASSERT_NULL(lambda->block_exprs);
+  TEST_ASSERT_EQUAL(AST_FUNCTION_DEF, ((ast_expr_t*) ast->assignment->value)->type);
+  ast_func_def_t *f= (ast_func_def_t*) ast->assignment->value->func_def;
+  TEST_ASSERT_NULL(f->argnames);
+  TEST_ASSERT_NULL(f->block_exprs);
   mem_free(ast);
 }
 
-void test_parse_lambda(void) {
+void test_parse_func(void) {
   char *program = "val x = fn(a, b, c) { val r = a + b + c\nr }";
   ast_expr_t *ast = mem_alloc(sizeof(ast_expr_t));
   parse_result_t *parse_result = mem_alloc(sizeof(parse_result_t));
@@ -286,12 +286,28 @@ void test_parse_lambda(void) {
   TEST_ASSERT_EQUAL(ERR_NO_ERROR, parse_result->err);
   TEST_ASSERT_EQUAL(AST_ASSIGN, ast->type);
   TEST_ASSERT_EQUAL(AST_IDENT, ((ast_expr_t*) ast->assignment->ident)->type);
-  TEST_ASSERT_EQUAL(AST_LAMBDA, ((ast_expr_t*) ast->assignment->value)->type);
-  ast_lambda_t *lambda = (ast_lambda_t*) ast->assignment->value->lambda;
-  TEST_ASSERT_EQUAL_STRING("a", lambda->argnames->name);
-  TEST_ASSERT_EQUAL_STRING("b", lambda->argnames->next->name);
-  TEST_ASSERT_EQUAL_STRING("c", lambda->argnames->next->next->name);
-  TEST_ASSERT_EQUAL(AST_IDENT, lambda->block_exprs->next->root->type);
+  TEST_ASSERT_EQUAL(AST_FUNCTION_DEF, ((ast_expr_t*) ast->assignment->value)->type);
+  ast_func_def_t *f= (ast_func_def_t*) ast->assignment->value->func_def;
+  TEST_ASSERT_EQUAL_STRING("a", f->argnames->name);
+  TEST_ASSERT_EQUAL_STRING("b", f->argnames->next->name);
+  TEST_ASSERT_EQUAL_STRING("c", f->argnames->next->next->name);
+  TEST_ASSERT_EQUAL(AST_IDENT, f->block_exprs->next->root->type);
+  mem_free(ast);
+}
+
+void test_parse_func_call(void) {
+  char *program = "val x = f(42)";
+  ast_expr_t *ast = mem_alloc(sizeof(ast_expr_t));
+  parse_result_t *parse_result = mem_alloc(sizeof(parse_result_t));
+  parse_program(program, ast, parse_result);
+
+  TEST_ASSERT_EQUAL(ERR_NO_ERROR, parse_result->err);
+  TEST_ASSERT_EQUAL(AST_ASSIGN, ast->type);
+  TEST_ASSERT_EQUAL(AST_IDENT, ((ast_expr_t*) ast->assignment->ident)->type);
+  TEST_ASSERT_EQUAL(AST_FUNCTION_CALL, ((ast_expr_t*) ast->assignment->value)->type);
+  ast_func_call_t *func_call = (ast_func_call_t*) ast->assignment->value->func_call;
+  TEST_ASSERT_EQUAL_STRING("f", bytearray_to_c_str(func_call->name));
+  TEST_ASSERT_EQUAL(42, func_call->args->root->intval);
   mem_free(ast);
 }
 
@@ -314,7 +330,8 @@ void test_parser(void) {
   RUN_TEST(test_parse_seq_elem);
   RUN_TEST(test_parse_seq_elem_access);
   RUN_TEST(test_parse_seq_elem_assign);
-  RUN_TEST(test_parse_empty_lambda);
-  RUN_TEST(test_parse_lambda);
+  RUN_TEST(test_parse_empty_func);
+  RUN_TEST(test_parse_func);
+  RUN_TEST(test_parse_func_call);
 }
 

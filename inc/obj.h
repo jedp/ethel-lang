@@ -12,7 +12,7 @@ enum obj_type_enum {
   TYPE_UNDEF,
   TYPE_NIL,
   TYPE_ERROR,
-  TYPE_FN,
+  TYPE_FUNC_PTR,
   TYPE_INT,
   TYPE_FLOAT,
   TYPE_CHAR,
@@ -71,6 +71,11 @@ typedef struct ObjList {
   obj_list_element_t *elems;
 } obj_list_t;
 
+typedef struct ObjFuncArg {
+  bytearray_t *name;
+  struct ObjFuncArg *next;
+} obj_func_arg_t;
+
 typedef struct Obj {
   uint16_t type;
   uint16_t flags;
@@ -83,6 +88,7 @@ typedef struct Obj {
     range_t range;
     obj_list_t *list;
     bytearray_t *bytearray;
+    void* func_ptr;
   };
   obj_method_t *methods;
 } obj_t;
@@ -146,6 +152,7 @@ obj_t *string_obj(bytearray_t *src);
 obj_t *boolean_obj(boolean);
 obj_t *range_obj(int, int);
 obj_t *list_obj(char* type_name, obj_list_element_t* elems);
+obj_t *func_obj(void* code);
 
 boolean truthy(obj_t *obj);
 

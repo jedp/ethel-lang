@@ -38,7 +38,6 @@ enum tag_enum {
   TAG_BITWISE_NOT,
 
   // Types
-  TAG_FN,
   TAG_BIN,
   TAG_HEX,
   TAG_INT,
@@ -104,7 +103,9 @@ enum tag_enum {
   // Fields and methods
   TAG_MEMBER_ACCESS,
   TAG_FIELD_NAME,
-  TAG_METHOD_NAME,
+  TAG_METHOD_CALL,
+  TAG_FUNC_DEF,
+  TAG_FUNC_CALL,
 
   // Math
   TAG_ABS,
@@ -215,7 +216,8 @@ static const char* tag_names[] = {
   // Field and method access
   "MEMBER-ACCESS",
   "FIELD-NAME",
-  "METHOD-NAME",
+  "METHOD-CALL",
+  "FUNCTION-CALL",
 
   // Math
   "ABS",
@@ -239,7 +241,7 @@ typedef struct {
 } token_t;
 
 static const token_t reserved[] = {
-  { TAG_FN,            .string = (char *) "fn" },
+  { TAG_FUNC_DEF,       .string = (char *) "fn" },
   { TAG_IF,            .string = (char *) "if" },
   { TAG_THEN,          .string = (char *) "then" },
   { TAG_ELSE,          .string = (char *) "else" },

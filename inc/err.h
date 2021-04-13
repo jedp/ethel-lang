@@ -30,6 +30,7 @@ enum error_enum {
   ERR_INDEX_OUT_OF_RANGE,
   ERR_NO_SUCH_FIELD,
   ERR_NO_SUCH_METHOD,
+  ERR_WRONG_ARG_COUNT,
   ERR_SYNTAX_ERROR,
   ERR_MAX,
 };
@@ -60,6 +61,7 @@ static const char* err_names[ERR_MAX] = {
   "Index out of range",
   "No such field",
   "No such method",
+  "Incorrect number of arguments",
   "Syntax error",
 };
 

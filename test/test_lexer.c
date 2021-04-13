@@ -421,13 +421,13 @@ void test_lex_method_access(void) {
   lexer_init(&lexer, expr, c_str_len(expr));
 
   int expected[] = {
-    TAG_IDENT, TAG_MEMBER_ACCESS, TAG_METHOD_NAME, TAG_LPAREN, TAG_INT, TAG_RPAREN
+    TAG_IDENT, TAG_MEMBER_ACCESS, TAG_METHOD_CALL, TAG_LPAREN, TAG_INT, TAG_RPAREN
   };
   for (int i = 0; i < sizeof(expected) / sizeof(expected[0]); i++) {
     TEST_ASSERT_EQUAL(ERR_NO_ERROR, lexer.err);
     TEST_ASSERT_EQUAL(expected[i], lexer.token.tag);
 
-    if (lexer.token.tag == TAG_METHOD_NAME) {
+    if (lexer.token.tag == TAG_METHOD_CALL) {
       TEST_ASSERT_EQUAL_STRING("insert", lexer.token.string);
     }
     advance(&lexer);
@@ -473,8 +473,24 @@ void test_lex_function_definition(void) {
 
   int expected[] = {
     TAG_INVARIABLE, TAG_IDENT, TAG_ASSIGN,
-    TAG_FN, TAG_LPAREN, TAG_IDENT, TAG_COMMA, TAG_IDENT, TAG_RPAREN,
+    TAG_FUNC_DEF, TAG_LPAREN, TAG_IDENT, TAG_COMMA, TAG_IDENT, TAG_RPAREN,
     TAG_BEGIN, TAG_IDENT, TAG_PLUS, TAG_IDENT, TAG_END
+  };
+  for (int i = 0; i < sizeof(expected) / sizeof(expected[0]); i++) {
+    TEST_ASSERT_EQUAL(ERR_NO_ERROR, lexer.err);
+    TEST_ASSERT_EQUAL(expected[i], lexer.token.tag);
+    advance(&lexer);
+  }
+}
+
+void test_lex_function_call(void) {
+  char*expr = "val x = f(42)";
+  lexer_t lexer;
+  lexer_init(&lexer, expr, c_str_len(expr));
+
+  int expected[] = {
+    TAG_INVARIABLE, TAG_IDENT, TAG_ASSIGN,
+    TAG_FUNC_CALL, TAG_LPAREN, TAG_INT, TAG_RPAREN
   };
   for (int i = 0; i < sizeof(expected) / sizeof(expected[0]); i++) {
     TEST_ASSERT_EQUAL(ERR_NO_ERROR, lexer.err);
@@ -490,7 +506,7 @@ void test_lex_all_tokens(void) {
   } test_data_t;
 
   test_data_t test_data[] = {
-    (test_data_t) { .text = "fn", .expected_tag = TAG_FN },
+    (test_data_t) { .text = "fn", .expected_tag = TAG_FUNC_DEF },
     (test_data_t) { .text = "x", .expected_tag = TAG_IDENT },
     (test_data_t) { .text = "=", .expected_tag = TAG_ASSIGN },
     (test_data_t) { .text = "{", .expected_tag = TAG_BEGIN },
@@ -575,6 +591,7 @@ void test_lexer(void) {
   RUN_TEST(test_lex_array_access);
   RUN_TEST(test_lex_array_constructor);
   RUN_TEST(test_lex_function_definition);
+  RUN_TEST(test_lex_function_call);
   RUN_TEST(test_lex_all_tokens);
 }
 

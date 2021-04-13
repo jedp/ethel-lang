@@ -195,22 +195,22 @@ ast_expr_t *ast_seq_elem(ast_expr_t *ident, ast_expr_t *index) {
   return node;
 }
 
-ast_expr_t *ast_method(char* name, ast_expr_list_t *args) {
-  ast_expr_t *node = ast_node(AST_METHOD);
-  node->method = mem_alloc(sizeof(ast_method_t));
-  node->method->name = mem_alloc(c_str_len(name) + 1);
-  c_str_cp(node->method->name, name);
-  node->method->args = args;
+ast_expr_t *ast_method_call(char* name, ast_expr_list_t *args) {
+  ast_expr_t *node = ast_node(AST_METHOD_CALL);
+  node->method_call = mem_alloc(sizeof(ast_method_t));
+  node->method_call->name = mem_alloc(c_str_len(name) + 1);
+  c_str_cp(node->method_call->name, name);
+  node->method_call->args = args;
   return node;
 }
 
 ast_expr_t *ast_access(ast_expr_t *object, ast_expr_t *member) {
-  if (member->type != AST_METHOD) {
+  if (member->type != AST_METHOD_CALL) {
     printf("Method access only. Not allowed: '%s'\n", ast_node_names[member->type]);
     return ast_empty();
   }
 
-  return ast_member_access(object, member->method->name, member->method->args);
+  return ast_member_access(object, member->method_call->name, member->method_call->args);
 }
 
 ast_expr_t *ast_block(ast_expr_list_t *es) {
@@ -220,12 +220,20 @@ ast_expr_t *ast_block(ast_expr_list_t *es) {
   return node;
 }
 
-ast_expr_t *ast_lambda(ast_fn_arg_decl_t *argnames,
+ast_expr_t *ast_func_def(ast_fn_arg_decl_t *argnames,
                        ast_expr_list_t *es) {
-  ast_expr_t *node = ast_node(AST_LAMBDA);
-  node->lambda = mem_alloc(sizeof(ast_lambda_t));
-  node->lambda->argnames = argnames;
-  node->lambda->block_exprs = es;
+  ast_expr_t *node = ast_node(AST_FUNCTION_DEF);
+  node->func_def = mem_alloc(sizeof(ast_func_def_t));
+  node->func_def->argnames = argnames;
+  node->func_def->block_exprs = es;
+  return node;
+}
+
+ast_expr_t *ast_func_call(bytearray_t *name, ast_expr_list_t *args) {
+  ast_expr_t *node = ast_node(AST_FUNCTION_CALL);
+  node->func_call = mem_alloc(sizeof(ast_func_call_t));
+  node->func_call->name = name;
+  node->func_call->args = args;
   return node;
 }
 

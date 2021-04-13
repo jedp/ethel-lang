@@ -111,6 +111,12 @@ obj_t *list_obj(char* name, obj_list_element_t *elems) {
   return obj;
 }
 
+obj_t *func_obj(void* code) {
+  obj_t *obj = obj_of(TYPE_FUNC_PTR);
+  obj->func_ptr = code;
+  return obj;
+}
+
 boolean truthy(obj_t *obj) {
   switch(obj->type) {
     case TYPE_NIL: return False;

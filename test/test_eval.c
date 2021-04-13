@@ -594,6 +594,22 @@ void test_eval_bitwise_shr(void) {
   TEST_ASSERT_EQUAL(4, result->obj->intval);
 }
 
+void test_eval_function(void) {
+  char *program = "{ val f = fn(x) { x + 1 } \nf(1) }";
+  eval_result_t *result = eval_program(program);
+
+  TEST_ASSERT_EQUAL(ERR_NO_ERROR, result->err);
+  TEST_ASSERT_EQUAL(TYPE_INT, result->obj->type);
+  TEST_ASSERT_EQUAL(2, result->obj->intval);
+}
+
+void test_eval_function_wrong_args(void) {
+  char *program = "{ val f = fn(x, y) { x + y } \nf(1) }";
+  eval_result_t *result = eval_program(program);
+
+  TEST_ASSERT_EQUAL(ERR_WRONG_ARG_COUNT, result->err);
+}
+
 void test_eval(void) {
   RUN_TEST(test_eval_calculator);
   RUN_TEST(test_eval_assign_immutable);
@@ -640,5 +656,7 @@ void test_eval(void) {
   RUN_TEST(test_eval_bitwise_not);
   RUN_TEST(test_eval_bitwise_shl);
   RUN_TEST(test_eval_bitwise_shr);
+  RUN_TEST(test_eval_function);
+  RUN_TEST(test_eval_function_wrong_args);
 }
 

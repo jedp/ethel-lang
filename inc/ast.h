@@ -30,7 +30,6 @@ enum ast_type_enum {
   AST_NIL,
   AST_LIST,
   AST_APPLY,
-  AST_LAMBDA,
   AST_INT,
   AST_FLOAT,
   AST_STRING,
@@ -47,7 +46,9 @@ enum ast_type_enum {
   AST_SEQ_ELEM,
   AST_SEQ_ELEM_ASSIGN,
   AST_FIELD,
-  AST_METHOD,
+  AST_METHOD_CALL,
+  AST_FUNCTION_DEF,
+  AST_FUNCTION_CALL,
   AST_TYPE_NAME,
   AST_BLOCK,
   AST_RESERVED_CALLABLE,
@@ -82,7 +83,6 @@ static const char *ast_node_names[] = {
   "NIL",
   "LIST",
   "APPLY",
-  "LAMBDA",
   "INT",
   "FLOAT",
   "STRING",
@@ -99,7 +99,9 @@ static const char *ast_node_names[] = {
   "SEQUENCE-ELEM",
   "SEQUENCE-ELEM-ASSIGN",
   "FIELD",
-  "METHOD",
+  "METHOD-CALL",
+  "FUNCTION-DEF",
+  "FUNCTION-CALL",
   "TYPE-NAME",
   "BLOCK",
   "RESERVED-CALLABLE",
@@ -190,15 +192,25 @@ typedef struct AstForLoop {
   ast_expr_t *pred;
 } ast_for_loop_t;
 
+typedef struct AstVarNameMap {
+  char* name;
+  ast_expr_t *value;
+} ast_var_name_map_t;
+
 typedef struct AstFnArgDecl {
   char *name;
   struct AstFnArgDecl *next;
 } ast_fn_arg_decl_t;
 
-typedef struct AstLambda {
+typedef struct AstFunc {
   ast_fn_arg_decl_t *argnames;
   ast_expr_list_t *block_exprs;
-} ast_lambda_t;
+} ast_func_def_t;
+
+typedef struct AstFuncCall {
+  bytearray_t *name;
+  ast_expr_list_t *args;
+} ast_func_call_t;
 
 typedef struct AstArrayDecl {
   ast_expr_t *size;
@@ -250,9 +262,10 @@ typedef struct __attribute__((__packed__)) AstExpr {
     ast_array_decl_t *array_decl;
     ast_seq_elem_t *seq_elem;
     ast_assign_elem_t *assign_elem;
-    ast_method_t *method;
+    ast_method_t *method_call;
     ast_apply_t *application;
-    ast_lambda_t *lambda;
+    ast_func_def_t *func_def;
+    ast_func_call_t *func_call;
     int intval;
     int boolval;
     float floatval;
@@ -278,8 +291,9 @@ ast_expr_t *ast_type(ast_type_t type);
 ast_expr_t *ast_ident(char* name);
 ast_expr_t *ast_seq_elem(ast_expr_t *ident, ast_expr_t *index);
 ast_expr_t *ast_field(char* name);
-ast_expr_t *ast_lambda(ast_fn_arg_decl_t *args, ast_expr_list_t *es);
-ast_expr_t *ast_method(char* name, ast_expr_list_t *args);
+ast_expr_t *ast_func_def(ast_fn_arg_decl_t *args, ast_expr_list_t *es);
+ast_expr_t *ast_func_call(bytearray_t *name, ast_expr_list_t *args);
+ast_expr_t *ast_method_call(char* name, ast_expr_list_t *args);
 ast_expr_t *ast_member_access(ast_expr_t *receiver, char* member_name, ast_expr_list_t *args);
 ast_expr_t *ast_type_name(char* name);
 ast_expr_t *ast_range(ast_expr_t *from, ast_expr_t *to);
