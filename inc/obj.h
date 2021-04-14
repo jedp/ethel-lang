@@ -135,11 +135,6 @@ static const static_method_name_t static_method_names[] = {
   { .ident = METHOD_DUMP,          .name = "dump" },
 };
 
-typedef struct StaticMethod {
-  const char* name;
-  struct Obj *(*callable)(obj_t *obj, obj_method_args_t *args);
-} obj_static_method_t;
-
 obj_t *undef_obj();
 obj_t *nil_obj();
 obj_t *no_obj();
