@@ -42,6 +42,12 @@ void test_eval_assign_multiple(void) {
   TEST_ASSERT_EQUAL(12, ((obj_t *)result->obj)->intval);
 }
 
+void test_eval_del(void) {
+  char *program = "{ val x = 42 \n del(x) \n x}";
+  eval_result_t *result = eval_program(program);
+  TEST_ASSERT_EQUAL(ERR_ENV_SYMBOL_UNDEFINED, result->err);
+}
+
 void test_eval_if_else(void) {
   char *program = "if 12 then val x = 5";
   eval_result_t *result = eval_program(program);
@@ -615,6 +621,7 @@ void test_eval(void) {
   RUN_TEST(test_eval_assign_immutable);
   RUN_TEST(test_eval_assign_var);
   RUN_TEST(test_eval_assign_multiple);
+  RUN_TEST(test_eval_del);
   RUN_TEST(test_eval_if_else);
   RUN_TEST(test_eval_if_else_nil);
   RUN_TEST(test_eval_if_else_assign);

@@ -14,7 +14,7 @@ ast_expr_t *ast_node(ast_type_t type) {
     case AST_BOOLEAN: node->boolval = 0;     break;
     case AST_BYTEARRAY:
     case AST_STRING: {
-                      node->bytearray = c_str_to_bytearray("");
+                      node->bytearray = bytearray_alloc(0);
                       break;
                      }
     // Other nodes are not initialized.

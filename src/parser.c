@@ -527,7 +527,10 @@ ast_expr_t *parse_atom(lexer_t *lexer) {
     }
     case TAG_DEL: {
       advance(lexer);
+      if (!eat(lexer, TAG_LPAREN)) goto error;
       ast_expr_t *id = ast_ident(c_str_to_bytearray(lexer->token.string));
+      if (!eat(lexer, TAG_IDENT)) { mem_free(id); goto error; }
+      if (!eat(lexer, TAG_RPAREN)) { mem_free(id); goto error; }
       return ast_delete(id);
     }
     case TAG_ABS: 
