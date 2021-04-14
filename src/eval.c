@@ -133,7 +133,7 @@ void eval_list_expr(ast_list_t *list, eval_result_t *result, env_t *env) {
     }
 
     // TODO user-defined types
-    if (!c_str_eq(list->type_name, obj_type_names[r->obj->type])) {
+    if (!c_str_eq(bytearray_to_c_str(list->type_name), obj_type_names[r->obj->type])) {
       result->err = ERR_EVAL_TYPE_ERROR;
       result->obj = list_obj(list->type_name, NULL);
       return;

@@ -312,9 +312,9 @@ ast_expr_t *parse_expr(lexer_t *lexer) {
           mem_free(es);
           goto error;
         }
-        return ast_list(bytearray_to_c_str(type_name->bytearray), es);
+        return ast_list(type_name->bytearray, es);
       }
-      return ast_list(bytearray_to_c_str(type_name->bytearray), NULL);
+      return ast_list(type_name->bytearray, NULL);
     }
     case TAG_INPUT: {
       ast_reserved_callable_type_t callable_type = ast_callable_type_for_tag(lexer->token.tag);
@@ -355,7 +355,6 @@ error:
 }
 
 ast_expr_t *parse_atom(lexer_t *lexer) {
-
   switch (lexer->token.tag) {
     case TAG_NIL: {
       advance(lexer);

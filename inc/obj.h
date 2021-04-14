@@ -51,7 +51,7 @@ typedef struct MethodArg {
 } obj_method_args_t;
 
 typedef struct Method {
-  const char* name;
+  bytearray_t *name;
   struct Obj *(*callable)(struct Obj *obj, struct MethodArg *args);
   struct Method *next;
 } obj_method_t;
@@ -67,7 +67,7 @@ typedef struct ObjListElem {
 } obj_list_element_t;
 
 typedef struct ObjList {
-  char* type_name;
+  bytearray_t *type_name;
   obj_list_element_t *elems;
 } obj_list_t;
 
@@ -151,7 +151,7 @@ obj_t *bytearray_obj(dim_t size, uint8_t *data);
 obj_t *string_obj(bytearray_t *src);
 obj_t *boolean_obj(boolean);
 obj_t *range_obj(int, int);
-obj_t *list_obj(char* type_name, obj_list_element_t* elems);
+obj_t *list_obj(bytearray_t *type_name, obj_list_element_t* elems);
 obj_t *func_obj(void* code);
 
 boolean truthy(obj_t *obj);

@@ -58,6 +58,12 @@ obj_t *float32_dump(obj_t *float_obj);
 
 bytearray_t *bytearray_alloc(dim_t size);
 
+/* Return a new bytearray that is a bytewise copy of the original. */
+bytearray_t *bytearray_clone(bytearray_t *src);
+
+/* Return true if the two arrays have the same contents. */
+boolean bytearray_eq(bytearray_t *a, bytearray_t *b);
+
 char* bytearray_to_c_str(bytearray_t *a);
 
 bytearray_t *c_str_to_bytearray(const char* s);

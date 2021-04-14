@@ -156,6 +156,26 @@ bytearray_t *bytearray_alloc(dim_t size) {
   return a;
 }
 
+bytearray_t *bytearray_clone(bytearray_t *src) {
+  bytearray_t *dst = bytearray_alloc(src->size);
+  dim_t i = 0;
+  while (i < src->size) {
+    dst->data[i] = src->data[i];
+    i++;
+  }
+  return dst;
+}
+
+boolean bytearray_eq(bytearray_t *a, bytearray_t *b) {
+  if (a->size != b->size) return False;
+
+  for (int i = 0; i < a->size; i++) {
+    if (a->data[i] != b->data[i]) return False;
+  }
+
+  return False;
+}
+
 char* bytearray_to_c_str(bytearray_t *a) {
   char* s = mem_alloc(a->size + 1);
   mem_cp(s, a->data, a->size);

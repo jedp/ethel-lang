@@ -4,14 +4,13 @@
 #include "../inc/obj.h"
 #include "../inc/list.h"
 
-obj_t *_empty_list(char* type_name) {
+obj_t *_empty_list(bytearray_t *type_name) {
   obj_t *obj = mem_alloc(sizeof(obj_t));
   obj->type = TYPE_LIST;
   obj->flags = F_NONE;
 
   obj_list_t *list = mem_alloc(sizeof(obj_list_t));
-  list->type_name = mem_alloc(c_str_len(type_name) + 1);
-  c_str_cp(list->type_name, type_name);
+  list->type_name = bytearray_clone(type_name);
   list->elems = NULL;
   obj->list = list;
   return obj;
@@ -90,8 +89,8 @@ obj_t *_list_slice(obj_t *list_obj, int start, int end) {
   slice->list = mem_alloc(sizeof(obj_list_t));
 
   // Give it the same type and put the first elem in it.
-  slice->list->type_name = mem_alloc(c_str_len(list_obj->list->type_name) + 1);
-  c_str_cp(slice->list->type_name, list_obj->list->type_name);
+  slice->list->type_name = mem_alloc(list_obj->list->type_name->size + 1);
+  slice->list->type_name = bytearray_clone(list_obj->list->type_name);
   slice->list->elems = mem_alloc(sizeof(obj_list_t));
 
   obj_list_element_t *curr = slice->list->elems;
@@ -168,7 +167,7 @@ obj_t *list_prepend(obj_t *list_obj, obj_method_args_t *args) {
     return nil_obj();
   }
 
-  if (!c_str_eq(obj_type_names[args->arg->type], list_obj->list->type_name)) {
+  if (!c_str_eq(obj_type_names[args->arg->type], bytearray_to_c_str(list_obj->list->type_name))) {
     printf("Wrong type\n");
     return nil_obj();
   }
@@ -188,7 +187,7 @@ obj_t *list_append(obj_t *list_obj, obj_method_args_t *args) {
     return nil_obj();
   }
 
-  if (!c_str_eq(obj_type_names[args->arg->type], list_obj->list->type_name)) {
+  if (!c_str_eq(obj_type_names[args->arg->type], bytearray_to_c_str(list_obj->list->type_name))) {
     printf("Wrong type\n");
     return nil_obj();
   }

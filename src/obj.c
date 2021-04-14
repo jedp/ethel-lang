@@ -97,12 +97,11 @@ obj_t *range_obj(int from, int to) {
   return obj;
 }
 
-obj_t *list_obj(char* name, obj_list_element_t *elems) {
+obj_t *list_obj(bytearray_t *name, obj_list_element_t *elems) {
   obj_t *obj = obj_of(TYPE_LIST);
   obj_list_t *list = mem_alloc(sizeof(obj_list_t));
 
-  list->type_name = mem_alloc(c_str_len(name) + 1);
-  c_str_cp(list->type_name, name);
+  list->type_name = bytearray_clone(name);
 
   list->elems = mem_alloc(sizeof(obj_list_element_t));
   list->elems = elems;

@@ -172,7 +172,7 @@ typedef struct AstExprListNode {
 } ast_expr_list_t;
 
 typedef struct AstList {
-  char* type_name;
+  bytearray_t *type_name;
   ast_expr_list_t *es;
 } ast_list_t;
 
@@ -279,7 +279,7 @@ ast_expr_t *ast_unary(ast_type_t type, ast_expr_t *a);
 ast_expr_t *ast_binop(ast_type_t type, ast_expr_t *a, ast_expr_t *b);
 ast_expr_t *ast_cast(ast_expr_t *e1, ast_expr_t *e2);
 ast_expr_t *ast_nil();
-ast_expr_t *ast_list(char* type_name, ast_expr_list_t *nullable_init_es);
+ast_expr_t *ast_list(bytearray_t *type_name, ast_expr_list_t *nullable_init_es);
 ast_expr_t *ast_float(float value);
 ast_expr_t *ast_int(int value);
 ast_expr_t *ast_byte(byte b);

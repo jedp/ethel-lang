@@ -97,11 +97,10 @@ ast_expr_t *ast_nil() {
   return ast_node(AST_NIL);
 }
 
-ast_expr_t *ast_list(char* type_name, ast_expr_list_t *nullable_init_es) {
+ast_expr_t *ast_list(bytearray_t *type_name, ast_expr_list_t *nullable_init_es) {
   ast_expr_t *node = ast_node(AST_LIST);
   node->list = mem_alloc(sizeof(ast_list_t));
-  node->list->type_name = mem_alloc(c_str_len(type_name) + 1);
-  c_str_cp(node->list->type_name, type_name);
+  node->list->type_name = bytearray_clone(type_name);
   if (nullable_init_es != NULL) {
     node->list->es = nullable_init_es;
   } else {
