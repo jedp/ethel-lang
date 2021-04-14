@@ -91,7 +91,7 @@ int hex_to_int(char* s) {
       case 'f': j = 15; break;
       default:
         printf("'%c' in \"%s\"? what?\n", s[strlen - 1 - i], s);
-        break;
+        return -1;
     }
     val += (j << i*4);
   }
@@ -109,7 +109,7 @@ int bin_to_int(char* s) {
       case '1': j = 1; break;
       default:
         printf("'%c' in \"%s\"? what?\n", s[strlen - 1 - i], s);
-        break;
+        return -1;
     }
     val += j << i;
   }

@@ -478,8 +478,7 @@ ast_expr_t *parse_atom(lexer_t *lexer) {
     case TAG_FUNC_DEF: {
       advance(lexer);
       if (!eat(lexer, TAG_LPAREN)) goto error;
-      ast_fn_arg_decl_t *args = mem_alloc(sizeof(ast_fn_arg_decl_t));
-      args = NULL;
+      ast_fn_arg_decl_t *args = NULL;
       if (lexer->token.tag != TAG_RPAREN) {
         args = parse_fn_arg_decl(lexer);
       }
@@ -497,8 +496,7 @@ ast_expr_t *parse_atom(lexer_t *lexer) {
       bytearray_t *name = c_str_to_bytearray(lexer->token.string);
       advance(lexer);
       if (!eat(lexer, TAG_LPAREN)) { mem_free(name); goto error; }
-      ast_expr_list_t *args = mem_alloc(sizeof(ast_expr_list_t));
-      args = NULL;
+      ast_expr_list_t *args = NULL;
       if (lexer->token.tag != TAG_RPAREN) {
         args = parse_expr_list(lexer);
       }
