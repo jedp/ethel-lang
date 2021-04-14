@@ -554,8 +554,12 @@ void bitwise_not(obj_t *a, eval_result_t *result) {
   }
 }
 
-void range(int from, int to, eval_result_t *result) {
-  result->obj = range_obj(from, to);
+void range(int from_inclusive, int to_inclusive, eval_result_t *result) {
+  if (to_inclusive < from_inclusive) {
+    result->err = ERR_RANGE_ERROR;
+    return;
+  }
+  result->obj = range_obj(from_inclusive, to_inclusive);
 }
 
 void apply(ast_expr_t *expr, eval_result_t *result, env_t *env) {
@@ -1026,17 +1030,13 @@ eval_result_t *eval_expr(ast_expr_t *expr, env_t *env) {
             break;
         }
         case AST_RANGE: {
-            if (((obj_t*)expr->range->from)->type != AST_INT) {
-              result->err = ERR_TYPE_INT_REQUIRED; goto error;
-            }
             eval_result_t *r1 = eval_expr(expr->range->from, env);
+            if (r1->obj->type != AST_INT) result->err = ERR_TYPE_INT_REQUIRED;
             if ((result->err = r1->err) != ERR_NO_ERROR) goto error;
-            if (((obj_t*)expr->range->to)->type != AST_INT) {
-              result->err = ERR_TYPE_INT_REQUIRED; goto error;
-            }
             eval_result_t *r2 = eval_expr(expr->range->to, env);
+            if (r2->obj->type != AST_INT) result->err = ERR_TYPE_INT_REQUIRED;
             if ((result->err = r2->err) != ERR_NO_ERROR) goto error;
-            range(r1->obj->intval, r2->obj->intval, result);
+            range(r1->obj->intval, r2->obj->intval - 1, result);
             if (result->err != ERR_NO_ERROR) goto error;
             break;
         }
