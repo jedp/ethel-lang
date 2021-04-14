@@ -193,12 +193,12 @@ typedef struct AstForLoop {
 } ast_for_loop_t;
 
 typedef struct AstVarNameMap {
-  char* name;
+  bytearray_t *name;
   ast_expr_t *value;
 } ast_var_name_map_t;
 
 typedef struct AstFnArgDecl {
-  char *name;
+  bytearray_t *name;
   struct AstFnArgDecl *next;
 } ast_fn_arg_decl_t;
 
@@ -228,18 +228,18 @@ typedef struct AstAssignElem {
 } ast_assign_elem_t;
 
 typedef struct AstField {
-  char* name;
+  bytearray_t *name;
 } ast_field_t;
 
 typedef struct AstMethod {
-  char* name;
+  bytearray_t *name;
   ast_type_t result_type;
   ast_expr_list_t *args;
 } ast_method_t;
 
 typedef struct AstApply {
   ast_expr_t *receiver;
-  char* member_name;
+  bytearray_t *member_name;
   ast_expr_list_t *args;
 } ast_apply_t;
 
@@ -283,19 +283,21 @@ ast_expr_t *ast_list(bytearray_t *type_name, ast_expr_list_t *nullable_init_es);
 ast_expr_t *ast_float(float value);
 ast_expr_t *ast_int(int value);
 ast_expr_t *ast_byte(byte b);
-ast_expr_t *ast_string(char* s);
+ast_expr_t *ast_string(bytearray_t *s);
 ast_expr_t *ast_array_decl(ast_expr_t *size);
 ast_expr_t *ast_assign_elem(ast_expr_t *seq, ast_expr_t *offset, ast_expr_t *value);
 ast_expr_t *ast_boolean(boolean t);
 ast_expr_t *ast_type(ast_type_t type);
-ast_expr_t *ast_ident(char* name);
+ast_expr_t *ast_ident(bytearray_t *s);
 ast_expr_t *ast_seq_elem(ast_expr_t *ident, ast_expr_t *index);
-ast_expr_t *ast_field(char* name);
+ast_expr_t *ast_field(bytearray_t *s);
 ast_expr_t *ast_func_def(ast_fn_arg_decl_t *args, ast_expr_list_t *es);
 ast_expr_t *ast_func_call(bytearray_t *name, ast_expr_list_t *args);
-ast_expr_t *ast_method_call(char* name, ast_expr_list_t *args);
-ast_expr_t *ast_member_access(ast_expr_t *receiver, char* member_name, ast_expr_list_t *args);
-ast_expr_t *ast_type_name(char* name);
+ast_expr_t *ast_method_call(bytearray_t *name, ast_expr_list_t *args);
+ast_expr_t *ast_member_access(ast_expr_t *receiver,
+                              bytearray_t *meber_name,
+                              ast_expr_list_t *args);
+ast_expr_t *ast_type_name(bytearray_t *name);
 ast_expr_t *ast_range(ast_expr_t *from, ast_expr_t *to);
 ast_expr_t *ast_access(ast_expr_t *object, ast_expr_t *member);
 ast_expr_t *ast_block(ast_expr_list_t *es);

@@ -134,9 +134,9 @@ ast_expr_t *ast_array_decl(ast_expr_t *size) {
   return node;
 }
 
-ast_expr_t *ast_string(char* s) {
+ast_expr_t *ast_string(bytearray_t *s) {
   ast_expr_t *node = ast_node(AST_STRING);
-  node->bytearray = c_str_to_bytearray(s);
+  node->bytearray = bytearray_clone(s);
   return node;
 }
 
@@ -151,20 +151,21 @@ ast_expr_t *ast_type(ast_type_t type) {
   return node;
 }
 
-ast_expr_t *ast_ident(char* name) {
+ast_expr_t *ast_ident(bytearray_t *name) {
   ast_expr_t *node = ast_node(AST_IDENT);
-  node->bytearray = c_str_to_bytearray(name);
+  node->bytearray = name;
   return node;
 }
 
-ast_expr_t *ast_member_access(ast_expr_t *expr, char* member_name, ast_expr_list_t *args) {
+ast_expr_t *ast_member_access(ast_expr_t *expr,
+                              bytearray_t *member_name,
+                              ast_expr_list_t *args) {
   ast_expr_t *node = ast_node(AST_APPLY);
 
   node->application = mem_alloc(sizeof(ast_apply_t));
   node->application->receiver = expr;
 
-  node->application->member_name = mem_alloc(c_str_len(member_name) + 1);
-  c_str_cp(node->application->member_name, member_name);
+  node->application->member_name = bytearray_clone(member_name);
 
   node->application->args = mem_alloc(sizeof(ast_expr_list_t));
   node->application->args = args;
@@ -172,9 +173,9 @@ ast_expr_t *ast_member_access(ast_expr_t *expr, char* member_name, ast_expr_list
   return node;
 }
 
-ast_expr_t *ast_type_name(char* name) {
+ast_expr_t *ast_type_name(bytearray_t *name) {
   ast_expr_t *node = ast_node(AST_TYPE_NAME);
-  node->bytearray = c_str_to_bytearray(name);
+  node->bytearray = name;
   return node;
 }
 
@@ -194,11 +195,10 @@ ast_expr_t *ast_seq_elem(ast_expr_t *ident, ast_expr_t *index) {
   return node;
 }
 
-ast_expr_t *ast_method_call(char* name, ast_expr_list_t *args) {
+ast_expr_t *ast_method_call(bytearray_t *name, ast_expr_list_t *args) {
   ast_expr_t *node = ast_node(AST_METHOD_CALL);
   node->method_call = mem_alloc(sizeof(ast_method_t));
-  node->method_call->name = mem_alloc(c_str_len(name) + 1);
-  c_str_cp(node->method_call->name, name);
+  node->method_call->name = bytearray_clone(name);
   node->method_call->args = args;
   return node;
 }

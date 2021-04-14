@@ -176,7 +176,7 @@ void eval_func_def(ast_func_def_t *func_def, eval_result_t *result, env_t *env) 
 }
 
 void eval_func_call(ast_func_call_t *func_call, eval_result_t *result, env_t *env) {
-  obj_t *obj = get_env(env, bytearray_to_c_str(func_call->name));
+  obj_t *obj = get_env(env, func_call->name);
 
   ast_func_def_t *fn = (ast_func_def_t *) obj->func_ptr;
 
@@ -189,7 +189,7 @@ void eval_func_call(ast_func_call_t *func_call, eval_result_t *result, env_t *en
       result->err = ERR_WRONG_ARG_COUNT;
       return;
     }
-    char* name = argnames->name;
+    bytearray_t *name = argnames->name;
     eval_result_t *r = eval_expr(callargs->root, env);
     put_env(env, name, r->obj, F_NONE);
 
@@ -378,9 +378,9 @@ void cast(obj_t *obj, obj_t *type_obj, eval_result_t *result) {
         case TYPE_BYTE:
           goto done;
         case TYPE_STRING: {
-          char c = obj->byteval;
+          char b = obj->byteval;
           obj->bytearray = bytearray_alloc(1);
-          obj->bytearray->data[0] = c;
+          obj->bytearray->data[0] = b;
           goto done;
         }
         case TYPE_BOOLEAN:
@@ -576,9 +576,9 @@ void apply(ast_expr_t *expr, eval_result_t *result, env_t *env) {
 
   // Look up the method identifier.
   static_method_ident_t method_id = METHOD_NONE;
-  const char* member_name = expr->application->member_name;
+  bytearray_t *member_name = expr->application->member_name;
   for (int i = 0; i < sizeof(static_method_names) / sizeof(static_method_names[0]); i++) {
-    if (c_str_eq(static_method_names[i].name, member_name)) {
+    if (c_str_eq_bytearray(static_method_names[i].name, member_name)) {
       method_id = static_method_names[i].ident;
       goto found;
     }
@@ -790,7 +790,7 @@ void eval_while_loop(ast_expr_t *expr, env_t *env, eval_result_t *result) {
 }
 
 void eval_for_loop(ast_expr_t *expr, env_t *env, eval_result_t *result) {
-  char* index_name = bytearray_to_c_str(((ast_expr_t*) expr->for_loop->index)->bytearray);
+  bytearray_t* index_name = ((ast_expr_t*) expr->for_loop->index)->bytearray;
   eval_result_t *r = mem_alloc(sizeof(eval_result_t));
   r->obj = undef_obj();
 
@@ -1064,8 +1064,7 @@ eval_result_t *eval_expr(ast_expr_t *expr, env_t *env) {
             if (result->err != ERR_NO_ERROR) goto error;
             break;
         case AST_IDENT: {
-            // Look up the identifier by name in the environment.
-            const char* name = bytearray_to_c_str(expr->bytearray);
+            bytearray_t *name = expr->bytearray;
             obj_t *obj = get_env(env, name);
             if (obj->type == TYPE_UNDEF) {
               result->err = ERR_ENV_SYMBOL_UNDEFINED;
@@ -1084,7 +1083,7 @@ eval_result_t *eval_expr(ast_expr_t *expr, env_t *env) {
           break;
         }
         case AST_SEQ_ELEM: {
-          const char* name = bytearray_to_c_str(expr->seq_elem->ident->bytearray);
+          bytearray_t *name = expr->seq_elem->ident->bytearray;
           obj_t *a = get_env(env, name);
           if (a->type == TYPE_UNDEF) {
             result->err = ERR_ENV_SYMBOL_UNDEFINED;
@@ -1104,7 +1103,7 @@ eval_result_t *eval_expr(ast_expr_t *expr, env_t *env) {
           break;
         }
         case AST_SEQ_ELEM_ASSIGN: {
-          const char* name = bytearray_to_c_str(expr->assign_elem->seq->bytearray);
+          bytearray_t* name = expr->assign_elem->seq->bytearray;
           obj_t *a = get_env(env, name);
           if (a->type == TYPE_UNDEF) {
             result->err = ERR_ENV_SYMBOL_UNDEFINED;
@@ -1157,7 +1156,7 @@ eval_result_t *eval_expr(ast_expr_t *expr, env_t *env) {
             // Save the expression associated with the identifier.
             // The mutability flags are on the associated expression e2,
             // and these need to be copied over to the new object.
-            const char* name = bytearray_to_c_str(((ast_expr_t*)expr->assignment->ident)->bytearray);
+            bytearray_t *name = ((ast_expr_t*)expr->assignment->ident)->bytearray;
             error_t error = ERR_NO_ERROR;
             // If it's a function, put a pointer to the code in the env.
             if (expr->assignment->value->type == AST_FUNCTION_DEF) {
@@ -1179,7 +1178,7 @@ eval_result_t *eval_expr(ast_expr_t *expr, env_t *env) {
             break;
         }
         case AST_REASSIGN: {
-            const char* name = bytearray_to_c_str(((ast_expr_t*)expr->assignment->ident)->bytearray);
+            bytearray_t *name = ((ast_expr_t*)expr->assignment->ident)->bytearray;
             obj_t *existing = get_env(env, name);
             if (existing->type == TYPE_UNDEF) {
               result->err = ERR_ENV_SYMBOL_UNDEFINED;
@@ -1207,7 +1206,7 @@ eval_result_t *eval_expr(ast_expr_t *expr, env_t *env) {
           break;
         }
         case AST_DELETE: {
-          error_t error = del_env(env, bytearray_to_c_str(expr->bytearray));
+          error_t error = del_env(env, expr->bytearray);
           if (error != ERR_NO_ERROR) {
             result->err = error;
             goto error;

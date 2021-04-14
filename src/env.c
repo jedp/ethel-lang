@@ -4,10 +4,10 @@
 #include "../inc/str.h"
 #include "../inc/env.h"
 
-env_sym_t *new_sym(const char* name, obj_t *obj, uint8_t flags) {
+env_sym_t *new_sym(bytearray_t *name, obj_t *obj, uint8_t flags) {
   env_sym_t *sym = mem_alloc(sizeof(env_sym_t));
-  sym->name = mem_alloc(c_str_len(name) + 1);
-  c_str_cp(sym->name, name);
+  sym->name = mem_alloc(sizeof(bytearray_t));
+  sym->name = bytearray_clone(name);
   sym->flags = flags;
   sym->obj = obj;
   sym->prev = NULL;
@@ -17,7 +17,7 @@ env_sym_t *new_sym(const char* name, obj_t *obj, uint8_t flags) {
 }
 
 env_sym_t *empty_sym() {
-  return new_sym("", NULL, F_NONE);
+  return new_sym(c_str_to_bytearray(""), NULL, F_NONE);
 }
 
 error_t push_scope(env_t *env) {
@@ -47,7 +47,7 @@ error_t pop_scope(env_t *env) {
   return ERR_NO_ERROR;
 }
 
-env_sym_t *find_sym(env_t *env, const char *name) {
+env_sym_t *find_sym(env_t *env, bytearray_t *name) {
   if (env->top < 0) {
     return NULL;
   }
@@ -57,7 +57,7 @@ env_sym_t *find_sym(env_t *env, const char *name) {
     // Start at the node the root points to.
     env_sym_t *node = env->symbols[i].next;
     while (node != NULL) {
-      if (c_str_eq(name, node->name)) {
+      if (bytearray_eq(name, node->name)) {
         return node;
       }
       node = node->next;
@@ -67,7 +67,7 @@ env_sym_t *find_sym(env_t *env, const char *name) {
   return NULL;
 }
 
-error_t put_env(env_t *env, const char* name, const obj_t *obj, const uint8_t flags) {
+error_t put_env(env_t *env, bytearray_t *name, const obj_t *obj, const uint8_t flags) {
   if (env->top < 0) {
     return ERR_ENV_NO_SCOPE;
   }
@@ -85,7 +85,6 @@ error_t put_env(env_t *env, const char* name, const obj_t *obj, const uint8_t fl
   }
 
   // Not found. Put it in the current scope.
-
   env_sym_t *top = &(env->symbols[env->top]);
   env_sym_t *new = new_sym(name, (obj_t *) obj, flags);
   new->next = top->next;
@@ -96,7 +95,7 @@ error_t put_env(env_t *env, const char* name, const obj_t *obj, const uint8_t fl
   return ERR_NO_ERROR;
 }
 
-error_t del_env(env_t *env, const char* name) {
+error_t del_env(env_t *env, bytearray_t *name) {
   env_sym_t *sym = find_sym(env, name);
   if (sym == NULL) return ERR_ENV_SYMBOL_UNDEFINED;
 
@@ -108,7 +107,7 @@ error_t del_env(env_t *env, const char* name) {
   return ERR_NO_ERROR;
 }
 
-obj_t *get_env(env_t *env, const char* name) {
+obj_t *get_env(env_t *env, bytearray_t *name) {
   env_sym_t *sym = find_sym(env, name);
   if (sym == NULL) return undef_obj();
 

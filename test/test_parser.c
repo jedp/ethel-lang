@@ -288,9 +288,9 @@ void test_parse_func(void) {
   TEST_ASSERT_EQUAL(AST_IDENT, ((ast_expr_t*) ast->assignment->ident)->type);
   TEST_ASSERT_EQUAL(AST_FUNCTION_DEF, ((ast_expr_t*) ast->assignment->value)->type);
   ast_func_def_t *f= (ast_func_def_t*) ast->assignment->value->func_def;
-  TEST_ASSERT_EQUAL_STRING("a", f->argnames->name);
-  TEST_ASSERT_EQUAL_STRING("b", f->argnames->next->name);
-  TEST_ASSERT_EQUAL_STRING("c", f->argnames->next->next->name);
+  TEST_ASSERT_EQUAL_STRING("a", bytearray_to_c_str(f->argnames->name));
+  TEST_ASSERT_EQUAL_STRING("b", bytearray_to_c_str(f->argnames->next->name));
+  TEST_ASSERT_EQUAL_STRING("c", bytearray_to_c_str(f->argnames->next->next->name));
   TEST_ASSERT_EQUAL(AST_IDENT, f->block_exprs->next->root->type);
   mem_free(ast);
 }

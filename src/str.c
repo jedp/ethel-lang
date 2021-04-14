@@ -173,7 +173,17 @@ boolean bytearray_eq(bytearray_t *a, bytearray_t *b) {
     if (a->data[i] != b->data[i]) return False;
   }
 
-  return False;
+  return True;
+}
+
+boolean c_str_eq_bytearray(const char *s, bytearray_t *a) {
+  if (c_str_len(s) != a->size) return False;
+
+  for (int i = 0; i < a->size; i++) {
+    if (s[i] != a->data[i]) return False;
+  }
+
+  return True;
 }
 
 char* bytearray_to_c_str(bytearray_t *a) {

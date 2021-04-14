@@ -64,6 +64,9 @@ bytearray_t *bytearray_clone(bytearray_t *src);
 /* Return true if the two arrays have the same contents. */
 boolean bytearray_eq(bytearray_t *a, bytearray_t *b);
 
+/* Return true if the string and bytearray have the same contents. */
+boolean c_str_eq_bytearray(const char *s, bytearray_t *a);
+
 char* bytearray_to_c_str(bytearray_t *a);
 
 bytearray_t *c_str_to_bytearray(const char* s);

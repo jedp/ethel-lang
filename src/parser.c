@@ -124,8 +124,8 @@ ast_fn_arg_decl_t *parse_fn_arg_decl(lexer_t *lexer) {
 
   if (lexer->token.tag != TAG_IDENT) return NULL;
 
-  node->name = mem_alloc(sizeof(lexer->token.string) + 1);
-  c_str_cp(node->name, lexer->token.string);
+  node->name = mem_alloc(sizeof(bytearray_t));
+  node->name = c_str_to_bytearray(lexer->token.string);
   advance(lexer);
 
   while (lexer->token.tag == TAG_COMMA) {
@@ -134,8 +134,8 @@ ast_fn_arg_decl_t *parse_fn_arg_decl(lexer_t *lexer) {
     node->next = mem_alloc(sizeof(ast_fn_arg_decl_t));
     node = node->next;
 
-    node->name = mem_alloc(sizeof(lexer->token.string) + 1);
-    c_str_cp(node->name, lexer->token.string);
+    node->name = mem_alloc(sizeof(bytearray_t));
+    node->name = c_str_to_bytearray(lexer->token.string);
     advance(lexer);
   }
 
@@ -333,7 +333,7 @@ ast_expr_t *parse_expr(lexer_t *lexer) {
         if (!eat(lexer, TAG_RPAREN)) goto error;
         return ast_reserved_callable(callable_type, empty_expr_list());
       }
-      return ast_ident(lexer->token.string);
+      return ast_ident(c_str_to_bytearray(lexer->token.string));
     }
   }
 
@@ -414,7 +414,7 @@ ast_expr_t *parse_atom(lexer_t *lexer) {
       return ast_byte(c);
     }
     case TAG_STRING: {
-      ast_expr_t *e = ast_string(lexer->token.string);
+      ast_expr_t *e = ast_string(c_str_to_bytearray(lexer->token.string));
       advance(lexer);
       return e;
     }
@@ -440,7 +440,7 @@ ast_expr_t *parse_atom(lexer_t *lexer) {
     }
     case TAG_INVARIABLE: {
       advance(lexer);
-      ast_expr_t *id = ast_ident(lexer->token.string);
+      ast_expr_t *id = ast_ident(c_str_to_bytearray(lexer->token.string));
       if (!eat(lexer, TAG_IDENT)) goto error;
       if (!eat(lexer, TAG_ASSIGN)) goto error;
       ast_expr_t *val = parse_expr(lexer);
@@ -448,14 +448,14 @@ ast_expr_t *parse_atom(lexer_t *lexer) {
     }
     case TAG_VARIABLE: {
       advance(lexer);
-      ast_expr_t *id = ast_ident(lexer->token.string);
+      ast_expr_t *id = ast_ident(c_str_to_bytearray(lexer->token.string));
       if (!eat(lexer, TAG_IDENT)) goto error;
       if (!eat(lexer, TAG_ASSIGN)) goto error;
       ast_expr_t *val = parse_expr(lexer);
       return ast_assign_var(id, val);
     }
     case TAG_IDENT: {
-      ast_expr_t *id = ast_ident(lexer->token.string);
+      ast_expr_t *id = ast_ident(c_str_to_bytearray(lexer->token.string));
       advance(lexer);
       // Identifier in sequence access?
       if (lexer->token.tag == TAG_LBRACKET) {
@@ -506,8 +506,7 @@ ast_expr_t *parse_atom(lexer_t *lexer) {
       return ast_func_call(name, args);
     }
     case TAG_METHOD_CALL: {
-      char* name = mem_alloc(c_str_len(lexer->token.string) + 1);
-      c_str_cp(name, lexer->token.string);
+      bytearray_t *name = c_str_to_bytearray(lexer->token.string);
       advance(lexer);
       if (!eat(lexer, TAG_LPAREN)) { mem_free(name); goto error; }
       if (lexer->token.tag == TAG_RPAREN) {
@@ -524,13 +523,13 @@ ast_expr_t *parse_atom(lexer_t *lexer) {
       return id;
     }
     case TAG_TYPE_NAME: {
-      ast_expr_t *type_name = ast_type_name(lexer->token.string);
+      ast_expr_t *type_name = ast_type_name(c_str_to_bytearray(lexer->token.string));
       advance(lexer);
       return type_name;
     }
     case TAG_DEL: {
       advance(lexer);
-      ast_expr_t *id = ast_ident(lexer->token.string);
+      ast_expr_t *id = ast_ident(c_str_to_bytearray(lexer->token.string));
       return ast_delete(id);
     }
     case TAG_ABS: 
@@ -558,7 +557,7 @@ ast_expr_t *parse_atom(lexer_t *lexer) {
         if (!eat(lexer, TAG_RPAREN)) goto error;
         return ast_reserved_callable(callable_type, empty_expr_list());
       }
-      return ast_ident(lexer->token.string);
+      return ast_ident(c_str_to_bytearray(lexer->token.string));
     }
     default: goto error;
   }
