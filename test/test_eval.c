@@ -144,7 +144,7 @@ void test_eval_char_comparison(void) {
   TEST_ASSERT_EQUAL(ERR_NO_ERROR, result->err);
 
   obj_t *obj = result->obj;
-  TEST_ASSERT_EQUAL('g', obj->charval);
+  TEST_ASSERT_EQUAL('g', obj->byteval);
 }
 
 void test_eval_cast_int(void) {
@@ -162,9 +162,9 @@ void test_eval_cast_int(void) {
   TEST_ASSERT_EQUAL(TYPE_STRING, obj->type);
   TEST_ASSERT_EQUAL_STRING("-99", bytearray_to_c_str(obj->bytearray));
 
-  obj = eval_program("99 as char")->obj;
-  TEST_ASSERT_EQUAL(TYPE_CHAR, obj->type);
-  TEST_ASSERT_EQUAL('c', obj->charval);
+  obj = eval_program("99 as byte")->obj;
+  TEST_ASSERT_EQUAL(TYPE_BYTE, obj->type);
+  TEST_ASSERT_EQUAL('c', obj->byteval);
 
   obj = eval_program("-99 as boolean")->obj;
   TEST_ASSERT_EQUAL(TYPE_BOOLEAN, obj->type);
@@ -255,11 +255,11 @@ void test_eval_cast_boolean(void) {
   TEST_ASSERT_EQUAL(TYPE_STRING, obj->type);
   TEST_ASSERT_EQUAL_STRING("false", bytearray_to_c_str(obj->bytearray));
 
-  obj = eval_program("true as char")->obj;
-  TEST_ASSERT_EQUAL(TYPE_CHAR, obj->type);
+  obj = eval_program("true as byte")->obj;
+  TEST_ASSERT_EQUAL(TYPE_BYTE, obj->type);
   TEST_ASSERT_EQUAL('t', obj->intval);
-  obj = eval_program("false as char")->obj;
-  TEST_ASSERT_EQUAL(TYPE_CHAR, obj->type);
+  obj = eval_program("false as byte")->obj;
+  TEST_ASSERT_EQUAL(TYPE_BYTE, obj->type);
   TEST_ASSERT_EQUAL('f', obj->intval);
 }
 
@@ -531,8 +531,8 @@ void test_eval_arr_decl(void) {
   eval_result_t *result2= eval_program(program2);
 
   TEST_ASSERT_EQUAL(ERR_NO_ERROR, result2->err);
-  TEST_ASSERT_EQUAL(TYPE_CHAR, result2->obj->type);
-  TEST_ASSERT_EQUAL('\0', result2->obj->charval);
+  TEST_ASSERT_EQUAL(TYPE_BYTE, result2->obj->type);
+  TEST_ASSERT_EQUAL('\0', result2->obj->byteval);
 }
 
 void test_eval_arr_assign(void) {
@@ -541,15 +541,15 @@ void test_eval_arr_assign(void) {
   eval_result_t *result = eval_program(program);
 
   TEST_ASSERT_EQUAL(ERR_NO_ERROR, result->err);
-  TEST_ASSERT_EQUAL('*', result->obj->charval);
+  TEST_ASSERT_EQUAL('*', result->obj->byteval);
 
   // Assign with char.
   char *program2= "{ val a = arr(12)\n a[3] = 'x'\n a[3] }";
   eval_result_t *result2= eval_program(program2);
 
   TEST_ASSERT_EQUAL(ERR_NO_ERROR, result2->err);
-  TEST_ASSERT_EQUAL(TYPE_CHAR, result2->obj->type);
-  TEST_ASSERT_EQUAL('x', result2->obj->charval);
+  TEST_ASSERT_EQUAL(TYPE_BYTE, result2->obj->type);
+  TEST_ASSERT_EQUAL('x', result2->obj->byteval);
 }
 
 void test_eval_bitwise_or(void) {

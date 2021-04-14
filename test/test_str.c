@@ -118,7 +118,7 @@ void test_str_float_dump(void) {
 
 void test_str_byte_dump(void) {
   char *expected = " 99  0x63  01100011";
-  obj_t *s = byte_dump(char_obj('c'));
+  obj_t *s = byte_dump(byte_obj('c'));
   TEST_ASSERT_EQUAL_STRING(expected, bytearray_to_c_str(s->bytearray));
 }
 

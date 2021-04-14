@@ -15,7 +15,7 @@ enum obj_type_enum {
   TYPE_FUNC_PTR,
   TYPE_INT,
   TYPE_FLOAT,
-  TYPE_CHAR,
+  TYPE_BYTE,
   TYPE_BYTEARRAY,
   TYPE_STRING,
   TYPE_BOOLEAN,
@@ -34,7 +34,7 @@ static const char* obj_type_names[TYPE_MAX] = {
   "Function",
   "Int",
   "Float",
-  "Char",
+  "Byte",
   "Byte Array",
   "Str",
   "Bool",
@@ -84,7 +84,7 @@ typedef struct Obj {
     int intval;
     int boolval;
     float floatval;
-    char charval;
+    byte byteval;
     range_t range;
     obj_list_t *list;
     bytearray_t *bytearray;
@@ -146,7 +146,7 @@ obj_t *no_obj();
 obj_t *error_obj(error_t errno);
 obj_t *int_obj(int);
 obj_t *float_obj(float);
-obj_t *char_obj(char);
+obj_t *byte_obj(byte);
 obj_t *bytearray_obj(dim_t size, uint8_t *data);
 obj_t *string_obj(bytearray_t *src);
 obj_t *boolean_obj(boolean);

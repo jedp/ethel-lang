@@ -22,7 +22,7 @@ obj_t *arr_get(obj_t *arr_obj, obj_method_args_t *args) {
     return nil_obj();
   }
 
-  return char_obj(arr_obj->bytearray->data[i]);
+  return byte_obj(arr_obj->bytearray->data[i]);
 }
 
 static_method get_arr_static_method(static_method_ident_t method_id) {

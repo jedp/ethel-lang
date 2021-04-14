@@ -159,8 +159,8 @@ void test_parse_char(void) {
   TEST_ASSERT_EQUAL(ERR_NO_ERROR, parse_result->err);
   TEST_ASSERT_EQUAL(AST_ASSIGN, ast->type);
   TEST_ASSERT_EQUAL(AST_IDENT, ((ast_expr_t*) ast->assignment->ident)->type);
-  TEST_ASSERT_EQUAL(AST_CHAR, ((ast_expr_t*) ast->assignment->value)->type);
-  TEST_ASSERT_EQUAL('c', ((ast_expr_t*) ast->assignment->value)->charval);
+  TEST_ASSERT_EQUAL(AST_BYTE, ((ast_expr_t*) ast->assignment->value)->type);
+  TEST_ASSERT_EQUAL('c', ((ast_expr_t*) ast->assignment->value)->byteval);
   mem_free(ast);
 }
 

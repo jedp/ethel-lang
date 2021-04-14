@@ -101,7 +101,7 @@ void test_lex_char(void) {
   lexer_init(&lexer, expr, c_str_len(expr));
 
   TEST_ASSERT_EQUAL(ERR_NO_ERROR, lexer.err);
-  TEST_ASSERT_EQUAL(TAG_CHAR, lexer.token.tag);
+  TEST_ASSERT_EQUAL(TAG_BYTE, lexer.token.tag);
   TEST_ASSERT_EQUAL('c', lexer.token.ch);
 }
 
@@ -535,7 +535,7 @@ void test_lex_all_tokens(void) {
     (test_data_t) { .text = "mod", .expected_tag = TAG_MOD },
     (test_data_t) { .text = "42", .expected_tag = TAG_INT },
     (test_data_t) { .text = "3.14", .expected_tag = TAG_FLOAT },
-    (test_data_t) { .text = "'c'", .expected_tag = TAG_CHAR },
+    (test_data_t) { .text = "'c'", .expected_tag = TAG_BYTE },
     (test_data_t) { .text = "\"string\"", .expected_tag = TAG_STRING },
     (test_data_t) { .text = "list", .expected_tag = TAG_LIST },
     (test_data_t) { .text = "of", .expected_tag = TAG_OF },

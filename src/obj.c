@@ -79,9 +79,9 @@ obj_t *string_obj(bytearray_t *src) {
   return obj;
 }
 
-obj_t *char_obj(char c) {
-  obj_t *obj = obj_of(TYPE_CHAR);
-  obj->charval = c;
+obj_t *byte_obj(byte b) {
+  obj_t *obj = obj_of(TYPE_BYTE);
+  obj->byteval = b;
   return obj;
 }
 
@@ -123,7 +123,7 @@ boolean truthy(obj_t *obj) {
     case TYPE_INT: return obj->intval != 0;
     case TYPE_FLOAT: return obj->floatval != 0;
     case TYPE_STRING: return obj->bytearray->size > 0;
-    case TYPE_CHAR: return obj->charval != 0x0;
+    case TYPE_BYTE: return obj->byteval != 0x0;
     case TYPE_BOOLEAN: return obj->boolval;
     default:
       printf("Unknown type: %d\n", obj->type);

@@ -13,9 +13,11 @@ char input[MAX_INPUT] = "";
 
 static char* byte_repr(char c) {
   if (c >= ' ' && c <= '~') {
-    char* s = mem_alloc(2);
-    s[0] = c;
-    s[1] = '\0';
+    char* s = mem_alloc(4);
+    s[0] = '\'';
+    s[1] = c;
+    s[2] = '\'';
+    s[3] = '\0';
     return s;
   }
 
@@ -45,9 +47,9 @@ void print_value(obj_t *obj) {
     case TYPE_BYTEARRAY:
       printf("Byte Array");
       break;
-    case TYPE_CHAR:
+    case TYPE_BYTE:
       // Range check here.
-      printf("%s", byte_repr(obj->charval));
+      printf("%s", byte_repr(obj->byteval));
       break;
     case TYPE_BOOLEAN:
       if (obj->boolval) {

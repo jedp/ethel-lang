@@ -369,9 +369,9 @@ ast_expr_t *parse_atom(lexer_t *lexer) {
       advance(lexer);
       return ast_type(AST_FLOAT);
     }
-    case TAG_TYPE_CHAR: {
+    case TAG_TYPE_BYTE: {
       advance(lexer);
-      return ast_type(AST_CHAR);
+      return ast_type(AST_BYTE);
     }
     case TAG_TYPE_STRING: {
       advance(lexer);
@@ -409,10 +409,10 @@ ast_expr_t *parse_atom(lexer_t *lexer) {
       advance(lexer);
       return ast_float(f);
     }
-    case TAG_CHAR: {
+    case TAG_BYTE: {
       char c = lexer->token.ch;
       advance(lexer);
-      return ast_char(c);
+      return ast_byte(c);
     }
     case TAG_STRING: {
       ast_expr_t *e = ast_string(lexer->token.string);
@@ -608,7 +608,7 @@ void parse_program(char *input, ast_expr_t *ast, parse_result_t *parse_result) {
   ast->boolval = p->boolval;
   ast->intval = p->intval;
   ast->floatval = p->floatval;
-  ast->charval = p->charval;
+  ast->byteval = p->byteval;
   ast->bytearray = p->bytearray;
 }
 

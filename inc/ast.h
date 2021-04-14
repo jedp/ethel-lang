@@ -35,7 +35,7 @@ enum ast_type_enum {
   AST_STRING,
   AST_BYTEARRAY_DECL,
   AST_BYTEARRAY,
-  AST_CHAR,
+  AST_BYTE,
   AST_BOOLEAN,
   AST_CAST,
   AST_ASSIGN,
@@ -88,7 +88,7 @@ static const char *ast_node_names[] = {
   "STRING",
   "BYTE-ARRAY-DECLARATION",
   "BYTE-ARRAY",
-  "CHAR",
+  "BYTE",
   "BOOLEAN",
   "CAST",
   "ASSIGN",
@@ -269,7 +269,7 @@ typedef struct __attribute__((__packed__)) AstExpr {
     int intval;
     int boolval;
     float floatval;
-    char charval;
+    byte byteval;
     bytearray_t *bytearray;
   };
 } ast_expr_t;
@@ -282,7 +282,7 @@ ast_expr_t *ast_nil();
 ast_expr_t *ast_list(char* type_name, ast_expr_list_t *nullable_init_es);
 ast_expr_t *ast_float(float value);
 ast_expr_t *ast_int(int value);
-ast_expr_t *ast_char(char c);
+ast_expr_t *ast_byte(byte b);
 ast_expr_t *ast_string(char* s);
 ast_expr_t *ast_array_decl(ast_expr_t *size);
 ast_expr_t *ast_assign_elem(ast_expr_t *seq, ast_expr_t *offset, ast_expr_t *value);

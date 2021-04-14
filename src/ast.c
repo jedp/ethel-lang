@@ -10,7 +10,7 @@ ast_expr_t *ast_node(ast_type_t type) {
   switch(type) {
     case AST_INT:     node->intval = 0;      break;
     case AST_FLOAT:   node->floatval = 0.0;  break;
-    case AST_CHAR:    node->charval = 0;     break;
+    case AST_BYTE:    node->byteval = 0;     break;
     case AST_BOOLEAN: node->boolval = 0;     break;
     case AST_BYTEARRAY:
     case AST_STRING: {
@@ -122,9 +122,9 @@ ast_expr_t *ast_int(int value) {
   return node;
 }
 
-ast_expr_t *ast_char(char c) {
-  ast_expr_t *node = ast_node(AST_CHAR);
-  node->charval = c;
+ast_expr_t *ast_byte(byte b) {
+  ast_expr_t *node = ast_node(AST_BYTE);
+  node->byteval = b;
   return node;
 }
 

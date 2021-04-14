@@ -228,7 +228,7 @@ static token_t *lex_char(lexer_t *lexer) {
   readch(lexer);
   if (lexer->nextch != '\'') return lexer_error(lexer);
 
-  lexer->next_token.tag = TAG_CHAR;
+  lexer->next_token.tag = TAG_BYTE;
   lexer->next_token.ch = c;
   return &lexer->next_token;
 }
@@ -380,7 +380,7 @@ void advance(lexer_t *lexer) {
     case TAG_FLOAT:
       lexer->token.floatval = lexer->next_token.floatval;
       break;
-    case TAG_CHAR:
+    case TAG_BYTE:
       lexer->token.ch = lexer->next_token.ch;
       break;
     default:

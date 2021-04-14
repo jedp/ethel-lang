@@ -184,7 +184,7 @@ obj_t *byte_dump(obj_t *byte_obj) {
 
   // Three-digit decimal representation.
   // Do not print leading zeroes, because that looks octal.
-  int v = byte_obj->charval;
+  int v = byte_obj->byteval;
   a->data[2] = '0';  // Edge case.
   for (int i = 0; i < 3; i++) {
     if (v) {
@@ -201,13 +201,13 @@ obj_t *byte_dump(obj_t *byte_obj) {
   // Hex value.
   a->data[5] = '0';
   a->data[6] = 'x';
-  a->data[7] = hex_char((byte_obj->charval & 0xf0) >> 4);
-  a->data[8] = hex_char(byte_obj->charval & 0xf);
+  a->data[7] = hex_char((byte_obj->byteval & 0xf0) >> 4);
+  a->data[8] = hex_char(byte_obj->byteval & 0xf);
 
   a->data[9] = ' ';
   a->data[10] = ' ';
 
-  v = byte_obj->charval;
+  v = byte_obj->byteval;
   for (int i = 0; i < 8; i++) {
     char b = (v & (1 << (7-i))) >> (7-i) ? '1' : '0';
     a->data[11 + i] = b;
@@ -329,8 +329,8 @@ obj_t *arr_dump(obj_t *arr_obj) {
     ba->data[row * 79 + 60] = '|';
     int j = 0;
     while(j < 16 && i+j < arr_obj->bytearray->size) {
-      byte c = arr_obj->bytearray->data[i + j];
-      ba->data[row * 79 + 61 + j] = ((c >= 0x21) && (c <= 0x7e) ) ? c : '.';
+      byte b = arr_obj->bytearray->data[i + j];
+      ba->data[row * 79 + 61 + j] = ((b >= 0x21) && (b <= 0x7e) ) ? b : '.';
       j++;
     }
     ba->data[row * 79 + 61 + j] = '|';

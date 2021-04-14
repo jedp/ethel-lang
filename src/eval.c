@@ -90,23 +90,22 @@ void eval_float_expr(ast_expr_t *expr, eval_result_t *result) {
   result->obj = float_obj(expr->floatval);
 }
 
-void eval_char_expr(ast_expr_t *expr, eval_result_t *result) {
-  if (expr->type != AST_CHAR) {
+void eval_byte_expr(ast_expr_t *expr, eval_result_t *result) {
+  if (expr->type != AST_BYTE) {
     result->err = ERR_EVAL_TYPE_ERROR;
     return;
   }
-  result->obj = char_obj(expr->charval);
+  result->obj = byte_obj(expr->byteval);
 }
 
-byte eval_byte_expr(ast_expr_t *expr, eval_result_t *result) {
+byte expr_to_byte(ast_expr_t *expr, eval_result_t *result) {
   switch(expr->type) {
-    case AST_CHAR:
-      return expr->charval;
-      return 0xFF;
+    case AST_BYTE:
+      return expr->byteval;
     case AST_INT: {
       if (expr->intval > 255)  { result->err = ERR_OVERFLOW_ERROR; return 0xFF; }
       if (expr->intval < -127) { result->err = ERR_UNDERFLOW_ERROR; return 0xFF; }
-      return (char) expr->intval;
+      return (byte) expr->intval;
     }
     default:
       result->err = ERR_EVAL_TYPE_ERROR;
@@ -286,7 +285,7 @@ void eval_string_expr(ast_expr_t *expr, eval_result_t *result) {
 void cast(obj_t *obj, obj_t *type_obj, eval_result_t *result) {
   if ( !(type_obj->type == TYPE_INT
       || type_obj->type == TYPE_FLOAT
-      || type_obj->type == TYPE_CHAR
+      || type_obj->type == TYPE_BYTE
       || type_obj->type == TYPE_STRING
       || type_obj->type == TYPE_BOOLEAN)) {
     result->err = ERR_EVAL_TYPE_ERROR;
@@ -301,12 +300,12 @@ void cast(obj_t *obj, obj_t *type_obj, eval_result_t *result) {
         case TYPE_FLOAT:
           obj->floatval = (float) obj->intval;
           goto done;
-        case TYPE_CHAR:
+        case TYPE_BYTE:
           if (obj->intval < 0 || obj->intval > 255) {
-            result->err = ERR_VALUE_TOO_LARGE_FOR_CHAR;
+            result->err = ERR_VALUE_TOO_LARGE_FOR_BYTE;
             goto done;
           }
-          obj->charval = (char) obj->intval;
+          obj->byteval = (byte) obj->intval & 0xff;
           goto done;
         case TYPE_STRING:
           int_to_string(obj);
@@ -328,7 +327,7 @@ void cast(obj_t *obj, obj_t *type_obj, eval_result_t *result) {
           goto done;
         case TYPE_FLOAT:
           goto done;
-        case TYPE_CHAR:
+        case TYPE_BYTE:
           result->err = ERR_EVAL_TYPE_ERROR;
           goto done;
         case TYPE_STRING:
@@ -351,12 +350,12 @@ void cast(obj_t *obj, obj_t *type_obj, eval_result_t *result) {
         case TYPE_FLOAT:
           result->err = string_to_float(obj);
           goto done;
-        case TYPE_CHAR:
+        case TYPE_BYTE:
           if (obj->bytearray->size > 1) {
             result->err = ERR_EVAL_TYPE_ERROR;
             goto done;
           }
-          obj->charval = obj->bytearray->data[0];
+          obj->byteval = obj->bytearray->data[0];
           goto done;
         case TYPE_STRING:
           goto done;
@@ -368,24 +367,24 @@ void cast(obj_t *obj, obj_t *type_obj, eval_result_t *result) {
           goto done;
       }
       break;
-    case TYPE_CHAR:
+    case TYPE_BYTE:
       switch (type_obj->type) {
         case TYPE_INT:
-          obj->intval = (int) obj->charval;
+          obj->intval = (int) obj->byteval;
           goto done;
         case TYPE_FLOAT:
-          obj->floatval = (float) obj->charval;
+          obj->floatval = (float) obj->byteval;
           goto done;
-        case TYPE_CHAR:
+        case TYPE_BYTE:
           goto done;
         case TYPE_STRING: {
-          char c = obj->charval;
+          char c = obj->byteval;
           obj->bytearray = bytearray_alloc(1);
           obj->bytearray->data[0] = c;
           goto done;
         }
         case TYPE_BOOLEAN:
-          obj->boolval = obj->charval != 0 ? 1 : 0;
+          obj->boolval = obj->byteval != 0 ? 1 : 0;
           goto done;
         default:
           result->err = ERR_EVAL_TYPE_ERROR;
@@ -400,8 +399,8 @@ void cast(obj_t *obj, obj_t *type_obj, eval_result_t *result) {
         case TYPE_FLOAT:
           obj->floatval = (float) obj->intval;
           goto done;
-        case TYPE_CHAR:
-          obj->charval = obj->intval ? 't' : 'f';
+        case TYPE_BYTE:
+          obj->byteval = obj->intval ? 't' : 'f';
           goto done;
         case TYPE_STRING:
           obj->bytearray = c_str_to_bytearray(obj->intval ? "true" : "false");
@@ -424,14 +423,14 @@ done:
 }
 
 void cmp(ast_type_t type, obj_t *a, obj_t *b, eval_result_t *result) {
-  if (a->type == TYPE_CHAR && b->type == TYPE_CHAR) {
+  if (a->type == TYPE_BYTE && b->type == TYPE_BYTE) {
     switch(type) {
-      case AST_GT: result->obj = boolean_obj(a->charval >  b->charval); return;
-      case AST_GE: result->obj = boolean_obj(a->charval >= b->charval); return;
-      case AST_LT: result->obj = boolean_obj(a->charval <  b->charval); return;
-      case AST_LE: result->obj = boolean_obj(a->charval <= b->charval); return;
-      case AST_NE: result->obj = boolean_obj(a->charval != b->charval); return;
-      case AST_EQ: result->obj = boolean_obj(a->charval == b->charval); return;
+      case AST_GT: result->obj = boolean_obj(a->byteval >  b->byteval); return;
+      case AST_GE: result->obj = boolean_obj(a->byteval >= b->byteval); return;
+      case AST_LT: result->obj = boolean_obj(a->byteval <  b->byteval); return;
+      case AST_LE: result->obj = boolean_obj(a->byteval <= b->byteval); return;
+      case AST_NE: result->obj = boolean_obj(a->byteval != b->byteval); return;
+      case AST_EQ: result->obj = boolean_obj(a->byteval == b->byteval); return;
       default:
         printf("what what what???\n");
         result->obj = boolean_obj(False);
@@ -478,12 +477,12 @@ void negate(obj_t *a, eval_result_t *result) {
 void bitwise_or(obj_t *a, obj_t *b, eval_result_t *result) {
   if (a->type == TYPE_INT && b->type == TYPE_INT) {
     result->obj = int_obj(a->intval | b->intval);
-  } else if (a->type == TYPE_INT && b->type == TYPE_CHAR) {
-    result->obj = int_obj(a->intval | (unsigned char) b->charval);
-  } else if (a->type == TYPE_CHAR && b->type == TYPE_INT) {
-    result->obj = int_obj((unsigned char) a->charval | b->intval);
-  } else if (a->type == TYPE_CHAR && b->type == TYPE_CHAR) {
-    result->obj = char_obj(a->charval | b->charval);
+  } else if (a->type == TYPE_INT && b->type == TYPE_BYTE) {
+    result->obj = int_obj(a->intval | (unsigned char) b->byteval);
+  } else if (a->type == TYPE_BYTE && b->type == TYPE_INT) {
+    result->obj = int_obj((unsigned char) a->byteval | b->intval);
+  } else if (a->type == TYPE_BYTE && b->type == TYPE_BYTE) {
+    result->obj = byte_obj(a->byteval | b->byteval);
   } else {
     result->err = ERR_EVAL_TYPE_ERROR;
   }
@@ -492,12 +491,12 @@ void bitwise_or(obj_t *a, obj_t *b, eval_result_t *result) {
 void bitwise_xor(obj_t *a, obj_t *b, eval_result_t *result) {
   if (a->type == TYPE_INT && b->type == TYPE_INT) {
     result->obj = int_obj(a->intval ^ b->intval);
-  } else if (a->type == TYPE_INT && b->type == TYPE_CHAR) {
-    result->obj = int_obj(a->intval ^ (unsigned char) b->charval);
-  } else if (a->type == TYPE_CHAR && b->type == TYPE_INT) {
-    result->obj = int_obj((unsigned char) a->charval ^ b->intval);
-  } else if (a->type == TYPE_CHAR && b->type == TYPE_CHAR) {
-    result->obj = char_obj(a->charval ^ b->charval);
+  } else if (a->type == TYPE_INT && b->type == TYPE_BYTE) {
+    result->obj = int_obj(a->intval ^ (unsigned char) b->byteval);
+  } else if (a->type == TYPE_BYTE && b->type == TYPE_INT) {
+    result->obj = int_obj((unsigned char) a->byteval ^ b->intval);
+  } else if (a->type == TYPE_BYTE && b->type == TYPE_BYTE) {
+    result->obj = byte_obj(a->byteval ^ b->byteval);
   } else {
     result->err = ERR_EVAL_TYPE_ERROR;
   }
@@ -506,12 +505,12 @@ void bitwise_xor(obj_t *a, obj_t *b, eval_result_t *result) {
 void bitwise_and(obj_t *a, obj_t *b, eval_result_t *result) {
   if (a->type == TYPE_INT && b->type == TYPE_INT) {
     result->obj = int_obj(a->intval & b->intval);
-  } else if (a->type == TYPE_INT && b->type == TYPE_CHAR) {
-    result->obj = int_obj(a->intval & (unsigned char) b->charval);
-  } else if (a->type == TYPE_CHAR && b->type == TYPE_INT) {
-    result->obj = int_obj((unsigned char) a->charval & b->intval);
-  } else if (a->type == TYPE_CHAR && b->type == TYPE_CHAR) {
-    result->obj = char_obj(a->charval & b->charval);
+  } else if (a->type == TYPE_INT && b->type == TYPE_BYTE) {
+    result->obj = int_obj(a->intval & (unsigned char) b->byteval);
+  } else if (a->type == TYPE_BYTE && b->type == TYPE_INT) {
+    result->obj = int_obj((unsigned char) a->byteval & b->intval);
+  } else if (a->type == TYPE_BYTE && b->type == TYPE_BYTE) {
+    result->obj = byte_obj(a->byteval & b->byteval);
   } else {
     result->err = ERR_EVAL_TYPE_ERROR;
   }
@@ -520,12 +519,12 @@ void bitwise_and(obj_t *a, obj_t *b, eval_result_t *result) {
 void bitwise_shl(obj_t *a, obj_t *b, eval_result_t *result) {
   if (a->type == TYPE_INT && b->type == TYPE_INT) {
     result->obj = int_obj(a->intval << b->intval);
-  } else if (a->type == TYPE_INT && b->type == TYPE_CHAR) {
-    result->obj = int_obj(a->intval << (unsigned char) b->charval);
-  } else if (a->type == TYPE_CHAR && b->type == TYPE_INT) {
-    result->obj = int_obj((unsigned char) a->charval << b->intval);
-  } else if (a->type == TYPE_CHAR && b->type == TYPE_CHAR) {
-    result->obj = char_obj(a->charval << b->charval);
+  } else if (a->type == TYPE_INT && b->type == TYPE_BYTE) {
+    result->obj = int_obj(a->intval << (unsigned char) b->byteval);
+  } else if (a->type == TYPE_BYTE && b->type == TYPE_INT) {
+    result->obj = int_obj((unsigned char) a->byteval << b->intval);
+  } else if (a->type == TYPE_BYTE && b->type == TYPE_BYTE) {
+    result->obj = byte_obj(a->byteval << b->byteval);
   } else {
     result->err = ERR_EVAL_TYPE_ERROR;
   }
@@ -533,12 +532,12 @@ void bitwise_shl(obj_t *a, obj_t *b, eval_result_t *result) {
 void bitwise_shr(obj_t *a, obj_t *b, eval_result_t *result) {
   if (a->type == TYPE_INT && b->type == TYPE_INT) {
     result->obj = int_obj(a->intval >> b->intval);
-  } else if (a->type == TYPE_INT && b->type == TYPE_CHAR) {
-    result->obj = int_obj(a->intval >> (unsigned char) b->charval);
-  } else if (a->type == TYPE_CHAR && b->type == TYPE_INT) {
-    result->obj = int_obj((unsigned char) a->charval >> b->intval);
-  } else if (a->type == TYPE_CHAR && b->type == TYPE_CHAR) {
-    result->obj = char_obj(a->charval >> b->charval);
+  } else if (a->type == TYPE_INT && b->type == TYPE_BYTE) {
+    result->obj = int_obj(a->intval >> (unsigned char) b->byteval);
+  } else if (a->type == TYPE_BYTE && b->type == TYPE_INT) {
+    result->obj = int_obj((unsigned char) a->byteval >> b->intval);
+  } else if (a->type == TYPE_BYTE && b->type == TYPE_BYTE) {
+    result->obj = byte_obj(a->byteval >> b->byteval);
   } else {
     result->err = ERR_EVAL_TYPE_ERROR;
   }
@@ -547,8 +546,8 @@ void bitwise_shr(obj_t *a, obj_t *b, eval_result_t *result) {
 void bitwise_not(obj_t *a, eval_result_t *result) {
   if (a->type == TYPE_INT) {
     result->obj = int_obj(~a->intval);
-  } else if (a->type == TYPE_CHAR) {
-    result->obj = char_obj(~ (unsigned char) a->charval);
+  } else if (a->type == TYPE_BYTE) {
+    result->obj = byte_obj(~ (unsigned char) a->byteval);
   } else {
     result->err = ERR_EVAL_TYPE_ERROR;
   }
@@ -660,7 +659,7 @@ int print_args(ast_expr_list_t *args, eval_result_t *result, env_t *env) {
       switch (r->obj->type) {
         case TYPE_INT: printf("%d ", r->obj->intval); break;
         case TYPE_FLOAT: printf("%f ", (double) r->obj->floatval); break;
-        case TYPE_CHAR: printf("%c ", r->obj->charval); break;
+        case TYPE_BYTE: printf("%c ", r->obj->byteval); break;
         case TYPE_STRING: printf("%s ", bytearray_to_c_str(r->obj->bytearray)); break;
         case TYPE_BOOLEAN: printf("%s ", r->obj->boolval ? "true" : "false"); break;
         case TYPE_NIL: printf("Nil "); break;
@@ -687,7 +686,7 @@ void dump_args(ast_expr_list_t *args, eval_result_t *result, env_t *env) {
 
   eval_result_t *r = eval_expr(args->root, env);
   switch(r->obj->type) {
-    case TYPE_CHAR:
+    case TYPE_BYTE:
       result->obj = byte_dump(r->obj);
       break;
     case TYPE_INT:
@@ -1056,8 +1055,8 @@ eval_result_t *eval_expr(ast_expr_t *expr, env_t *env) {
             eval_float_expr(expr, result);
             if (result->err != ERR_NO_ERROR) goto error;
             break;
-        case AST_CHAR:
-            eval_char_expr(expr, result);
+        case AST_BYTE:
+            eval_byte_expr(expr, result);
             if (result->err != ERR_NO_ERROR) goto error;
             break;
         case AST_STRING:
@@ -1101,7 +1100,7 @@ eval_result_t *eval_expr(ast_expr_t *expr, env_t *env) {
             result->err = ERR_INDEX_OUT_OF_RANGE;
             goto error;
           }
-          result->obj = char_obj(a->bytearray->data[offset]);
+          result->obj = byte_obj(a->bytearray->data[offset]);
           break;
         }
         case AST_SEQ_ELEM_ASSIGN: {
@@ -1122,10 +1121,10 @@ eval_result_t *eval_expr(ast_expr_t *expr, env_t *env) {
             goto error;
           }
 
-          byte c = eval_byte_expr(expr->assign_elem->value, result);
+          byte b = expr_to_byte(expr->assign_elem->value, result);
           if (result->err != ERR_NO_ERROR) goto error;
-          a->bytearray->data[offset] = c;
-          result->obj = char_obj(c);
+          a->bytearray->data[offset] = b;
+          result->obj = byte_obj(b);
           break;
         }
         case AST_LIST: {
