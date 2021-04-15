@@ -22,7 +22,7 @@ env_sym_t *empty_sym() {
 
 error_t push_scope(env_t *env) {
   env->top += 1;
-  if (env->top == ENV_MAX_SCOPES) {
+  if (env->top == ENV_MAX_STACK_DEPTH) {
     return ERR_ENV_MAX_DEPTH_EXCEEDED;
   }
 
@@ -47,7 +47,7 @@ error_t pop_scope(env_t *env) {
   return ERR_NO_ERROR;
 }
 
-env_sym_t *find_sym(env_t *env, bytearray_t *name) {
+static env_sym_t *find_sym(env_t *env, bytearray_t *name, boolean recursive) {
   if (env->top < 0) {
     return NULL;
   }
@@ -62,17 +62,23 @@ env_sym_t *find_sym(env_t *env, bytearray_t *name) {
       }
       node = node->next;
     }
+
+    if (!recursive) return NULL;
   }
 
   return NULL;
 }
 
-error_t put_env(env_t *env, bytearray_t *name, const obj_t *obj, const uint8_t flags) {
+error_t _put_env(env_t *env,
+                 bytearray_t *name,
+                 const obj_t *obj,
+                 const uint8_t flags,
+                 boolean can_shadow) {
   if (env->top < 0) {
     return ERR_ENV_NO_SCOPE;
   }
 
-  env_sym_t *found = find_sym(env, name);
+  env_sym_t *found = find_sym(env, name, !can_shadow);
   // Already exists in scopes we can access.
   if (found != NULL) {
     if (!(found->flags & F_VAR)) {
@@ -95,8 +101,16 @@ error_t put_env(env_t *env, bytearray_t *name, const obj_t *obj, const uint8_t f
   return ERR_NO_ERROR;
 }
 
+error_t put_env(env_t *env, bytearray_t *name, const obj_t *obj, const uint8_t flags) {
+  return _put_env(env, name, obj, flags, False);
+}
+
+error_t put_env_shadow(env_t *env, bytearray_t *name, const obj_t *obj, const uint8_t flags) {
+  return _put_env(env, name, obj, flags, True);
+}
+
 error_t del_env(env_t *env, bytearray_t *name) {
-  env_sym_t *sym = find_sym(env, name);
+  env_sym_t *sym = find_sym(env, name, True);
   if (sym == NULL) return ERR_ENV_SYMBOL_UNDEFINED;
 
   env_sym_t *prev = sym->prev;
@@ -108,14 +122,14 @@ error_t del_env(env_t *env, bytearray_t *name) {
 }
 
 obj_t *get_env(env_t *env, bytearray_t *name) {
-  env_sym_t *sym = find_sym(env, name);
+  env_sym_t *sym = find_sym(env, name, True);
   if (sym == NULL) return undef_obj();
 
   return sym->obj;
 }
 
 error_t env_init(env_t *env) {
-  for (int i = 0; i < ENV_MAX_SCOPES; ++i) {
+  for (int i = 0; i < ENV_MAX_STACK_DEPTH; ++i) {
     env->symbols[i] = *empty_sym();
   }
 

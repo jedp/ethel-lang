@@ -483,14 +483,9 @@ ast_expr_t *parse_atom(lexer_t *lexer) {
         args = parse_fn_arg_decl(lexer);
       }
       if (!eat(lexer, TAG_RPAREN)) { mem_free(args); goto error; }
-      if (!eat(lexer, TAG_BEGIN)) goto error;
-      if (lexer->token.tag == TAG_END) {
-        advance(lexer);
-        return ast_func_def(args, NULL);
-      }
-      ast_expr_list_t *es = parse_block(lexer);
-      if (!eat(lexer, TAG_END)) { mem_free(args); mem_free(es); goto error; }
-      return ast_func_def(args, es);
+      if (lexer->token.tag != TAG_BEGIN) { mem_free(args); goto error; }
+      ast_expr_t *block = parse_expr(lexer);
+      return ast_func_def(args, block->block_exprs);
     }
     case TAG_FUNC_CALL: {
       bytearray_t *name = c_str_to_bytearray(lexer->token.string);
@@ -502,6 +497,13 @@ ast_expr_t *parse_atom(lexer_t *lexer) {
       }
       if (!eat(lexer, TAG_RPAREN)) { mem_free(name); mem_free(args); goto error; }
       return ast_func_call(name, args);
+    }
+    case TAG_FUNC_RETURN: {
+      // syntax: return a, b
+      // TODO: destructuring assignment
+      advance(lexer);
+      ast_expr_list_t *args = parse_expr_list(lexer);
+      return ast_func_return(args);
     }
     case TAG_METHOD_CALL: {
       bytearray_t *name = c_str_to_bytearray(lexer->token.string);

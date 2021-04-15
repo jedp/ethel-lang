@@ -49,6 +49,7 @@ enum ast_type_enum {
   AST_METHOD_CALL,
   AST_FUNCTION_DEF,
   AST_FUNCTION_CALL,
+  AST_FUNCTION_RETURN,
   AST_TYPE_NAME,
   AST_BLOCK,
   AST_RESERVED_CALLABLE,
@@ -102,6 +103,7 @@ static const char *ast_node_names[] = {
   "METHOD-CALL",
   "FUNCTION-DEF",
   "FUNCTION-CALL",
+  "FUNCTION-RETURN",
   "TYPE-NAME",
   "BLOCK",
   "RESERVED-CALLABLE",
@@ -266,6 +268,7 @@ typedef struct __attribute__((__packed__)) AstExpr {
     ast_apply_t *application;
     ast_func_def_t *func_def;
     ast_func_call_t *func_call;
+    ast_expr_list_t *func_return_values;
     int intval;
     int boolval;
     float floatval;
@@ -293,6 +296,7 @@ ast_expr_t *ast_seq_elem(ast_expr_t *ident, ast_expr_t *index);
 ast_expr_t *ast_field(bytearray_t *s);
 ast_expr_t *ast_func_def(ast_fn_arg_decl_t *args, ast_expr_list_t *es);
 ast_expr_t *ast_func_call(bytearray_t *name, ast_expr_list_t *args);
+ast_expr_t *ast_func_return(ast_expr_list_t *func_return_values);
 ast_expr_t *ast_method_call(bytearray_t *name, ast_expr_list_t *args);
 ast_expr_t *ast_member_access(ast_expr_t *receiver,
                               bytearray_t *meber_name,

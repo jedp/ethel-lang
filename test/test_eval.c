@@ -616,6 +616,13 @@ void test_eval_function_wrong_args(void) {
   TEST_ASSERT_EQUAL(ERR_WRONG_ARG_COUNT, result->err);
 }
 
+void test_eval_function_return(void) {
+  char *program = "{ val f = fn(x) { if x == 0 then return 42\n x\n } \n f(0)}";
+  eval_result_t *result = eval_program(program);
+
+  TEST_ASSERT_EQUAL(42, result->obj->intval);
+}
+
 void test_eval(void) {
   RUN_TEST(test_eval_calculator);
   RUN_TEST(test_eval_assign_immutable);
@@ -665,5 +672,6 @@ void test_eval(void) {
   RUN_TEST(test_eval_bitwise_shr);
   RUN_TEST(test_eval_function);
   RUN_TEST(test_eval_function_wrong_args);
+  RUN_TEST(test_eval_function_return);
 }
 

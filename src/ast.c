@@ -236,6 +236,12 @@ ast_expr_t *ast_func_call(bytearray_t *name, ast_expr_list_t *args) {
   return node;
 }
 
+ast_expr_t *ast_func_return(ast_expr_list_t *es) {
+  ast_expr_t *node = ast_node(AST_FUNCTION_RETURN);
+  node->func_return_values = es;
+  return node;
+}
+
 ast_expr_t *ast_reserved_callable(ast_reserved_callable_type_t type, ast_expr_list_t *es) {
   ast_expr_t *node = ast_node(AST_RESERVED_CALLABLE);
   node->reserved_callable = mem_alloc(sizeof(ast_reserved_callable_t));

@@ -4,7 +4,7 @@
 #include "err.h"
 #include "obj.h"
 
-#define ENV_MAX_SCOPES 16
+#define ENV_MAX_STACK_DEPTH 50
 
 typedef struct Symbol {
     bytearray_t *name;
@@ -17,13 +17,14 @@ typedef struct Symbol {
 /* A stack of symbol tables in scope. */
 typedef struct Env {
     int top;
-    env_sym_t symbols[ENV_MAX_SCOPES];
+    env_sym_t symbols[ENV_MAX_STACK_DEPTH];
 } env_t;
 
 error_t env_init(env_t *env);
 error_t push_scope(env_t *env);
 error_t pop_scope(env_t *env);
 error_t put_env(env_t *env, bytearray_t *name, const obj_t *obj, const uint8_t flags);
+error_t put_env_shadow(env_t *env, bytearray_t *name, const obj_t *obj, const uint8_t flags);
 error_t del_env(env_t *env, bytearray_t *name);
 obj_t *get_env(env_t *env, bytearray_t *name);
 

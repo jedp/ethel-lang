@@ -106,6 +106,7 @@ enum tag_enum {
   TAG_METHOD_CALL,
   TAG_FUNC_DEF,
   TAG_FUNC_CALL,
+  TAG_FUNC_RETURN,
 
   // Math
   TAG_ABS,
@@ -218,6 +219,7 @@ static const char* tag_names[] = {
   "FIELD-NAME",
   "METHOD-CALL",
   "FUNCTION-CALL",
+  "FUNCTION-RETURN",
 
   // Math
   "ABS",
@@ -241,7 +243,8 @@ typedef struct {
 } token_t;
 
 static const token_t reserved[] = {
-  { TAG_FUNC_DEF,       .string = (char *) "fn" },
+  { TAG_FUNC_DEF,      .string = (char *) "fn" },
+  { TAG_FUNC_RETURN,   .string = (char *) "return" },
   { TAG_IF,            .string = (char *) "if" },
   { TAG_THEN,          .string = (char *) "then" },
   { TAG_ELSE,          .string = (char *) "else" },

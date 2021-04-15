@@ -13,6 +13,7 @@ enum obj_type_enum {
   TYPE_NIL,
   TYPE_ERROR,
   TYPE_FUNC_PTR,
+  TYPE_RETURN_VAL,
   TYPE_INT,
   TYPE_FLOAT,
   TYPE_BYTE,
@@ -32,6 +33,7 @@ static const char* obj_type_names[TYPE_MAX] = {
   "Nil",
   "Error",
   "Function",
+  "Return Val",
   "Int",
   "Float",
   "Byte",
@@ -89,6 +91,7 @@ typedef struct Obj {
     obj_list_t *list;
     bytearray_t *bytearray;
     void* func_ptr;
+    struct Obj *return_val;
   };
   obj_method_t *methods;
 } obj_t;
@@ -148,6 +151,7 @@ obj_t *boolean_obj(boolean);
 obj_t *range_obj(int, int);
 obj_t *list_obj(bytearray_t *type_name, obj_list_element_t* elems);
 obj_t *func_obj(void* code);
+obj_t *return_val(obj_t *val);
 
 boolean truthy(obj_t *obj);
 

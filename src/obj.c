@@ -116,6 +116,12 @@ obj_t *func_obj(void* code) {
   return obj;
 }
 
+obj_t *return_val(obj_t *val) {
+  obj_t *obj = obj_of(TYPE_RETURN_VAL);
+  obj->return_val = val;
+  return obj;
+}
+
 boolean truthy(obj_t *obj) {
   switch(obj->type) {
     case TYPE_NIL: return False;

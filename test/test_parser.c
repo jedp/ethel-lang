@@ -273,7 +273,6 @@ void test_parse_empty_func(void) {
   TEST_ASSERT_EQUAL(AST_FUNCTION_DEF, ((ast_expr_t*) ast->assignment->value)->type);
   ast_func_def_t *f= (ast_func_def_t*) ast->assignment->value->func_def;
   TEST_ASSERT_NULL(f->argnames);
-  TEST_ASSERT_NULL(f->block_exprs);
   mem_free(ast);
 }
 

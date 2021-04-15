@@ -15,7 +15,7 @@
 size_t MAX_INPUT_LINE = 80;
 eval_result_t *eval_expr(ast_expr_t *expr, env_t *env);
 
-void eval_nil_expr(ast_expr_t *expr, eval_result_t *result) {
+static void eval_nil_expr(ast_expr_t *expr, eval_result_t *result) {
   if (expr->type != AST_NIL) {
     result->err = ERR_EVAL_TYPE_ERROR;
     return;
@@ -25,7 +25,7 @@ void eval_nil_expr(ast_expr_t *expr, eval_result_t *result) {
   result->obj = obj;
 }
 
-void eval_boolean_expr(ast_expr_t *expr, eval_result_t *result) {
+static void eval_boolean_expr(ast_expr_t *expr, eval_result_t *result) {
   if (expr->type != AST_BOOLEAN) {
     result->err = ERR_EVAL_TYPE_ERROR;
     return;
@@ -33,7 +33,7 @@ void eval_boolean_expr(ast_expr_t *expr, eval_result_t *result) {
   result->obj = boolean_obj(expr->boolval);
 }
 
-void eval_abs(ast_expr_t *expr, eval_result_t *result, env_t *env) {
+static void eval_abs(ast_expr_t *expr, eval_result_t *result, env_t *env) {
   eval_result_t *r = eval_expr(expr, env);
 
   switch (r->obj->type) {
@@ -74,7 +74,7 @@ static void eval_to_bin(ast_expr_t *expr, eval_result_t *result, env_t *env) {
   result->obj = string_obj(int_to_bin(r->obj->intval));
 }
 
-void eval_int_expr(ast_expr_t *expr, eval_result_t *result) {
+static void eval_int_expr(ast_expr_t *expr, eval_result_t *result) {
   if (expr->type != AST_INT) {
     result->err = ERR_EVAL_TYPE_ERROR;
     return;
@@ -82,7 +82,7 @@ void eval_int_expr(ast_expr_t *expr, eval_result_t *result) {
   result->obj = int_obj(expr->intval);
 }
 
-void eval_float_expr(ast_expr_t *expr, eval_result_t *result) {
+static void eval_float_expr(ast_expr_t *expr, eval_result_t *result) {
   if (expr->type != AST_FLOAT) {
     result->err = ERR_EVAL_TYPE_ERROR;
     return;
@@ -90,7 +90,7 @@ void eval_float_expr(ast_expr_t *expr, eval_result_t *result) {
   result->obj = float_obj(expr->floatval);
 }
 
-void eval_byte_expr(ast_expr_t *expr, eval_result_t *result) {
+static void eval_byte_expr(ast_expr_t *expr, eval_result_t *result) {
   if (expr->type != AST_BYTE) {
     result->err = ERR_EVAL_TYPE_ERROR;
     return;
@@ -98,7 +98,7 @@ void eval_byte_expr(ast_expr_t *expr, eval_result_t *result) {
   result->obj = byte_obj(expr->byteval);
 }
 
-byte expr_to_byte(ast_expr_t *expr, eval_result_t *result) {
+static byte expr_to_byte(ast_expr_t *expr, eval_result_t *result) {
   switch(expr->type) {
     case AST_BYTE:
       return expr->byteval;
@@ -113,7 +113,7 @@ byte expr_to_byte(ast_expr_t *expr, eval_result_t *result) {
   }
 }
 
-void eval_list_expr(ast_list_t *list, eval_result_t *result, env_t *env) {
+static void eval_list_expr(ast_list_t *list, eval_result_t *result, env_t *env) {
   if (list->es == NULL) {
     result->obj = list_obj(list->type_name, NULL);
     return;
@@ -154,9 +154,11 @@ void eval_list_expr(ast_list_t *list, eval_result_t *result, env_t *env) {
   result->obj = list_obj(list->type_name, root_elem);
 }
 
-void eval_block_expr(ast_expr_list_t *block_exprs, eval_result_t *result, env_t *env) {
+static void _eval_block_expr_in_scope(ast_expr_list_t *block_exprs,
+                               eval_result_t *result,
+                               env_t *env) {
   ast_expr_list_t *node = block_exprs;
-  push_scope(env);
+  result->obj = nil_obj();
   while (node != NULL) {
     eval_result_t *r = eval_expr(node->root, env);
     if ((result->err = r->err) != ERR_NO_ERROR) {
@@ -164,23 +166,50 @@ void eval_block_expr(ast_expr_list_t *block_exprs, eval_result_t *result, env_t 
       return;
     }
 
-    // The last object in the block is its value.
-    result->obj = r->obj;
+    // Unwrap and return any return val.
+    if (r->obj->type == TYPE_RETURN_VAL) {
+      result->obj = r->obj->return_val;
+      return;
+    }
+
+    // The last meaningful object in the block is its value.
+    // TODO destructuring or something for return vals
+    if (r->obj->type != TYPE_NOTHING) {
+      result->obj = r->obj;
+    }
     node = node->next;
   }
+}
+
+static void eval_block_expr(ast_expr_list_t *block_exprs, eval_result_t *result, env_t *env) {
+  push_scope(env);
+  _eval_block_expr_in_scope(block_exprs, result, env);
   pop_scope(env);
 }
 
-void eval_func_def(ast_func_def_t *func_def, eval_result_t *result, env_t *env) {
+static void eval_return_expr(ast_expr_list_t *block_exprs, eval_result_t *result, env_t *env) {
+  push_scope(env);
+  _eval_block_expr_in_scope(block_exprs, result, env);
+  // Wrap the return obj.
+  result->obj = return_val(result->obj);
+  pop_scope(env);
+}
+
+/* Wrap the function pointer in an obj. */
+static void eval_func_def(ast_func_def_t *func_def, eval_result_t *result, env_t *env) {
   result->obj = func_obj((void *) func_def);
 }
 
-void eval_func_call(ast_func_call_t *func_call, eval_result_t *result, env_t *env) {
+static void eval_func_call(ast_func_call_t *func_call, eval_result_t *result, env_t *env) {
   obj_t *obj = get_env(env, func_call->name);
 
   ast_func_def_t *fn = (ast_func_def_t *) obj->func_ptr;
 
-  push_scope(env);
+  error_t err = push_scope(env);
+  if (err != ERR_NO_ERROR) {
+    result->err = err;
+    return;
+  }
 
   ast_fn_arg_decl_t *argnames = fn->argnames;
   ast_expr_list_t *callargs = func_call->args;
@@ -191,18 +220,23 @@ void eval_func_call(ast_func_call_t *func_call, eval_result_t *result, env_t *en
     }
     bytearray_t *name = argnames->name;
     eval_result_t *r = eval_expr(callargs->root, env);
-    put_env(env, name, r->obj, F_NONE);
+    error_t err = put_env_shadow(env, name, r->obj, F_NONE);
+    if (err != ERR_NO_ERROR) {
+      result->err = err;
+      pop_scope(env);
+      return;
+    }
 
     argnames = argnames->next;
     callargs = callargs->next;
   }
 
-  eval_block_expr(fn->block_exprs, result, env);
+  _eval_block_expr_in_scope(fn->block_exprs, result, env);
 
   pop_scope(env);
 }
 
-void strip_trailing_ws(char* s) {
+static void strip_trailing_ws(char* s) {
   int end = c_str_len(s) - 1;
   while (end > 0) {
     if (s[end] != ' '  &&
@@ -216,7 +250,7 @@ void strip_trailing_ws(char* s) {
   }
 }
 
-void int_to_string(obj_t *obj) {
+static void int_to_string(obj_t *obj) {
   int i = obj->intval;
   // Longest thing we can print is -2147483648, which is 11 characters + 1 for the null.
   char* s = mem_alloc(12);
@@ -225,7 +259,7 @@ void int_to_string(obj_t *obj) {
   obj->bytearray = c_str_to_bytearray(s);
 }
 
-void float_to_string(obj_t *obj) {
+static void float_to_string(obj_t *obj) {
   float f = obj->floatval;
   int len = snprintf(NULL, 0, "%f", f);
   char* s = mem_alloc(len + 1);
@@ -234,7 +268,7 @@ void float_to_string(obj_t *obj) {
   obj->bytearray = c_str_to_bytearray(s);
 }
 
-error_t string_to_int(obj_t *obj) {
+static error_t string_to_int(obj_t *obj) {
   char *end = NULL;
   char *input = mem_alloc(obj->bytearray->size + 1);
   c_str_cp(input, bytearray_to_c_str(obj->bytearray));
@@ -255,7 +289,7 @@ error_t string_to_int(obj_t *obj) {
   return ERR_NO_ERROR;
 }
 
-error_t string_to_float(obj_t *obj) {
+static error_t string_to_float(obj_t *obj) {
   char *end = NULL;
   char *input = mem_alloc(obj->bytearray->size + 1);
   c_str_cp(input, bytearray_to_c_str(obj->bytearray));
@@ -273,7 +307,7 @@ error_t string_to_float(obj_t *obj) {
   return ERR_NO_ERROR;
 }
 
-void eval_string_expr(ast_expr_t *expr, eval_result_t *result) {
+static void eval_string_expr(ast_expr_t *expr, eval_result_t *result) {
   if (expr->type != AST_STRING) {
     result->err = ERR_EVAL_TYPE_ERROR;
     return;
@@ -282,7 +316,7 @@ void eval_string_expr(ast_expr_t *expr, eval_result_t *result) {
   result->obj = obj;
 }
 
-void cast(obj_t *obj, obj_t *type_obj, eval_result_t *result) {
+static void cast(obj_t *obj, obj_t *type_obj, eval_result_t *result) {
   if ( !(type_obj->type == TYPE_INT
       || type_obj->type == TYPE_FLOAT
       || type_obj->type == TYPE_BYTE
@@ -422,7 +456,7 @@ done:
   result->obj = obj;
 }
 
-void cmp(ast_type_t type, obj_t *a, obj_t *b, eval_result_t *result) {
+static void cmp(ast_type_t type, obj_t *a, obj_t *b, eval_result_t *result) {
   if (a->type == TYPE_BYTE && b->type == TYPE_BYTE) {
     switch(type) {
       case AST_GT: result->obj = boolean_obj(a->byteval >  b->byteval); return;
@@ -456,15 +490,15 @@ void cmp(ast_type_t type, obj_t *a, obj_t *b, eval_result_t *result) {
   result->err = ERR_EVAL_TYPE_ERROR;
 }
 
-void boolean_and(obj_t *a, obj_t *b, eval_result_t *result) {
+static void boolean_and(obj_t *a, obj_t *b, eval_result_t *result) {
   result->obj = boolean_obj(truthy(a) && truthy(b)); 
 }
 
-void boolean_or(obj_t *a, obj_t *b, eval_result_t *result) {
+static void boolean_or(obj_t *a, obj_t *b, eval_result_t *result) {
   result->obj = boolean_obj(truthy(a) || truthy(b)); 
 }
 
-void negate(obj_t *a, eval_result_t *result) {
+static void negate(obj_t *a, eval_result_t *result) {
   if (a->type == TYPE_INT) {
     result->obj = int_obj(-(a->intval));
   } else if (a->type == TYPE_FLOAT) {
@@ -474,7 +508,7 @@ void negate(obj_t *a, eval_result_t *result) {
   }
 }
 
-void bitwise_or(obj_t *a, obj_t *b, eval_result_t *result) {
+static void bitwise_or(obj_t *a, obj_t *b, eval_result_t *result) {
   if (a->type == TYPE_INT && b->type == TYPE_INT) {
     result->obj = int_obj(a->intval | b->intval);
   } else if (a->type == TYPE_INT && b->type == TYPE_BYTE) {
@@ -488,7 +522,7 @@ void bitwise_or(obj_t *a, obj_t *b, eval_result_t *result) {
   }
 }
 
-void bitwise_xor(obj_t *a, obj_t *b, eval_result_t *result) {
+static void bitwise_xor(obj_t *a, obj_t *b, eval_result_t *result) {
   if (a->type == TYPE_INT && b->type == TYPE_INT) {
     result->obj = int_obj(a->intval ^ b->intval);
   } else if (a->type == TYPE_INT && b->type == TYPE_BYTE) {
@@ -502,7 +536,7 @@ void bitwise_xor(obj_t *a, obj_t *b, eval_result_t *result) {
   }
 }
 
-void bitwise_and(obj_t *a, obj_t *b, eval_result_t *result) {
+static void bitwise_and(obj_t *a, obj_t *b, eval_result_t *result) {
   if (a->type == TYPE_INT && b->type == TYPE_INT) {
     result->obj = int_obj(a->intval & b->intval);
   } else if (a->type == TYPE_INT && b->type == TYPE_BYTE) {
@@ -516,7 +550,7 @@ void bitwise_and(obj_t *a, obj_t *b, eval_result_t *result) {
   }
 }
 
-void bitwise_shl(obj_t *a, obj_t *b, eval_result_t *result) {
+static void bitwise_shl(obj_t *a, obj_t *b, eval_result_t *result) {
   if (a->type == TYPE_INT && b->type == TYPE_INT) {
     result->obj = int_obj(a->intval << b->intval);
   } else if (a->type == TYPE_INT && b->type == TYPE_BYTE) {
@@ -529,7 +563,7 @@ void bitwise_shl(obj_t *a, obj_t *b, eval_result_t *result) {
     result->err = ERR_EVAL_TYPE_ERROR;
   }
 }
-void bitwise_shr(obj_t *a, obj_t *b, eval_result_t *result) {
+static void bitwise_shr(obj_t *a, obj_t *b, eval_result_t *result) {
   if (a->type == TYPE_INT && b->type == TYPE_INT) {
     result->obj = int_obj(a->intval >> b->intval);
   } else if (a->type == TYPE_INT && b->type == TYPE_BYTE) {
@@ -543,7 +577,7 @@ void bitwise_shr(obj_t *a, obj_t *b, eval_result_t *result) {
   }
 }
 
-void bitwise_not(obj_t *a, eval_result_t *result) {
+static void bitwise_not(obj_t *a, eval_result_t *result) {
   if (a->type == TYPE_INT) {
     result->obj = int_obj(~a->intval);
   } else if (a->type == TYPE_BYTE) {
@@ -553,7 +587,7 @@ void bitwise_not(obj_t *a, eval_result_t *result) {
   }
 }
 
-void range(int from_inclusive, int to_inclusive, eval_result_t *result) {
+static void range(int from_inclusive, int to_inclusive, eval_result_t *result) {
   if (to_inclusive < from_inclusive) {
     result->err = ERR_RANGE_ERROR;
     return;
@@ -561,7 +595,7 @@ void range(int from_inclusive, int to_inclusive, eval_result_t *result) {
   result->obj = range_obj(from_inclusive, to_inclusive);
 }
 
-void apply(ast_expr_t *expr, eval_result_t *result, env_t *env) {
+static void apply(ast_expr_t *expr, eval_result_t *result, env_t *env) {
   if (expr->type != AST_APPLY) {
     result->err = ERR_SYNTAX_ERROR;
     return;
@@ -640,7 +674,7 @@ found:
   }
 }
 
-int print_args(ast_expr_list_t *args, eval_result_t *result, env_t *env) {
+static int print_args(ast_expr_list_t *args, eval_result_t *result, env_t *env) {
   int printed = 0;
   ast_expr_list_t *node = (ast_expr_list_t*) args;
   if (args->root->type != AST_EMPTY) {
@@ -673,12 +707,12 @@ int print_args(ast_expr_list_t *args, eval_result_t *result, env_t *env) {
   return printed;
 }
 
-void println_args(ast_expr_list_t *args, eval_result_t *result, env_t *env) {
+static void println_args(ast_expr_list_t *args, eval_result_t *result, env_t *env) {
   print_args(args, result, env);
   printf("\n");
 }
 
-void dump_args(ast_expr_list_t *args, eval_result_t *result, env_t *env) {
+static void dump_args(ast_expr_list_t *args, eval_result_t *result, env_t *env) {
   if (args->root == NULL) {
     result->obj = nil_obj();
     return;
@@ -705,7 +739,7 @@ void dump_args(ast_expr_list_t *args, eval_result_t *result, env_t *env) {
   }
 }
 
-void readln_input(eval_result_t *result) {
+static void readln_input(eval_result_t *result) {
   char* s = mem_alloc(MAX_INPUT_LINE);
   if (getline(&s, &MAX_INPUT_LINE, stdin) == -1) {
     result->err = ERR_INPUT_STREAM_ERROR;
@@ -719,7 +753,7 @@ void readln_input(eval_result_t *result) {
   mem_free(s);
 }
 
-void resolve_callable_expr(ast_expr_t *expr, env_t *env, eval_result_t *result) {
+static void resolve_callable_expr(ast_expr_t *expr, env_t *env, eval_result_t *result) {
   if (expr->type != AST_RESERVED_CALLABLE) {
     result->err = ERR_EVAL_TYPE_ERROR;
     return;
@@ -762,7 +796,7 @@ error:
       result->obj = undef_obj();
 }
 
-void eval_while_loop(ast_expr_t *expr, env_t *env, eval_result_t *result) {
+static void eval_while_loop(ast_expr_t *expr, env_t *env, eval_result_t *result) {
   eval_result_t *cond;
   eval_result_t *r;
   result->obj = nil_obj();
@@ -789,7 +823,7 @@ void eval_while_loop(ast_expr_t *expr, env_t *env, eval_result_t *result) {
   }
 }
 
-void eval_for_loop(ast_expr_t *expr, env_t *env, eval_result_t *result) {
+static void eval_for_loop(ast_expr_t *expr, env_t *env, eval_result_t *result) {
   bytearray_t* index_name = ((ast_expr_t*) expr->for_loop->index)->bytearray;
   eval_result_t *r = mem_alloc(sizeof(eval_result_t));
   r->obj = undef_obj();
@@ -1039,6 +1073,11 @@ eval_result_t *eval_expr(ast_expr_t *expr, env_t *env) {
             if (result->err != ERR_NO_ERROR) goto error;
             break;
         }
+        case AST_FUNCTION_RETURN: {
+          eval_return_expr(expr->func_return_values, result, env);
+          if (result->err != ERR_NO_ERROR) goto error;
+          break;
+        }
         case AST_NIL: {
             eval_nil_expr(expr, result);
             break;
@@ -1137,7 +1176,6 @@ eval_result_t *eval_expr(ast_expr_t *expr, env_t *env) {
           break;
         }
         case AST_FUNCTION_DEF: {
-          // Wrap the function pointer in an obj.
           eval_func_def(expr->func_def, result, env);
           if (result->err != ERR_NO_ERROR) goto error;
           break;
