@@ -71,6 +71,7 @@ ast_expr_t *ast_binop(ast_type_t type, ast_expr_t *a, ast_expr_t *b) {
     case AST_LE:
     case AST_EQ:
     case AST_NE:
+    case AST_IS:
     case AST_IN:
       node->type = type;
       break;
@@ -357,7 +358,7 @@ void _pretty_print(ast_expr_t *expr, int indent) {
       }
       break;
     default:
-      printf(" <something> ");
+      printf(" <%s> ", ast_node_names[expr->type]);
       break;
   }
 

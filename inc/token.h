@@ -62,6 +62,8 @@ enum tag_enum {
   TAG_TYPE_STRING,
   TAG_TYPE_BOOLEAN,
   TAG_AS,
+  TAG_IS,
+  TAG_TYPEOF,
 
   // Sequence
   TAG_RANGE,
@@ -177,6 +179,8 @@ static const char* tag_names[] = {
   "STRING-TYPE",
   "BOOLEAN-TYPE",
   "AS",
+  "IS",
+  "TYPE-OF",
 
   // Sequence
   "RANGE-TO",
@@ -275,6 +279,8 @@ static const token_t reserved[] = {
   { TAG_TYPE_STRING,   .string = (char *) "string" },
   { TAG_TYPE_BOOLEAN,  .string = (char *) "boolean" },
   { TAG_AS,            .string = (char *) "as" },
+  { TAG_IS,            .string = (char *) "is" },
+  { TAG_TYPEOF,        .string = (char *) "type" },
   { TAG_TRUE,          .string = (char *) "true" },
   { TAG_FALSE,         .string = (char *) "false" },
   { TAG_ABS,           .string = (char *) "abs" },

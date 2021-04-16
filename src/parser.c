@@ -34,6 +34,7 @@ boolean is_binop(token_t *token) {
       || token->tag == TAG_LE
       || token->tag == TAG_EQ
       || token->tag == TAG_NE
+      || token->tag == TAG_IS
       || token->tag == TAG_IN
       || token->tag == TAG_MEMBER_ACCESS
       ;
@@ -59,6 +60,7 @@ uint8_t binop_preced(token_t *token) {
       return PRECED_GLT;
     case TAG_EQ:
     case TAG_NE:
+    case TAG_IS:
       return PRECED_EQ;
     case TAG_IN:
       return PRECED_MEMBERSHIP;
@@ -87,6 +89,7 @@ uint8_t binop_preced(token_t *token) {
 
 ast_reserved_callable_type_t ast_callable_type_for_tag(tag_t tag) {
   switch (tag) {
+    case TAG_TYPEOF: return AST_CALL_TYPE_OF;
     case TAG_TO_HEX: return AST_CALL_TO_HEX;
     case TAG_TO_BIN: return AST_CALL_TO_BIN;
     case TAG_DUMP: return AST_CALL_DUMP;
@@ -229,6 +232,7 @@ ast_expr_t *_parse_expr(lexer_t *lexer, int min_preced) {
       case TAG_LE:             lhs = ast_binop(AST_LE,            lhs, _parse_expr(lexer, next_min_preced)); break;
       case TAG_EQ:             lhs = ast_binop(AST_EQ,            lhs, _parse_expr(lexer, next_min_preced)); break;
       case TAG_NE:             lhs = ast_binop(AST_NE,            lhs, _parse_expr(lexer, next_min_preced)); break;
+      case TAG_IS:             lhs = ast_binop(AST_IS,            lhs, _parse_expr(lexer, next_min_preced)); break;
       case TAG_IN:             lhs = ast_binop(AST_IN,            lhs, _parse_expr(lexer, next_min_preced)); break;
       case TAG_AS:             lhs = ast_cast(                    lhs, _parse_expr(lexer, next_min_preced)); break;
       case TAG_RANGE:          lhs = ast_range(                   lhs, _parse_expr(lexer, next_min_preced)); break;
@@ -539,6 +543,8 @@ ast_expr_t *parse_atom(lexer_t *lexer) {
       if (!eat(lexer, TAG_RPAREN)) { mem_free(id); goto error; }
       return ast_delete(id);
     }
+    case TAG_IS:
+    case TAG_TYPEOF:
     case TAG_ABS: 
     case TAG_SIN: 
     case TAG_COS: 

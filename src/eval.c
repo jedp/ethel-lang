@@ -53,6 +53,18 @@ static void eval_abs(ast_expr_t *expr, eval_result_t *result, env_t *env) {
   }
 }
 
+static void eval_type_of(ast_expr_t *expr, eval_result_t *result, env_t *env) {
+  eval_result_t *r = eval_expr(expr, env);
+
+  if (r->err != ERR_NO_ERROR) {
+    result->err = r->err;
+    return;
+  }
+
+  // TODO fix when we have user-defined types
+  result->obj = string_obj(c_str_to_bytearray(obj_type_names[r->obj->type]));
+}
+
 static void eval_to_hex(ast_expr_t *expr, eval_result_t *result, env_t *env) {
   eval_result_t *r = eval_expr(expr, env);
 
@@ -315,6 +327,19 @@ static void eval_string_expr(ast_expr_t *expr, eval_result_t *result) {
   }
   obj_t* obj = string_obj(expr->bytearray);
   result->obj = obj;
+}
+
+static void is_type(obj_t *obj, obj_t *type_obj, eval_result_t *result) {
+  if ( !(type_obj->type == TYPE_INT
+      || type_obj->type == TYPE_FLOAT
+      || type_obj->type == TYPE_BYTE
+      || type_obj->type == TYPE_STRING
+      || type_obj->type == TYPE_BOOLEAN)) {
+    result->err = ERR_EVAL_TYPE_ERROR;
+    return;
+  }
+
+  result->obj = boolean_obj(obj->type == type_obj->type);
 }
 
 static void cast(obj_t *obj, obj_t *type_obj, eval_result_t *result) {
@@ -795,6 +820,9 @@ static void resolve_callable_expr(ast_expr_t *expr, env_t *env, eval_result_t *r
   ast_expr_list_t *args = expr->reserved_callable->es;
 
   switch (expr->reserved_callable->type) {
+    case AST_CALL_TYPE_OF:
+      eval_type_of(args->root, result, env);
+      break;
     case AST_CALL_TO_HEX:
       eval_to_hex(args->root, result, env);
       break;
@@ -928,6 +956,15 @@ eval_result_t *eval_expr(ast_expr_t *expr, env_t *env) {
     switch(expr->type) {
         case AST_EMPTY: {
             result->obj = no_obj();
+            break;
+        }
+        case AST_IS: {
+            eval_result_t *r1 = eval_expr(expr->cast_args->a, env);
+            if ((result->err = r1->err) != ERR_NO_ERROR) goto error;
+            eval_result_t *r2 = eval_expr(expr->cast_args->b, env);
+            if ((result->err = r2->err) != ERR_NO_ERROR) goto error;
+            is_type(r1->obj, r2->obj, result);
+            if (result->err != ERR_NO_ERROR) goto error;
             break;
         }
         case AST_CAST: {

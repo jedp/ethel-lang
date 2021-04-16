@@ -26,6 +26,7 @@ enum ast_type_enum {
   AST_LE,
   AST_EQ,
   AST_NE,
+  AST_IS,
   AST_IN,
   AST_RANGE,
   AST_NIL,
@@ -81,6 +82,7 @@ static const char *ast_node_names[] = {
   "LE",
   "EQ",
   "NE",
+  "IS-TYPE",
   "MEMBER-OF",
   "RANGE-FROM-TO",
   "NIL",
@@ -118,6 +120,7 @@ static const char *ast_node_names[] = {
 typedef uint8_t ast_reserved_callable_type_t;
 enum ast_call_type_enum {
   AST_CALL_UNDEFINED = 0,
+  AST_CALL_TYPE_OF,
   AST_CALL_TO_HEX,
   AST_CALL_TO_BIN,
   AST_CALL_DUMP,

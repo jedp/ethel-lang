@@ -54,7 +54,8 @@ Ok
     0 then 1
     < 10 then 2
     in 11..50 then 3
-    else 4
+    is Int then 4
+    else 0
     }
 3
 ```
@@ -140,6 +141,25 @@ Byte Array
 0x0000799d  00000000 00000000 01111001 10011101
 > dump(0b10101100)
 0x000000ac  00000000 00000000 00000000 10101100
+```
+
+#### Dynamic typing
+
+```
+> val s = 101
+101
+> type(s)
+Int
+> s is float
+False
+> s as float
+101.000000
+> type(s as float)
+Float
+> type("moo".length())
+Int
+> "moo" + 2
+Type error
 ```
 
 #### Functions

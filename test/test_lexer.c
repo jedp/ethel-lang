@@ -581,9 +581,11 @@ void test_lex_all_tokens(void) {
     (test_data_t) { .text = "in", .expected_tag = TAG_IN },
     (test_data_t) { .text = "match", .expected_tag = TAG_MATCH },
     (test_data_t) { .text = "step", .expected_tag = TAG_STEP },
+    (test_data_t) { .text = "as", .expected_tag = TAG_AS },
+    (test_data_t) { .text = "is", .expected_tag = TAG_IS },
+    (test_data_t) { .text = "type", .expected_tag = TAG_TYPEOF },
     (test_data_t) { .text = "hex", .expected_tag = TAG_TO_HEX },
     (test_data_t) { .text = "bin", .expected_tag = TAG_TO_BIN },
-
   };
 
   int num_data = sizeof(test_data) / sizeof(test_data[0]);

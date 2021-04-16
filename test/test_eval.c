@@ -269,6 +269,35 @@ void test_eval_cast_boolean(void) {
   TEST_ASSERT_EQUAL('f', obj->intval);
 }
 
+void test_eval_is_type(void) {
+  TEST_ASSERT_EQUAL(True, (eval_program("2 is int")->obj)->boolval);
+  TEST_ASSERT_EQUAL(False, (eval_program("2 is float")->obj)->boolval);
+
+  TEST_ASSERT_EQUAL(True, (eval_program("2.2 is float")->obj)->boolval);
+  TEST_ASSERT_EQUAL(False, (eval_program("2.2 is boolean")->obj)->boolval);
+
+  TEST_ASSERT_EQUAL(True, (eval_program("true is boolean")->obj)->boolval);
+  TEST_ASSERT_EQUAL(False, (eval_program("true is string")->obj)->boolval);
+
+  TEST_ASSERT_EQUAL(True, (eval_program("\"glug\" is string")->obj)->boolval);
+  TEST_ASSERT_EQUAL(False, (eval_program("\"glug\" is byte")->obj)->boolval);
+
+  TEST_ASSERT_EQUAL(True, (eval_program("'c' is byte")->obj)->boolval);
+  TEST_ASSERT_EQUAL(False, (eval_program("'c' is int")->obj)->boolval);
+
+  // TODO There's currently no way to do this for string and bytearray.
+  // Want a proper list of types that includes keyword etc, so we can say type(while) etc.
+  // Possible hook for documentation, as well.
+}
+
+void test_eval_type_of(void) {
+  TEST_ASSERT_EQUAL_STRING("Int",        bytearray_to_c_str(eval_program("type(2)")->obj->bytearray));
+  TEST_ASSERT_EQUAL_STRING("Float",      bytearray_to_c_str(eval_program("type(2.2)")->obj->bytearray));
+  TEST_ASSERT_EQUAL_STRING("Bool",       bytearray_to_c_str(eval_program("type(true)")->obj->bytearray));
+  TEST_ASSERT_EQUAL_STRING("Str",        bytearray_to_c_str(eval_program("type(\"2\")")->obj->bytearray));
+  TEST_ASSERT_EQUAL_STRING("Byte Array", bytearray_to_c_str(eval_program("type(arr(2))")->obj->bytearray));
+}
+
 void test_eval_callable_abs(void) {
   char *program = "abs(-42)";
   eval_result_t *result = eval_program(program);
@@ -701,6 +730,8 @@ void test_eval(void) {
   RUN_TEST(test_eval_cast_string);
   RUN_TEST(test_eval_cast_char);
   RUN_TEST(test_eval_cast_boolean);
+  RUN_TEST(test_eval_is_type);
+  RUN_TEST(test_eval_type_of);
   RUN_TEST(test_eval_callable_abs);
   RUN_TEST(test_eval_callable_hex);
   RUN_TEST(test_eval_callable_bin);
