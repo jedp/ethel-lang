@@ -45,6 +45,20 @@ Ok
 5
 ```
 
+#### Pattern matching
+
+```
+> val x = 42
+42
+> val y = match(x) {
+    0 then 1
+    < 10 then 2
+    in 11..50 then 3
+    else 4
+    }
+3
+```
+
 #### Lists
 
 ```

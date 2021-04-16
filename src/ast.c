@@ -71,6 +71,7 @@ ast_expr_t *ast_binop(ast_type_t type, ast_expr_t *a, ast_expr_t *b) {
     case AST_LE:
     case AST_EQ:
     case AST_NE:
+    case AST_IN:
       node->type = type;
       break;
     default:

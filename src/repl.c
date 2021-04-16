@@ -8,7 +8,6 @@
 
 #define MAX_INPUT 1024
 
-char result_buf[80];
 char input[MAX_INPUT] = "";
 
 static char* byte_repr(char c) {

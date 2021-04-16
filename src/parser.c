@@ -34,6 +34,7 @@ boolean is_binop(token_t *token) {
       || token->tag == TAG_LE
       || token->tag == TAG_EQ
       || token->tag == TAG_NE
+      || token->tag == TAG_IN
       || token->tag == TAG_MEMBER_ACCESS
       ;
 }
@@ -59,6 +60,8 @@ uint8_t binop_preced(token_t *token) {
     case TAG_EQ:
     case TAG_NE:
       return PRECED_EQ;
+    case TAG_IN:
+      return PRECED_MEMBERSHIP;
     case TAG_BITWISE_AND:
       return PRECED_BITWISE_AND;
     case TAG_BITWISE_XOR:
@@ -226,6 +229,7 @@ ast_expr_t *_parse_expr(lexer_t *lexer, int min_preced) {
       case TAG_LE:             lhs = ast_binop(AST_LE,            lhs, _parse_expr(lexer, next_min_preced)); break;
       case TAG_EQ:             lhs = ast_binop(AST_EQ,            lhs, _parse_expr(lexer, next_min_preced)); break;
       case TAG_NE:             lhs = ast_binop(AST_NE,            lhs, _parse_expr(lexer, next_min_preced)); break;
+      case TAG_IN:             lhs = ast_binop(AST_IN,            lhs, _parse_expr(lexer, next_min_preced)); break;
       case TAG_AS:             lhs = ast_cast(                    lhs, _parse_expr(lexer, next_min_preced)); break;
       case TAG_RANGE:          lhs = ast_range(                   lhs, _parse_expr(lexer, next_min_preced)); break;
       case TAG_MEMBER_ACCESS:  lhs = ast_access(                  lhs, _parse_expr(lexer, next_min_preced)); break;

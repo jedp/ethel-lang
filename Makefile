@@ -1,7 +1,9 @@
 
 COMPOBJS = src/mem.o \
 					 src/obj.o \
+					 src/math.o \
 					 src/num.o \
+					 src/range.o \
 					 src/arr.o \
 					 src/str.o \
 					 src/list.o \
@@ -15,6 +17,8 @@ REPLOBJS = src/repl.o
 
 TESTOBJS = test/unity/unity.o \
 					 test/test_str.o \
+					 test/test_list.o \
+					 test/test_range.o \
 					 test/test_mem.o \
 					 test/test_bytearray.o \
 					 test/test_lexer.o \

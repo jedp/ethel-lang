@@ -526,6 +526,13 @@ void test_eval_list_val_remove_at(void) {
   TEST_ASSERT_EQUAL(TYPE_NIL, result9->obj->type);
 }
 
+void test_eval_list_in(void) {
+  char *program = "{ val l = list of Int { 1, 2, 3 }\n 2 in l }";
+  eval_result_t *result = eval_program(program);
+  TEST_ASSERT_EQUAL(ERR_NO_ERROR, result->err);
+  TEST_ASSERT_EQUAL(True, result->obj->boolval);
+}
+
 void test_eval_arr_decl(void) {
   char *program = "{ val a = arr(12)\n a.length() }";
   eval_result_t *result = eval_program(program);
@@ -662,6 +669,7 @@ void test_eval(void) {
   RUN_TEST(test_eval_list_val_remove_first);
   RUN_TEST(test_eval_list_val_remove_last);
   RUN_TEST(test_eval_list_val_remove_at);
+  RUN_TEST(test_eval_list_in);
   RUN_TEST(test_eval_arr_decl);
   RUN_TEST(test_eval_arr_assign);
   RUN_TEST(test_eval_bitwise_or);

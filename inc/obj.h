@@ -110,6 +110,7 @@ enum static_method_ident_enum {
   METHOD_HEAD,
   METHOD_TAIL,
   METHOD_SLICE,
+  METHOD_CONTAINS,
   METHOD_PREPEND,
   METHOD_APPEND,
   METHOD_REMOVE_FIRST,
@@ -130,6 +131,7 @@ static const static_method_name_t static_method_names[] = {
   { .ident = METHOD_HEAD,          .name = "head" },
   { .ident = METHOD_TAIL,          .name = "tail" },
   { .ident = METHOD_SLICE,         .name = "slice" },
+  { .ident = METHOD_CONTAINS,      .name = "contains" },
   { .ident = METHOD_PREPEND,       .name = "prepend" },
   { .ident = METHOD_APPEND,        .name = "append" },
   { .ident = METHOD_REMOVE_FIRST,  .name = "removeFirst" },
@@ -152,6 +154,8 @@ obj_t *range_obj(int, int);
 obj_t *list_obj(bytearray_t *type_name, obj_list_element_t* elems);
 obj_t *func_obj(void* code);
 obj_t *return_val(obj_t *val);
+obj_method_args_t *wrap_varargs(int n_args, ...);
+boolean obj_prim_eq(obj_t *a, obj_t *b);
 
 boolean truthy(obj_t *obj);
 

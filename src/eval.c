@@ -4,6 +4,7 @@
 #include "../inc/err.h"
 #include "../inc/mem.h"
 #include "../inc/num.h"
+#include "../inc/range.h"
 #include "../inc/arr.h"
 #include "../inc/str.h"
 #include "../inc/list.h"
@@ -488,6 +489,38 @@ static void cmp(ast_type_t type, obj_t *a, obj_t *b, eval_result_t *result) {
   }
 
   result->err = ERR_EVAL_TYPE_ERROR;
+}
+
+static void member_of(obj_t *a, obj_t *b, eval_result_t *result) {
+  if (!(b->type == TYPE_RANGE ||
+        b->type == TYPE_LIST ||
+        b->type == TYPE_STRING ||
+        b->type == TYPE_BYTEARRAY)) {
+    result->err = ERR_TYPE_ITERABLE_REQUIRED;
+    return;
+  }
+
+  if (b->type == TYPE_LIST) {
+    result->obj = list_contains(b, wrap_varargs(1, a));
+    return;
+  }
+
+  if (b->type == TYPE_RANGE) {
+    result->obj = range_contains(b, wrap_varargs(1, a));
+    return;
+  }
+
+  if (b->type == TYPE_STRING) {
+    result->obj = arr_contains(b, wrap_varargs(1, a));
+    return;
+  }
+
+  if (b->type == TYPE_BYTEARRAY) {
+    result->obj = arr_contains(b, wrap_varargs(1, a));
+    return;
+  }
+
+  result->err = ERR_EVAL_UNHANDLED_OBJECT;
 }
 
 static void boolean_and(obj_t *a, obj_t *b, eval_result_t *result) {
@@ -1059,6 +1092,15 @@ eval_result_t *eval_expr(ast_expr_t *expr, env_t *env) {
             eval_result_t *r2 = eval_expr(expr->binop_args->b, env);
             if ((result->err = r2->err) != ERR_NO_ERROR) goto error;
             cmp(expr->type, r1->obj, r2->obj, result); 
+            if (result->err != ERR_NO_ERROR) goto error;
+            break;
+        }
+        case AST_IN: {
+            eval_result_t *r1 = eval_expr(expr->binop_args->a, env);
+            if ((result->err = r1->err) != ERR_NO_ERROR) goto error;
+            eval_result_t *r2 = eval_expr(expr->binop_args->b, env);
+            if ((result->err = r2->err) != ERR_NO_ERROR) goto error;
+            member_of(r1->obj, r2->obj, result);
             if (result->err != ERR_NO_ERROR) goto error;
             break;
         }

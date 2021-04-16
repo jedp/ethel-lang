@@ -1,4 +1,5 @@
 #include <stdio.h>
+#include "../inc/math.h"
 #include "../inc/mem.h"
 #include "../inc/str.h"
 #include "../inc/obj.h"
@@ -69,6 +70,11 @@ obj_t *_list_slice(obj_t *list_obj, int start, int end) {
     return nil_obj();
   }
 
+  dim_t len = _list_len(list_obj);
+  if (abs(start) > len || abs(end) > len) {
+    return _empty_list(list_obj->list->type_name);
+  }
+
   int i = 0;
   obj_list_element_t *root = list_obj->list->elems;
 
@@ -111,6 +117,28 @@ obj_t *_list_slice(obj_t *list_obj, int start, int end) {
 
   curr->next = NULL;
   return slice;
+}
+
+obj_t *list_contains(obj_t *list_obj, obj_method_args_t *args) {
+  if (args == NULL || args->arg == NULL) {
+    printf("Null arg to contains()\n");
+    return nil_obj();
+  }
+
+  if (!c_str_eq(obj_type_names[args->arg->type], bytearray_to_c_str(list_obj->list->type_name))) {
+    printf("Wrong type: %s not %s\n", obj_type_names[args->arg->type], bytearray_to_c_str(list_obj->list->type_name));
+    return boolean_obj(False);
+  }
+
+  obj_t *arg = args->arg;
+  obj_list_element_t *root = list_obj->list->elems;
+  while(root != NULL) {
+    if (obj_prim_eq(root->node, arg)) {
+      return boolean_obj(True);
+    }
+    root = root->next;
+  }
+  return boolean_obj(False);
 }
 
 obj_t *list_len(obj_t *list_obj, obj_method_args_t /* ignored */ *args) {
@@ -227,7 +255,6 @@ obj_t *list_remove_last(obj_t *list_obj, obj_method_args_t *args) {
   int len = _list_len(list_obj);
   obj_list_element_t *last = _get_elem(list_obj, len - 1);
   if (first == last) {
-    printf("first is last\n");
     obj_t *obj = first->node;
     list_obj->list->elems = NULL;
     mem_free(last);

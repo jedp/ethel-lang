@@ -394,6 +394,22 @@ void test_lex_list_of_with_init(void) {
   }
 }
 
+void test_lex_member_of(void) {
+  char *expr = "val x = 2 in 0..10";
+  lexer_t lexer;
+  lexer_init(&lexer, expr, c_str_len(expr));
+
+  int expected[] = {
+    TAG_INVARIABLE, TAG_IDENT, TAG_ASSIGN,
+    TAG_INT, TAG_IN, TAG_INT, TAG_RANGE, TAG_INT
+  };
+  for (int i = 0; i < sizeof(expected) / sizeof(expected[0]); i++) {
+    TEST_ASSERT_EQUAL(ERR_NO_ERROR, lexer.err);
+    TEST_ASSERT_EQUAL(expected[i], lexer.token.tag);
+    advance(&lexer);
+  }
+}
+
 void test_lex_field_access(void) {
   char *expr = "val l = x.length";
   lexer_t lexer;
@@ -604,6 +620,7 @@ void test_lexer(void) {
   RUN_TEST(test_lex_begin_end);
   RUN_TEST(test_lex_list_of);
   RUN_TEST(test_lex_list_of_with_init);
+  RUN_TEST(test_lex_member_of);
   RUN_TEST(test_lex_field_access);
   RUN_TEST(test_lex_method_access);
   RUN_TEST(test_lex_array_access);

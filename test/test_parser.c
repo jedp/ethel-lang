@@ -261,6 +261,19 @@ void test_parse_seq_elem_assign(void) {
   mem_free(ast);
 }
 
+void test_parse_member_of(void) {
+  char *program = "val x = 3 in 0..10";
+  ast_expr_t *ast = mem_alloc(sizeof(ast_expr_t));
+  parse_result_t *parse_result = mem_alloc(sizeof(parse_result_t));
+  parse_program(program, ast, parse_result);
+
+  TEST_ASSERT_EQUAL(ERR_NO_ERROR, parse_result->err);
+  TEST_ASSERT_EQUAL(AST_ASSIGN, ast->type);
+  TEST_ASSERT_EQUAL(AST_IDENT, ((ast_expr_t*) ast->assignment->ident)->type);
+  TEST_ASSERT_EQUAL(AST_IN, ((ast_expr_t*) ast->assignment->value)->type);
+  mem_free(ast);
+}
+
 void test_parse_empty_func(void) {
   char *program = "val x = fn() { }";
   ast_expr_t *ast = mem_alloc(sizeof(ast_expr_t));
@@ -329,6 +342,7 @@ void test_parser(void) {
   RUN_TEST(test_parse_seq_elem);
   RUN_TEST(test_parse_seq_elem_access);
   RUN_TEST(test_parse_seq_elem_assign);
+  RUN_TEST(test_parse_member_of);
   RUN_TEST(test_parse_empty_func);
   RUN_TEST(test_parse_func);
   RUN_TEST(test_parse_func_call);

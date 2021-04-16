@@ -1,5 +1,6 @@
 #include "unity/unity.h"
 #include "test_bytearray.h"
+#include "../inc/arr.h"
 #include "../inc/obj.h"
 
 uint8_t int_arr[3] = { 1, 2, 3 };
@@ -23,6 +24,13 @@ void test_barr_new(void) {
   TEST_ASSERT_EQUAL(3, a2->bytearray->data[2]);
 }
 
+void test_barr_contains(void) {
+  obj_t *a = bytearray_obj(5, (uint8_t *) "ohai");
+  TEST_ASSERT_EQUAL(True, arr_contains(a, wrap_varargs(1, byte_obj('h')))->boolval);
+}
+
 void test_bytearray(void) {
   RUN_TEST(test_barr_new);
+  RUN_TEST(test_barr_contains);
 }
+

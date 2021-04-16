@@ -1,4 +1,5 @@
 #include <stdio.h>
+#include <stdarg.h>
 #include <stdint.h>
 #include "../inc/mem.h"
 #include "../inc/err.h"
@@ -120,6 +121,46 @@ obj_t *return_val(obj_t *val) {
   obj_t *obj = obj_of(TYPE_RETURN_VAL);
   obj->return_val = val;
   return obj;
+}
+
+obj_method_args_t *wrap_varargs(int n_args, ...) {
+  va_list vargs;
+  va_start(vargs, n_args);
+
+  obj_method_args_t *args = mem_alloc(sizeof(obj_method_args_t));
+  obj_method_args_t *root = args;
+
+  for (int i = 0; i < n_args; i++) {
+    obj_t *val = va_arg(vargs, obj_t*);
+    args->arg = val;
+
+    if (i < n_args - 1) {
+      args->next = mem_alloc(sizeof(obj_method_args_t));
+    } else {
+      args->next = NULL;
+    }
+
+    args = args->next;
+  }
+
+  return root;
+}
+
+boolean obj_prim_eq(obj_t *a, obj_t *b) {
+  if (a->type != b->type) return False;
+
+  switch (a->type) {
+    case TYPE_BOOLEAN:
+      return a->boolval == b->boolval;
+    case TYPE_INT:
+      return a->intval == b->intval;
+    case TYPE_FLOAT:
+      return a->floatval == b->floatval;
+    case TYPE_BYTE:
+      return a->byteval == b->byteval;
+    default:
+      return False;
+  }
 }
 
 boolean truthy(obj_t *obj) {
