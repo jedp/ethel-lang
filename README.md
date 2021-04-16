@@ -4,32 +4,6 @@ A basic programming language.
 
 Very much in progress and not useful yet.
 
-### Example
-
-```
-make
-./repl
-> for i in 1..10 if (i mod 7 == 0) then print("Hello, Ethel!")
-Hello, Ethel!
-(Nil)
-> var guess = input("Guess my age!") as int
-Guess my age! 5
-5  (Int)
-> val age = 42
-42  (Int)
-> while guess != age {
-    if guess < age then print("Too low") else print("Too high")
-    guess = input("Guess again") as int
-    }
-Too low
-Guess again 66
-Too high
-Guess again 15
-Too low
-Guess again 42
-Ok
-```
-
 ### Features
 
 #### Expressions all the way down
@@ -45,19 +19,23 @@ Ok
 5
 ```
 
-#### Pattern matching
+#### Dynamic typing
 
 ```
-> val x = 42
-42
-> val y = match(x) {
-    0 then 1
-    < 10 then 2
-    in 11..50 then 3
-    is Int then 4
-    else 0
-    }
-3
+> val s = 101
+101
+> type(s)
+Int
+> s is float
+False
+> s as float
+101.000000
+> type(s as float)
+Float
+> type("moo".length())
+Int
+> "moo" + 2
+Type error
 ```
 
 #### Lists
@@ -104,6 +82,32 @@ ByteArray(4)
 True
 ```
 
+#### Functions
+
+```
+> val f = fn(a, b) { a * b }
+f
+> f(2, 5)
+10
+> val fib = fn(n) {
+    if n <= 0 then return 0  ;; Early returns
+    if n == 1 then return 1
+    fib(n - 2) + fib(n - 1)  ;; Last expr is still normal result value
+    }
+Function
+> for i in 1..10 { print(i, fib(i)) }
+1 1
+2 1
+3 2
+4 3
+5 5
+6 8
+7 13
+8 21
+9 34
+<Nil>
+```
+
 #### Bitwise operators
 
 ```
@@ -141,50 +145,5 @@ Byte Array
 0x0000799d  00000000 00000000 01111001 10011101
 > dump(0b10101100)
 0x000000ac  00000000 00000000 00000000 10101100
-```
-
-#### Dynamic typing
-
-```
-> val s = 101
-101
-> type(s)
-Int
-> s is float
-False
-> s as float
-101.000000
-> type(s as float)
-Float
-> type("moo".length())
-Int
-> "moo" + 2
-Type error
-```
-
-#### Functions
-
-```
-> val f = fn(a, b) { a * b }
-f
-> f(2, 5)
-10
-> val fib = fn(n) {
-    if n <= 0 then return 0  ;; Early returns
-    if n == 1 then return 1
-    fib(n - 2) + fib(n - 1)  ;; Last expr is still normal result value
-    }
-Function
-> for i in 1..10 { print(i, fib(i)) }
-1 1
-2 1
-3 2
-4 3
-5 5
-6 8
-7 13
-8 21
-9 34
-<Nil>
 ```
 
