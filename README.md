@@ -72,6 +72,8 @@ Ok
 20
 > l
 { 5, 6, 7, 8, 9 }
+> 7 in l
+True
 ```
 
 #### Byte Arrays and Strings
@@ -97,6 +99,8 @@ ByteArray(4)
 'm'
 > print(a)
 "omai"
+> 'a' in a
+True
 ```
 
 #### Bitwise operators

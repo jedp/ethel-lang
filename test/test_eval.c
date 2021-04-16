@@ -627,7 +627,56 @@ void test_eval_function_return(void) {
   char *program = "{ val f = fn(x) { if x == 0 then return 42\n x\n } \n f(0)}";
   eval_result_t *result = eval_program(program);
 
+  TEST_ASSERT_EQUAL(ERR_NO_ERROR, result->err);
   TEST_ASSERT_EQUAL(42, result->obj->intval);
+}
+
+void test_eval_in_list(void) {
+  char *program = "{ val l = list of Int { 1, 2, 3 }\n 5 in l}";
+  eval_result_t *result = eval_program(program);
+  TEST_ASSERT_EQUAL(ERR_NO_ERROR, result->err);
+  TEST_ASSERT_EQUAL(False, result->obj->boolval);
+
+  program = "{ val l = list of Int { 1, 2, 3 }\n 2 in l}";
+  result = eval_program(program);
+  TEST_ASSERT_EQUAL(ERR_NO_ERROR, result->err);
+  TEST_ASSERT_EQUAL(True, result->obj->boolval);
+}
+
+void test_eval_in_range(void) {
+  char *program = "{ val s = \"glug\"\n 0 in 1..s.length()}";
+  eval_result_t *result = eval_program(program);
+  TEST_ASSERT_EQUAL(ERR_NO_ERROR, result->err);
+  TEST_ASSERT_EQUAL(False, result->obj->boolval);
+
+  program = "{ val s = \"glug\"\n 3 in 1..s.length()}";
+  result = eval_program(program);
+  TEST_ASSERT_EQUAL(ERR_NO_ERROR, result->err);
+  TEST_ASSERT_EQUAL(True, result->obj->boolval);
+}
+
+void test_eval_in_string(void) {
+  char *program = "{ val s = \"Ethel\"\n 'x' in s}";
+  eval_result_t *result = eval_program(program);
+  TEST_ASSERT_EQUAL(ERR_NO_ERROR, result->err);
+  TEST_ASSERT_EQUAL(False, result->obj->boolval);
+
+  program = "{ val s = \"Ethel\"\n 'e' in s}";
+  result = eval_program(program);
+  TEST_ASSERT_EQUAL(ERR_NO_ERROR, result->err);
+  TEST_ASSERT_EQUAL(True, result->obj->boolval);
+}
+
+void test_eval_in_bytearray(void) {
+  char *program = "{ val a = arr(10)\n 1 in a}";
+  eval_result_t *result = eval_program(program);
+  TEST_ASSERT_EQUAL(ERR_NO_ERROR, result->err);
+  TEST_ASSERT_EQUAL(False, result->obj->boolval);
+
+  program = "{ val a = arr(10)\n a[4] = 1 \n 1 in a}";
+  result = eval_program(program);
+  TEST_ASSERT_EQUAL(ERR_NO_ERROR, result->err);
+  TEST_ASSERT_EQUAL(True, result->obj->boolval);
 }
 
 void test_eval(void) {
@@ -681,5 +730,9 @@ void test_eval(void) {
   RUN_TEST(test_eval_function);
   RUN_TEST(test_eval_function_wrong_args);
   RUN_TEST(test_eval_function_return);
+  RUN_TEST(test_eval_in_list);
+  RUN_TEST(test_eval_in_range);
+  RUN_TEST(test_eval_in_string);
+  RUN_TEST(test_eval_in_bytearray);
 }
 
