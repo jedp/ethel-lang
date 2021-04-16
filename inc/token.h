@@ -77,6 +77,7 @@ enum tag_enum {
   TAG_WHILE,
   TAG_FOR,
   TAG_IN,
+  TAG_MATCH,
   TAG_STEP,
 
   // Comparison
@@ -262,6 +263,7 @@ static const token_t reserved[] = {
   { TAG_WHILE,         .string = (char *) "while" },
   { TAG_FOR,           .string = (char *) "for" },
   { TAG_IN,            .string = (char *) "in" },
+  { TAG_MATCH,         .string = (char *) "match" },
   { TAG_STEP,          .string = (char *) "step" },
   { TAG_NIL,           .string = (char *) "nil" },
   { TAG_LIST,          .string = (char *) "list" },

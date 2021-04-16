@@ -579,6 +579,7 @@ void test_lex_all_tokens(void) {
     (test_data_t) { .text = "while", .expected_tag = TAG_WHILE },
     (test_data_t) { .text = "for", .expected_tag = TAG_FOR },
     (test_data_t) { .text = "in", .expected_tag = TAG_IN },
+    (test_data_t) { .text = "match", .expected_tag = TAG_MATCH },
     (test_data_t) { .text = "step", .expected_tag = TAG_STEP },
     (test_data_t) { .text = "hex", .expected_tag = TAG_TO_HEX },
     (test_data_t) { .text = "bin", .expected_tag = TAG_TO_BIN },
