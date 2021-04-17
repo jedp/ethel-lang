@@ -9,9 +9,11 @@ eval_result_t *eval_program(char* program) {
   env_t env;
   env_init(&env);
 
-  push_scope(&env);
+  new_scope(&env);
 
   return eval(&env, program);
+  
+  del_scope(&env);
 }
 
 void test_eval_calculator(void) {

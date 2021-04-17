@@ -20,7 +20,7 @@ env_sym_t *empty_sym() {
   return new_sym(c_str_to_bytearray(""), NULL, F_NONE);
 }
 
-error_t push_scope(env_t *env) {
+error_t new_scope(env_t *env) {
   env->top += 1;
   if (env->top == ENV_MAX_STACK_DEPTH) {
     return ERR_ENV_MAX_DEPTH_EXCEEDED;
@@ -31,7 +31,7 @@ error_t push_scope(env_t *env) {
   return ERR_NO_ERROR;
 }
 
-error_t pop_scope(env_t *env) {
+error_t del_scope(env_t *env) {
   // Delete any symbols at this level.
   // Don't delete the root node.
   env_sym_t *next = env->symbols[env->top].next;
@@ -133,7 +133,7 @@ error_t env_init(env_t *env) {
     env->symbols[i] = *empty_sym();
   }
 
-  // An outer push_scope() is required.
+  // An outer new_scope() is required.
   env->top = -1;
 
   return ERR_NO_ERROR;
