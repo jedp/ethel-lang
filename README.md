@@ -84,6 +84,8 @@ True
 
 #### Functions
 
+Functions have lexical scope.
+
 ```
 > val f = fn(a, b) { a * b }
 f

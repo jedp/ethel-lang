@@ -96,7 +96,7 @@ int main(int argc, char** argv) {
 
   env_t env;
   env_init(&env);
-  new_scope(&env);
+  enter_scope(&env);
 
   while (1) {
     if (indent) {

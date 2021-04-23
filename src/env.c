@@ -9,6 +9,7 @@ env_sym_t *new_sym(bytearray_t *name, obj_t *obj, uint8_t flags) {
   sym->name = mem_alloc(sizeof(bytearray_t));
   sym->name = bytearray_clone(name);
   sym->flags = flags;
+  sym->refcount = 0;
   sym->obj = obj;
   sym->prev = NULL;
   sym->next = NULL; 
@@ -20,27 +21,35 @@ env_sym_t *empty_sym() {
   return new_sym(c_str_to_bytearray(""), NULL, F_NONE);
 }
 
-error_t new_scope(env_t *env) {
+error_t push_scope(env_t *env, env_sym_t *scope) {
   env->top += 1;
   if (env->top == ENV_MAX_STACK_DEPTH) {
     return ERR_ENV_MAX_DEPTH_EXCEEDED;
   }
 
-  env->symbols[env->top] = *empty_sym();
-
+  env->symbols[env->top] = *scope;
+  scope->refcount += 1;
   return ERR_NO_ERROR;
 }
 
-error_t del_scope(env_t *env) {
-  // Delete any symbols at this level.
-  // Don't delete the root node.
+error_t enter_scope(env_t *env) {
+  return push_scope(env, empty_sym());
+}
+
+error_t leave_scope(env_t *env) {
   env_sym_t *next = env->symbols[env->top].next;
-  while (next != NULL) {
-    env_sym_t *temp = next;
-    next = next->next;
-    mem_free(temp->name);
-    mem_free(temp);
-    temp = NULL;
+  // Decrement refcount when popping scope.
+  // Once refcount is 0, we know it's not under something else's scope.
+  if (next != NULL && --next->refcount < 1) {
+    // Delete any symbols at this level.
+    // Don't delete the root node.
+    while (next != NULL) {
+      env_sym_t *temp = next;
+      next = next->next;
+      mem_free(temp->name);
+      mem_free(temp);
+      temp = NULL;
+    }
   }
   env->top -= 1;
 

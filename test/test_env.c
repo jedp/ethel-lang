@@ -20,14 +20,14 @@ void test_env_no_scope_error() {
   TEST_ASSERT_EQUAL(ERR_ENV_NO_SCOPE, put_env(&env, BA("foo"), int_obj(42), F_NONE));
 
   // First, create the initial scope.
-  TEST_ASSERT_EQUAL(ERR_NO_ERROR, new_scope(&env));
+  TEST_ASSERT_EQUAL(ERR_NO_ERROR, enter_scope(&env));
   TEST_ASSERT_EQUAL(ERR_NO_ERROR, put_env(&env, BA("foo"), int_obj(42), F_NONE));
 }
 
 void test_env_put_get() {
   env_t env;
   env_init(&env);
-  new_scope(&env);
+  enter_scope(&env);
 
   obj_t *not_found = get_env(&env, BA("ethel"));
   TEST_ASSERT_EQUAL(TYPE_UNDEF, not_found->type);
@@ -45,7 +45,7 @@ void test_env_put_get() {
 void test_env_put_del_get() {
   env_t env;
   env_init(&env);
-  new_scope(&env);
+  enter_scope(&env);
 
   obj_t *not_found = get_env(&env, BA("ethel"));
   TEST_ASSERT_EQUAL(TYPE_UNDEF, not_found->type);
@@ -68,18 +68,18 @@ void test_env_put_del_get() {
 void test_env_scopes() {
   env_t env;
   env_init(&env);
-  new_scope(&env);
+  enter_scope(&env);
   
   TEST_ASSERT_EQUAL(0, env.top);
   TEST_ASSERT_EQUAL(ERR_NO_ERROR, put_env(&env, BA("one-1"), float_obj(1.1), F_NONE));
   TEST_ASSERT_EQUAL(ERR_NO_ERROR, put_env(&env, BA("one-2"), float_obj(1.2), F_NONE));
   TEST_ASSERT_EQUAL(ERR_NO_ERROR, put_env(&env, BA("one-3"), float_obj(1.3), F_NONE));
 
-  TEST_ASSERT_EQUAL(ERR_NO_ERROR, new_scope(&env));
+  TEST_ASSERT_EQUAL(ERR_NO_ERROR, enter_scope(&env));
   TEST_ASSERT_EQUAL(ERR_NO_ERROR, put_env(&env, BA("two-1"), float_obj(2.1), F_NONE));
   TEST_ASSERT_EQUAL(ERR_NO_ERROR, put_env(&env, BA("two-2"), float_obj(2.2), F_NONE));
 
-  TEST_ASSERT_EQUAL(ERR_NO_ERROR, new_scope(&env));
+  TEST_ASSERT_EQUAL(ERR_NO_ERROR, enter_scope(&env));
   TEST_ASSERT_EQUAL(ERR_NO_ERROR, put_env(&env, BA("three-1"), float_obj(3.1), F_NONE));
   TEST_ASSERT_EQUAL(ERR_NO_ERROR, put_env(&env, BA("three-2"), float_obj(3.2), F_NONE));
   TEST_ASSERT_EQUAL(ERR_NO_ERROR, put_env(&env, BA("three-3"), float_obj(3.3), F_NONE));
@@ -97,7 +97,7 @@ void test_env_scopes() {
   TEST_ASSERT_EQUAL(1.1, get_env(&env, BA("one-1"))->floatval);
 
   // Pop the topmost scope.
-  TEST_ASSERT_EQUAL(ERR_NO_ERROR, del_scope(&env));
+  TEST_ASSERT_EQUAL(ERR_NO_ERROR, leave_scope(&env));
   TEST_ASSERT_EQUAL(TYPE_UNDEF, get_env(&env, BA("three-4"))->type);
   TEST_ASSERT_EQUAL(TYPE_UNDEF, get_env(&env, BA("three-3"))->type);
   TEST_ASSERT_EQUAL(TYPE_UNDEF, get_env(&env, BA("three-2"))->type);
@@ -111,7 +111,7 @@ void test_env_scopes() {
   TEST_ASSERT_EQUAL(1.1, get_env(&env, BA("one-1"))->floatval);
 
   // Pop the next scope.
-  TEST_ASSERT_EQUAL(ERR_NO_ERROR, del_scope(&env));
+  TEST_ASSERT_EQUAL(ERR_NO_ERROR, leave_scope(&env));
   TEST_ASSERT_EQUAL(TYPE_UNDEF, get_env(&env, BA("three-4"))->type);
   TEST_ASSERT_EQUAL(TYPE_UNDEF, get_env(&env, BA("three-3"))->type);
   TEST_ASSERT_EQUAL(TYPE_UNDEF, get_env(&env, BA("three-2"))->type);
@@ -125,7 +125,7 @@ void test_env_scopes() {
   TEST_ASSERT_EQUAL(1.1, get_env(&env, BA("one-1"))->floatval);
 
   // Pop the last scope. Nothing is in scope.
-  TEST_ASSERT_EQUAL(ERR_NO_ERROR, del_scope(&env));
+  TEST_ASSERT_EQUAL(ERR_NO_ERROR, leave_scope(&env));
   TEST_ASSERT_EQUAL(TYPE_UNDEF, get_env(&env, BA("three-4"))->type);
   TEST_ASSERT_EQUAL(TYPE_UNDEF, get_env(&env, BA("three-3"))->type);
   TEST_ASSERT_EQUAL(TYPE_UNDEF, get_env(&env, BA("three-2"))->type);
@@ -140,12 +140,12 @@ void test_env_scopes() {
 
   // Sanity check. We should be out of all scopes now.
   TEST_ASSERT_EQUAL(ERR_ENV_NO_SCOPE, put_env(&env, BA("one-new-1"), int_obj(42), F_NONE));
-  TEST_ASSERT_EQUAL(ERR_NO_ERROR, new_scope(&env));
+  TEST_ASSERT_EQUAL(ERR_NO_ERROR, enter_scope(&env));
   TEST_ASSERT_EQUAL(0, env.top);
 
   // And we can push things back in new scopes.
   TEST_ASSERT_EQUAL(ERR_NO_ERROR, put_env(&env, BA("one-new-1"), int_obj(42), F_NONE));
-  TEST_ASSERT_EQUAL(ERR_NO_ERROR, new_scope(&env));
+  TEST_ASSERT_EQUAL(ERR_NO_ERROR, enter_scope(&env));
   TEST_ASSERT_EQUAL(ERR_NO_ERROR, put_env(&env, BA("two-new-1"), int_obj(17), F_NONE));
   TEST_ASSERT_EQUAL(TYPE_INT, get_env(&env, BA("one-new-1"))->type);
   TEST_ASSERT_EQUAL(TYPE_INT, get_env(&env, BA("two-new-1"))->type);
@@ -154,7 +154,7 @@ void test_env_scopes() {
 void test_env_redefinition_error(void) {
   env_t env;
   env_init(&env);
-  new_scope(&env);
+  enter_scope(&env);
 
   // Not there.
   TEST_ASSERT_EQUAL(TYPE_UNDEF, get_env(&env, BA("thing"))->type);
@@ -167,7 +167,7 @@ void test_env_redefinition_error(void) {
   TEST_ASSERT_EQUAL(ERR_ENV_SYMBOL_REDEFINED, put_env(&env, BA("thing"), float_obj(1.2), F_NONE));
 
   // Also cannot shadow it in a deeper scope.
-  new_scope(&env); 
+  enter_scope(&env);
   TEST_ASSERT_EQUAL(ERR_ENV_SYMBOL_REDEFINED, put_env(&env, BA("thing"), float_obj(1.2), F_NONE));
 }
 

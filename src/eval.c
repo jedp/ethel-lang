@@ -175,7 +175,7 @@ static void _eval_block_expr_in_scope(ast_expr_list_t *block_exprs,
   while (node != NULL) {
     eval_result_t *r = eval_expr(node->root, env);
     if ((result->err = r->err) != ERR_NO_ERROR) {
-      del_scope(env);
+      leave_scope(env);
       return;
     }
 
@@ -195,34 +195,37 @@ static void _eval_block_expr_in_scope(ast_expr_list_t *block_exprs,
 }
 
 static void eval_block_expr(ast_expr_list_t *block_exprs, eval_result_t *result, env_t *env) {
-  new_scope(env);
+  enter_scope(env);
   _eval_block_expr_in_scope(block_exprs, result, env);
-  del_scope(env);
+  leave_scope(env);
 }
 
 static void eval_return_expr(ast_expr_list_t *block_exprs, eval_result_t *result, env_t *env) {
-  new_scope(env);
+  enter_scope(env);
   _eval_block_expr_in_scope(block_exprs, result, env);
   // Wrap the return obj.
   result->obj = return_val(result->obj);
-  del_scope(env);
+  leave_scope(env);
 }
 
 /* Wrap the function pointer in an obj. */
 static void eval_func_def(ast_func_def_t *func_def, eval_result_t *result, env_t *env) {
-  result->obj = func_obj((void *) func_def);
+  result->obj = func_obj((void *) func_def, (void *) &env->symbols[env->top]);
 }
 
 static void eval_func_call(ast_func_call_t *func_call, eval_result_t *result, env_t *env) {
   obj_t *obj = get_env(env, func_call->name);
 
-  ast_func_def_t *fn = (ast_func_def_t *) obj->func_ptr;
+  ast_func_def_t *fn = (ast_func_def_t *) obj->func_def->code;
+  env_sym_t *scope = (env_sym_t *) obj->func_def->scope;
 
-  error_t err = new_scope(env);
-  if (err != ERR_NO_ERROR) {
-    result->err = err;
-    return;
-  }
+  /* Push the scope the function was defined in ... */
+  error_t err = push_scope(env, scope);
+  if ((result->err = err) != ERR_NO_ERROR) return;
+
+  /* ... and create a new scope for the function itself. */
+  err = enter_scope(env);
+  if ((result->err = err) != ERR_NO_ERROR) return;
 
   ast_fn_arg_decl_t *argnames = fn->argnames;
   ast_expr_list_t *callargs = func_call->args;
@@ -236,7 +239,7 @@ static void eval_func_call(ast_func_call_t *func_call, eval_result_t *result, en
     error_t err = put_env_shadow(env, name, r->obj, F_NONE);
     if (err != ERR_NO_ERROR) {
       result->err = err;
-      del_scope(env);
+      leave_scope(env);
       return;
     }
 
@@ -246,7 +249,8 @@ static void eval_func_call(ast_func_call_t *func_call, eval_result_t *result, en
 
   _eval_block_expr_in_scope(fn->block_exprs, result, env);
 
-  del_scope(env);
+  leave_scope(env);
+  leave_scope(env);
 }
 
 static void strip_trailing_ws(char* s) {
@@ -899,7 +903,7 @@ static void eval_for_loop(ast_expr_t *expr, env_t *env, eval_result_t *result) {
 
   // Push a new scope and store the index variable.
   // We will mutate this variable with each iteration through the loop.
-  new_scope(env);
+  enter_scope(env);
   obj_t *index_obj = int_obj(range->obj->intval);
   // Not mutable in code.
   put_env(env, index_name, index_obj, F_NONE);
@@ -920,7 +924,7 @@ static void eval_for_loop(ast_expr_t *expr, env_t *env, eval_result_t *result) {
       // Eval predicate.
       r = eval_expr(expr->for_loop->pred, env);
       if ((result->err = r->err) != ERR_NO_ERROR) {
-        del_scope(env);
+        leave_scope(env);
         goto error;
       }
     }
@@ -933,13 +937,13 @@ static void eval_for_loop(ast_expr_t *expr, env_t *env, eval_result_t *result) {
       // Eval predicate.
       r = eval_expr(expr->for_loop->pred, env);
       if ((result->err = r->err) != ERR_NO_ERROR) {
-        del_scope(env);
+        leave_scope(env);
         goto error;
       }
     }
   }
 
-  del_scope(env);
+  leave_scope(env);
   result->obj = r->obj;
   mem_free(r);
   return;

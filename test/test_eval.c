@@ -9,11 +9,11 @@ eval_result_t *eval_program(char* program) {
   env_t env;
   env_init(&env);
 
-  new_scope(&env);
+  enter_scope(&env);
 
   return eval(&env, program);
   
-  del_scope(&env);
+  leave_scope(&env);
 }
 
 void test_eval_calculator(void) {
@@ -718,6 +718,28 @@ void test_eval_function_return(void) {
   TEST_ASSERT_EQUAL(42, result->obj->intval);
 }
 
+void test_eval_function_lexical_scope(void) {
+  char *program = "{ val x = 42            \n"
+                  "  val f = fn()  {   x } \n"
+                  "  val g = fn(x) { f() } \n"
+                  "  g(17)                 \n"
+                  "}";
+  eval_result_t *result = eval_program(program);
+
+  TEST_ASSERT_EQUAL(ERR_NO_ERROR, result->err);
+  TEST_ASSERT_EQUAL(42, result->obj->intval);
+}
+
+void test_eval_block_scope(void) {
+  char *program = "{ val x = 42       \n"
+                  "  { { { x } } }    \n"
+                  "}                  \n";
+  eval_result_t *result = eval_program(program);
+
+  TEST_ASSERT_EQUAL(ERR_NO_ERROR, result->err);
+  TEST_ASSERT_EQUAL(42, result->obj->intval);
+}
+
 void test_eval_in_list(void) {
   char *program = "{ val l = list of Int { 1, 2, 3 }\n"
                   "  5 in l}";
@@ -828,6 +850,8 @@ void test_eval(void) {
   RUN_TEST(test_eval_function);
   RUN_TEST(test_eval_function_wrong_args);
   RUN_TEST(test_eval_function_return);
+  RUN_TEST(test_eval_function_lexical_scope);
+  RUN_TEST(test_eval_block_scope);
   RUN_TEST(test_eval_in_list);
   RUN_TEST(test_eval_in_range);
   RUN_TEST(test_eval_in_string);

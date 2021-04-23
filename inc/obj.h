@@ -78,6 +78,13 @@ typedef struct ObjFuncArg {
   struct ObjFuncArg *next;
 } obj_func_arg_t;
 
+typedef struct ObjFuncDef {
+  /* Pointer to the ast_func_def_t to execute. */
+  void* code;
+  /* Pointer to the env_sym_t scope the function was declared in. */
+  void* scope;
+} obj_func_def_t;
+
 typedef struct Obj {
   uint16_t type;
   uint16_t flags;
@@ -90,7 +97,7 @@ typedef struct Obj {
     range_t range;
     obj_list_t *list;
     bytearray_t *bytearray;
-    void* func_ptr;
+    obj_func_def_t *func_def;
     struct Obj *return_val;
   };
   obj_method_t *methods;
@@ -152,7 +159,7 @@ obj_t *string_obj(bytearray_t *src);
 obj_t *boolean_obj(boolean);
 obj_t *range_obj(int, int);
 obj_t *list_obj(bytearray_t *type_name, obj_list_element_t* elems);
-obj_t *func_obj(void* code);
+obj_t *func_obj(void* code, void* scope);
 obj_t *return_val(obj_t *val);
 obj_method_args_t *wrap_varargs(int n_args, ...);
 boolean obj_prim_eq(obj_t *a, obj_t *b);

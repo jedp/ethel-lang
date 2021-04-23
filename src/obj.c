@@ -111,9 +111,11 @@ obj_t *list_obj(bytearray_t *name, obj_list_element_t *elems) {
   return obj;
 }
 
-obj_t *func_obj(void* code) {
+obj_t *func_obj(void* code, void* scope) {
   obj_t *obj = obj_of(TYPE_FUNC_PTR);
-  obj->func_ptr = code;
+  obj->func_def = mem_alloc(sizeof(obj_func_def_t));
+  obj->func_def->code = code;
+  obj->func_def->scope = scope;
   return obj;
 }
 

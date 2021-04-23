@@ -6,9 +6,12 @@
 
 #define ENV_MAX_STACK_DEPTH 50
 
-typedef struct Symbol {
+typedef struct __attribute__((__packed__)) Symbol {
     bytearray_t *name;
-    uint8_t flags;
+    uint16_t flags;
+    /* Used to track how many times this scope is on the stack. */
+    /* When refcount is 0, all symbols in the scope can be deleted. */
+    uint16_t refcount;
     struct Obj *obj;
     struct Symbol *prev;
     struct Symbol *next;
@@ -21,8 +24,9 @@ typedef struct Env {
 } env_t;
 
 error_t env_init(env_t *env);
-error_t new_scope(env_t *env);
-error_t del_scope(env_t *env);
+error_t push_scope(env_t *env, env_sym_t *scope);
+error_t enter_scope(env_t *env);
+error_t leave_scope(env_t *env);
 error_t put_env(env_t *env, bytearray_t *name, const obj_t *obj, const uint8_t flags);
 error_t put_env_shadow(env_t *env, bytearray_t *name, const obj_t *obj, const uint8_t flags);
 error_t del_env(env_t *env, bytearray_t *name);
