@@ -28,15 +28,15 @@ obj_t *obj_of(obj_type_t type) {
   return obj;
 }
 
-obj_t *undef_obj() {
+obj_t *undef_obj(void) {
   return obj_of(TYPE_UNDEF);
 }
 
-obj_t *no_obj() {
+obj_t *no_obj(void) {
   return obj_of(TYPE_NOTHING);
 }
 
-obj_t *nil_obj() {
+obj_t *nil_obj(void) {
   return obj_of(TYPE_NIL);
 }
 

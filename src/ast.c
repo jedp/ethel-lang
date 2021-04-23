@@ -26,7 +26,7 @@ ast_expr_t *ast_node(ast_type_t type) {
   return node;
 }
 
-ast_expr_t *ast_empty() {
+ast_expr_t *ast_empty(void) {
   ast_expr_t *node = ast_node(AST_EMPTY);
   return node;
 }
@@ -95,7 +95,7 @@ ast_expr_t *ast_cast(ast_expr_t *a, ast_expr_t *b) {
   return node;
 }
 
-ast_expr_t *ast_nil() {
+ast_expr_t *ast_nil(void) {
   return ast_node(AST_NIL);
 }
 

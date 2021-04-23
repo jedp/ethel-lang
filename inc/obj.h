@@ -147,9 +147,9 @@ static const static_method_name_t static_method_names[] = {
   { .ident = METHOD_DUMP,          .name = "dump" },
 };
 
-obj_t *undef_obj();
-obj_t *nil_obj();
-obj_t *no_obj();
+obj_t *undef_obj(void);
+obj_t *nil_obj(void);
+obj_t *no_obj(void);
 obj_t *error_obj(error_t errno);
 obj_t *int_obj(int);
 obj_t *float_obj(float);

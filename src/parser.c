@@ -116,7 +116,7 @@ ast_expr_t *parse_start(lexer_t *lexer) {
   return e;
 }
 
-ast_expr_list_t *empty_expr_list() {
+ast_expr_list_t *empty_expr_list(void) {
   ast_expr_list_t *node = mem_alloc(sizeof(ast_expr_list_t));
   node->root = ast_empty();
   return node;
