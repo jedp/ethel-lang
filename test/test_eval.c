@@ -50,6 +50,29 @@ void test_eval_del(void) {
   TEST_ASSERT_EQUAL(ERR_ENV_SYMBOL_UNDEFINED, result->err);
 }
 
+void test_eval_for_loop(void) {
+  char *program = "for i in 1..10 { i }";
+  eval_result_t *result = eval_program(program);
+  TEST_ASSERT_EQUAL(ERR_NO_ERROR, result->err);
+
+  obj_t *obj = result->obj;
+  TEST_ASSERT_EQUAL(TYPE_INT, obj->type);
+  TEST_ASSERT_EQUAL(9, obj->intval);
+}
+
+void test_eval_while_loop(void) {
+  char *program = "{ var x = 10                \n"
+                  "  while x > 0 { x = x - 1 } \n"
+                  "  x                         \n"
+                  "}                           \n";
+  eval_result_t *result = eval_program(program);
+  TEST_ASSERT_EQUAL(ERR_NO_ERROR, result->err);
+
+  obj_t *obj = result->obj;
+  TEST_ASSERT_EQUAL(TYPE_INT, obj->type);
+  TEST_ASSERT_EQUAL(0, obj->intval);
+}
+
 void test_eval_if_else(void) {
   char *program = "if 12 then val x = 5";
   eval_result_t *result = eval_program(program);
@@ -803,6 +826,8 @@ void test_eval(void) {
   RUN_TEST(test_eval_assign_var);
   RUN_TEST(test_eval_assign_multiple);
   RUN_TEST(test_eval_del);
+  RUN_TEST(test_eval_for_loop);
+  RUN_TEST(test_eval_while_loop);
   RUN_TEST(test_eval_if_else);
   RUN_TEST(test_eval_if_else_nil);
   RUN_TEST(test_eval_if_else_assign);

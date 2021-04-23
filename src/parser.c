@@ -293,7 +293,8 @@ ast_expr_t *parse_expr(lexer_t *lexer) {
     }
     case TAG_FOR: {
       advance(lexer);
-      ast_expr_t *index = parse_expr(lexer);
+      // Be sure not to interpret the 'in' as part of a binop.
+      ast_expr_t *index = parse_atom(lexer);
       if (index->type != AST_IDENT) goto error;
       if (!eat(lexer, TAG_IN)) goto error;
       ast_expr_t *range = parse_expr(lexer);

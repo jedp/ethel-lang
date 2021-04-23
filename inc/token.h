@@ -54,8 +54,6 @@ enum tag_enum {
   TAG_ARR_DECL,
 
   // Type declarations
-  TAG_TYPE_BIN,
-  TAG_TYPE_HEX,
   TAG_TYPE_INT,
   TAG_TYPE_FLOAT,
   TAG_TYPE_BYTE,
@@ -156,7 +154,6 @@ static const char* tag_names[] = {
   "BITWISE_NOT",
 
   // Types
-  "FUNCTION",
   "BIN",
   "HEX",
   "INT",
@@ -196,6 +193,7 @@ static const char* tag_names[] = {
   "WHILE",
   "FOR",
   "IN",
+  "MATCH",
   "STEP",
 
   // Comparison
@@ -223,6 +221,7 @@ static const char* tag_names[] = {
   "MEMBER-ACCESS",
   "FIELD-NAME",
   "METHOD-CALL",
+  "FUNCTION-DEFINITION",
   "FUNCTION-CALL",
   "FUNCTION-RETURN",
 
