@@ -6,7 +6,7 @@
 #include "def.h"
 #include "token.h"
 
-#define LEXER_BUF_SIZE 128
+#define LEXER_BUF_SIZE 1024
 
 typedef struct {
   uint32_t pos;

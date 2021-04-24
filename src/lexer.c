@@ -413,11 +413,16 @@ void lexer_init(lexer_t *lexer, const char input[], const uint32_t input_size) {
   lexer->depth = 1;
   lexer->err = ERR_NO_ERROR;
 
+  if (input_size > LEXER_BUF_SIZE) {
+    lexer->err = ERR_INPUT_TOO_LONG;
+    return;
+  }
+
   mem_set(next_word_buf, 0, MAX_WORD);
   mem_set(word_buf, 0, MAX_WORD);
 
   mem_set(lexer->buf, 0, LEXER_BUF_SIZE);
-  for (uint8_t i = 0; i < input_size; i++) {
+  for (uint32_t i = 0; i < input_size; i++) {
     lexer->buf[i] = input[i];
   }
 

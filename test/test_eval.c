@@ -742,12 +742,13 @@ void test_eval_function_return(void) {
 }
 
 void test_eval_function_recursion(void) {
-  char *program = "{ val fib = fn(x) {\n"
+  char *program = "{ val fib = fn(x) {          \n"
                   "    if x <= 0 then return 0  \n"
                   "    if x == 1 then return 1  \n"
-                  "    fib(x-1) + fib(x-2)      \n"
-                  "  }\n"
-                  "  fib(10)}";
+                  "    fib(x - 1) + fib(x - 2)  \n"
+                  "  }                          \n"
+                  "  fib(10)                    \n"
+                  "}";
   eval_result_t *result = eval_program(program);
 
   TEST_ASSERT_EQUAL(ERR_NO_ERROR, result->err);
