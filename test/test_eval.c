@@ -25,6 +25,15 @@ void test_eval_calculator(void) {
   TEST_ASSERT_EQUAL(14, obj->intval);
 }
 
+void test_eval_unary_minus(void) {
+  char *program = "2*-1+2*-1";
+  eval_result_t *result = eval_program(program);
+  TEST_ASSERT_EQUAL(ERR_NO_ERROR, result->err);
+
+  obj_t *obj = result->obj;
+  TEST_ASSERT_EQUAL(-4, obj->intval);
+}
+
 void test_eval_assign_immutable(void) {
   char *program = "{\nval x = 32\nx = 33\n}";
   eval_result_t *result = eval_program(program);
@@ -836,6 +845,7 @@ void test_eval_in_bytearray(void) {
 
 void test_eval(void) {
   RUN_TEST(test_eval_calculator);
+  RUN_TEST(test_eval_unary_minus);
   RUN_TEST(test_eval_assign_immutable);
   RUN_TEST(test_eval_assign_var);
   RUN_TEST(test_eval_assign_multiple);
