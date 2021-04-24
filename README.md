@@ -107,6 +107,28 @@ Function
 7 13
 8 21
 9 34
+10 55
+<Nil>
+```
+
+#### Loops
+
+```
+> var x = 10
+10
+> val y = while x {
+    x = x - 1
+    }
+0
+> y ;; loop is still an expr, returning last value
+0
+> x
+0
+> for i in 0..3 { print(i) }
+0
+1
+2
+3
 <Nil>
 ```
 

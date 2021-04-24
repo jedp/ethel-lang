@@ -1152,7 +1152,7 @@ eval_result_t *eval_expr(ast_expr_t *expr, env_t *env) {
             eval_result_t *r2 = eval_expr(expr->range->to, env);
             if (r2->obj->type != AST_INT) result->err = ERR_TYPE_INT_REQUIRED;
             if ((result->err = r2->err) != ERR_NO_ERROR) goto error;
-            range(r1->obj->intval, r2->obj->intval - 1, result);
+            range(r1->obj->intval, r2->obj->intval, result);
             if (result->err != ERR_NO_ERROR) goto error;
             break;
         }

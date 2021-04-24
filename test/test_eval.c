@@ -57,7 +57,7 @@ void test_eval_for_loop(void) {
 
   obj_t *obj = result->obj;
   TEST_ASSERT_EQUAL(TYPE_INT, obj->type);
-  TEST_ASSERT_EQUAL(9, obj->intval);
+  TEST_ASSERT_EQUAL(10, obj->intval);
 }
 
 void test_eval_while_loop(void) {
@@ -741,6 +741,19 @@ void test_eval_function_return(void) {
   TEST_ASSERT_EQUAL(42, result->obj->intval);
 }
 
+void test_eval_function_recursion(void) {
+  char *program = "{ val fib = fn(x) {\n"
+                  "    if x <= 0 then return 0  \n"
+                  "    if x == 1 then return 1  \n"
+                  "    fib(x-1) + fib(x-2)      \n"
+                  "  }\n"
+                  "  fib(10)}";
+  eval_result_t *result = eval_program(program);
+
+  TEST_ASSERT_EQUAL(ERR_NO_ERROR, result->err);
+  TEST_ASSERT_EQUAL(55, result->obj->intval);
+}
+
 void test_eval_function_lexical_scope(void) {
   char *program = "{ val x = 42            \n"
                   "  val f = fn()  {   x } \n"
@@ -875,6 +888,7 @@ void test_eval(void) {
   RUN_TEST(test_eval_function);
   RUN_TEST(test_eval_function_wrong_args);
   RUN_TEST(test_eval_function_return);
+  RUN_TEST(test_eval_function_recursion);
   RUN_TEST(test_eval_function_lexical_scope);
   RUN_TEST(test_eval_block_scope);
   RUN_TEST(test_eval_in_list);

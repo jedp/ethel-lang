@@ -356,7 +356,7 @@ error:
       (lexer->token.tag == TAG_EOF || lexer->token.tag == TAG_EOL)) {
     lexer->err = ERR_LEX_INCOMPLETE_INPUT;
   } else {
-    printf("Expected atom or block; got %s.\n", tag_names[lexer->token.tag]);
+    printf("Expected atom or block; got %s at pos %d.\n", tag_names[lexer->token.tag], lexer->pos);
     lexer->err = ERR_LEX_ERROR;
   }
 
@@ -584,7 +584,7 @@ error:
       (lexer->token.tag == TAG_EOF || lexer->token.tag == TAG_EOL)) {
     lexer->err = ERR_LEX_INCOMPLETE_INPUT;
   } else {
-    printf("Expected atom or block; got %s.\n", tag_names[lexer->token.tag]);
+    printf("Expected atom or block; got %s at pos %d.\n", tag_names[lexer->token.tag], lexer->pos);
     lexer->err = ERR_LEX_ERROR;
   }
 
