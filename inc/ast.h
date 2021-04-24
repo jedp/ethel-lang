@@ -147,10 +147,10 @@ typedef struct AstUnaryArg {
   ast_expr_t *a;
 } ast_unary_arg_t;
 
-typedef struct AstBinOpArgs {
+typedef struct AstOpArgs {
   ast_expr_t *a;
   ast_expr_t *b;
-} ast_binop_args_t;
+} ast_op_args_t;
 
 typedef struct AstRangeArgs {
   ast_expr_t *from;
@@ -258,7 +258,7 @@ typedef struct __attribute__((__packed__)) AstExpr {
     ast_expr_list_t *block_exprs;
     ast_list_t *list;
     ast_unary_arg_t *unary_arg;
-    ast_binop_args_t *binop_args;
+    ast_op_args_t *op_args;
     ast_range_args_t *range;
     ast_cast_args_t *cast_args;
     ast_reserved_callable_t *reserved_callable;
@@ -284,9 +284,9 @@ typedef struct __attribute__((__packed__)) AstExpr {
 
 void pretty_print(ast_expr_t *expr);
 ast_expr_t *ast_unary(ast_type_t type, ast_expr_t *a);
-ast_expr_t *ast_binop(ast_type_t type, ast_expr_t *a, ast_expr_t *b);
+ast_expr_t *ast_op(ast_type_t type, ast_expr_t *a, ast_expr_t *b);
 ast_expr_t *ast_cast(ast_expr_t *e1, ast_expr_t *e2);
-ast_expr_t *ast_nil();
+ast_expr_t *ast_nil(void);
 ast_expr_t *ast_list(bytearray_t *type_name, ast_expr_list_t *nullable_init_es);
 ast_expr_t *ast_float(float value);
 ast_expr_t *ast_int(int value);
@@ -319,7 +319,7 @@ ast_expr_t *ast_if_then(ast_expr_t *if_clause, ast_expr_t *then_clause);
 ast_expr_t *ast_if_then_else(ast_expr_t *if_clause, ast_expr_t *then_clause, ast_expr_t *else_clause);
 ast_expr_t *ast_while_loop(ast_expr_t *cond, ast_expr_t *pred);
 ast_expr_t *ast_for_loop(ast_expr_t *index, ast_expr_t *range, ast_expr_t *pred);
-ast_expr_t *ast_empty();
+ast_expr_t *ast_empty(void);
 
 #endif
 

@@ -49,7 +49,7 @@ ast_expr_t *ast_unary(ast_type_t type, ast_expr_t *a) {
   return node;
 }
 
-ast_expr_t *ast_binop(ast_type_t type, ast_expr_t *a, ast_expr_t *b) {
+ast_expr_t *ast_op(ast_type_t type, ast_expr_t *a, ast_expr_t *b) {
   ast_expr_t *node = ast_node(type);
   switch(type) {
     case AST_ADD:
@@ -76,14 +76,14 @@ ast_expr_t *ast_binop(ast_type_t type, ast_expr_t *a, ast_expr_t *b) {
       node->type = type;
       break;
     default:
-      printf("Binop type %d unfamiliar\n", type);
+      printf("Op type %d unfamiliar\n", type);
       mem_free(node);
       return ast_empty();
   }
 
-  node->binop_args = mem_alloc(sizeof(ast_binop_args_t));
-  node->binop_args->a = a;
-  node->binop_args->b = b;
+  node->op_args = mem_alloc(sizeof(ast_op_args_t));
+  node->op_args->a = a;
+  node->op_args->b = b;
   return node;
 }
 
@@ -351,8 +351,8 @@ void _pretty_print(ast_expr_t *expr, int indent) {
     case AST_MUL:
     case AST_DIV:
       printf("\n");
-      _pretty_print(expr->binop_args->a, indent + 1);
-      _pretty_print(expr->binop_args->b, indent + 1);
+      _pretty_print(expr->op_args->a, indent + 1);
+      _pretty_print(expr->op_args->b, indent + 1);
       for (int i = 0; i < indent * 2; i++) {
         printf(" ");
       }

@@ -31,10 +31,10 @@ void test_parse_add(void) {
 
   TEST_ASSERT_EQUAL(ERR_NO_ERROR, parse_result->err);
   TEST_ASSERT_EQUAL(AST_ADD, ast->type);
-  TEST_ASSERT_EQUAL(AST_INT, ((ast_expr_t*) ast->binop_args->a)->type);
-  TEST_ASSERT_EQUAL(1, ((ast_expr_t*) ast->binop_args->a)->intval);
-  TEST_ASSERT_EQUAL(AST_INT, ((ast_expr_t*) ast->binop_args->b)->type);
-  TEST_ASSERT_EQUAL(2, ((ast_expr_t*) ast->binop_args->b)->intval);
+  TEST_ASSERT_EQUAL(AST_INT, ((ast_expr_t*) ast->op_args->a)->type);
+  TEST_ASSERT_EQUAL(1, ((ast_expr_t*) ast->op_args->a)->intval);
+  TEST_ASSERT_EQUAL(AST_INT, ((ast_expr_t*) ast->op_args->b)->type);
+  TEST_ASSERT_EQUAL(2, ((ast_expr_t*) ast->op_args->b)->intval);
   mem_free(ast);
 }
 
@@ -46,10 +46,10 @@ void test_parse_sub(void) {
 
   TEST_ASSERT_EQUAL(ERR_NO_ERROR, parse_result->err);
   TEST_ASSERT_EQUAL(AST_SUB, ast->type);
-  TEST_ASSERT_EQUAL(AST_INT, ((ast_expr_t*) ast->binop_args->a)->type);
-  TEST_ASSERT_EQUAL(2, ((ast_expr_t*) ast->binop_args->a)->intval);
-  TEST_ASSERT_EQUAL(AST_INT, ((ast_expr_t*) ast->binop_args->b)->type);
-  TEST_ASSERT_EQUAL(1, ((ast_expr_t*) ast->binop_args->b)->intval);
+  TEST_ASSERT_EQUAL(AST_INT, ((ast_expr_t*) ast->op_args->a)->type);
+  TEST_ASSERT_EQUAL(2, ((ast_expr_t*) ast->op_args->a)->intval);
+  TEST_ASSERT_EQUAL(AST_INT, ((ast_expr_t*) ast->op_args->b)->type);
+  TEST_ASSERT_EQUAL(1, ((ast_expr_t*) ast->op_args->b)->intval);
   mem_free(ast);
 }
 
@@ -61,10 +61,10 @@ void test_parse_mul(void) {
 
   TEST_ASSERT_EQUAL(ERR_NO_ERROR, parse_result->err);
   TEST_ASSERT_EQUAL(AST_MUL, ast->type);
-  TEST_ASSERT_EQUAL(AST_INT, ((ast_expr_t*) ast->binop_args->a)->type);
-  TEST_ASSERT_EQUAL(2, ((ast_expr_t*) ast->binop_args->a)->intval);
-  TEST_ASSERT_EQUAL(AST_INT, ((ast_expr_t*) ast->binop_args->b)->type);
-  TEST_ASSERT_EQUAL(3, ((ast_expr_t*) ast->binop_args->b)->intval);
+  TEST_ASSERT_EQUAL(AST_INT, ((ast_expr_t*) ast->op_args->a)->type);
+  TEST_ASSERT_EQUAL(2, ((ast_expr_t*) ast->op_args->a)->intval);
+  TEST_ASSERT_EQUAL(AST_INT, ((ast_expr_t*) ast->op_args->b)->type);
+  TEST_ASSERT_EQUAL(3, ((ast_expr_t*) ast->op_args->b)->intval);
   mem_free(ast);
 }
 
@@ -76,10 +76,10 @@ void test_parse_div(void) {
 
   TEST_ASSERT_EQUAL(ERR_NO_ERROR, parse_result->err);
   TEST_ASSERT_EQUAL(AST_DIV, ast->type);
-  TEST_ASSERT_EQUAL(AST_INT, ((ast_expr_t*) ast->binop_args->a)->type);
-  TEST_ASSERT_EQUAL(3, ((ast_expr_t*) ast->binop_args->a)->intval);
-  TEST_ASSERT_EQUAL(AST_INT, ((ast_expr_t*) ast->binop_args->b)->type);
-  TEST_ASSERT_EQUAL(6, ((ast_expr_t*) ast->binop_args->b)->intval);
+  TEST_ASSERT_EQUAL(AST_INT, ((ast_expr_t*) ast->op_args->a)->type);
+  TEST_ASSERT_EQUAL(3, ((ast_expr_t*) ast->op_args->a)->intval);
+  TEST_ASSERT_EQUAL(AST_INT, ((ast_expr_t*) ast->op_args->b)->type);
+  TEST_ASSERT_EQUAL(6, ((ast_expr_t*) ast->op_args->b)->intval);
   mem_free(ast);
 }
 

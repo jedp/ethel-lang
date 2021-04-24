@@ -981,9 +981,9 @@ eval_result_t *eval_expr(ast_expr_t *expr, env_t *env) {
             break;
         }
         case AST_ADD: {
-            eval_result_t *r1 = eval_expr(expr->binop_args->a, env);
+            eval_result_t *r1 = eval_expr(expr->op_args->a, env);
             if ((result->err = r1->err) != ERR_NO_ERROR) goto error;
-            eval_result_t *r2 = eval_expr(expr->binop_args->b, env);
+            eval_result_t *r2 = eval_expr(expr->op_args->b, env);
             if ((result->err = r2->err) != ERR_NO_ERROR) goto error;
             obj_t *r = num_add(r1->obj, r2->obj);
             if (r->type == TYPE_ERROR && ((result->err = r->errno) != ERR_NO_ERROR)) {
@@ -994,9 +994,9 @@ eval_result_t *eval_expr(ast_expr_t *expr, env_t *env) {
             break;
         }
         case AST_SUB: {
-            eval_result_t *r1 = eval_expr(expr->binop_args->a, env);
+            eval_result_t *r1 = eval_expr(expr->op_args->a, env);
             if ((result->err = r1->err) != ERR_NO_ERROR) goto error;
-            eval_result_t *r2 = eval_expr(expr->binop_args->b, env);
+            eval_result_t *r2 = eval_expr(expr->op_args->b, env);
             if ((result->err = r2->err) != ERR_NO_ERROR) goto error;
             obj_t *r = num_sub(r1->obj, r2->obj);
             if (r->type == TYPE_ERROR && ((result->err = r->errno) != ERR_NO_ERROR)) {
@@ -1007,9 +1007,9 @@ eval_result_t *eval_expr(ast_expr_t *expr, env_t *env) {
             break;
         }
         case AST_MUL: {
-            eval_result_t *r1 = eval_expr(expr->binop_args->a, env);
+            eval_result_t *r1 = eval_expr(expr->op_args->a, env);
             if ((result->err = r1->err) != ERR_NO_ERROR) goto error;
-            eval_result_t *r2 = eval_expr(expr->binop_args->b, env);
+            eval_result_t *r2 = eval_expr(expr->op_args->b, env);
             if ((result->err = r2->err) != ERR_NO_ERROR) goto error;
             obj_t *r = num_mul(r1->obj, r2->obj);
             if (r->type == TYPE_ERROR && ((result->err = r->errno) != ERR_NO_ERROR)) {
@@ -1020,9 +1020,9 @@ eval_result_t *eval_expr(ast_expr_t *expr, env_t *env) {
             break;
         }
         case AST_DIV: {
-            eval_result_t *r1 = eval_expr(expr->binop_args->a, env);
+            eval_result_t *r1 = eval_expr(expr->op_args->a, env);
             if ((result->err = r1->err) != ERR_NO_ERROR) goto error;
-            eval_result_t *r2 = eval_expr(expr->binop_args->b, env);
+            eval_result_t *r2 = eval_expr(expr->op_args->b, env);
             if ((result->err = r2->err) != ERR_NO_ERROR) goto error;
             obj_t *r = num_div(r1->obj, r2->obj);
             if (r->type == TYPE_ERROR && ((result->err = r->errno) != ERR_NO_ERROR)) {
@@ -1033,9 +1033,9 @@ eval_result_t *eval_expr(ast_expr_t *expr, env_t *env) {
             break;
         }
         case AST_MOD: {
-            eval_result_t *r1 = eval_expr(expr->binop_args->a, env);
+            eval_result_t *r1 = eval_expr(expr->op_args->a, env);
             if ((result->err = r1->err) != ERR_NO_ERROR) goto error;
-            eval_result_t *r2 = eval_expr(expr->binop_args->b, env);
+            eval_result_t *r2 = eval_expr(expr->op_args->b, env);
             if ((result->err = r2->err) != ERR_NO_ERROR) goto error;
             obj_t *r = num_mod(r1->obj, r2->obj);
             if (r->type == TYPE_ERROR && ((result->err = r->errno) != ERR_NO_ERROR)) {
@@ -1046,77 +1046,77 @@ eval_result_t *eval_expr(ast_expr_t *expr, env_t *env) {
             break;
         }
         case AST_AND: {
-            eval_result_t *r1 = eval_expr(expr->binop_args->a, env);
+            eval_result_t *r1 = eval_expr(expr->op_args->a, env);
             if ((result->err = r1->err) != ERR_NO_ERROR) goto error;
-            eval_result_t *r2 = eval_expr(expr->binop_args->b, env);
+            eval_result_t *r2 = eval_expr(expr->op_args->b, env);
             if ((result->err = r2->err) != ERR_NO_ERROR) goto error;
             boolean_and(r1->obj, r2->obj, result); 
             if (result->err != ERR_NO_ERROR) goto error;
             break;
         }
         case AST_OR: {
-            eval_result_t *r1 = eval_expr(expr->binop_args->a, env);
+            eval_result_t *r1 = eval_expr(expr->op_args->a, env);
             if ((result->err = r1->err) != ERR_NO_ERROR) goto error;
-            eval_result_t *r2 = eval_expr(expr->binop_args->b, env);
+            eval_result_t *r2 = eval_expr(expr->op_args->b, env);
             if ((result->err = r2->err) != ERR_NO_ERROR) goto error;
             boolean_or(r1->obj, r2->obj, result); 
             if (result->err != ERR_NO_ERROR) goto error;
             break;
         }
         case AST_NEGATE: {
-            eval_result_t *r1 = eval_expr(expr->binop_args->a, env);
+            eval_result_t *r1 = eval_expr(expr->op_args->a, env);
             if ((result->err = r1->err) != ERR_NO_ERROR) goto error;
             negate(r1->obj, result);
             if (result->err != ERR_NO_ERROR) goto error;
             break;
         }
         case AST_BITWISE_NOT: {
-            eval_result_t *r1 = eval_expr(expr->binop_args->a, env);
+            eval_result_t *r1 = eval_expr(expr->op_args->a, env);
             if ((result->err = r1->err) != ERR_NO_ERROR) goto error;
             bitwise_not(r1->obj, result);
             if (result->err != ERR_NO_ERROR) goto error;
             break;
         }
         case AST_BITWISE_SHL: {
-            eval_result_t *r1 = eval_expr(expr->binop_args->a, env);
+            eval_result_t *r1 = eval_expr(expr->op_args->a, env);
             if ((result->err = r1->err) != ERR_NO_ERROR) goto error;
-            eval_result_t *r2 = eval_expr(expr->binop_args->b, env);
+            eval_result_t *r2 = eval_expr(expr->op_args->b, env);
             if ((result->err = r2->err) != ERR_NO_ERROR) goto error;
             bitwise_shl(r1->obj, r2->obj, result);
             if (result->err != ERR_NO_ERROR) goto error;
             break;
         }
         case AST_BITWISE_SHR: {
-            eval_result_t *r1 = eval_expr(expr->binop_args->a, env);
+            eval_result_t *r1 = eval_expr(expr->op_args->a, env);
             if ((result->err = r1->err) != ERR_NO_ERROR) goto error;
-            eval_result_t *r2 = eval_expr(expr->binop_args->b, env);
+            eval_result_t *r2 = eval_expr(expr->op_args->b, env);
             if ((result->err = r2->err) != ERR_NO_ERROR) goto error;
             bitwise_shr(r1->obj, r2->obj, result);
             if (result->err != ERR_NO_ERROR) goto error;
             break;
         }
         case AST_BITWISE_OR: {
-            eval_result_t *r1 = eval_expr(expr->binop_args->a, env);
+            eval_result_t *r1 = eval_expr(expr->op_args->a, env);
             if ((result->err = r1->err) != ERR_NO_ERROR) goto error;
-            eval_result_t *r2 = eval_expr(expr->binop_args->b, env);
+            eval_result_t *r2 = eval_expr(expr->op_args->b, env);
             if ((result->err = r2->err) != ERR_NO_ERROR) goto error;
             bitwise_or(r1->obj, r2->obj, result);
             if (result->err != ERR_NO_ERROR) goto error;
             break;
         }
         case AST_BITWISE_XOR: {
-            eval_result_t *r1 = eval_expr(expr->binop_args->a, env);
+            eval_result_t *r1 = eval_expr(expr->op_args->a, env);
             if ((result->err = r1->err) != ERR_NO_ERROR) goto error;
-            eval_result_t *r2 = eval_expr(expr->binop_args->b, env);
+            eval_result_t *r2 = eval_expr(expr->op_args->b, env);
             if ((result->err = r2->err) != ERR_NO_ERROR) goto error;
             bitwise_xor(r1->obj, r2->obj, result);
             if (result->err != ERR_NO_ERROR) goto error;
             break;
         }
         case AST_BITWISE_AND: {
-            eval_result_t *r1 = eval_expr(expr->binop_args->a, env);
+            eval_result_t *r1 = eval_expr(expr->op_args->a, env);
             if ((result->err = r1->err) != ERR_NO_ERROR) goto error;
-            eval_result_t *r2 = eval_expr(expr->binop_args->b, env);
+            eval_result_t *r2 = eval_expr(expr->op_args->b, env);
             if ((result->err = r2->err) != ERR_NO_ERROR) goto error;
             bitwise_and(r1->obj, r2->obj, result);
             if (result->err != ERR_NO_ERROR) goto error;
@@ -1128,18 +1128,18 @@ eval_result_t *eval_expr(ast_expr_t *expr, env_t *env) {
         case AST_LE:
         case AST_NE:
         case AST_EQ: {
-            eval_result_t *r1 = eval_expr(expr->binop_args->a, env);
+            eval_result_t *r1 = eval_expr(expr->op_args->a, env);
             if ((result->err = r1->err) != ERR_NO_ERROR) goto error;
-            eval_result_t *r2 = eval_expr(expr->binop_args->b, env);
+            eval_result_t *r2 = eval_expr(expr->op_args->b, env);
             if ((result->err = r2->err) != ERR_NO_ERROR) goto error;
             cmp(expr->type, r1->obj, r2->obj, result); 
             if (result->err != ERR_NO_ERROR) goto error;
             break;
         }
         case AST_IN: {
-            eval_result_t *r1 = eval_expr(expr->binop_args->a, env);
+            eval_result_t *r1 = eval_expr(expr->op_args->a, env);
             if ((result->err = r1->err) != ERR_NO_ERROR) goto error;
-            eval_result_t *r2 = eval_expr(expr->binop_args->b, env);
+            eval_result_t *r2 = eval_expr(expr->op_args->b, env);
             if ((result->err = r2->err) != ERR_NO_ERROR) goto error;
             member_of(r1->obj, r2->obj, result);
             if (result->err != ERR_NO_ERROR) goto error;
