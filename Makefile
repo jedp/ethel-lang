@@ -25,6 +25,7 @@ TESTOBJS = test/unity/unity.o \
 					 test/test_parser.o \
 					 test/test_eval.o \
 					 test/test_env.o \
+					 test/test_examples.o \
 					 test/test.o
 
 CFLAGS = -std=gnu11 -g3 -Os -I inc
@@ -50,7 +51,7 @@ LDFLAGS = -lm -lreadline -ldl
 all: test repl
 
 debug: CFLAGS += -DDEBUG
-debug: all
+debug: repl
 
 %.o: %.c
 	$(CC) $(CFLAGS) -c -o $@ $<

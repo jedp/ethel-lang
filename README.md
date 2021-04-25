@@ -111,6 +111,44 @@ Function
 <Nil>
 ```
 
+Quicksort, with a little scoping nit.
+
+```
+> val quicksort = fn(a, lo, hi) {
+    if lo < hi then {
+      var p = partition(a, lo, hi)
+      quicksort(a, lo, p-1)
+      quicksort(a, p+1, hi)
+      }
+    }
+Function
+> val partition = fn(a, lo, hi) {
+    val pivot = a[hi]
+    var i = lo
+    for j in lo..hi {
+      if a[j] < pivot then {
+        swap(a, i, j)
+        i = i + 1
+        }
+      }
+    swap(a, i, hi)
+    i
+    }
+Function
+> val swap = fn(a, i, j) {
+    val t = a[i]
+    a[i] = a[j]
+    a[j] = t
+    }
+Function
+> val s = "I like potatoes!"
+I like potatoes!
+> quicksort(s, 0, s.length() - 1)
+<Nil>
+> s
+  !Iaeeikloopstt
+```
+
 #### Loops
 
 ```

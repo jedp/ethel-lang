@@ -750,20 +750,6 @@ void test_eval_function_return(void) {
   TEST_ASSERT_EQUAL(42, result->obj->intval);
 }
 
-void test_eval_function_recursion(void) {
-  char *program = "{ val fib = fn(x) {          \n"
-                  "    if x <= 0 then return 0  \n"
-                  "    if x == 1 then return 1  \n"
-                  "    fib(x - 1) + fib(x - 2)  \n"
-                  "  }                          \n"
-                  "  fib(10)                    \n"
-                  "}";
-  eval_result_t *result = eval_program(program);
-
-  TEST_ASSERT_EQUAL(ERR_NO_ERROR, result->err);
-  TEST_ASSERT_EQUAL(55, result->obj->intval);
-}
-
 void test_eval_function_lexical_scope(void) {
   char *program = "{ val x = 42            \n"
                   "  val f = fn()  {   x } \n"
@@ -843,6 +829,54 @@ void test_eval_in_bytearray(void) {
   TEST_ASSERT_EQUAL(True, result->obj->boolval);
 }
 
+void test_eval_arr_subscript_cmp(void) {
+  char *program = "{ val s = \"foo\" \n"
+                  "  var i = 0 \n"
+                  "  if (s[0] == 'f') then i = i + 1  \n"
+                  "  if (s[0] <= 'f') then i = i + 1  \n"
+                  "  if (s[0] >= 'f') then i = i + 1  \n"
+                  "  if (s[0] != 'g') then i = i + 1  \n"
+                  "  if (s[0] < 'g')  then i = i + 1  \n"
+                  "  if (s[0] > 'e')  then i = i + 1  \n"
+                  "  if ('f' == s[0]) then i = i + 1  \n"
+                  "  if ('f' <= s[0]) then i = i + 1  \n"
+                  "  if ('f' >= s[0]) then i = i + 1  \n"
+                  "  if ('e' != s[0]) then i = i + 1  \n"
+                  "  if ('e' < s[0])  then i = i + 1  \n"
+                  "  if ('g' > s[0])  then i = i + 1  \n"
+                  "  i                                \n"
+                  "}";
+  eval_result_t *result = eval_program(program);
+  TEST_ASSERT_EQUAL(ERR_NO_ERROR, result->err);
+  TEST_ASSERT_EQUAL(12, result->obj->intval);
+}
+
+void test_eval_arr_subscript_assign_byte(void) {
+  char *program = "{ val swap = fn(a, i, j) {         \n"
+                  "     val temp = a[i]               \n"
+                  "     a[i] = a[j]                   \n"
+                  "     a[j] = temp                   \n"
+                  "  }                                \n"
+                  "  val s = \"I like potatoes\"      \n"
+                  "  swap(s, 0, 3)                    \n"
+                  "  s                                \n"
+                  "}";
+  eval_result_t *result = eval_program(program);
+  TEST_ASSERT_EQUAL(ERR_NO_ERROR, result->err);
+  TEST_ASSERT_EQUAL_STRING("i lIke potatoes", bytearray_to_c_str(result->obj->bytearray));
+}
+
+void test_eval_arr_subscript_assign_int(void) {
+  char *program = "{ val s = \"I like potatoes\"      \n"
+                  "  s[0] = 85                        \n"
+                  "  s[2] = 0x4c                      \n"
+                  "  s                                \n"
+                  "}";
+  eval_result_t *result = eval_program(program);
+  TEST_ASSERT_EQUAL(ERR_NO_ERROR, result->err);
+  TEST_ASSERT_EQUAL_STRING("U Like potatoes", bytearray_to_c_str(result->obj->bytearray));
+} 
+
 void test_eval(void) {
   RUN_TEST(test_eval_calculator);
   RUN_TEST(test_eval_unary_minus);
@@ -899,12 +933,14 @@ void test_eval(void) {
   RUN_TEST(test_eval_function);
   RUN_TEST(test_eval_function_wrong_args);
   RUN_TEST(test_eval_function_return);
-  RUN_TEST(test_eval_function_recursion);
   RUN_TEST(test_eval_function_lexical_scope);
   RUN_TEST(test_eval_block_scope);
   RUN_TEST(test_eval_in_list);
   RUN_TEST(test_eval_in_range);
   RUN_TEST(test_eval_in_string);
   RUN_TEST(test_eval_in_bytearray);
+  RUN_TEST(test_eval_arr_subscript_cmp);
+  RUN_TEST(test_eval_arr_subscript_assign_byte);
+  RUN_TEST(test_eval_arr_subscript_assign_int);
 }
 

@@ -34,7 +34,7 @@ enum error_enum {
   ERR_NO_SUCH_METHOD,
   ERR_WRONG_ARG_COUNT,
   ERR_SYNTAX_ERROR,
-  ERR_MAX,
+  ERR_MAX
 };
 
 static const char* err_names[ERR_MAX] = {

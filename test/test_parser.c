@@ -228,9 +228,9 @@ void test_parse_seq_elem(void) {
   parse_program(program, ast, parse_result);
 
   TEST_ASSERT_EQUAL(ERR_NO_ERROR, parse_result->err);
-  TEST_ASSERT_EQUAL(AST_SEQ_ELEM, ast->type);
-  TEST_ASSERT_EQUAL(AST_IDENT, ((ast_expr_t*) ast->seq_elem->ident)->type);
-  TEST_ASSERT_EQUAL(AST_IF_THEN_ELSE, ((ast_expr_t*) ast->seq_elem->index)->type);
+  TEST_ASSERT_EQUAL(AST_SUBSCRIPT, ast->type);
+  TEST_ASSERT_EQUAL(AST_IDENT, ((ast_expr_t*) ast->op_args->a)->type);
+  TEST_ASSERT_EQUAL(AST_IF_THEN_ELSE, ((ast_expr_t*) ast->op_args->b)->type);
   mem_free(ast);
 }
 
@@ -242,8 +242,8 @@ void test_parse_seq_elem_access(void) {
 
   TEST_ASSERT_EQUAL(ERR_NO_ERROR, parse_result->err);
   TEST_ASSERT_EQUAL(AST_ASSIGN, ast->type);
-  TEST_ASSERT_EQUAL(AST_IDENT, ((ast_expr_t*) ast->assignment->ident)->type);
-  TEST_ASSERT_EQUAL(AST_SEQ_ELEM, ((ast_expr_t*) ast->assignment->value)->type);
+  TEST_ASSERT_EQUAL(AST_IDENT, ((ast_expr_t*) ast->op_args->a)->type);
+  TEST_ASSERT_EQUAL(AST_SUBSCRIPT, ((ast_expr_t*) ast->op_args->b)->type);
   mem_free(ast);
 }
 
@@ -254,10 +254,13 @@ void test_parse_seq_elem_assign(void) {
   parse_program(program, ast, parse_result);
 
   TEST_ASSERT_EQUAL(ERR_NO_ERROR, parse_result->err);
-  TEST_ASSERT_EQUAL(AST_SEQ_ELEM_ASSIGN, ast->type);
-  TEST_ASSERT_EQUAL(AST_IDENT, ((ast_expr_t*) ast->assign_elem->seq)->type);
-  TEST_ASSERT_EQUAL(AST_MUL, ((ast_expr_t*) ast->assign_elem->offset)->type);
-  TEST_ASSERT_EQUAL(AST_INT, ((ast_expr_t*) ast->assign_elem->value)->type);
+  TEST_ASSERT_EQUAL(AST_ASSIGN, ast->type);
+  TEST_ASSERT_EQUAL(AST_SUBSCRIPT, ((ast_expr_t*) ast->op_args->a)->type);
+  ast_expr_t *ss = (ast_expr_t *) ast->op_args->a;
+  ast_expr_t *val = (ast_expr_t *) ast->op_args->b;
+  TEST_ASSERT_EQUAL(AST_IDENT, ((ast_expr_t*) ss->op_args->a)->type);
+  TEST_ASSERT_EQUAL(AST_MUL, ((ast_expr_t*) ss->op_args->b)->type);
+  TEST_ASSERT_EQUAL(AST_INT, val->type);
   mem_free(ast);
 }
 

@@ -111,21 +111,6 @@ static void eval_byte_expr(ast_expr_t *expr, eval_result_t *result) {
   result->obj = byte_obj(expr->byteval);
 }
 
-static byte expr_to_byte(ast_expr_t *expr, eval_result_t *result) {
-  switch(expr->type) {
-    case AST_BYTE:
-      return expr->byteval;
-    case AST_INT: {
-      if (expr->intval > 255)  { result->err = ERR_OVERFLOW_ERROR; return 0xFF; }
-      if (expr->intval < -127) { result->err = ERR_UNDERFLOW_ERROR; return 0xFF; }
-      return (byte) expr->intval;
-    }
-    default:
-      result->err = ERR_EVAL_TYPE_ERROR;
-      return 0xFF;
-  }
-}
-
 static void eval_list_expr(ast_list_t *list, eval_result_t *result, env_t *env) {
   if (list->es == NULL) {
     result->obj = list_obj(list->type_name, NULL);
@@ -215,6 +200,8 @@ static void eval_func_def(ast_func_def_t *func_def, eval_result_t *result, env_t
 
 static void eval_func_call(ast_func_call_t *func_call, eval_result_t *result, env_t *env) {
   obj_t *obj = get_env(env, func_call->name);
+
+  // TODO bail if undefined
 
   ast_func_def_t *fn = (ast_func_def_t *) obj->func_def->code;
   env_sym_t *scope = (env_sym_t *) obj->func_def->scope;
@@ -486,6 +473,45 @@ done:
   result->obj = obj;
 }
 
+static void assign(ast_expr_t *lhs,
+                   ast_expr_t *rhs,
+                   eval_result_t *result,
+                   env_t *env) {
+  bytearray_t *name = lhs->bytearray;
+  error_t error = ERR_EVAL_UNHANDLED_OBJECT;
+
+  if (lhs->type == AST_SUBSCRIPT) {
+    bytearray_t *name = lhs->op_args->a->bytearray;
+    obj_t *arr = get_env(env, name);
+    eval_result_t *r1 = eval_expr(lhs->op_args->b, env);
+    if ((result->err = r1->err) != ERR_NO_ERROR) goto error;
+    obj_t *offset = r1->obj;
+    eval_result_t *r2 = eval_expr(rhs, env);
+    if ((result->err = r2->err) != ERR_NO_ERROR) goto error;
+    obj_t *val = r2->obj;
+    result->obj = arr_set(arr, wrap_varargs(2, offset, val));
+    return;
+  }
+
+  if (rhs->type == AST_FUNCTION_DEF) {
+    eval_func_def(rhs->func_def, result, env);
+    if (result->err != ERR_NO_ERROR) goto error;
+    error = put_env(env, name, result->obj, F_NONE);
+  } else {
+    eval_result_t *r = eval_expr(rhs, env);
+    if ((result->err = r->err) != ERR_NO_ERROR) goto error;
+    error = put_env(env, name, r->obj, lhs->flags);
+    result->obj = r->obj;
+  }
+
+  result->err = error;
+  if (result->err != ERR_NO_ERROR) goto error;
+  return;
+
+error:
+  result->obj = nil_obj();
+}
+
 static void cmp(ast_type_t type, obj_t *a, obj_t *b, eval_result_t *result) {
   if (a->type == TYPE_BYTE && b->type == TYPE_BYTE) {
     switch(type) {
@@ -539,13 +565,35 @@ static void member_of(obj_t *a, obj_t *b, eval_result_t *result) {
     return;
   }
 
-  if (b->type == TYPE_STRING) {
+  if (b->type == TYPE_STRING || b->type == TYPE_BYTEARRAY) {
     result->obj = arr_contains(b, wrap_varargs(1, a));
     return;
   }
 
-  if (b->type == TYPE_BYTEARRAY) {
-    result->obj = arr_contains(b, wrap_varargs(1, a));
+  result->err = ERR_EVAL_UNHANDLED_OBJECT;
+}
+
+static void subscript_of(obj_t *a, obj_t *b, eval_result_t *result) {
+  if (!(a->type == TYPE_RANGE ||
+        a->type == TYPE_LIST ||
+        a->type == TYPE_STRING ||
+        a->type == TYPE_BYTEARRAY)) {
+    result->err = ERR_TYPE_ITERABLE_REQUIRED;
+    return;
+  }
+
+  if (a->type == TYPE_LIST) {
+    result->obj = list_get(a, wrap_varargs(1, b));
+    return;
+  }
+
+  if (a->type == TYPE_RANGE) {
+    result->obj = range_subscript(a, wrap_varargs(1, b));
+    return;
+  }
+
+  if (a->type == TYPE_STRING || a->type == TYPE_BYTEARRAY) {
+    result->obj = arr_get(a, wrap_varargs(1, b));
     return;
   }
 
@@ -1136,12 +1184,25 @@ eval_result_t *eval_expr(ast_expr_t *expr, env_t *env) {
             if (result->err != ERR_NO_ERROR) goto error;
             break;
         }
+        case AST_ASSIGN: {
+          assign(expr->op_args->a, expr->op_args->b, result, env);
+          break;
+        }
         case AST_IN: {
             eval_result_t *r1 = eval_expr(expr->op_args->a, env);
             if ((result->err = r1->err) != ERR_NO_ERROR) goto error;
             eval_result_t *r2 = eval_expr(expr->op_args->b, env);
             if ((result->err = r2->err) != ERR_NO_ERROR) goto error;
             member_of(r1->obj, r2->obj, result);
+            if (result->err != ERR_NO_ERROR) goto error;
+            break;
+        }
+        case AST_SUBSCRIPT: {
+            eval_result_t *r1 = eval_expr(expr->op_args->a, env);
+            if ((result->err = r1->err) != ERR_NO_ERROR) goto error;
+            eval_result_t *r2 = eval_expr(expr->op_args->b, env);
+            if ((result->err = r2->err) != ERR_NO_ERROR) goto error;
+            subscript_of(r1->obj, r2->obj, result);
             if (result->err != ERR_NO_ERROR) goto error;
             break;
         }
@@ -1204,50 +1265,6 @@ eval_result_t *eval_expr(ast_expr_t *expr, env_t *env) {
           result->obj = bytearray_obj(size->obj->intval, NULL);
           break;
         }
-        case AST_SEQ_ELEM: {
-          bytearray_t *name = expr->seq_elem->ident->bytearray;
-          obj_t *a = get_env(env, name);
-          if (a->type == TYPE_UNDEF) {
-            result->err = ERR_ENV_SYMBOL_UNDEFINED;
-            goto error;
-          }
-          if (a->type != TYPE_BYTEARRAY && a->type != TYPE_STRING) {
-            result->err = ERR_TYPE_SEQUENCE_REQUIRED;
-            goto error;
-          }
-
-          int offset = expr->seq_elem->index->intval;
-          if (a->bytearray->size <= offset) {
-            result->err = ERR_INDEX_OUT_OF_RANGE;
-            goto error;
-          }
-          result->obj = byte_obj(a->bytearray->data[offset]);
-          break;
-        }
-        case AST_SEQ_ELEM_ASSIGN: {
-          bytearray_t* name = expr->assign_elem->seq->bytearray;
-          obj_t *a = get_env(env, name);
-          if (a->type == TYPE_UNDEF) {
-            result->err = ERR_ENV_SYMBOL_UNDEFINED;
-            goto error;
-          }
-          if (a->type != TYPE_BYTEARRAY && a->type != TYPE_STRING) {
-            result->err = ERR_TYPE_SEQUENCE_REQUIRED;
-            goto error;
-          }
-
-          int offset = expr->seq_elem->index->intval;
-          if (a->bytearray->size <= offset) {
-            result->err = ERR_INDEX_OUT_OF_RANGE;
-            goto error;
-          }
-
-          byte b = expr_to_byte(expr->assign_elem->value, result);
-          if (result->err != ERR_NO_ERROR) goto error;
-          a->bytearray->data[offset] = b;
-          result->obj = byte_obj(b);
-          break;
-        }
         case AST_LIST: {
           eval_list_expr(expr->list, result, env);
           if (result->err != ERR_NO_ERROR) goto error;
@@ -1272,54 +1289,6 @@ eval_result_t *eval_expr(ast_expr_t *expr, env_t *env) {
           resolve_callable_expr(expr, env, result);
           if (result->err != ERR_NO_ERROR) goto error;
           break;
-        }
-        case AST_ASSIGN: {
-            // Save the expression associated with the identifier.
-            // The mutability flags are on the associated expression e2,
-            // and these need to be copied over to the new object.
-            bytearray_t *name = ((ast_expr_t*)expr->assignment->ident)->bytearray;
-            error_t error = ERR_NO_ERROR;
-            // If it's a function, put a pointer to the code in the env.
-            if (expr->assignment->value->type == AST_FUNCTION_DEF) {
-              eval_func_def(expr->assignment->value->func_def, result, env);
-              if (result->err != ERR_NO_ERROR) goto error;
-              error = put_env(env, name, result->obj, F_NONE);
-            } else {
-              eval_result_t *r = eval_expr(expr->assignment->value, env);
-              if ((result->err = r->err) != ERR_NO_ERROR) goto error;
-              error = put_env(env, name, r->obj, expr->flags);
-              result->obj = r->obj;
-            }
-            // Otherwise eval the object now and save the primitive value in the env.
-            // Store the obj in the result value for the caller.
-            if (error != ERR_NO_ERROR) {
-              result->err = error;
-              goto error;
-            }
-            break;
-        }
-        case AST_REASSIGN: {
-            bytearray_t *name = ((ast_expr_t*)expr->assignment->ident)->bytearray;
-            obj_t *existing = get_env(env, name);
-            if (existing->type == TYPE_UNDEF) {
-              result->err = ERR_ENV_SYMBOL_UNDEFINED;
-              goto error;
-            }
-            eval_result_t *r = eval_expr(expr->assignment->value, env);
-            if ((result->err = r->err) != ERR_NO_ERROR) goto error;
-            if (existing->type != r->obj->type) {
-              // TODO: Numerical types.
-              result->err = ERR_EVAL_TYPE_ERROR;
-              goto error;
-            }
-            error_t error = put_env(env, name, r->obj, r->obj->flags);
-            result->obj = r->obj;
-            // Store the obj in the result value for the caller.
-            if (error != ERR_NO_ERROR) {
-              result->err = error;
-              goto error;
-            }
-            break;
         }
         case AST_APPLY: {
           apply(expr, result, env);

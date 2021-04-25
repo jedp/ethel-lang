@@ -28,6 +28,7 @@ enum ast_type_enum {
   AST_NE,
   AST_IS,
   AST_IN,
+  AST_SUBSCRIPT,
   AST_RANGE,
   AST_NIL,
   AST_LIST,
@@ -41,12 +42,9 @@ enum ast_type_enum {
   AST_BOOLEAN,
   AST_CAST,
   AST_ASSIGN,
-  AST_REASSIGN,
   AST_DELETE,
   AST_NEGATE,
   AST_IDENT,
-  AST_SEQ_ELEM,
-  AST_SEQ_ELEM_ASSIGN,
   AST_FIELD,
   AST_METHOD_CALL,
   AST_FUNCTION_DEF,
@@ -84,6 +82,7 @@ static const char *ast_node_names[] = {
   "NE",
   "IS-TYPE",
   "MEMBER-OF",
+  "SUBSCRIPT",
   "RANGE-FROM-TO",
   "NIL",
   "LIST",
@@ -97,12 +96,9 @@ static const char *ast_node_names[] = {
   "BOOLEAN",
   "CAST",
   "ASSIGN",
-  "REASSIGN",
   "DELETE",
   "NEGATE",
   "IDENT",
-  "SEQUENCE-ELEM",
-  "SEQUENCE-ELEM-ASSIGN",
   "FIELD",
   "METHOD-CALL",
   "FUNCTION-DEF",
@@ -223,11 +219,6 @@ typedef struct AstArrayDecl {
   ast_expr_t *size;
 } ast_array_decl_t;
 
-typedef struct AstSeqElem {
-  ast_expr_t *ident;
-  ast_expr_t *index;
-} ast_seq_elem_t;
-
 typedef struct AstAssignElem {
   ast_expr_t *seq;
   ast_expr_t *offset;
@@ -267,7 +258,6 @@ typedef struct __attribute__((__packed__)) AstExpr {
     ast_while_loop_t *while_loop;
     ast_for_loop_t *for_loop;
     ast_array_decl_t *array_decl;
-    ast_seq_elem_t *seq_elem;
     ast_assign_elem_t *assign_elem;
     ast_method_t *method_call;
     ast_apply_t *application;
@@ -296,8 +286,8 @@ ast_expr_t *ast_array_decl(ast_expr_t *size);
 ast_expr_t *ast_assign_elem(ast_expr_t *seq, ast_expr_t *offset, ast_expr_t *value);
 ast_expr_t *ast_boolean(boolean t);
 ast_expr_t *ast_type(ast_type_t type);
-ast_expr_t *ast_ident(bytearray_t *s);
-ast_expr_t *ast_seq_elem(ast_expr_t *ident, ast_expr_t *index);
+ast_expr_t *ast_ident(bytearray_t *name);
+ast_expr_t *ast_ident_decl(bytearray_t *name, uint16_t flags);
 ast_expr_t *ast_field(bytearray_t *s);
 ast_expr_t *ast_func_def(ast_fn_arg_decl_t *args, ast_expr_list_t *es);
 ast_expr_t *ast_func_call(bytearray_t *name, ast_expr_list_t *args);
@@ -311,9 +301,6 @@ ast_expr_t *ast_range(ast_expr_t *from, ast_expr_t *to);
 ast_expr_t *ast_access(ast_expr_t *object, ast_expr_t *member);
 ast_expr_t *ast_block(ast_expr_list_t *es);
 ast_expr_t *ast_reserved_callable(ast_reserved_callable_type_t type, ast_expr_list_t *es);
-ast_expr_t *ast_assign_var(ast_expr_t *ident, ast_expr_t *value);
-ast_expr_t *ast_assign_val(ast_expr_t *ident, ast_expr_t *value);
-ast_expr_t *ast_reassign(ast_expr_t *ident, ast_expr_t *value);
 ast_expr_t *ast_delete(ast_expr_t *ident);
 ast_expr_t *ast_if_then(ast_expr_t *if_clause, ast_expr_t *then_clause);
 ast_expr_t *ast_if_then_else(ast_expr_t *if_clause, ast_expr_t *then_clause, ast_expr_t *else_clause);

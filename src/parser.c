@@ -12,6 +12,8 @@ ast_expr_list_t *parse_expr_list(lexer_t *lexer);
 ast_expr_t *parse_expr(lexer_t *lexer);
 ast_expr_t *parse_atom(lexer_t *lexer);
 ast_expr_t *parse_eof(lexer_t *lexer);
+ast_expr_t *_parse_expr(lexer_t *lexer, int min_preced);
+ast_expr_t *_parse_subscript(lexer_t *lexer, int min_preced);
 
 boolean is_op(token_t *token) {
   return token->tag == TAG_AS
@@ -37,6 +39,8 @@ boolean is_op(token_t *token) {
       || token->tag == TAG_IS
       || token->tag == TAG_IN
       || token->tag == TAG_MEMBER_ACCESS
+      || token->tag == TAG_LBRACKET  // Always subscript
+      || token->tag == TAG_ASSIGN
       ;
 }
 
@@ -44,6 +48,8 @@ uint8_t op_preced(token_t *token) {
   switch (token->tag) {
     case TAG_MEMBER_ACCESS:
       return PRECED_MEMBER_ACCESS;
+    case TAG_LBRACKET:
+      return PRECED_SUBSCRIPT;
     case TAG_AS:
       return PRECED_CAST;
     case TAG_TIMES:
@@ -81,10 +87,17 @@ uint8_t op_preced(token_t *token) {
       return PRECED_OR;
     case TAG_RANGE:
       return PRECED_RANGE;
+    case TAG_ASSIGN:
+      return PRECED_ASSIGN;
     default:
       return PRECED_NONE;
       break;
   }
+}
+
+int op_preced_inc(token_t *token) {
+  // Return -1 for right-associative ops
+  return 1;
 }
 
 ast_reserved_callable_type_t ast_callable_type_for_tag(tag_t tag) {
@@ -193,6 +206,18 @@ done:
   return root;
 }
 
+ast_expr_t *_parse_subscript(lexer_t *lexer, int min_preced) {
+  ast_expr_t *expr = parse_expr(lexer);
+
+  if (!eat(lexer, TAG_RBRACKET)) {
+    printf("Expected to eat right bracket. Could not eat tasty right bracket.\n");
+    lexer->err = ERR_SYNTAX_ERROR;
+    return ast_empty();
+  }
+
+  return expr;
+}
+
 ast_expr_t *_parse_expr(lexer_t *lexer, int min_preced) {
   ast_expr_t *lhs = parse_atom(lexer);
 
@@ -206,14 +231,16 @@ ast_expr_t *_parse_expr(lexer_t *lexer, int min_preced) {
     }
 
     int preced = op_preced(&token);
+    int preced_inc = op_preced_inc(&token);
 
     // TODO the +1 is only for left-associative operators.
-    int next_min_preced = preced +1;
+    int next_min_preced = preced + preced_inc;
 
     tag_t tag = token.tag;
     advance(lexer);
 
     switch(tag) {
+      case TAG_ASSIGN:         lhs = ast_op(AST_ASSIGN,        lhs, parse_expr(lexer)); break;
       case TAG_PLUS:           lhs = ast_op(AST_ADD,           lhs, _parse_expr(lexer, next_min_preced)); break;
       case TAG_MINUS:          lhs = ast_op(AST_SUB,           lhs, _parse_expr(lexer, next_min_preced)); break;
       case TAG_TIMES:          lhs = ast_op(AST_MUL,           lhs, _parse_expr(lexer, next_min_preced)); break;
@@ -234,9 +261,10 @@ ast_expr_t *_parse_expr(lexer_t *lexer, int min_preced) {
       case TAG_NE:             lhs = ast_op(AST_NE,            lhs, _parse_expr(lexer, next_min_preced)); break;
       case TAG_IS:             lhs = ast_op(AST_IS,            lhs, _parse_expr(lexer, next_min_preced)); break;
       case TAG_IN:             lhs = ast_op(AST_IN,            lhs, _parse_expr(lexer, next_min_preced)); break;
-      case TAG_AS:             lhs = ast_cast(                    lhs, _parse_expr(lexer, next_min_preced)); break;
-      case TAG_RANGE:          lhs = ast_range(                   lhs, _parse_expr(lexer, next_min_preced)); break;
-      case TAG_MEMBER_ACCESS:  lhs = ast_access(                  lhs, _parse_expr(lexer, next_min_preced)); break;
+      case TAG_LBRACKET:       lhs = ast_op(AST_SUBSCRIPT,     lhs, _parse_subscript(lexer, next_min_preced)); break;
+      case TAG_AS:             lhs = ast_cast(                 lhs, _parse_expr(lexer, next_min_preced)); break;
+      case TAG_RANGE:          lhs = ast_range(                lhs, _parse_expr(lexer, next_min_preced)); break;
+      case TAG_MEMBER_ACCESS:  lhs = ast_access(               lhs, _parse_expr(lexer, next_min_preced)); break;
 
       default:
         printf("what? why this %s?\n", tag_names[tag]);
@@ -302,13 +330,6 @@ ast_expr_t *parse_expr(lexer_t *lexer) {
       if (pred->type == AST_EMPTY) goto error;
       return ast_for_loop(index, range, pred);
     }
-    case TAG_ARR_DECL: {
-      advance(lexer);
-      if (!eat(lexer, TAG_LPAREN)) goto error;
-      ast_expr_t *size = parse_expr(lexer);
-      if (!eat(lexer, TAG_RPAREN)) goto error;
-      return ast_array_decl(size);
-    }
     case TAG_LIST: {
       advance(lexer);
       if (!eat(lexer, TAG_OF)) goto error;
@@ -356,7 +377,7 @@ error:
       (lexer->token.tag == TAG_EOF || lexer->token.tag == TAG_EOL)) {
     lexer->err = ERR_LEX_INCOMPLETE_INPUT;
   } else {
-    printf("Expected atom or block; got %s at pos %d.\n", tag_names[lexer->token.tag], lexer->pos);
+    printf("1. Expected atom or block; got %s at pos %d.\n", tag_names[lexer->token.tag], lexer->pos);
     lexer->err = ERR_LEX_ERROR;
   }
 
@@ -441,48 +462,27 @@ ast_expr_t *parse_atom(lexer_t *lexer) {
       if (!eat(lexer, TAG_RPAREN)) goto error;
       return e;
     }
-    case TAG_LBRACKET: {
-      advance(lexer);
-      ast_expr_t *e = parse_expr(lexer);
-      if (!eat(lexer, TAG_RBRACKET)) goto error;
-      return e;
-    }
     case TAG_INVARIABLE: {
       advance(lexer);
-      ast_expr_t *id = ast_ident(c_str_to_bytearray(lexer->token.string));
       if (!eat(lexer, TAG_IDENT)) goto error;
-      if (!eat(lexer, TAG_ASSIGN)) goto error;
-      ast_expr_t *val = parse_expr(lexer);
-      return ast_assign_val(id, val);
+      return ast_ident_decl(c_str_to_bytearray(lexer->token.string), F_NONE);
     }
     case TAG_VARIABLE: {
       advance(lexer);
-      ast_expr_t *id = ast_ident(c_str_to_bytearray(lexer->token.string));
       if (!eat(lexer, TAG_IDENT)) goto error;
-      if (!eat(lexer, TAG_ASSIGN)) goto error;
-      ast_expr_t *val = parse_expr(lexer);
-      return ast_assign_var(id, val);
+      return ast_ident_decl(c_str_to_bytearray(lexer->token.string), F_VAR);
     }
     case TAG_IDENT: {
       ast_expr_t *id = ast_ident(c_str_to_bytearray(lexer->token.string));
-      advance(lexer);
-      // Identifier in sequence access?
-      if (lexer->token.tag == TAG_LBRACKET) {
-        ast_expr_t *index = parse_expr(lexer);
-        if (lexer->token.tag == TAG_ASSIGN) {
-          advance(lexer);
-          // Sequence elem assignment.
-          return ast_assign_elem(id, index, parse_expr(lexer));
-        }
-        // Sequence elem access.
-        return ast_seq_elem(id, index);
-      }
-      // Identifier in assignment?
-      if (lexer->token.tag == TAG_ASSIGN) {
-        advance(lexer);
-        return ast_reassign(id, parse_expr(lexer));
-      }
+      if (!eat(lexer, TAG_IDENT)) goto error;
       return id;
+    }
+    case TAG_ARR_DECL: {
+      advance(lexer);
+      if (!eat(lexer, TAG_LPAREN)) goto error;
+      ast_expr_t *size = parse_expr(lexer);
+      if (!eat(lexer, TAG_RPAREN)) goto error;
+      return ast_array_decl(size);
     }
     case TAG_FUNC_DEF: {
       advance(lexer);
@@ -584,7 +584,7 @@ error:
       (lexer->token.tag == TAG_EOF || lexer->token.tag == TAG_EOL)) {
     lexer->err = ERR_LEX_INCOMPLETE_INPUT;
   } else {
-    printf("Expected atom or block; got %s at pos %d.\n", tag_names[lexer->token.tag], lexer->pos);
+    printf("2. Expected atom or block; got %s at pos %d.\n", tag_names[lexer->token.tag], lexer->pos);
     lexer->err = ERR_LEX_ERROR;
   }
 

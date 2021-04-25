@@ -183,8 +183,8 @@ static const char* tag_names[] = {
   "RANGE-TO",
 
   // Element access
-  "OPEN_BRACKET",
-  "CLOSE_BRACKET",
+  "OPEN_SUBSCRIPT_BRACKET",
+  "CLOSE_SUBSCRIPT_BRACKET",
 
   // Structure
   "IF",

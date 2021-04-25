@@ -8,6 +8,7 @@
 #include "test_parser.h"
 #include "test_eval.h"
 #include "test_env.h"
+#include "test_examples.h"
 
 void setUp(void) {
 }
@@ -27,6 +28,7 @@ int main(int argc, char** argv) {
   test_parser();
   test_eval();
   test_env();
+  test_examples();
 
   UNITY_END();
 }

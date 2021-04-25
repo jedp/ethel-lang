@@ -38,6 +38,7 @@ error_t enter_scope(env_t *env) {
 
 error_t leave_scope(env_t *env) {
   env_sym_t *next = env->symbols[env->top].next;
+  // TODO buggy
   // Decrement refcount when popping scope.
   // Once refcount is 0, we know it's not under something else's scope.
   if (next != NULL && --next->refcount < 1) {
