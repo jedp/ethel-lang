@@ -328,7 +328,10 @@ void test_eval_is_type(void) {
   TEST_ASSERT_EQUAL(True, (eval_program("'c' is byte")->obj)->boolval);
   TEST_ASSERT_EQUAL(False, (eval_program("'c' is int")->obj)->boolval);
 
-  // TODO There's currently no way to do this for string and bytearray.
+  TEST_ASSERT_EQUAL(True, (eval_program("\"moo\" is string")->obj)->boolval);
+  TEST_ASSERT_EQUAL(False, (eval_program("\"moo\" is int")->obj)->boolval);
+
+  // TODO There's currently no way to do this for bytearray.
   // Want a proper list of types that includes keyword etc, so we can say type(while) etc.
   // Possible hook for documentation, as well.
 }
