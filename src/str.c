@@ -4,6 +4,27 @@
 #include "../inc/arr.h"
 #include "../inc/str.h"
 
+static obj_t *_str_slice(obj_t *str_obj, int start, int end) {
+  if (end < 0 ||
+      start < 0 ||
+      end < start) {
+    printf("Bad range for slice\n");
+    return string_obj(bytearray_alloc(0));
+  }
+
+  dim_t len = str_obj->bytearray->size;
+  if (start > len) {
+    return string_obj(bytearray_alloc(0));
+  }
+
+  bytearray_t *ba = bytearray_alloc(end-start);
+  for (int i = start; (i < end) && (start+i < len); i++) {
+    ba->data[i] = str_obj->bytearray->data[start+i];
+  }
+
+  return string_obj(ba);
+}
+
 dim_t c_str_len(const char* s) {
   dim_t size = 0;
   const unsigned char *p = (const unsigned char *) s;
@@ -213,6 +234,21 @@ obj_t *str_ne(obj_t *str_obj, obj_method_args_t *args) {
   return arr_ne(str_obj, args);
 }
 
+obj_t *str_substr(obj_t *str_obj, obj_method_args_t *args) {
+  if (args == NULL || args->arg == NULL) {
+    printf("Null arg to substring()\n");
+    return nil_obj();
+  }
+
+  obj_t *start_arg = args->arg;
+  if (start_arg->type != TYPE_INT) return nil_obj();
+
+  obj_t *end_arg = args->next->arg;
+  if (end_arg->type != TYPE_INT)  return nil_obj();
+
+  return _str_slice(str_obj, start_arg->intval, end_arg->intval);
+}
+
 obj_t *byte_dump(obj_t *byte_obj) {
   // 'x' -> "120  0x78  11111111"
   bytearray_t *a = bytearray_alloc(19);
@@ -385,6 +421,7 @@ static_method get_str_static_method(static_method_ident_t method_id) {
     case METHOD_LENGTH: return str_len;
     case METHOD_EQ: return str_eq;
     case METHOD_NE: return str_ne;
+    case METHOD_SUBSTR: return str_substr;
     default: return NULL;
   }
 }

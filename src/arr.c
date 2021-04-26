@@ -1,4 +1,7 @@
 #include <stdio.h>
+#include "../inc/math.h"
+#include "../inc/mem.h"
+#include "../inc/obj.h"
 #include "../inc/arr.h"
 
 static boolean _eq(bytearray_t *a, bytearray_t *b) {
@@ -11,6 +14,27 @@ static boolean _eq(bytearray_t *a, bytearray_t *b) {
   }
 
   return True;
+}
+
+static obj_t *_arr_slice(obj_t *arr_obj, int start, int end) {
+  if (end < 0 ||
+      start < 0 ||
+      end < start) {
+    printf("Bad range for slice\n");
+    return bytearray_obj(0, NULL);
+  }
+
+  dim_t len = arr_obj->bytearray->size;
+  if (start > len || end > len) {
+    return bytearray_obj(0, NULL);
+  }
+
+  obj_t *new = bytearray_obj(end-start, NULL);
+  for (int i = start; (i < end) && (start+i < len); i++) {
+    new->bytearray->data[i] = arr_obj->bytearray->data[start+i];
+  }
+
+  return new;
 }
 
 static byte obj_to_byte(obj_t *obj) {
@@ -146,6 +170,21 @@ obj_t *arr_ne(obj_t *arr_obj, obj_method_args_t *args) {
   return boolean_obj(!_eq(arr_obj->bytearray, other->bytearray));
 }
 
+obj_t *arr_slice(obj_t *arr_obj, obj_method_args_t *args) {
+  if (args == NULL || args->arg == NULL) {
+    printf("Null arg to slice()\n");
+    return nil_obj();
+  }
+
+  obj_t *start_arg = args->arg;
+  if (start_arg->type != TYPE_INT) return nil_obj();
+
+  obj_t *end_arg = args->next->arg;
+  if (end_arg->type != TYPE_INT)  return nil_obj();
+
+  return _arr_slice(arr_obj, start_arg->intval, end_arg->intval);
+}
+
 static_method get_arr_static_method(static_method_ident_t method_id) {
   switch (method_id) {
     case METHOD_LENGTH: return arr_size;
@@ -153,6 +192,7 @@ static_method get_arr_static_method(static_method_ident_t method_id) {
     case METHOD_CONTAINS: return arr_contains;
     case METHOD_EQ: return arr_eq;
     case METHOD_NE: return arr_ne;
+    case METHOD_SLICE: return arr_slice;
     default: return NULL;
   }
 }

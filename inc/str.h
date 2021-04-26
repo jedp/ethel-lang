@@ -74,6 +74,7 @@ bytearray_t *c_str_to_bytearray(const char* s);
 obj_t *str_len(obj_t *str_obj, obj_method_args_t *args);
 obj_t *str_eq(obj_t *str_obj, obj_method_args_t *args);
 obj_t *str_ne(obj_t *str_obj, obj_method_args_t *args);
+obj_t *str_substring(obj_t *str_obj, obj_method_args_t *args);
 
 static_method get_str_static_method(static_method_ident_t method_id);
 
