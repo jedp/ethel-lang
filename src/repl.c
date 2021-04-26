@@ -52,9 +52,9 @@ void print_value(obj_t *obj) {
       break;
     case TYPE_BOOLEAN:
       if (obj->boolval) {
-        printf("True");
+        printf("true");
       } else {
-        printf("False");
+        printf("false");
       }
       break;
     default:

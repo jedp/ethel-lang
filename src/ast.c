@@ -35,6 +35,7 @@ ast_expr_t *ast_unary(ast_type_t type, ast_expr_t *a) {
   ast_expr_t *node = ast_node(type);
   switch(type) {
     case AST_NEGATE:
+    case AST_NOT:
     case AST_BITWISE_NOT:
       node->type = type;
       break;

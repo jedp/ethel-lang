@@ -201,7 +201,11 @@ static void eval_func_def(ast_func_def_t *func_def, eval_result_t *result, env_t
 static void eval_func_call(ast_func_call_t *func_call, eval_result_t *result, env_t *env) {
   obj_t *obj = get_env(env, func_call->name);
 
-  // TODO bail if undefined
+  if (obj->type == TYPE_UNDEF) {
+    result->err = ERR_FUNCTION_UNDEFINED;
+    result->obj = nil_obj();
+    return;
+  }
 
   ast_func_def_t *fn = (ast_func_def_t *) obj->func_def->code;
   env_sym_t *scope = (env_sym_t *) obj->func_def->scope;
@@ -538,6 +542,17 @@ static void cmp(ast_type_t type, obj_t *a, obj_t *b, eval_result_t *result) {
       case AST_EQ: result->obj = num_eq(a, b); return;
       default:
         printf("what what what???\n");
+        result->obj = boolean_obj(False);
+        return;
+    }
+  }
+
+  if (a->type == TYPE_BOOLEAN && b->type == TYPE_BOOLEAN) {
+    switch(type) {
+      case AST_EQ: result->obj = boolean_obj(a->boolval == b->boolval); return;
+      case AST_NE: result->obj = boolean_obj(a->boolval != b->boolval); return;
+      default:
+        printf("Comparison makes no sense for booleans.\n");
         result->obj = boolean_obj(False);
         return;
     }
@@ -1109,6 +1124,12 @@ eval_result_t *eval_expr(ast_expr_t *expr, env_t *env) {
             if ((result->err = r2->err) != ERR_NO_ERROR) goto error;
             boolean_or(r1->obj, r2->obj, result); 
             if (result->err != ERR_NO_ERROR) goto error;
+            break;
+        }
+        case AST_NOT: {
+            eval_result_t *r1 = eval_expr(expr->op_args->a, env);
+            if ((result->err = r1->err) != ERR_NO_ERROR) goto error;
+            result->obj = boolean_obj(truthy(r1->obj) == True ? False : True);
             break;
         }
         case AST_NEGATE: {

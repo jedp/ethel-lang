@@ -139,6 +139,15 @@ void test_eval_boolean_false(void) {
   TEST_ASSERT_EQUAL(0, obj->intval);
 }
 
+void test_eval_logical_not(void) {
+  char *program = "not false == not(false == true)";
+  eval_result_t *result = eval_program(program);
+  TEST_ASSERT_EQUAL(ERR_NO_ERROR, result->err);
+
+  // 1 is boolean true.
+  TEST_ASSERT_EQUAL(1, result->obj->intval);
+}
+
 void test_eval_truthiness(void) {
   char *program = "val x = (\"glug\" or 0) and (4.3 or 0) and (0 or 'c')"; 
   eval_result_t *result = eval_program(program);
@@ -730,6 +739,14 @@ void test_eval_function(void) {
   TEST_ASSERT_EQUAL(2, result->obj->intval);
 }
 
+void test_eval_function_undef(void) {
+  char *program = "nope(42)";
+  eval_result_t *result = eval_program(program);
+
+  TEST_ASSERT_EQUAL(ERR_FUNCTION_UNDEFINED, result->err);
+  TEST_ASSERT_EQUAL(TYPE_NIL, result->obj->type);
+}
+
 void test_eval_function_wrong_args(void) {
   char *program = "{ val f = fn(x, y) { x + y } \n"
                   "  f(1) }";
@@ -892,6 +909,7 @@ void test_eval(void) {
   RUN_TEST(test_eval_if_else_assign_expr);
   RUN_TEST(test_eval_boolean_true);
   RUN_TEST(test_eval_boolean_false);
+  RUN_TEST(test_eval_logical_not);
   RUN_TEST(test_eval_truthiness);
   RUN_TEST(test_eval_int_mod);
   RUN_TEST(test_eval_float_mod);
@@ -931,6 +949,7 @@ void test_eval(void) {
   RUN_TEST(test_eval_bitwise_shl);
   RUN_TEST(test_eval_bitwise_shr);
   RUN_TEST(test_eval_function);
+  RUN_TEST(test_eval_function_undef);
   RUN_TEST(test_eval_function_wrong_args);
   RUN_TEST(test_eval_function_return);
   RUN_TEST(test_eval_function_lexical_scope);

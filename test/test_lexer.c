@@ -212,14 +212,14 @@ void test_lex_inequality_no_spaces(void) {
 }
 
 void test_lex_inequality_nested_expressions(void) {
-  char *expr = "if (a < 1) and (b<=(2*4)) and c>3 and d>=4";
+  char *expr = "if not(a < 1) and (b<=(2*4)) and c>3 and d>=4";
   lexer_t lexer;
   lexer_init(&lexer, expr, c_str_len(expr));
 
   int expected[] = {
-    TAG_IF, TAG_LPAREN, TAG_IDENT, TAG_LT, TAG_INT, TAG_RPAREN,
+    TAG_IF, TAG_NOT, TAG_LPAREN, TAG_IDENT, TAG_LT, TAG_INT, TAG_RPAREN,
     TAG_AND, TAG_LPAREN, TAG_IDENT, TAG_LE,
-      TAG_LPAREN, TAG_INT, TAG_TIMES, TAG_INT, TAG_RPAREN, TAG_RPAREN,
+    TAG_LPAREN, TAG_INT, TAG_TIMES, TAG_INT, TAG_RPAREN, TAG_RPAREN,
     TAG_AND, TAG_IDENT, TAG_GT, TAG_INT,
     TAG_AND, TAG_IDENT, TAG_GE, TAG_INT
   };
@@ -567,6 +567,7 @@ void test_lex_all_tokens(void) {
     (test_data_t) { .text = "and", .expected_tag = TAG_AND },
     (test_data_t) { .text = "or", .expected_tag = TAG_OR },
     (test_data_t) { .text = "mod", .expected_tag = TAG_MOD },
+    (test_data_t) { .text = "not", .expected_tag = TAG_NOT },
     (test_data_t) { .text = "42", .expected_tag = TAG_INT },
     (test_data_t) { .text = "3.14", .expected_tag = TAG_FLOAT },
     (test_data_t) { .text = "'c'", .expected_tag = TAG_BYTE },

@@ -25,6 +25,7 @@ boolean is_op(token_t *token) {
       || token->tag == TAG_AND
       || token->tag == TAG_OR
       || token->tag == TAG_MOD
+      || token->tag == TAG_NOT
       || token->tag == TAG_BITWISE_SHL
       || token->tag == TAG_BITWISE_SHR
       || token->tag == TAG_BITWISE_OR
@@ -59,6 +60,8 @@ uint8_t op_preced(token_t *token) {
     case TAG_PLUS:
     case TAG_MINUS:
       return PRECED_ADD;
+    case TAG_NOT:
+      return PRECED_NOT;
     case TAG_GT:
     case TAG_GE:
     case TAG_LT:
@@ -377,7 +380,7 @@ error:
       (lexer->token.tag == TAG_EOF || lexer->token.tag == TAG_EOL)) {
     lexer->err = ERR_LEX_INCOMPLETE_INPUT;
   } else {
-    printf("1. Expected atom or block; got %s at pos %d.\n", tag_names[lexer->token.tag], lexer->pos);
+    printf("Expected expr or block; got %s at pos %d.\n", tag_names[lexer->token.tag], lexer->pos);
     lexer->err = ERR_LEX_ERROR;
   }
 
@@ -451,6 +454,10 @@ ast_expr_t *parse_atom(lexer_t *lexer) {
     case TAG_MINUS: {
       advance(lexer);
       return ast_unary(AST_NEGATE, parse_atom(lexer));
+    }
+    case TAG_NOT: {
+      advance(lexer);
+      return ast_unary(AST_NOT, parse_atom(lexer));
     }
     case TAG_BITWISE_NOT: {
       advance(lexer);
@@ -584,7 +591,7 @@ error:
       (lexer->token.tag == TAG_EOF || lexer->token.tag == TAG_EOL)) {
     lexer->err = ERR_LEX_INCOMPLETE_INPUT;
   } else {
-    printf("2. Expected atom or block; got %s at pos %d.\n", tag_names[lexer->token.tag], lexer->pos);
+    printf("Expected atom; got %s at pos %d.\n", tag_names[lexer->token.tag], lexer->pos);
     lexer->err = ERR_LEX_ERROR;
   }
 

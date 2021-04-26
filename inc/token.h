@@ -8,21 +8,15 @@ enum tag_enum {
   TAG_EOF = 0,
   TAG_EOL,
   TAG_COMMENT,
-
-  // Identifiers
   TAG_IDENT,
   TAG_TYPE_NAME,
   TAG_ASSIGN,
   TAG_INVARIABLE,
   TAG_VARIABLE,
   TAG_DEL,
-
-  // Association
   TAG_LPAREN,
   TAG_RPAREN,
   TAG_COMMA,
-
-  // Arithmetic
   TAG_PLUS,
   TAG_MINUS,
   TAG_TIMES,
@@ -30,14 +24,13 @@ enum tag_enum {
   TAG_MOD,
   TAG_AND,
   TAG_OR,
+  TAG_NOT,
   TAG_BITWISE_SHL,
   TAG_BITWISE_SHR,
   TAG_BITWISE_AND,
   TAG_BITWISE_OR,
   TAG_BITWISE_XOR,
   TAG_BITWISE_NOT,
-
-  // Types
   TAG_BIN,
   TAG_HEX,
   TAG_INT,
@@ -49,11 +42,7 @@ enum tag_enum {
   TAG_NIL,
   TAG_LIST,
   TAG_OF,
-
-  // Array constructor
   TAG_ARR_DECL,
-
-  // Type declarations
   TAG_TYPE_INT,
   TAG_TYPE_FLOAT,
   TAG_TYPE_BYTE,
@@ -62,15 +51,9 @@ enum tag_enum {
   TAG_AS,
   TAG_IS,
   TAG_TYPEOF,
-
-  // Sequence
   TAG_RANGE,
-
-  // Element access
   TAG_LBRACKET,
   TAG_RBRACKET,
-
-  // Structure
   TAG_IF,
   TAG_THEN,
   TAG_ELSE,
@@ -79,37 +62,25 @@ enum tag_enum {
   TAG_IN,
   TAG_MATCH,
   TAG_STEP,
-
-  // Comparison
   TAG_GT,
   TAG_LT,
   TAG_GE,
   TAG_LE,
   TAG_EQ,
   TAG_NE,
-
-  // IO
   TAG_DUMP,
   TAG_PRINT,
   TAG_INPUT,
-
-  // Formatting
   TAG_TO_HEX,
   TAG_TO_BIN,
-
-  // Blocks
   TAG_BEGIN,
   TAG_END,
-
-  // Fields and methods
   TAG_MEMBER_ACCESS,
   TAG_FIELD_NAME,
   TAG_METHOD_CALL,
   TAG_FUNC_DEF,
   TAG_FUNC_CALL,
   TAG_FUNC_RETURN,
-
-  // Math
   TAG_ABS,
   TAG_SIN,
   TAG_COS,
@@ -146,6 +117,7 @@ static const char* tag_names[] = {
   "MOD",
   "AND",
   "OR",
+  "NOT",
   "BITWISE_SHL",
   "BITWISE_SHR",
   "BITWISE_AND",
@@ -255,6 +227,7 @@ static const token_t reserved[] = {
   { TAG_AND,           .string = (char *) "and" },
   { TAG_OR,            .string = (char *) "or" },
   { TAG_MOD,           .string = (char *) "mod" },
+  { TAG_NOT,           .string = (char *) "not" },
   { TAG_INVARIABLE,    .string = (char *) "val" },
   { TAG_VARIABLE,      .string = (char *) "var" },
   { TAG_DEL,           .string = (char *) "del" },

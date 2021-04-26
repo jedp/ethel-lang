@@ -11,7 +11,7 @@ Very much in progress and not useful yet.
 ```
 > val age = 42
 42
-> val x = if age > 1 then val y = "Ethel".length()
+> val x = if not(age < 1) then val y = "Ethel".length()
 5
 > x
 5
@@ -27,7 +27,7 @@ Very much in progress and not useful yet.
 > type(s)
 Int
 > s is float
-False
+false
 > s as float
 101.000000
 > type(s as float)
@@ -52,7 +52,7 @@ Type error
 > l
 { 5, 6, 7, 8, 9 }
 > 7 in l
-True
+true
 ```
 
 #### Byte Arrays and Strings
@@ -79,7 +79,7 @@ ByteArray(4)
 > print(a)
 "omai"
 > 'a' in a
-True
+true
 ```
 
 #### Functions

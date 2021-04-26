@@ -361,7 +361,8 @@ token_t *get_token(lexer_t *lexer) {
       if (lexer->nextch == '=') {
         return lex_op(lexer, TAG_NE);
       }
-      // TODO: NOT, probably like NEG
+      unreadch(lexer);
+      // Logical not is the word "not"
       return lexer_error(lexer);
     }
     case '\'': return lex_char(lexer);
