@@ -15,6 +15,12 @@ obj_t *arr_set(obj_t *arr_obj, obj_method_args_t *args);
 /* Return true if the byte-compatible first arg is in the array. */
 obj_t *arr_contains(obj_t *arr_obj, obj_method_args_t *args);
 
+/* Return true if the arrays are element-wise equal. */
+obj_t *arr_eq(obj_t *array_obj, obj_method_args_t *args);
+
+/* Return true if the arrays are element-wise not equal. */
+obj_t *arr_ne(obj_t *array_obj, obj_method_args_t *args);
+
 static_method get_arr_static_method(static_method_ident_t method_id);
 
 #endif

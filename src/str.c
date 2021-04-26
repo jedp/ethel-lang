@@ -1,6 +1,7 @@
 #include <stdio.h>
 #include "../inc/mem.h"
 #include "../inc/obj.h"
+#include "../inc/arr.h"
 #include "../inc/str.h"
 
 dim_t c_str_len(const char* s) {
@@ -205,7 +206,11 @@ obj_t *str_len(obj_t *str_obj, obj_method_args_t *args) {
 }
 
 obj_t *str_eq(obj_t *str_obj, obj_method_args_t *args) {
-  return boolean_obj(False);
+  return arr_eq(str_obj, args);
+}
+
+obj_t *str_ne(obj_t *str_obj, obj_method_args_t *args) {
+  return arr_ne(str_obj, args);
 }
 
 obj_t *byte_dump(obj_t *byte_obj) {
@@ -378,7 +383,8 @@ obj_t *arr_dump(obj_t *arr_obj) {
 static_method get_str_static_method(static_method_ident_t method_id) {
   switch(method_id) {
     case METHOD_LENGTH: return str_len;
-    case METHOD_EQUALS: return str_eq;
+    case METHOD_EQ: return str_eq;
+    case METHOD_NE: return str_ne;
     default: return NULL;
   }
 }

@@ -122,6 +122,28 @@ void test_str_byte_dump(void) {
   TEST_ASSERT_EQUAL_STRING(expected, bytearray_to_c_str(s->bytearray));
 }
 
+void test_str_eq(void) {
+  obj_t *a = string_obj(c_str_to_bytearray("foo"));
+  obj_t *b = string_obj(c_str_to_bytearray("foo"));
+  obj_t *r = str_eq(a, wrap_varargs(1, b));
+  TEST_ASSERT_EQUAL(1, r->boolval);
+
+  b = string_obj(c_str_to_bytearray("bar"));
+  r = str_eq(a, wrap_varargs(1, b));
+  TEST_ASSERT_EQUAL(0, r->boolval);
+}
+
+void test_str_ne(void) {
+  obj_t *a = string_obj(c_str_to_bytearray("foo"));
+  obj_t *b = string_obj(c_str_to_bytearray("bar"));
+  obj_t *r = str_ne(a, wrap_varargs(1, b));
+  TEST_ASSERT_EQUAL(1, r->boolval);
+
+  b = string_obj(c_str_to_bytearray("foo"));
+  r = str_ne(a, wrap_varargs(1, b));
+  TEST_ASSERT_EQUAL(0, r->boolval);
+}
+
 void test_str(void) {
   RUN_TEST(test_c_str_len);
   RUN_TEST(test_c_str_eq);
@@ -136,5 +158,7 @@ void test_str(void) {
   RUN_TEST(test_str_int_dump);
   RUN_TEST(test_str_float_dump);
   RUN_TEST(test_str_byte_dump);
+  RUN_TEST(test_str_eq);
+  RUN_TEST(test_str_ne);
 }
 

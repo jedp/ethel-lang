@@ -111,7 +111,9 @@ obj_t *arg_at(obj_method_args_t *args, int index);
 typedef uint8_t static_method_ident_t;
 enum static_method_ident_enum {
   METHOD_NONE = 0,
-  METHOD_EQUALS,
+  METHOD_EQ,
+  METHOD_NE,
+  METHOD_CMP,
   METHOD_LENGTH,
   METHOD_GET,
   METHOD_HEAD,
@@ -132,7 +134,8 @@ typedef struct {
 } static_method_name_t;
 
 static const static_method_name_t static_method_names[] = {
-  { .ident = METHOD_EQUALS,        .name = "equals" },
+  { .ident = METHOD_EQ,            .name = "equals" },
+  { .ident = METHOD_CMP,           .name = "compare" },
   { .ident = METHOD_LENGTH,        .name = "length" },
   { .ident = METHOD_GET,           .name = "get" },
   { .ident = METHOD_HEAD,          .name = "head" },

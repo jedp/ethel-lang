@@ -1,6 +1,18 @@
 #include <stdio.h>
 #include "../inc/arr.h"
 
+static boolean _eq(bytearray_t *a, bytearray_t *b) {
+  if (a->size != b->size) return False;
+
+  for (dim_t i = 0; i < a->size; i++) {
+    if (a->data[i] != b->data[i]) {
+      return False;
+    }
+  }
+
+  return True;
+}
+
 static byte obj_to_byte(obj_t *obj) {
   switch(obj->type) {
     case TYPE_BYTE:
@@ -104,11 +116,43 @@ obj_t *arr_contains(obj_t *arr_obj, obj_method_args_t *args) {
   return boolean_obj(False);
 }
 
+obj_t *arr_eq(obj_t *arr_obj, obj_method_args_t *args) {
+  if (args == NULL || args->arg == NULL) {
+    printf("Null arg to eq()\n");
+    return nil_obj();
+  }
+
+  obj_t *other = args->arg;
+  if (other->type != TYPE_STRING &&
+      other->type != TYPE_BYTEARRAY) {
+    return nil_obj();
+  }
+
+  return boolean_obj(_eq(arr_obj->bytearray, other->bytearray));
+}
+
+obj_t *arr_ne(obj_t *arr_obj, obj_method_args_t *args) {
+  if (args == NULL || args->arg == NULL) {
+    printf("Null arg to ne()\n");
+    return nil_obj();
+  }
+
+  obj_t *other = args->arg;
+  if (other->type != TYPE_STRING &&
+      other->type != TYPE_BYTEARRAY) {
+    return nil_obj();
+  }
+
+  return boolean_obj(!_eq(arr_obj->bytearray, other->bytearray));
+}
+
 static_method get_arr_static_method(static_method_ident_t method_id) {
   switch (method_id) {
     case METHOD_LENGTH: return arr_size;
     case METHOD_GET: return arr_get;
     case METHOD_CONTAINS: return arr_contains;
+    case METHOD_EQ: return arr_eq;
+    case METHOD_NE: return arr_ne;
     default: return NULL;
   }
 }

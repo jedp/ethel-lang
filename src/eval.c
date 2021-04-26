@@ -526,8 +526,6 @@ static void cmp(ast_type_t type, obj_t *a, obj_t *b, eval_result_t *result) {
       case AST_NE: result->obj = boolean_obj(a->byteval != b->byteval); return;
       case AST_EQ: result->obj = boolean_obj(a->byteval == b->byteval); return;
       default:
-        printf("what what what???\n");
-        result->obj = boolean_obj(False);
         return;
     }
   }
@@ -541,9 +539,17 @@ static void cmp(ast_type_t type, obj_t *a, obj_t *b, eval_result_t *result) {
       case AST_NE: result->obj = num_ne(a, b); return;
       case AST_EQ: result->obj = num_eq(a, b); return;
       default:
-        printf("what what what???\n");
-        result->obj = boolean_obj(False);
         return;
+    }
+  }
+
+  if ((a->type == TYPE_STRING || a->type == TYPE_BYTEARRAY) &&
+      (b->type == TYPE_STRING || b->type == TYPE_BYTEARRAY)) {
+    switch(type) {
+      case AST_EQ: result->obj = arr_eq(a, wrap_varargs(1, b)); return;
+      case AST_NE: result->obj = arr_ne(a, wrap_varargs(1, b)); return;
+      default:
+        break;
     }
   }
 
@@ -552,12 +558,14 @@ static void cmp(ast_type_t type, obj_t *a, obj_t *b, eval_result_t *result) {
       case AST_EQ: result->obj = boolean_obj(a->boolval == b->boolval); return;
       case AST_NE: result->obj = boolean_obj(a->boolval != b->boolval); return;
       default:
-        printf("Comparison makes no sense for booleans.\n");
-        result->obj = boolean_obj(False);
-        return;
+        break;
     }
   }
 
+  printf("Don't know how to evaluate %s %s %s\n",
+         obj_type_names[a->type],
+         ast_node_names[type],
+         obj_type_names[b->type]);
   result->err = ERR_EVAL_TYPE_ERROR;
 }
 

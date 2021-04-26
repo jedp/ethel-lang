@@ -897,6 +897,21 @@ void test_eval_arr_subscript_assign_int(void) {
   TEST_ASSERT_EQUAL_STRING("U Like potatoes", bytearray_to_c_str(result->obj->bytearray));
 } 
 
+void test_eval_str_compare(void) {
+  char *program = "{ val s1 = \"foo\"             \n"
+                  "  val s2 = \"bar\"             \n"
+                  "  var i = 0                    \n"
+                  "  if (s1 == s1) then i = i + 1 \n"
+                  "  if (s1 != s1) then i = i - 1 \n"
+                  "  if (s1 == s2) then i = i - 1 \n"
+                  "  if (s1 != s2) then i = i + 1 \n"
+                  "  i                            \n"
+                  "}";
+  eval_result_t *result = eval_program(program);
+  TEST_ASSERT_EQUAL(ERR_NO_ERROR, result->err);
+  TEST_ASSERT_EQUAL(2, result->obj->intval);
+}
+
 void test_eval(void) {
   RUN_TEST(test_eval_calculator);
   RUN_TEST(test_eval_unary_minus);
@@ -964,5 +979,6 @@ void test_eval(void) {
   RUN_TEST(test_eval_arr_subscript_cmp);
   RUN_TEST(test_eval_arr_subscript_assign_byte);
   RUN_TEST(test_eval_arr_subscript_assign_int);
+  RUN_TEST(test_eval_str_compare);
 }
 
