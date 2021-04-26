@@ -17,6 +17,8 @@ static boolean _eq(bytearray_t *a, bytearray_t *b) {
 }
 
 static obj_t *_arr_slice(obj_t *arr_obj, int start, int end) {
+  if (end > arr_obj->bytearray->size) end = arr_obj->bytearray->size;
+
   if (end < 0 ||
       start < 0 ||
       end < start) {
@@ -24,13 +26,10 @@ static obj_t *_arr_slice(obj_t *arr_obj, int start, int end) {
     return bytearray_obj(0, NULL);
   }
 
-  dim_t len = arr_obj->bytearray->size;
-  if (start > len || end > len) {
-    return bytearray_obj(0, NULL);
-  }
-
-  obj_t *new = bytearray_obj(end-start, NULL);
-  for (int i = start; (i < end) && (start+i < len); i++) {
+  dim_t len = end - start;
+  obj_t *new = bytearray_obj(len, NULL);
+  for (int i = 0; i < len; i++) {
+    printf("copy byte '%c'\n", arr_obj->bytearray->data[start+i]);
     new->bytearray->data[i] = arr_obj->bytearray->data[start+i];
   }
 
