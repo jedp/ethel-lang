@@ -5,6 +5,8 @@
 #include "../inc/str.h"
 
 static obj_t *_str_slice(obj_t *str_obj, int start, int end) {
+  if (end > str_obj->bytearray->size) end = str_obj->bytearray->size;
+
   if (end < 0 ||
       start < 0 ||
       end < start) {
@@ -12,13 +14,9 @@ static obj_t *_str_slice(obj_t *str_obj, int start, int end) {
     return string_obj(bytearray_alloc(0));
   }
 
-  dim_t len = str_obj->bytearray->size;
-  if (start > len) {
-    return string_obj(bytearray_alloc(0));
-  }
-
-  bytearray_t *ba = bytearray_alloc(end-start);
-  for (int i = start; (i < end) && (start+i < len); i++) {
+  dim_t len = end - start;
+  bytearray_t *ba = bytearray_alloc(len);
+  for (int i = 0; i < end; i++) {
     ba->data[i] = str_obj->bytearray->data[start+i];
   }
 
@@ -234,7 +232,7 @@ obj_t *str_ne(obj_t *str_obj, obj_method_args_t *args) {
   return arr_ne(str_obj, args);
 }
 
-obj_t *str_substr(obj_t *str_obj, obj_method_args_t *args) {
+obj_t *str_substring(obj_t *str_obj, obj_method_args_t *args) {
   if (args == NULL || args->arg == NULL) {
     printf("Null arg to substring()\n");
     return nil_obj();
@@ -421,7 +419,7 @@ static_method get_str_static_method(static_method_ident_t method_id) {
     case METHOD_LENGTH: return str_len;
     case METHOD_EQ: return str_eq;
     case METHOD_NE: return str_ne;
-    case METHOD_SUBSTR: return str_substr;
+    case METHOD_SUBSTR: return str_substring;
     default: return NULL;
   }
 }

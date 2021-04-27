@@ -29,7 +29,6 @@ static obj_t *_arr_slice(obj_t *arr_obj, int start, int end) {
   dim_t len = end - start;
   obj_t *new = bytearray_obj(len, NULL);
   for (int i = 0; i < len; i++) {
-    printf("copy byte '%c'\n", arr_obj->bytearray->data[start+i]);
     new->bytearray->data[i] = arr_obj->bytearray->data[start+i];
   }
 

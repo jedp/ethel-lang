@@ -144,6 +144,21 @@ void test_str_ne(void) {
   TEST_ASSERT_EQUAL(0, r->boolval);
 }
 
+void test_str_substr(void) {
+  obj_t *a = string_obj(c_str_to_bytearray("ohai"));
+  obj_t *slice = str_substring(a, wrap_varargs(2, int_obj(0), int_obj(10)));
+  TEST_ASSERT_EQUAL_STRING("ohai", bytearray_to_c_str(slice->bytearray));
+
+  slice = str_substring(a, wrap_varargs(2, int_obj(0), int_obj(0)));
+  TEST_ASSERT_EQUAL_STRING("", bytearray_to_c_str(slice->bytearray));
+
+  slice = str_substring(a, wrap_varargs(2, int_obj(0), int_obj(2)));
+  TEST_ASSERT_EQUAL_STRING("oh", bytearray_to_c_str(slice->bytearray));
+
+  slice = str_substring(a, wrap_varargs(2, int_obj(2), int_obj(4)));
+  TEST_ASSERT_EQUAL_STRING("ai", bytearray_to_c_str(slice->bytearray));
+}
+
 void test_str(void) {
   RUN_TEST(test_c_str_len);
   RUN_TEST(test_c_str_eq);
@@ -160,5 +175,6 @@ void test_str(void) {
   RUN_TEST(test_str_byte_dump);
   RUN_TEST(test_str_eq);
   RUN_TEST(test_str_ne);
+  RUN_TEST(test_str_substr);
 }
 
