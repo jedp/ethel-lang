@@ -35,6 +35,7 @@ enum error_enum {
   ERR_FUNCTION_UNDEFINED,
   ERR_WRONG_ARG_COUNT,
   ERR_SYNTAX_ERROR,
+  ERR_OUT_OF_MEMORY,
   ERR_MAX
 };
 
@@ -69,6 +70,7 @@ static const char* err_names[ERR_MAX] = {
   "Undefined function",
   "Incorrect number of arguments",
   "Syntax error",
+  "Out of memory",
 };
 
 #endif

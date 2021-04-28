@@ -1,9 +1,11 @@
 #include <stdio.h>
+#include "../inc/def.h"
 #include "../inc/math.h"
 #include "../inc/mem.h"
 #include "../inc/str.h"
 #include "../inc/obj.h"
 #include "../inc/list.h"
+#include "../inc/type.h"
 
 obj_t *_empty_list(bytearray_t *type_name) {
   obj_t *obj = mem_alloc(sizeof(obj_t));
@@ -139,6 +141,19 @@ obj_t *list_contains(obj_t *list_obj, obj_method_args_t *args) {
     root = root->next;
   }
   return boolean_obj(False);
+}
+
+obj_t *list_hash(obj_t *list_obj, obj_method_args_t /* Ignored */ *args) {
+  uint32_t temp = FNV32Basis;
+
+  for (dim_t i = 0; i < _list_len(list_obj); i++) {
+    obj_t *val = _list_get(list_obj, i);
+    obj_type_t t = val->type;
+    uint32_t h = get_static_method(t, METHOD_HASH)(val, NULL)->intval;
+    temp = FNV32Prime * (temp ^ h);
+  }
+
+  return int_obj(temp);
 }
 
 obj_t *list_len(obj_t *list_obj, obj_method_args_t /* ignored */ *args) {
@@ -312,6 +327,7 @@ obj_t *list_remove_at(obj_t *list_obj, obj_method_args_t *args) {
 
 static_method get_list_static_method(static_method_ident_t method_id) {
   switch (method_id) {
+    case METHOD_HASH: return list_hash;
     case METHOD_LENGTH: return list_len;
     case METHOD_GET: return list_get;
     case METHOD_HEAD: return list_head;

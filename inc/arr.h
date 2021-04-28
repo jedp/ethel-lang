@@ -3,6 +3,14 @@
 
 #include "obj.h"
 
+/*
+ * Return the integer hash of the array object.
+ *
+ * This is a function of the contents, so if the contents change,
+ * so will the hash.
+ */
+obj_t *arr_hash(obj_t *arr_obj, obj_method_args_t *args);
+
 /* Return the number of elements in the array object.  */
 obj_t *arr_size(obj_t *arr_obj, obj_method_args_t *args);
 

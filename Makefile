@@ -6,7 +6,11 @@ COMPOBJS = src/mem.o \
 					 src/range.o \
 					 src/arr.o \
 					 src/str.o \
+					 src/float.o \
+					 src/int.o \
 					 src/list.o \
+					 src/bool.o \
+					 src/type.o \
 					 src/lexer.o \
 					 src/parser.o \
 					 src/env.o \
@@ -24,6 +28,7 @@ TESTOBJS = test/unity/unity.o \
 					 test/test_lexer.o \
 					 test/test_parser.o \
 					 test/test_eval.o \
+					 test/test_hash.o \
 					 test/test_env.o \
 					 test/test_examples.o \
 					 test/test.o

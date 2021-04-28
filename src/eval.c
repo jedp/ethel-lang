@@ -6,8 +6,12 @@
 #include "../inc/num.h"
 #include "../inc/range.h"
 #include "../inc/arr.h"
+#include "../inc/int.h"
+#include "../inc/float.h"
+#include "../inc/bool.h"
 #include "../inc/str.h"
 #include "../inc/list.h"
+#include "../inc/type.h"
 #include "../inc/eval.h"
 #include "../inc/parser.h"
 #include "../inc/ast.h"
@@ -756,29 +760,13 @@ found:
     return;
   }
 
-  // Now look up the method for the given object type.
-  static_method method;
-  switch(obj->type) {
-    case TYPE_BYTEARRAY:
-      method = get_arr_static_method(method_id);
-      break;
-    case TYPE_LIST:
-      method = get_list_static_method(method_id);
-      break;
-    case TYPE_STRING:
-      method = get_str_static_method(method_id);
-      break;
-    default:
-      method = NULL;
-      break;
-  }
+  static_method method = get_static_method(obj->type, method_id);
 
   if (method == NULL) {
     printf("Method not found for that object\n");
     result->err = ERR_NO_SUCH_METHOD;
     return;
   }
-
 
   if (expr->application->args == NULL) {
     // Zero args.

@@ -49,6 +49,29 @@ static byte obj_to_byte(obj_t *obj) {
   }
 }
 
+obj_t *arr_hash(obj_t *arr_obj, obj_method_args_t /* Ignored */ *args) {
+  uint32_t temp;
+  byte b;
+
+  if (arr_obj->bytearray->size == 0) {
+    return nil_obj();
+  }
+
+  /*
+   * FNV (Fowler, Noll, Vo), the non-cryptographic hash function FNV-1a
+   * for 32-bit hashes returning a 32-bit integer.
+   */
+  temp = FNV32Basis;
+  dim_t i = 0;
+  while (i < arr_obj->bytearray->size) {
+    b = arr_obj->bytearray->data[i];
+    temp = FNV32Prime * (temp ^ b);
+    i++;
+  }
+
+  return int_obj(temp);
+}
+
 obj_t *arr_size(obj_t *arr_obj, obj_method_args_t /* Ignored */ *args) {
   return int_obj(arr_obj->bytearray->size);
 }
@@ -185,6 +208,7 @@ obj_t *arr_slice(obj_t *arr_obj, obj_method_args_t *args) {
 
 static_method get_arr_static_method(static_method_ident_t method_id) {
   switch (method_id) {
+    case METHOD_HASH: return arr_hash;
     case METHOD_LENGTH: return arr_size;
     case METHOD_GET: return arr_get;
     case METHOD_CONTAINS: return arr_contains;

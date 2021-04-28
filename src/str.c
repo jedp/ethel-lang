@@ -23,6 +23,10 @@ static obj_t *_str_slice(obj_t *str_obj, int start, int end) {
   return string_obj(ba);
 }
 
+obj_t *str_hash(obj_t *str_obj, obj_method_args_t /* Ignored */ *args) {
+  return arr_hash(str_obj, args);
+}
+
 dim_t c_str_len(const char* s) {
   dim_t size = 0;
   const unsigned char *p = (const unsigned char *) s;
@@ -416,6 +420,7 @@ obj_t *arr_dump(obj_t *arr_obj) {
 
 static_method get_str_static_method(static_method_ident_t method_id) {
   switch(method_id) {
+    case METHOD_HASH: return str_hash;
     case METHOD_LENGTH: return str_len;
     case METHOD_EQ: return str_eq;
     case METHOD_NE: return str_ne;

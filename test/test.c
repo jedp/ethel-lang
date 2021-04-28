@@ -7,6 +7,7 @@
 #include "test_lexer.h"
 #include "test_parser.h"
 #include "test_eval.h"
+#include "test_hash.h"
 #include "test_env.h"
 #include "test_examples.h"
 
@@ -27,6 +28,7 @@ int main(int argc, char** argv) {
   test_lexer();
   test_parser();
   test_eval();
+  test_hash();
   test_env();
   test_examples();
 

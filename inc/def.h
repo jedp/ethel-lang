@@ -7,6 +7,10 @@
 #define False     0
 #define Null      0
 
+// FNV (Fowlwer, Noll, Vo) FNV-1a 32-bit hash constants.
+#define FNV32Prime 0x01000193
+#define FNV32Basis 0x811C9DC5
+
 enum flags {
   F_NONE   = 0x00,
   F_UNDEF  = 0x01,
