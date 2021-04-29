@@ -521,66 +521,22 @@ error:
 }
 
 static void cmp(ast_type_t type, obj_t *a, obj_t *b, eval_result_t *result) {
-  if (type == AST_EQ) {
-    result->obj = get_static_method(a->type, METHOD_EQ)(a, wrap_varargs(1, b));
+  static_method cmp;
+  switch (type) {
+    case AST_EQ: cmp = get_static_method(a->type, METHOD_EQ); break;
+    case AST_NE: cmp = get_static_method(a->type, METHOD_NE); break;
+    case AST_LT: cmp = get_static_method(a->type, METHOD_LT); break;
+    case AST_GT: cmp = get_static_method(a->type, METHOD_GT); break;
+    case AST_LE: cmp = get_static_method(a->type, METHOD_LE); break;
+    case AST_GE: cmp = get_static_method(a->type, METHOD_GE); break;
+  }
+
+  if (cmp == NULL) {
+    result->err = ERR_EVAL_TYPE_ERROR;
     return;
   }
 
-  if (type == AST_NE) {
-    result->obj = get_static_method(a->type, METHOD_NE)(a, wrap_varargs(1, b));
-    return;
-  }
-
-  if (a->type == TYPE_BYTE && b->type == TYPE_BYTE) {
-    switch(type) {
-      case AST_GT: result->obj = boolean_obj(a->byteval >  b->byteval); return;
-      case AST_GE: result->obj = boolean_obj(a->byteval >= b->byteval); return;
-      case AST_LT: result->obj = boolean_obj(a->byteval <  b->byteval); return;
-      case AST_LE: result->obj = boolean_obj(a->byteval <= b->byteval); return;
-      case AST_NE: result->obj = boolean_obj(a->byteval != b->byteval); return;
-      case AST_EQ: result->obj = boolean_obj(a->byteval == b->byteval); return;
-      default:
-        return;
-    }
-  }
-
-  if (is_numeric(a) && is_numeric(b)) {
-    switch(type) {
-      case AST_GT: result->obj = num_gt(a, b); return;
-      case AST_GE: result->obj = num_ge(a, b); return;
-      case AST_LT: result->obj = num_lt(a, b); return;
-      case AST_LE: result->obj = num_le(a, b); return;
-      case AST_NE: result->obj = num_ne(a, b); return;
-      case AST_EQ: result->obj = num_eq(a, b); return;
-      default:
-        return;
-    }
-  }
-
-  if ((a->type == TYPE_STRING || a->type == TYPE_BYTEARRAY) &&
-      (b->type == TYPE_STRING || b->type == TYPE_BYTEARRAY)) {
-    switch(type) {
-      case AST_EQ: result->obj = arr_eq(a, wrap_varargs(1, b)); return;
-      case AST_NE: result->obj = arr_ne(a, wrap_varargs(1, b)); return;
-      default:
-        break;
-    }
-  }
-
-  if (a->type == TYPE_BOOLEAN && b->type == TYPE_BOOLEAN) {
-    switch(type) {
-      case AST_EQ: result->obj = boolean_obj(a->boolval == b->boolval); return;
-      case AST_NE: result->obj = boolean_obj(a->boolval != b->boolval); return;
-      default:
-        break;
-    }
-  }
-
-  printf("Don't know how to evaluate %s %s %s\n",
-         obj_type_names[a->type],
-         ast_node_names[type],
-         obj_type_names[b->type]);
-  result->err = ERR_EVAL_TYPE_ERROR;
+  result->obj = cmp(a, wrap_varargs(1, b));
 }
 
 static void member_of(obj_t *a, obj_t *b, eval_result_t *result) {
