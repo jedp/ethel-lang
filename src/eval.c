@@ -521,6 +521,16 @@ error:
 }
 
 static void cmp(ast_type_t type, obj_t *a, obj_t *b, eval_result_t *result) {
+  if (type == AST_EQ) {
+    result->obj = get_static_method(a->type, METHOD_EQ)(a, wrap_varargs(1, b));
+    return;
+  }
+
+  if (type == AST_NE) {
+    result->obj = get_static_method(a->type, METHOD_NE)(a, wrap_varargs(1, b));
+    return;
+  }
+
   if (a->type == TYPE_BYTE && b->type == TYPE_BYTE) {
     switch(type) {
       case AST_GT: result->obj = boolean_obj(a->byteval >  b->byteval); return;

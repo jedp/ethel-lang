@@ -156,6 +156,32 @@ obj_t *list_hash(obj_t *list_obj, obj_method_args_t /* Ignored */ *args) {
   return int_obj(temp);
 }
 
+obj_t *list_eq(obj_t *obj, obj_method_args_t *args) {
+  if (args == NULL || args->arg == NULL) return boolean_obj(False);
+  obj_t *arg = args->arg;
+
+  if (arg->type != TYPE_LIST) return boolean_obj(False);
+
+  if (_list_len(obj) != _list_len(arg)) return boolean_obj(False);
+
+  obj_list_element_t *root = obj->list->elems;
+  obj_list_element_t *other_root = arg->list->elems;
+  while(root != NULL) {
+    static_method ne = get_static_method(root->node->type, METHOD_NE);
+    // TODO is loosey-goosey equality correct? (int 0 eq byte 0, etc.)
+    if (ne(root->node, wrap_varargs(1, other_root->node))) {
+      return boolean_obj(False);
+    }
+    root = root->next;
+    other_root = other_root->next;
+  }
+  return boolean_obj(True);
+}
+
+obj_t *list_ne(obj_t *obj, obj_method_args_t *args) {
+  return boolean_obj(list_eq(obj, args)->boolval == True ? False : True);
+}
+
 obj_t *list_len(obj_t *list_obj, obj_method_args_t /* ignored */ *args) {
   return int_obj(_list_len(list_obj));
 }
@@ -328,6 +354,8 @@ obj_t *list_remove_at(obj_t *list_obj, obj_method_args_t *args) {
 static_method get_list_static_method(static_method_ident_t method_id) {
   switch (method_id) {
     case METHOD_HASH: return list_hash;
+    case METHOD_EQ: return list_eq;
+    case METHOD_NE: return list_ne;
     case METHOD_LENGTH: return list_len;
     case METHOD_GET: return list_get;
     case METHOD_HEAD: return list_head;

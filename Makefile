@@ -7,6 +7,7 @@ COMPOBJS = src/mem.o \
 					 src/arr.o \
 					 src/str.o \
 					 src/float.o \
+					 src/byte.o \
 					 src/int.o \
 					 src/list.o \
 					 src/bool.o \
