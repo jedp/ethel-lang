@@ -27,7 +27,7 @@ obj_t *int_eq(obj_t *obj, obj_method_args_t *args) {
 
 obj_t *int_ne(obj_t *obj, obj_method_args_t *args) {
   obj_t *eq = int_eq(obj, args);
-  return boolean_obj(eq->boolval == True ? False : True);
+  return boolean_obj((eq->boolval == True) ? False : True);
 }
 
 static_method get_int_static_method(static_method_ident_t method_id) {

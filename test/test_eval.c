@@ -410,6 +410,21 @@ void test_eval_list_val_length(void) {
   TEST_ASSERT_EQUAL(3, obj->intval);
 }
 
+void test_eval_list_val_eq(void) {
+  char *program = "{ val a = list of Int { 1, 2, 3 }   \n"
+                  "  val b = list of Int { 0, 1, 2, 3 }\n"
+                  "  var i = 0                         \n"
+                  "  if (a == b.tail()) then i = 1     \n"
+                  "  if (a == b) then i = 0            \n"
+                  "  i                                 \n"
+                  "}";
+  eval_result_t *result = eval_program(program);
+  TEST_ASSERT_EQUAL(ERR_NO_ERROR, result->err);
+
+  obj_t *obj = result->obj;
+  TEST_ASSERT_EQUAL(1, obj->intval);
+}
+
 void test_eval_list_val_get(void) {
   char *program = "{ val l = list of Int { 1, 2, 3 }\n"
                   "  l.get(0) }";
@@ -947,6 +962,7 @@ void test_eval(void) {
   RUN_TEST(test_eval_string_var_length);
   RUN_TEST(test_eval_string_length_in_expr);
   RUN_TEST(test_eval_list_val_length);
+  RUN_TEST(test_eval_list_val_eq);
   RUN_TEST(test_eval_list_val_get);
   RUN_TEST(test_eval_list_val_head);
   RUN_TEST(test_eval_list_val_tail_length);

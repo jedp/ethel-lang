@@ -169,7 +169,8 @@ obj_t *list_eq(obj_t *obj, obj_method_args_t *args) {
   while(root != NULL) {
     static_method ne = get_static_method(root->node->type, METHOD_NE);
     // TODO is loosey-goosey equality correct? (int 0 eq byte 0, etc.)
-    if (ne(root->node, wrap_varargs(1, other_root->node))) {
+    if (ne(root->node, wrap_varargs(1, other_root->node))->boolval == True) {
+      printf("not equal!\n");
       return boolean_obj(False);
     }
     root = root->next;
