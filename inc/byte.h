@@ -19,6 +19,12 @@ obj_t *byte_gt(obj_t *obj, obj_method_args_t *args);
 obj_t *byte_le(obj_t *obj, obj_method_args_t *args);
 obj_t *byte_ge(obj_t *obj, obj_method_args_t *args);
 obj_t *byte_as(obj_t *obj, obj_method_args_t *args);
+obj_t *byte_bitwise_or(obj_t *obj, obj_method_args_t *args);
+obj_t *byte_bitwise_xor(obj_t *obj, obj_method_args_t *args);
+obj_t *byte_bitwise_and(obj_t *obj, obj_method_args_t *args);
+obj_t *byte_bitwise_shl(obj_t *obj, obj_method_args_t *args);
+obj_t *byte_bitwise_shr(obj_t *obj, obj_method_args_t *args);
+obj_t *byte_bitwise_not(obj_t *obj, obj_method_args_t *args);
 
 static_method get_byte_static_method(static_method_ident_t method_id);
 

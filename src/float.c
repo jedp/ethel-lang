@@ -24,7 +24,7 @@ obj_t *float_eq(obj_t *obj, obj_method_args_t *args) {
       return boolean_obj((obj->floatval == arg->intval) ? True : False);
     default:
       printf("Cannot compare for equality between %s and %s.\n",
-             obj_type_names[TYPE_FLOAT], obj_type_names[arg->type]);
+             obj_type_names[obj->type], obj_type_names[arg->type]);
       return boolean_obj(False);
   }
 }
@@ -34,7 +34,7 @@ obj_t *float_ne(obj_t *obj, obj_method_args_t *args) {
   obj_t *arg = args->arg;
   if (arg->type != TYPE_FLOAT && arg->type != TYPE_INT) {
     printf("Cannot compare for equality between %s and %s.\n",
-           obj_type_names[TYPE_FLOAT], obj_type_names[arg->type]);
+           obj_type_names[obj->type], obj_type_names[arg->type]);
     return boolean_obj(False);
   }
 
@@ -53,7 +53,7 @@ obj_t *float_lt(obj_t *obj, obj_method_args_t *args) {
       return boolean_obj((obj->floatval < arg->intval) ? True : False);
     default:
       printf("Cannot compare for equality between %s and %s.\n",
-            obj_type_names[TYPE_FLOAT], obj_type_names[arg->type]);
+            obj_type_names[obj->type], obj_type_names[arg->type]);
       return boolean_obj(False);
   }
 }
@@ -69,7 +69,7 @@ obj_t *float_gt(obj_t *obj, obj_method_args_t *args) {
       return boolean_obj((obj->floatval > arg->intval) ? True : False);
     default:
       printf("Cannot compare for equality between %s and %s.\n",
-            obj_type_names[TYPE_FLOAT], obj_type_names[arg->type]);
+            obj_type_names[obj->type], obj_type_names[arg->type]);
       return boolean_obj(False);
   }
 }
@@ -79,7 +79,7 @@ obj_t *float_le(obj_t *obj, obj_method_args_t *args) {
   obj_t *arg = args->arg;
   if (arg->type != TYPE_FLOAT && arg->type != TYPE_INT) {
     printf("Cannot compare for equality between %s and %s.\n",
-           obj_type_names[TYPE_FLOAT], obj_type_names[arg->type]);
+           obj_type_names[obj->type], obj_type_names[arg->type]);
     return boolean_obj(False);
   }
 
@@ -92,7 +92,7 @@ obj_t *float_ge(obj_t *obj, obj_method_args_t *args) {
   obj_t *arg = args->arg;
   if (arg->type != TYPE_FLOAT && arg->type != TYPE_INT) {
     printf("Cannot compare for equality between %s and %s.\n",
-           obj_type_names[TYPE_FLOAT], obj_type_names[arg->type]);
+           obj_type_names[obj->type], obj_type_names[arg->type]);
     return boolean_obj(False);
   }
 
@@ -121,7 +121,7 @@ obj_t *float_as(obj_t *obj, obj_method_args_t *args) {
   }
 
   printf("Cannot cast %s to %s.\n",
-          obj_type_names[TYPE_FLOAT], obj_type_names[arg->type]);
+          obj_type_names[obj->type], obj_type_names[arg->type]);
   return nil_obj();
 }
 

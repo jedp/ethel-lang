@@ -378,82 +378,63 @@ static void negate(obj_t *a, eval_result_t *result) {
 }
 
 static void bitwise_or(obj_t *a, obj_t *b, eval_result_t *result) {
-  if (a->type == TYPE_INT && b->type == TYPE_INT) {
-    result->obj = int_obj(a->intval | b->intval);
-  } else if (a->type == TYPE_INT && b->type == TYPE_BYTE) {
-    result->obj = int_obj(a->intval | (unsigned char) b->byteval);
-  } else if (a->type == TYPE_BYTE && b->type == TYPE_INT) {
-    result->obj = int_obj((unsigned char) a->byteval | b->intval);
-  } else if (a->type == TYPE_BYTE && b->type == TYPE_BYTE) {
-    result->obj = byte_obj(a->byteval | b->byteval);
-  } else {
+  static_method m = get_static_method(a->type, METHOD_BITWISE_OR);
+  if (m == NULL) {
     result->err = ERR_EVAL_TYPE_ERROR;
+    return;
   }
+
+  result->obj = m(a, wrap_varargs(1, b));
 }
 
 static void bitwise_xor(obj_t *a, obj_t *b, eval_result_t *result) {
-  if (a->type == TYPE_INT && b->type == TYPE_INT) {
-    result->obj = int_obj(a->intval ^ b->intval);
-  } else if (a->type == TYPE_INT && b->type == TYPE_BYTE) {
-    result->obj = int_obj(a->intval ^ (unsigned char) b->byteval);
-  } else if (a->type == TYPE_BYTE && b->type == TYPE_INT) {
-    result->obj = int_obj((unsigned char) a->byteval ^ b->intval);
-  } else if (a->type == TYPE_BYTE && b->type == TYPE_BYTE) {
-    result->obj = byte_obj(a->byteval ^ b->byteval);
-  } else {
+  static_method m = get_static_method(a->type, METHOD_BITWISE_XOR);
+  if (m == NULL) {
     result->err = ERR_EVAL_TYPE_ERROR;
+    return;
   }
+
+  result->obj = m(a, wrap_varargs(1, b));
 }
 
 static void bitwise_and(obj_t *a, obj_t *b, eval_result_t *result) {
-  if (a->type == TYPE_INT && b->type == TYPE_INT) {
-    result->obj = int_obj(a->intval & b->intval);
-  } else if (a->type == TYPE_INT && b->type == TYPE_BYTE) {
-    result->obj = int_obj(a->intval & (unsigned char) b->byteval);
-  } else if (a->type == TYPE_BYTE && b->type == TYPE_INT) {
-    result->obj = int_obj((unsigned char) a->byteval & b->intval);
-  } else if (a->type == TYPE_BYTE && b->type == TYPE_BYTE) {
-    result->obj = byte_obj(a->byteval & b->byteval);
-  } else {
+  static_method m = get_static_method(a->type, METHOD_BITWISE_AND);
+  if (m == NULL) {
     result->err = ERR_EVAL_TYPE_ERROR;
+    return;
   }
+
+  result->obj = m(a, wrap_varargs(1, b));
 }
 
 static void bitwise_shl(obj_t *a, obj_t *b, eval_result_t *result) {
-  if (a->type == TYPE_INT && b->type == TYPE_INT) {
-    result->obj = int_obj(a->intval << b->intval);
-  } else if (a->type == TYPE_INT && b->type == TYPE_BYTE) {
-    result->obj = int_obj(a->intval << (unsigned char) b->byteval);
-  } else if (a->type == TYPE_BYTE && b->type == TYPE_INT) {
-    result->obj = int_obj((unsigned char) a->byteval << b->intval);
-  } else if (a->type == TYPE_BYTE && b->type == TYPE_BYTE) {
-    result->obj = byte_obj(a->byteval << b->byteval);
-  } else {
+  static_method m = get_static_method(a->type, METHOD_BITWISE_SHL);
+  if (m == NULL) {
     result->err = ERR_EVAL_TYPE_ERROR;
+    return;
   }
+
+  result->obj = m(a, wrap_varargs(1, b));
 }
+
 static void bitwise_shr(obj_t *a, obj_t *b, eval_result_t *result) {
-  if (a->type == TYPE_INT && b->type == TYPE_INT) {
-    result->obj = int_obj(a->intval >> b->intval);
-  } else if (a->type == TYPE_INT && b->type == TYPE_BYTE) {
-    result->obj = int_obj(a->intval >> (unsigned char) b->byteval);
-  } else if (a->type == TYPE_BYTE && b->type == TYPE_INT) {
-    result->obj = int_obj((unsigned char) a->byteval >> b->intval);
-  } else if (a->type == TYPE_BYTE && b->type == TYPE_BYTE) {
-    result->obj = byte_obj(a->byteval >> b->byteval);
-  } else {
+  static_method m = get_static_method(a->type, METHOD_BITWISE_SHR);
+  if (m == NULL) {
     result->err = ERR_EVAL_TYPE_ERROR;
+    return;
   }
+
+  result->obj = m(a, wrap_varargs(1, b));
 }
 
 static void bitwise_not(obj_t *a, eval_result_t *result) {
-  if (a->type == TYPE_INT) {
-    result->obj = int_obj(~a->intval);
-  } else if (a->type == TYPE_BYTE) {
-    result->obj = byte_obj(~ (unsigned char) a->byteval);
-  } else {
+  static_method m = get_static_method(a->type, METHOD_BITWISE_NOT);
+  if (m == NULL) {
     result->err = ERR_EVAL_TYPE_ERROR;
+    return;
   }
+
+  result->obj = m(a, NULL);
 }
 
 static void range(int from_inclusive, int to_inclusive, eval_result_t *result) {

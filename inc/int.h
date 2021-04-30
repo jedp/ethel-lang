@@ -21,6 +21,12 @@ obj_t *int_le(obj_t *obj, obj_method_args_t *args);
 obj_t *int_ge(obj_t *obj, obj_method_args_t *args);
 obj_t *int_as(obj_t *obj, obj_method_args_t *args);
 obj_t *int_abs(obj_t *obj, obj_method_args_t *args);
+obj_t *int_bitwise_or(obj_t *obj, obj_method_args_t *args);
+obj_t *int_bitwise_xor(obj_t *obj, obj_method_args_t *args);
+obj_t *int_bitwise_and(obj_t *obj, obj_method_args_t *args);
+obj_t *int_bitwise_shl(obj_t *obj, obj_method_args_t *args);
+obj_t *int_bitwise_shr(obj_t *obj, obj_method_args_t *args);
+obj_t *int_bitwise_not(obj_t *obj, obj_method_args_t *args);
 
 static_method get_int_static_method(static_method_ident_t method_id);
 

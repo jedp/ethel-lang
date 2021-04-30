@@ -343,7 +343,7 @@ obj_t *str_as(obj_t *str_obj, obj_method_args_t *args) {
     case TYPE_BOOLEAN: return boolean_obj(truthy(str_obj) ? True : False);
     default:
       printf("Cannot cast %s to type %s.\n",
-             obj_type_names[TYPE_STRING], obj_type_names[type_arg->type]);
+             obj_type_names[str_obj->type], obj_type_names[type_arg->type]);
       return boolean_obj(False);
   }
 }
