@@ -44,6 +44,10 @@ obj_t *str_hash(obj_t *str_obj, obj_method_args_t /* Ignored */ *args) {
   return arr_hash(str_obj, args);
 }
 
+obj_t *str_contains(obj_t *str_obj, obj_method_args_t *args) {
+  return arr_contains(str_obj, args);
+}
+
 dim_t c_str_len(const char* s) {
   dim_t size = 0;
   const unsigned char *p = (const unsigned char *) s;
@@ -526,6 +530,7 @@ static_method get_str_static_method(static_method_ident_t method_id) {
   switch(method_id) {
     case METHOD_HASH: return str_hash;
     case METHOD_LENGTH: return str_len;
+    case METHOD_CONTAINS: return str_contains;
     case METHOD_EQ: return str_eq;
     case METHOD_NE: return str_ne;
     case METHOD_CAST: return str_as;

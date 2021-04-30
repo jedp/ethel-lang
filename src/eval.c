@@ -359,30 +359,13 @@ static void cmp(ast_type_t type, obj_t *a, obj_t *b, eval_result_t *result) {
 }
 
 static void member_of(obj_t *a, obj_t *b, eval_result_t *result) {
-  if (!(b->type == TYPE_RANGE ||
-        b->type == TYPE_LIST ||
-        b->type == TYPE_STRING ||
-        b->type == TYPE_BYTEARRAY)) {
+  static_method memb = get_static_method(b->type, METHOD_CONTAINS);
+  if (memb == NULL) {
     result->err = ERR_TYPE_ITERABLE_REQUIRED;
     return;
   }
 
-  if (b->type == TYPE_LIST) {
-    result->obj = list_contains(b, wrap_varargs(1, a));
-    return;
-  }
-
-  if (b->type == TYPE_RANGE) {
-    result->obj = range_contains(b, wrap_varargs(1, a));
-    return;
-  }
-
-  if (b->type == TYPE_STRING || b->type == TYPE_BYTEARRAY) {
-    result->obj = arr_contains(b, wrap_varargs(1, a));
-    return;
-  }
-
-  result->err = ERR_EVAL_UNHANDLED_OBJECT;
+  result->obj = memb(b, wrap_varargs(1, a));
 }
 
 static void subscript_of(obj_t *a, obj_t *b, eval_result_t *result) {

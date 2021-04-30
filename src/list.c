@@ -358,6 +358,7 @@ static_method get_list_static_method(static_method_ident_t method_id) {
     case METHOD_EQ: return list_eq;
     case METHOD_NE: return list_ne;
     case METHOD_LENGTH: return list_len;
+    case METHOD_CONTAINS: return list_contains;
     case METHOD_GET: return list_get;
     case METHOD_HEAD: return list_head;
     case METHOD_TAIL: return list_tail;
