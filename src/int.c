@@ -1,5 +1,6 @@
 #include <stdio.h>
 #include "../inc/mem.h"
+#include "../inc/math.h"
 #include "../inc/int.h"
 #include "../inc/str.h"
 #include "../inc/obj.h"
@@ -127,6 +128,11 @@ obj_t *int_as(obj_t *obj, obj_method_args_t *args) {
   }
 }
 
+obj_t *int_abs(obj_t *obj, obj_method_args_t /* Ignored */ *args) {
+  return int_obj(abs(obj->intval));
+}
+
+
 static_method get_int_static_method(static_method_ident_t method_id) {
   switch (method_id) {
     case METHOD_HASH: return int_hash;
@@ -137,6 +143,7 @@ static_method get_int_static_method(static_method_ident_t method_id) {
     case METHOD_GT: return int_gt;
     case METHOD_GE: return int_ge;
     case METHOD_CAST: return int_as;
+    case METHOD_ABS: return int_abs;
     default: return NULL;
   }
 }

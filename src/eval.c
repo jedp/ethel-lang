@@ -40,20 +40,13 @@ static void eval_boolean_expr(ast_expr_t *expr, eval_result_t *result) {
 static void eval_abs(ast_expr_t *expr, eval_result_t *result, env_t *env) {
   eval_result_t *r = eval_expr(expr, env);
 
-  switch (r->obj->type) {
-    case TYPE_INT:
-        result->obj = int_obj(r->obj->intval < 0 ? -1 * r->obj->intval : r->obj->intval);
-        break;
-    case TYPE_FLOAT:
-        result->obj = float_obj(r->obj->floatval < 0 ? -1 * r->obj->floatval : r->obj->floatval);
-        break;
-    case TYPE_BOOLEAN:
-        result->obj = boolean_obj(r->obj->intval < 0 ? -1 * r->obj->intval : r->obj->intval);
-        break;
-    default:
-        result->err = ERR_EVAL_TYPE_ERROR;
-        break;
+  static_method abs = get_static_method(r->obj->type, METHOD_ABS);
+  if (abs == NULL) {
+    result->err = ERR_EVAL_TYPE_ERROR;
+    return;
   }
+
+  result->obj = abs(r->obj, NULL);
 }
 
 static void eval_type_of(ast_expr_t *expr, eval_result_t *result, env_t *env) {

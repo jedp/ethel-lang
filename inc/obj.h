@@ -112,6 +112,7 @@ typedef uint8_t static_method_ident_t;
 enum static_method_ident_enum {
   METHOD_NONE = 0,
   METHOD_HASH,
+  METHOD_ABS,
   METHOD_EQ,
   METHOD_NE,
   METHOD_LT,
@@ -141,6 +142,7 @@ typedef struct {
 
 static const static_method_name_t static_method_names[] = {
   { .ident = METHOD_HASH,          .name = "hash" },
+  { .ident = METHOD_ABS,           .name = "abs" },
   { .ident = METHOD_EQ,            .name = "equalTo" },
   { .ident = METHOD_NE,            .name = "notEqualTo" },
   { .ident = METHOD_LT,            .name = "lessThan" },
