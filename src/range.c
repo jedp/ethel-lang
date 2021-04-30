@@ -16,9 +16,9 @@ obj_t *range_contains(obj_t *range_obj, obj_method_args_t *args) {
   return boolean_obj(val >= range_obj->range.from && val <= range_obj->range.to);
 }
 
-obj_t *range_subscript(obj_t *range_obj, obj_method_args_t *args) {
+obj_t *range_get(obj_t *range_obj, obj_method_args_t *args) {
   if (args == NULL || args->arg == NULL) {
-    printf("Null arg to subscript()\n");
+    printf("Null arg to get()\n");
     return nil_obj();
   }
 
@@ -40,6 +40,7 @@ obj_t *range_subscript(obj_t *range_obj, obj_method_args_t *args) {
 static_method get_range_static_method(static_method_ident_t method_id) {
   switch (method_id) {
     case METHOD_CONTAINS: return range_contains;
+    case METHOD_GET: return range_get;
     default: return NULL;
   }
 }

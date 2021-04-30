@@ -369,30 +369,13 @@ static void member_of(obj_t *a, obj_t *b, eval_result_t *result) {
 }
 
 static void subscript_of(obj_t *a, obj_t *b, eval_result_t *result) {
-  if (!(a->type == TYPE_RANGE ||
-        a->type == TYPE_LIST ||
-        a->type == TYPE_STRING ||
-        a->type == TYPE_BYTEARRAY)) {
+  static_method get = get_static_method(a->type, METHOD_GET);
+  if (get == NULL) {
     result->err = ERR_TYPE_ITERABLE_REQUIRED;
     return;
   }
 
-  if (a->type == TYPE_LIST) {
-    result->obj = list_get(a, wrap_varargs(1, b));
-    return;
-  }
-
-  if (a->type == TYPE_RANGE) {
-    result->obj = range_subscript(a, wrap_varargs(1, b));
-    return;
-  }
-
-  if (a->type == TYPE_STRING || a->type == TYPE_BYTEARRAY) {
-    result->obj = arr_get(a, wrap_varargs(1, b));
-    return;
-  }
-
-  result->err = ERR_EVAL_UNHANDLED_OBJECT;
+  result->obj = get(a, wrap_varargs(1, b));
 }
 
 static void boolean_and(obj_t *a, obj_t *b, eval_result_t *result) {
