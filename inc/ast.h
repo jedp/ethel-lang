@@ -30,9 +30,11 @@ enum ast_type_enum {
   AST_IS,
   AST_IN,
   AST_SUBSCRIPT,
+  AST_MAPS_TO,
   AST_RANGE,
   AST_NIL,
   AST_LIST,
+  AST_DICT,
   AST_APPLY,
   AST_INT,
   AST_FLOAT,
@@ -85,9 +87,11 @@ static const char *ast_node_names[] = {
   "IS-TYPE",
   "MEMBER-OF",
   "SUBSCRIPT",
+  "MAPS-TO",
   "RANGE-FROM-TO",
   "NIL",
   "LIST",
+  "DICT",
   "APPLY",
   "INT",
   "FLOAT",
@@ -181,6 +185,17 @@ typedef struct AstList {
   ast_expr_list_t *es;
 } ast_list_t;
 
+typedef struct AstExprKvListNode {
+  ast_expr_t *k;
+  ast_expr_t *v;
+  struct AstExprKvListNode *next;
+} ast_expr_kv_list_t;
+
+typedef struct AstDict {
+  bytearray_t *type_name;
+  ast_expr_kv_list_t *kv;
+} ast_dict_t;
+
 typedef struct AstReservedCallable {
   ast_reserved_callable_type_t type;
   ast_expr_list_t *es;
@@ -250,6 +265,7 @@ typedef struct __attribute__((__packed__)) AstExpr {
     ast_assign_t *assignment;
     ast_expr_list_t *block_exprs;
     ast_list_t *list;
+    ast_dict_t *dict;
     ast_unary_arg_t *unary_arg;
     ast_op_args_t *op_args;
     ast_range_args_t *range;
@@ -280,6 +296,7 @@ ast_expr_t *ast_op(ast_type_t type, ast_expr_t *a, ast_expr_t *b);
 ast_expr_t *ast_cast(ast_expr_t *e1, ast_expr_t *e2);
 ast_expr_t *ast_nil(void);
 ast_expr_t *ast_list(bytearray_t *type_name, ast_expr_list_t *nullable_init_es);
+ast_expr_t *ast_dict(ast_expr_kv_list_t *nullable_kvs);
 ast_expr_t *ast_float(float value);
 ast_expr_t *ast_int(int value);
 ast_expr_t *ast_byte(byte b);

@@ -9,6 +9,7 @@ typedef enum {
   PRECED_NONE = 0, // Lowest precedence
   PRECED_ASSIGN,
   PRECED_COND,
+  PRECED_MAPS_TO,
   PRECED_OR,
   PRECED_AND,
   PRECED_BITWISE_OR,

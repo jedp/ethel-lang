@@ -75,11 +75,12 @@ ast_expr_t *ast_op(ast_type_t type, ast_expr_t *a, ast_expr_t *b) {
     case AST_IS:
     case AST_IN:
     case AST_SUBSCRIPT:
+    case AST_MAPS_TO:
     case AST_ASSIGN:
       node->type = type;
       break;
     default:
-      printf("Op type %d unfamiliar\n", type);
+      printf("Op %s unfamiliar\n", ast_node_names[type]);
       mem_free(node);
       return ast_empty();
   }
@@ -110,6 +111,17 @@ ast_expr_t *ast_list(bytearray_t *type_name, ast_expr_list_t *nullable_init_es) 
     node->list->es = nullable_init_es;
   } else {
     node->list->es = NULL;
+  }
+  return node;
+}
+
+ast_expr_t *ast_dict(ast_expr_kv_list_t *nullable_kvs) {
+  ast_expr_t *node = ast_node(AST_DICT);
+  node->list = mem_alloc(sizeof(ast_list_t));
+  if (nullable_kvs != NULL) {
+    node->dict->kv = nullable_kvs;
+  } else {
+    node->dict->kv = NULL;
   }
   return node;
 }

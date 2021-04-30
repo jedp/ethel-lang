@@ -96,6 +96,38 @@ void test_parse_assign(void) {
   mem_free(ast);
 }
 
+void test_parse_kv_assoc(void) {
+  char *program = "'t' : 2";
+  ast_expr_t *ast = mem_alloc(sizeof(ast_expr_t));
+  parse_result_t *parse_result = mem_alloc(sizeof(parse_result_t));
+  parse_program(program, ast, parse_result);
+
+  TEST_ASSERT_EQUAL(ERR_NO_ERROR, parse_result->err);
+  TEST_ASSERT_EQUAL(AST_MAPS_TO, ast->type);
+  TEST_ASSERT_EQUAL(AST_BYTE, ((ast_expr_t*) ast->op_args->a)->type);
+  TEST_ASSERT_EQUAL(AST_INT, ((ast_expr_t*) ast->op_args->b)->type);
+  mem_free(ast);
+}
+
+void test_parse_kv_dict_init(void) {
+  char *program = "val d = dict { 'a': 1, \"foo\": 2.2 }";
+  ast_expr_t *ast = mem_alloc(sizeof(ast_expr_t));
+  parse_result_t *parse_result = mem_alloc(sizeof(parse_result_t));
+  parse_program(program, ast, parse_result);
+
+  TEST_ASSERT_EQUAL(ERR_NO_ERROR, parse_result->err);
+  TEST_ASSERT_EQUAL(AST_ASSIGN, ast->type);
+  TEST_ASSERT_EQUAL(AST_DICT, ((ast_expr_t*) ast->assignment->value)->type);
+  ast_dict_t *d = ast->assignment->value->dict;
+  ast_expr_kv_list_t *kv1 = d->kv;
+  TEST_ASSERT_EQUAL(AST_BYTE, ((ast_expr_t*) kv1->k)->type);
+  TEST_ASSERT_EQUAL(AST_INT, ((ast_expr_t*) kv1->v)->type);
+  ast_expr_kv_list_t *kv2 = d->kv->next;
+  TEST_ASSERT_EQUAL(AST_STRING, ((ast_expr_t*) kv2->k)->type);
+  TEST_ASSERT_EQUAL(AST_FLOAT, ((ast_expr_t*) kv2->v)->type);
+  mem_free(ast);
+}
+
 void test_parse_if_else(void) {
   char *program = "if 1 then 2";
   ast_expr_t *ast = mem_alloc(sizeof(ast_expr_t));
@@ -333,6 +365,8 @@ void test_parser(void) {
   RUN_TEST(test_parse_mul);
   RUN_TEST(test_parse_div);
   RUN_TEST(test_parse_assign);
+  RUN_TEST(test_parse_kv_assoc);
+  RUN_TEST(test_parse_kv_dict_init);
   RUN_TEST(test_parse_if_else);
   RUN_TEST(test_parse_if_else_assign_expr);
   RUN_TEST(test_parse_char);

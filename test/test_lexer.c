@@ -394,6 +394,39 @@ void test_lex_list_of_with_init(void) {
   }
 }
 
+void test_lex_dict_init(void) {
+  char *expr = "val d = dict";
+  lexer_t lexer;
+  lexer_init(&lexer, expr, c_str_len(expr));
+
+  int expected[] = { TAG_INVARIABLE, TAG_IDENT, TAG_ASSIGN, TAG_DICT };
+  for (int i = 0; i < sizeof(expected) / sizeof(expected[0]); i++) {
+    TEST_ASSERT_EQUAL(ERR_NO_ERROR, lexer.err);
+    TEST_ASSERT_EQUAL(expected[i], lexer.token.tag);
+    advance(&lexer);
+  }
+}
+
+void test_lex_dict_with_kv_init(void) {
+  char *expr = "val d = dict { 'x': 12, \"foo\": 'c', 3: 0xff }";
+  lexer_t lexer;
+  lexer_init(&lexer, expr, c_str_len(expr));
+
+  int expected[] = {
+    TAG_INVARIABLE, TAG_IDENT, TAG_ASSIGN, TAG_DICT,
+    TAG_BEGIN,
+    TAG_BYTE, TAG_COLON, TAG_INT, TAG_COMMA,
+    TAG_STRING, TAG_COLON, TAG_BYTE, TAG_COMMA,
+    TAG_INT, TAG_COLON, TAG_HEX,
+    TAG_END
+  };
+  for (int i = 0; i < sizeof(expected) / sizeof(expected[0]); i++) {
+    TEST_ASSERT_EQUAL(ERR_NO_ERROR, lexer.err);
+    TEST_ASSERT_EQUAL(expected[i], lexer.token.tag);
+    advance(&lexer);
+  }
+}
+
 void test_lex_member_of(void) {
   char *expr = "val x = 2 in 0..10";
   lexer_t lexer;
@@ -548,6 +581,7 @@ void test_lex_all_tokens(void) {
     (test_data_t) { .text = "(", .expected_tag = TAG_LPAREN },
     (test_data_t) { .text = ")", .expected_tag = TAG_RPAREN },
     (test_data_t) { .text = ",", .expected_tag = TAG_COMMA },
+    (test_data_t) { .text = ":", .expected_tag = TAG_COLON },
     (test_data_t) { .text = "+", .expected_tag = TAG_PLUS },
     (test_data_t) { .text = "-", .expected_tag = TAG_MINUS },
     (test_data_t) { .text = "*", .expected_tag = TAG_TIMES },
@@ -624,6 +658,8 @@ void test_lexer(void) {
   RUN_TEST(test_lex_begin_end);
   RUN_TEST(test_lex_list_of);
   RUN_TEST(test_lex_list_of_with_init);
+  RUN_TEST(test_lex_dict_init);
+  RUN_TEST(test_lex_dict_with_kv_init);
   RUN_TEST(test_lex_member_of);
   RUN_TEST(test_lex_field_access);
   RUN_TEST(test_lex_method_access);

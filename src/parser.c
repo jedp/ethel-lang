@@ -41,6 +41,7 @@ boolean is_op(token_t *token) {
       || token->tag == TAG_IN
       || token->tag == TAG_MEMBER_ACCESS
       || token->tag == TAG_LBRACKET  // Always subscript
+      || token->tag == TAG_COLON  // Always dict kv association
       || token->tag == TAG_ASSIGN
       ;
 }
@@ -90,6 +91,8 @@ uint8_t op_preced(token_t *token) {
       return PRECED_OR;
     case TAG_RANGE:
       return PRECED_RANGE;
+    case TAG_COLON:
+      return PRECED_MAPS_TO;
     case TAG_ASSIGN:
       return PRECED_ASSIGN;
     default:
@@ -132,9 +135,18 @@ ast_expr_t *parse_start(lexer_t *lexer) {
   return e;
 }
 
-ast_expr_list_t *empty_expr_list(void) {
+static ast_expr_list_t *empty_expr_list(void) {
   ast_expr_list_t *node = mem_alloc(sizeof(ast_expr_list_t));
   node->root = ast_empty();
+  node->next = NULL;
+  return node;
+}
+
+static ast_expr_kv_list_t *empty_expr_kv_list(void) {
+  ast_expr_kv_list_t *node = mem_alloc(sizeof(ast_expr_kv_list_t));
+  node->k = ast_empty();
+  node->v = ast_empty();
+  node->next = NULL;
   return node;
 }
 
@@ -177,12 +189,46 @@ ast_expr_list_t *parse_expr_list(lexer_t *lexer) {
     ast_expr_list_t *next = mem_alloc(sizeof(ast_expr_list_t));
     e = parse_expr(lexer);
     next->root = e;
+    next->next = NULL;
 
     node->next = next;
     node = next;
   }
 
-  node->next = NULL;
+  return root;
+}
+
+ast_expr_kv_list_t *parse_expr_kv_list(lexer_t *lexer) {
+  ast_expr_kv_list_t *node = empty_expr_kv_list();
+  ast_expr_kv_list_t *root = node;
+
+  ast_expr_t *e = parse_expr(lexer);
+  if (e->type != AST_MAPS_TO) {
+    printf("Syntax error.");
+    return empty_expr_kv_list();
+  }
+
+  root->k = e->op_args->a;
+  root->v = e->op_args->b;
+
+  while (lexer->token.tag == TAG_COMMA) {
+    advance(lexer);
+    ast_expr_kv_list_t *next = mem_alloc(sizeof(ast_expr_kv_list_t));
+    e = parse_expr(lexer);
+
+    if (e->type != AST_MAPS_TO) {
+      printf("Syntax error. got %s\n.", ast_node_names[e->type]);
+      return empty_expr_kv_list();
+    }
+
+    next->k = e->op_args->a;
+    next->v = e->op_args->b;
+    next->next = NULL;
+
+    root->next = next;
+    node = next;
+  }
+
   return root;
 }
 
@@ -265,6 +311,7 @@ ast_expr_t *_parse_expr(lexer_t *lexer, int min_preced) {
       case TAG_IS:             lhs = ast_op(AST_IS,            lhs, _parse_expr(lexer, next_min_preced)); break;
       case TAG_IN:             lhs = ast_op(AST_IN,            lhs, _parse_expr(lexer, next_min_preced)); break;
       case TAG_LBRACKET:       lhs = ast_op(AST_SUBSCRIPT,     lhs, _parse_subscript(lexer, next_min_preced)); break;
+      case TAG_COLON:          lhs = ast_op(AST_MAPS_TO,       lhs, _parse_expr(lexer, next_min_preced)); break;
       case TAG_AS:             lhs = ast_cast(                 lhs, _parse_expr(lexer, next_min_preced)); break;
       case TAG_RANGE:          lhs = ast_range(                lhs, _parse_expr(lexer, next_min_preced)); break;
       case TAG_MEMBER_ACCESS:  lhs = ast_access(               lhs, _parse_expr(lexer, next_min_preced)); break;
@@ -348,6 +395,19 @@ ast_expr_t *parse_expr(lexer_t *lexer) {
         return ast_list(type_name->bytearray, es);
       }
       return ast_list(type_name->bytearray, NULL);
+    }
+    case TAG_DICT: {
+      advance(lexer);
+      if (lexer->token.tag == TAG_BEGIN) {
+        eat(lexer, TAG_BEGIN);
+        ast_expr_kv_list_t *kv = parse_expr_kv_list(lexer);
+        if (!eat(lexer, TAG_END)) {
+          mem_free(kv);
+          goto error;
+        }
+        return ast_dict(kv);
+      }
+      return ast_dict(NULL);
     }
     case TAG_INPUT: {
       ast_reserved_callable_type_t callable_type = ast_callable_type_for_tag(lexer->token.tag);

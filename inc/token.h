@@ -17,6 +17,7 @@ enum tag_enum {
   TAG_LPAREN,
   TAG_RPAREN,
   TAG_COMMA,
+  TAG_COLON,
   TAG_PLUS,
   TAG_MINUS,
   TAG_TIMES,
@@ -41,6 +42,7 @@ enum tag_enum {
   TAG_FALSE,
   TAG_NIL,
   TAG_LIST,
+  TAG_DICT,
   TAG_OF,
   TAG_ARR_DECL,
   TAG_TYPE_INT,
@@ -108,6 +110,7 @@ static const char* tag_names[] = {
   "LPAREN",
   "RPAREN",
   "COMMA",
+  "COLON",
 
   // Arithmetic
   "PLUS",
@@ -243,6 +246,7 @@ static const token_t reserved[] = {
   { TAG_STEP,          .string = (char *) "step" },
   { TAG_NIL,           .string = (char *) "nil" },
   { TAG_LIST,          .string = (char *) "list" },
+  { TAG_DICT,          .string = (char *) "dict" },
   { TAG_OF,            .string = (char *) "of" },
   { TAG_ARR_DECL,      .string = (char *) "arr" },
   { TAG_TYPE_INT,      .string = (char *) "int" },

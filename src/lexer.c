@@ -302,6 +302,7 @@ token_t *get_token(lexer_t *lexer) {
     case '[': return lex_paren(lexer, TAG_LBRACKET);
     case ']': return lex_paren(lexer, TAG_RBRACKET);
     case ',': return lex_paren(lexer, TAG_COMMA);
+    case ':': return lex_paren(lexer, TAG_COLON);
     case '+': return lex_op(lexer, TAG_PLUS);
     // The parser can treat this as the sign op or a binop as context dictates.
     case '-': return lex_op(lexer, TAG_MINUS);

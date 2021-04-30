@@ -82,6 +82,21 @@ ByteArray(4)
 true
 ```
 
+#### Dictionaries
+
+```
+> val d = dict { 'x': 42, "foo": 19, 3.14: "pi, roughly" }
+d
+> d['x']
+42
+> d["foo"] + 1
+20
+> 3.14 in d
+True
+> d.keys()
+{ 'x', "foo", 3.14 }
+```
+
 #### Functions
 
 Functions have lexical scope.
