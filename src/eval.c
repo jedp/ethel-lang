@@ -1,5 +1,4 @@
 #include <stdio.h>
-#include <stdlib.h>
 #include "../inc/err.h"
 #include "../inc/mem.h"
 #include "../inc/num.h"
@@ -239,17 +238,6 @@ static void eval_func_call(ast_func_call_t *func_call, eval_result_t *result, en
   leave_scope(env);
   leave_scope(env);
 }
-
-
-static void int_to_string(obj_t *obj) {
-  int i = obj->intval;
-  // Longest thing we can print is -2147483648, which is 11 characters + 1 for the null.
-  char* s = mem_alloc(12);
-  snprintf(s, 12, "%d", i);
-  obj->type = TYPE_STRING;
-  obj->bytearray = c_str_to_bytearray(s);
-}
-
 
 static void eval_string_expr(ast_expr_t *expr, eval_result_t *result) {
   if (expr->type != AST_STRING) {
