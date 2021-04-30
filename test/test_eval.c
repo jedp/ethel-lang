@@ -217,7 +217,7 @@ void test_eval_cast_int(void) {
 
   obj = eval_program("-99 as boolean")->obj;
   TEST_ASSERT_EQUAL(TYPE_BOOLEAN, obj->type);
-  TEST_ASSERT_EQUAL(1, obj->intval);
+  TEST_ASSERT_EQUAL(1, obj->boolval);
 }
 
 void test_eval_cast_float(void) {
@@ -267,15 +267,11 @@ void test_eval_cast_char(void) {
   TEST_ASSERT_EQUAL(TYPE_INT, obj->type);
   TEST_ASSERT_EQUAL(99, obj->intval);
 
-  obj = eval_program("'c' as float")->obj;
-  TEST_ASSERT_EQUAL(TYPE_FLOAT, obj->type);
-  TEST_ASSERT_EQUAL(99.0, obj->floatval);
-
   obj = eval_program("'c' as string")->obj;
   TEST_ASSERT_EQUAL(TYPE_STRING, obj->type);
   TEST_ASSERT_EQUAL_STRING("c", bytearray_to_c_str(obj->bytearray));
 
-  obj = eval_program("'c' as boolean")->obj;
+  obj = eval_program("'t' as boolean")->obj;
   TEST_ASSERT_EQUAL(TYPE_BOOLEAN, obj->type);
   TEST_ASSERT_EQUAL(1, obj->intval);
 }
@@ -290,13 +286,6 @@ void test_eval_cast_boolean(void) {
   TEST_ASSERT_EQUAL(TYPE_INT, obj->type);
   TEST_ASSERT_EQUAL(0, obj->intval);
 
-  obj = eval_program("true as float")->obj;
-  TEST_ASSERT_EQUAL(TYPE_FLOAT, obj->type);
-  TEST_ASSERT_EQUAL(1.0, obj->floatval);
-  obj = eval_program("false as float")->obj;
-  TEST_ASSERT_EQUAL(TYPE_FLOAT, obj->type);
-  TEST_ASSERT_EQUAL(0.0, obj->floatval);
-
   obj = eval_program("true as string")->obj;
   TEST_ASSERT_EQUAL(TYPE_STRING, obj->type);
   TEST_ASSERT_EQUAL_STRING("true", bytearray_to_c_str(obj->bytearray));
@@ -306,10 +295,10 @@ void test_eval_cast_boolean(void) {
 
   obj = eval_program("true as byte")->obj;
   TEST_ASSERT_EQUAL(TYPE_BYTE, obj->type);
-  TEST_ASSERT_EQUAL('t', obj->intval);
+  TEST_ASSERT_EQUAL('t', obj->byteval);
   obj = eval_program("false as byte")->obj;
   TEST_ASSERT_EQUAL(TYPE_BYTE, obj->type);
-  TEST_ASSERT_EQUAL('f', obj->intval);
+  TEST_ASSERT_EQUAL('f', obj->byteval);
 }
 
 void test_eval_is_type(void) {

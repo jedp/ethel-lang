@@ -1,6 +1,5 @@
 #include <stdio.h>
 #include <stdlib.h>
-#include <limits.h>
 #include "../inc/err.h"
 #include "../inc/mem.h"
 #include "../inc/num.h"
@@ -248,19 +247,6 @@ static void eval_func_call(ast_func_call_t *func_call, eval_result_t *result, en
   leave_scope(env);
 }
 
-static void strip_trailing_ws(char* s) {
-  int end = c_str_len(s) - 1;
-  while (end > 0) {
-    if (s[end] != ' '  &&
-        s[end] != '\t' &&
-        s[end] != '\n') {
-      break;
-    }
-    // Convert trailing whitespace to null, and decrement length by one.
-    s[end] = '\0';
-    end--;
-  }
-}
 
 static void int_to_string(obj_t *obj) {
   int i = obj->intval;
@@ -271,53 +257,6 @@ static void int_to_string(obj_t *obj) {
   obj->bytearray = c_str_to_bytearray(s);
 }
 
-static void float_to_string(obj_t *obj) {
-  float f = obj->floatval;
-  int len = snprintf(NULL, 0, "%f", f);
-  char* s = mem_alloc(len + 1);
-  snprintf(s, len + 1, "%f", f);
-  obj->type = TYPE_STRING;
-  obj->bytearray = c_str_to_bytearray(s);
-}
-
-static error_t string_to_int(obj_t *obj) {
-  char *end = NULL;
-  char *input = mem_alloc(obj->bytearray->size + 1);
-  c_str_cp(input, bytearray_to_c_str(obj->bytearray));
-  strip_trailing_ws(input);
-
-  long l = strtol(input, &end, 10);
-  // Expect to have read to the end of the string or to a decimal point.
-  boolean bad_input = (*end != '\0') && (*end != '.');
-  // Can only free input after we're done using the end pointer.
-  mem_free(input);
-
-  if (bad_input) return ERR_EVAL_BAD_INPUT;
-  if (l > INT_MAX) return ERR_OVERFLOW_ERROR;
-  if (l < INT_MIN) return ERR_UNDERFLOW_ERROR;
-
-  obj->type = TYPE_INT;
-  obj->intval = (int) l;
-  return ERR_NO_ERROR;
-}
-
-static error_t string_to_float(obj_t *obj) {
-  char *end = NULL;
-  char *input = mem_alloc(obj->bytearray->size + 1);
-  c_str_cp(input, bytearray_to_c_str(obj->bytearray));
-  strip_trailing_ws(input);
-
-  float f = strtof(input, &end);
-
-  boolean bad_input = *end != '\0';
-  mem_free(input);
-
-  if (bad_input) return ERR_EVAL_BAD_INPUT;
-
-  obj->type = TYPE_FLOAT;
-  obj->floatval = f;
-  return ERR_NO_ERROR;
-}
 
 static void eval_string_expr(ast_expr_t *expr, eval_result_t *result) {
   if (expr->type != AST_STRING) {
@@ -351,134 +290,14 @@ static void cast(obj_t *obj, obj_t *type_obj, eval_result_t *result) {
     return;
   }
 
-  switch (obj->type) {
-    case TYPE_INT:
-      switch (type_obj->type) {
-        case TYPE_INT:
-          goto done;
-        case TYPE_FLOAT:
-          obj->floatval = (float) obj->intval;
-          goto done;
-        case TYPE_BYTE:
-          if (obj->intval < 0 || obj->intval > 255) {
-            result->err = ERR_VALUE_TOO_LARGE_FOR_BYTE;
-            goto done;
-          }
-          obj->byteval = (byte) obj->intval & 0xff;
-          goto done;
-        case TYPE_STRING:
-          int_to_string(obj);
-          goto done;
-        case TYPE_BOOLEAN:
-          obj->boolval = obj->intval ? 1 : 0;
-          goto done;
-        default:
-          result->err = ERR_EVAL_TYPE_ERROR;
-          goto done;
-      }
-      break;
-    case TYPE_FLOAT:
-      switch (type_obj->type) {
-        case TYPE_INT:
-          if (obj->floatval > INT_MAX) { result->err = ERR_OVERFLOW_ERROR; goto done; }
-          if (obj->floatval < INT_MIN) { result->err = ERR_OVERFLOW_ERROR; goto done; }
-          obj->intval = (int) obj->floatval;
-          goto done;
-        case TYPE_FLOAT:
-          goto done;
-        case TYPE_BYTE:
-          result->err = ERR_EVAL_TYPE_ERROR;
-          goto done;
-        case TYPE_STRING:
-          float_to_string(obj);
-          goto done;
-        case TYPE_BOOLEAN:
-          obj->boolval = (obj->floatval != 0.0f) ? (int) 1 : (int) 0;
-          goto done;
-        default:
-          result->err = ERR_EVAL_TYPE_ERROR;
-          goto done;
-      }
-      break;
-    case TYPE_STRING:
-      obj->type = type_obj->type;
-      switch (type_obj->type) {
-        case TYPE_INT:
-          result->err = string_to_int(obj);
-          goto done;
-        case TYPE_FLOAT:
-          result->err = string_to_float(obj);
-          goto done;
-        case TYPE_BYTE:
-          if (obj->bytearray->size > 1) {
-            result->err = ERR_EVAL_TYPE_ERROR;
-            goto done;
-          }
-          obj->byteval = obj->bytearray->data[0];
-          goto done;
-        case TYPE_STRING:
-          goto done;
-        case TYPE_BOOLEAN:
-          obj->boolval = obj->bytearray->size > 0 ? 1 : 0;
-          goto done;
-        default:
-          result->err = ERR_EVAL_TYPE_ERROR;
-          goto done;
-      }
-      break;
-    case TYPE_BYTE:
-      switch (type_obj->type) {
-        case TYPE_INT:
-          obj->intval = (int) obj->byteval;
-          goto done;
-        case TYPE_FLOAT:
-          obj->floatval = (float) obj->byteval;
-          goto done;
-        case TYPE_BYTE:
-          goto done;
-        case TYPE_STRING: {
-          char b = obj->byteval;
-          obj->bytearray = bytearray_alloc(1);
-          obj->bytearray->data[0] = b;
-          goto done;
-        }
-        case TYPE_BOOLEAN:
-          obj->boolval = obj->byteval != 0 ? 1 : 0;
-          goto done;
-        default:
-          result->err = ERR_EVAL_TYPE_ERROR;
-          goto done;
-      }
-      break;
-    case TYPE_BOOLEAN:
-      switch (type_obj->type) {
-        case TYPE_INT:
-          // No change for intval.
-          goto done;
-        case TYPE_FLOAT:
-          obj->floatval = (float) obj->intval;
-          goto done;
-        case TYPE_BYTE:
-          obj->byteval = obj->intval ? 't' : 'f';
-          goto done;
-        case TYPE_STRING:
-          obj->bytearray = c_str_to_bytearray(obj->intval ? "true" : "false");
-          goto done;
-        case TYPE_BOOLEAN:
-          goto done;
-        default:
-          result->err = ERR_EVAL_TYPE_ERROR;
-          goto done;
-      }
-      break;
-    default:
-      result->err = ERR_EVAL_TYPE_ERROR;
-      break;
+  static_method as = get_static_method(obj->type, METHOD_CAST);
+
+  if (as == NULL) {
+    result->err = ERR_EVAL_TYPE_ERROR;
+    return;
   }
 
-done:
-  if (result->err == ERR_NO_ERROR) obj->type = type_obj->type;
-  result->obj = obj;
+  result->obj = as(obj, wrap_varargs(1, type_obj));
 }
 
 static void assign(ast_expr_t *lhs,

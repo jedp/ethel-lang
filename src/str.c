@@ -1,8 +1,25 @@
 #include <stdio.h>
+#include <stdlib.h>
+#include <limits.h>
 #include "../inc/mem.h"
 #include "../inc/obj.h"
 #include "../inc/arr.h"
+#include "../inc/math.h"
 #include "../inc/str.h"
+
+static void strip_trailing_ws(char* s) {
+  int end = c_str_len(s) - 1;
+  while (end > 0) {
+    if (s[end] != ' '  &&
+        s[end] != '\t' &&
+        s[end] != '\n') {
+      break;
+    }
+    // Convert trailing whitespace to null, and decrement length by one.
+    s[end] = '\0';
+    end--;
+  }
+}
 
 static obj_t *_str_slice(obj_t *str_obj, int start, int end) {
   if (end > str_obj->bytearray->size) end = str_obj->bytearray->size;
@@ -141,6 +158,42 @@ int bin_to_int(char* s) {
   return val;
 }
 
+bytearray_t *int_to_str(int n) {
+  int digits = 0;
+  if (n < 0) digits++; // Sign.
+  int na = abs(n);
+  while (na > 0) {
+    na /= 10;
+    digits++;
+  }
+
+  // Edge case
+  if (digits == 0) {
+    return c_str_to_bytearray("0");
+  }
+
+  bytearray_t *a = bytearray_alloc(digits);
+
+  na = abs(n);
+  int i = digits - 1;
+  while (na > 0) {
+    a->data[i] = (na % 10) + '0';
+    na /= 10;
+    i--;
+  }
+  if (n < 0) a->data[0] = '-';
+
+  return a;
+}
+
+bytearray_t *float_to_str(float n) {
+  // TODO so lazy. Twiddle those bits, shed a dependency.
+  int len = snprintf(NULL, 0, "%f", n);
+  char* s = mem_alloc(len + 1);
+  snprintf(s, len + 1, "%f", n);
+  return c_str_to_bytearray(s);
+}
+
 bytearray_t *int_to_bin(unsigned int n) {
   int digits = 1;
   for (int i = 0; i < 32; i++) {
@@ -155,6 +208,41 @@ bytearray_t *int_to_bin(unsigned int n) {
   }
 
   return a;
+}
+
+int str_to_int(obj_t *obj) {
+  char *end = NULL;
+  char *input = mem_alloc(obj->bytearray->size + 1);
+  c_str_cp(input, bytearray_to_c_str(obj->bytearray));
+  strip_trailing_ws(input);
+
+  long l = strtol(input, &end, 10);
+  // Expect to have read to the end of the string or to a decimal point.
+  boolean bad_input = (*end != '\0') && (*end != '.');
+  // Can only free input after we're done using the end pointer.
+  mem_free(input);
+
+  if (bad_input) return 0;
+  if (l > INT_MAX) return -1;
+  if (l < INT_MIN) return -1;
+
+  return (int) l;
+}
+
+float str_to_float(obj_t *obj) {
+  char *end = NULL;
+  char *input = mem_alloc(obj->bytearray->size + 1);
+  c_str_cp(input, bytearray_to_c_str(obj->bytearray));
+  strip_trailing_ws(input);
+
+  float f = strtof(input, &end);
+
+  boolean bad_input = *end != '\0';
+  mem_free(input);
+
+  if (bad_input) return -1;
+
+  return f;
 }
 
 bytearray_t *int_to_hex(unsigned int n) {
@@ -234,6 +322,22 @@ obj_t *str_eq(obj_t *str_obj, obj_method_args_t *args) {
 
 obj_t *str_ne(obj_t *str_obj, obj_method_args_t *args) {
   return arr_ne(str_obj, args);
+}
+
+obj_t *str_as(obj_t *str_obj, obj_method_args_t *args) {
+  if (args == NULL || args->arg == NULL) return boolean_obj(False);
+  obj_t *type_arg = args->arg;
+
+  switch (type_arg->type) {
+    case TYPE_STRING: return str_obj;
+    case TYPE_INT: return int_obj(str_to_int(str_obj));
+    case TYPE_FLOAT: return float_obj(str_to_float(str_obj));
+    case TYPE_BOOLEAN: return boolean_obj(truthy(str_obj) ? True : False);
+    default:
+      printf("Cannot cast %s to type %s.\n",
+             obj_type_names[TYPE_STRING], obj_type_names[type_arg->type]);
+      return boolean_obj(False);
+  }
 }
 
 obj_t *str_substring(obj_t *str_obj, obj_method_args_t *args) {
@@ -424,6 +528,7 @@ static_method get_str_static_method(static_method_ident_t method_id) {
     case METHOD_LENGTH: return str_len;
     case METHOD_EQ: return str_eq;
     case METHOD_NE: return str_ne;
+    case METHOD_CAST: return str_as;
     case METHOD_SUBSTR: return str_substring;
     default: return NULL;
   }

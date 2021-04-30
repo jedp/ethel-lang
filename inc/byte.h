@@ -18,6 +18,7 @@ obj_t *byte_lt(obj_t *obj, obj_method_args_t *args);
 obj_t *byte_gt(obj_t *obj, obj_method_args_t *args);
 obj_t *byte_le(obj_t *obj, obj_method_args_t *args);
 obj_t *byte_ge(obj_t *obj, obj_method_args_t *args);
+obj_t *byte_as(obj_t *obj, obj_method_args_t *args);
 
 static_method get_byte_static_method(static_method_ident_t method_id);
 

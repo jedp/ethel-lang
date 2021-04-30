@@ -1,5 +1,6 @@
 #include<stdio.h>
 #include "../inc/bool.h"
+#include "../inc/str.h"
 #include "../inc/obj.h"
 
 obj_t *bool_hash(obj_t *obj, obj_method_args_t *args) {
@@ -18,11 +19,29 @@ obj_t *bool_ne(obj_t *obj, obj_method_args_t *args) {
   return boolean_obj(bool_eq(obj, args)->boolval == True ? False : True);
 }
 
+obj_t *bool_as(obj_t *obj, obj_method_args_t *args) {
+  if (args == NULL || args->arg == NULL) return boolean_obj(False);
+  obj_t *type_arg = args->arg;
+
+  switch (type_arg->type) {
+    case TYPE_BOOLEAN: return obj;
+    case TYPE_INT: return int_obj((obj->boolval == True) ? 1 : 0);
+    case TYPE_BYTE: return byte_obj((obj->boolval == True) ? 't' : 'f');
+    case TYPE_STRING: return string_obj(c_str_to_bytearray(
+                            (obj->boolval == True) ? "true":  "false"));
+    default:
+      printf("Cannot cast %s to type %s.\n",
+             obj_type_names[TYPE_BOOLEAN], obj_type_names[type_arg->type]);
+      return boolean_obj(False);
+  }
+}
+
 static_method get_bool_static_method(static_method_ident_t method_id) {
   switch (method_id) {
     case METHOD_HASH: return bool_hash;
     case METHOD_EQ: return bool_eq;
     case METHOD_NE: return bool_ne;
+    case METHOD_CAST: return bool_as;
     default: return NULL;
   }
 }

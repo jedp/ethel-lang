@@ -38,6 +38,12 @@ int hex_to_int(char* s);
  */
 int bin_to_int(char* s);
 
+/* Convert an int to a string. Uses the least number of digits possible. */
+bytearray_t *int_to_str(int n);
+
+/* Convert a float to a string. Uses the least number of digits possible. */
+bytearray_t *float_to_str(float n);
+
 /* Convert an int to a binary string. Uses the least number of digits possible. */
 bytearray_t *int_to_bin(unsigned int n);
 
