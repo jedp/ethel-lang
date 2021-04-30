@@ -13,6 +13,10 @@ obj_t *float_abs(obj_t *obj, obj_method_args_t *args) {
   return float_obj((obj->floatval < 0) ? 1-obj->floatval : obj->floatval);
 }
 
+obj_t *float_neg(obj_t *obj, obj_method_args_t *args) {
+  return float_obj(-obj->floatval);
+}
+
 obj_t *float_eq(obj_t *obj, obj_method_args_t *args) {
   if (args == NULL || args->arg == NULL) return boolean_obj(False);
   obj_t *arg = args->arg;
@@ -129,6 +133,7 @@ static_method get_float_static_method(static_method_ident_t method_id) {
   switch (method_id) {
     case METHOD_HASH: return float_hash;
     case METHOD_ABS: return float_abs;
+    case METHOD_NEG: return float_neg;
     case METHOD_EQ: return float_eq;
     case METHOD_NE: return float_ne;
     case METHOD_LT: return float_lt;

@@ -39,13 +39,13 @@ static void eval_boolean_expr(ast_expr_t *expr, eval_result_t *result) {
 static void eval_abs(ast_expr_t *expr, eval_result_t *result, env_t *env) {
   eval_result_t *r = eval_expr(expr, env);
 
-  static_method abs = get_static_method(r->obj->type, METHOD_ABS);
-  if (abs == NULL) {
+  static_method m = get_static_method(r->obj->type, METHOD_ABS);
+  if (m == NULL) {
     result->err = ERR_EVAL_TYPE_ERROR;
     return;
   }
 
-  result->obj = abs(r->obj, NULL);
+  result->obj = m(r->obj, NULL);
 }
 
 static void eval_type_of(ast_expr_t *expr, eval_result_t *result, env_t *env) {
@@ -262,23 +262,14 @@ static void is_type(obj_t *obj, obj_t *type_obj, eval_result_t *result) {
 }
 
 static void cast(obj_t *obj, obj_t *type_obj, eval_result_t *result) {
-  if ( !(type_obj->type == TYPE_INT
-      || type_obj->type == TYPE_FLOAT
-      || type_obj->type == TYPE_BYTE
-      || type_obj->type == TYPE_STRING
-      || type_obj->type == TYPE_BOOLEAN)) {
+  static_method m = get_static_method(obj->type, METHOD_CAST);
+
+  if (m == NULL) {
     result->err = ERR_EVAL_TYPE_ERROR;
     return;
   }
 
-  static_method as = get_static_method(obj->type, METHOD_CAST);
-
-  if (as == NULL) {
-    result->err = ERR_EVAL_TYPE_ERROR;
-    return;
-  }
-
-  result->obj = as(obj, wrap_varargs(1, type_obj));
+  result->obj = m(obj, wrap_varargs(1, type_obj));
 }
 
 static void assign(ast_expr_t *lhs,
@@ -321,42 +312,42 @@ error:
 }
 
 static void cmp(ast_type_t type, obj_t *a, obj_t *b, eval_result_t *result) {
-  static_method cmp;
+  static_method m;
   switch (type) {
-    case AST_EQ: cmp = get_static_method(a->type, METHOD_EQ); break;
-    case AST_NE: cmp = get_static_method(a->type, METHOD_NE); break;
-    case AST_LT: cmp = get_static_method(a->type, METHOD_LT); break;
-    case AST_GT: cmp = get_static_method(a->type, METHOD_GT); break;
-    case AST_LE: cmp = get_static_method(a->type, METHOD_LE); break;
-    case AST_GE: cmp = get_static_method(a->type, METHOD_GE); break;
+    case AST_EQ: m = get_static_method(a->type, METHOD_EQ); break;
+    case AST_NE: m = get_static_method(a->type, METHOD_NE); break;
+    case AST_LT: m = get_static_method(a->type, METHOD_LT); break;
+    case AST_GT: m = get_static_method(a->type, METHOD_GT); break;
+    case AST_LE: m = get_static_method(a->type, METHOD_LE); break;
+    case AST_GE: m = get_static_method(a->type, METHOD_GE); break;
   }
 
-  if (cmp == NULL) {
+  if (m == NULL) {
     result->err = ERR_EVAL_TYPE_ERROR;
     return;
   }
 
-  result->obj = cmp(a, wrap_varargs(1, b));
+  result->obj = m(a, wrap_varargs(1, b));
 }
 
 static void member_of(obj_t *a, obj_t *b, eval_result_t *result) {
-  static_method memb = get_static_method(b->type, METHOD_CONTAINS);
-  if (memb == NULL) {
+  static_method m = get_static_method(b->type, METHOD_CONTAINS);
+  if (m == NULL) {
     result->err = ERR_TYPE_ITERABLE_REQUIRED;
     return;
   }
 
-  result->obj = memb(b, wrap_varargs(1, a));
+  result->obj = m(b, wrap_varargs(1, a));
 }
 
 static void subscript_of(obj_t *a, obj_t *b, eval_result_t *result) {
-  static_method get = get_static_method(a->type, METHOD_GET);
-  if (get == NULL) {
+  static_method m = get_static_method(a->type, METHOD_GET);
+  if (m == NULL) {
     result->err = ERR_TYPE_ITERABLE_REQUIRED;
     return;
   }
 
-  result->obj = get(a, wrap_varargs(1, b));
+  result->obj = m(a, wrap_varargs(1, b));
 }
 
 static void boolean_and(obj_t *a, obj_t *b, eval_result_t *result) {
@@ -368,13 +359,13 @@ static void boolean_or(obj_t *a, obj_t *b, eval_result_t *result) {
 }
 
 static void negate(obj_t *a, eval_result_t *result) {
-  if (a->type == TYPE_INT) {
-    result->obj = int_obj(-(a->intval));
-  } else if (a->type == TYPE_FLOAT) {
-    result->obj = float_obj(-(a->floatval));
-  } else {
+  static_method m = get_static_method(a->type, METHOD_NEG);
+  if (m == NULL) {
     result->err = ERR_EVAL_TYPE_ERROR;
+    return;
   }
+
+  result->obj = m(a, NULL);
 }
 
 static void bitwise_or(obj_t *a, obj_t *b, eval_result_t *result) {

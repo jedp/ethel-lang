@@ -113,6 +113,7 @@ enum static_method_ident_enum {
   METHOD_NONE = 0,
   METHOD_HASH,
   METHOD_ABS,
+  METHOD_NEG,
   METHOD_EQ,
   METHOD_NE,
   METHOD_LT,
@@ -149,6 +150,7 @@ typedef struct {
 static const static_method_name_t static_method_names[] = {
   { .ident = METHOD_HASH,          .name = "hash" },
   { .ident = METHOD_ABS,           .name = "abs" },
+  { .ident = METHOD_NEG,           .name = "neg" },
   { .ident = METHOD_EQ,            .name = "eq" },
   { .ident = METHOD_NE,            .name = "ne" },
   { .ident = METHOD_LT,            .name = "lt" },

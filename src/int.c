@@ -132,6 +132,10 @@ obj_t *int_abs(obj_t *obj, obj_method_args_t /* Ignored */ *args) {
   return int_obj(abs(obj->intval));
 }
 
+obj_t *int_neg(obj_t *obj, obj_method_args_t /* Ignored */ *args) {
+  return int_obj(-obj->intval);
+}
+
 obj_t *int_bitwise_and(obj_t *obj, obj_method_args_t *args) {
   if (args == NULL || args->arg == NULL) return obj;
   obj_t *arg = args->arg;
@@ -209,6 +213,8 @@ obj_t *int_bitwise_shr(obj_t *obj, obj_method_args_t *args) {
 static_method get_int_static_method(static_method_ident_t method_id) {
   switch (method_id) {
     case METHOD_HASH: return int_hash;
+    case METHOD_ABS: return int_abs;
+    case METHOD_NEG: return int_neg;
     case METHOD_EQ: return int_eq;
     case METHOD_NE: return int_ne;
     case METHOD_LT: return int_lt;
@@ -222,7 +228,6 @@ static_method get_int_static_method(static_method_ident_t method_id) {
     case METHOD_BITWISE_SHL: return int_bitwise_shl;
     case METHOD_BITWISE_SHR: return int_bitwise_shr;
     case METHOD_CAST: return int_as;
-    case METHOD_ABS: return int_abs;
     default: return NULL;
   }
 }
