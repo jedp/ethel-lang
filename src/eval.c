@@ -9,6 +9,7 @@
 #include "../inc/bool.h"
 #include "../inc/str.h"
 #include "../inc/list.h"
+#include "../inc/dict.h"
 #include "../inc/type.h"
 #include "../inc/eval.h"
 #include "../inc/parser.h"
@@ -147,6 +148,48 @@ static void eval_list_expr(ast_list_t *list, eval_result_t *result, env_t *env) 
   result->obj = list_obj(list->type_name, root_elem);
 }
 
+static void eval_dict_expr(ast_dict_t *expr, eval_result_t *result, env_t *env) {
+  if (expr->kv == NULL) {
+    result->obj = dict_obj();
+    return;
+  }
+
+  obj_t *dict = dict_obj();
+  dict_init(dict, DICT_INIT_BUCKETS);
+
+  ast_expr_kv_list_t *kv = expr->kv;
+  eval_result_t *r;
+  while(kv != NULL) {
+    r = eval_expr(kv->k, env);
+    if ((result->err = r->err) != ERR_NO_ERROR) {
+      printf("Failed to evaluate %s for key.\n", ast_node_names[kv->k->type]);
+      result->obj = nil_obj();
+      return;
+    }
+    obj_t *k = r->obj;
+
+    r = eval_expr(kv->v, env);
+    if ((result->err = r->err) != ERR_NO_ERROR) {
+      printf("Failed to evaluate %s for value.\n", ast_node_names[kv->v->type]);
+      result->obj = nil_obj();
+      return;
+    }
+    obj_t *v = r->obj;
+
+    if ((result->err = dict_put(dict, k, v)) != ERR_NO_ERROR) {
+      mem_free(dict);
+      printf("Failed to put kv in dict!\n");
+      return;
+    }
+
+    printf("inserted %s key, %s value\n", obj_type_names[k->type], obj_type_names[v->type]);
+
+    kv = kv->next;
+  }
+
+  result->obj = dict;
+}
+
 static void _eval_block_expr_in_scope(ast_expr_list_t *block_exprs,
                                eval_result_t *result,
                                env_t *env) {
@@ -272,6 +315,43 @@ static void cast(obj_t *obj, obj_t *type_obj, eval_result_t *result) {
   result->obj = m(obj, wrap_varargs(1, type_obj));
 }
 
+static void arr_subscript_assign(obj_t *obj,
+                                 ast_expr_t *lhs,
+                                 ast_expr_t *rhs,
+                                 eval_result_t *result,
+                                 env_t *env) {
+  eval_result_t *r1 = eval_expr(lhs->op_args->b, env);
+  if ((result->err = r1->err) != ERR_NO_ERROR) goto error;
+  obj_t *offset = r1->obj;
+  eval_result_t *r2 = eval_expr(rhs, env);
+  if ((result->err = r2->err) != ERR_NO_ERROR) goto error;
+  obj_t *val = r2->obj;
+  result->obj = arr_set(obj, wrap_varargs(2, offset, val));
+  return;
+
+error:
+  result->obj = nil_obj();
+}
+
+static void dict_subscript_assign(obj_t *obj,
+                                  ast_expr_t *lhs,
+                                  ast_expr_t *rhs,
+                                  eval_result_t *result,
+                                  env_t *env) {
+  eval_result_t *r1 = eval_expr(lhs->op_args->b, env);
+  if ((result->err = r1->err) != ERR_NO_ERROR) goto error;
+  obj_t *k = r1->obj;
+  eval_result_t *r2 = eval_expr(rhs, env);
+  if ((result->err = r2->err) != ERR_NO_ERROR) goto error;
+  obj_t *v = r2->obj;
+  result->obj = dict_obj_put(obj, wrap_varargs(2, k, v));
+  return;
+
+error:
+  result->obj = nil_obj();
+
+}
+
 static void assign(ast_expr_t *lhs,
                    ast_expr_t *rhs,
                    eval_result_t *result,
@@ -281,15 +361,20 @@ static void assign(ast_expr_t *lhs,
 
   if (lhs->type == AST_SUBSCRIPT) {
     bytearray_t *name = lhs->op_args->a->bytearray;
-    obj_t *arr = get_env(env, name);
-    eval_result_t *r1 = eval_expr(lhs->op_args->b, env);
-    if ((result->err = r1->err) != ERR_NO_ERROR) goto error;
-    obj_t *offset = r1->obj;
-    eval_result_t *r2 = eval_expr(rhs, env);
-    if ((result->err = r2->err) != ERR_NO_ERROR) goto error;
-    obj_t *val = r2->obj;
-    result->obj = arr_set(arr, wrap_varargs(2, offset, val));
-    return;
+    obj_t *obj = get_env(env, name);
+
+    switch(obj->type) {
+      case TYPE_STRING:
+      case TYPE_BYTEARRAY:
+        arr_subscript_assign(obj, lhs, rhs, result, env);
+        return;
+      case TYPE_DICT:
+        dict_subscript_assign(obj, lhs, rhs, result, env);
+        return;
+      default:
+        result->err = ERR_AST_TYPE_UNHANDLED;
+        return;
+    }
   }
 
   if (rhs->type == AST_FUNCTION_DEF) {
@@ -988,6 +1073,11 @@ eval_result_t *eval_expr(ast_expr_t *expr, env_t *env) {
         }
         case AST_LIST: {
           eval_list_expr(expr->list, result, env);
+          if (result->err != ERR_NO_ERROR) goto error;
+          break;
+        }
+        case AST_DICT: {
+          eval_dict_expr(expr->dict, result, env);
           if (result->err != ERR_NO_ERROR) goto error;
           break;
         }

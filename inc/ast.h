@@ -192,7 +192,6 @@ typedef struct AstExprKvListNode {
 } ast_expr_kv_list_t;
 
 typedef struct AstDict {
-  bytearray_t *type_name;
   ast_expr_kv_list_t *kv;
 } ast_dict_t;
 

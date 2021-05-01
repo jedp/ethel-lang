@@ -916,6 +916,29 @@ void test_eval_str_compare(void) {
   TEST_ASSERT_EQUAL(2, result->obj->intval);
 }
 
+void test_eval_dict(void) {
+  char *program = "{ val d = dict    \n"
+                  "  var i = 0       \n"
+                  "  d[2] = 10       \n"
+                  "  d[\"foo\"] = 1  \n"
+                  "  d[3.3] = 1      \n"
+                  "  d['c'] = 1      \n"
+                  "  if (1 in d) then       i = i - 1 \n"
+                  "  if (\"no\" in d) then  i = i - 1 \n"
+                  "  if (3.4 in d) then     i = i - 1 \n"
+                  "  if ('x' in d) then     i = i - 1 \n"
+                  "  if (2 in d) then       i = i + 1 \n"
+                  "  if (\"foo\" in d) then i = i + 1 \n"
+                  "  if (3.3 in d) then     i = i + 1 \n"
+                  "  if ('c' in d) then     i = i + 1 \n"
+                  "  i = i + d[2]                     \n"
+                  "  i \n"
+                  "}";
+  eval_result_t *result = eval_program(program);
+  TEST_ASSERT_EQUAL(ERR_NO_ERROR, result->err);
+  TEST_ASSERT_EQUAL(14, result->obj->intval);
+}
+
 void test_eval(void) {
   RUN_TEST(test_eval_calculator);
   RUN_TEST(test_eval_unary_minus);
@@ -985,5 +1008,6 @@ void test_eval(void) {
   RUN_TEST(test_eval_arr_subscript_assign_byte);
   RUN_TEST(test_eval_arr_subscript_assign_int);
   RUN_TEST(test_eval_str_compare);
+  RUN_TEST(test_eval_dict);
 }
 

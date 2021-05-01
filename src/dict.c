@@ -179,8 +179,45 @@ obj_t *dict_get(obj_t *dict_obj, obj_t *k) {
   return nil_obj();
 }
 
+obj_t *dict_obj_get(obj_t *dict_obj, obj_method_args_t *args) {
+  if (args == NULL || args->arg == NULL) {
+    printf("Null arg to get()\n");
+    return nil_obj();
+  }
+  obj_t *k = args->arg;
+  return dict_get(dict_obj, k);
+}
+
+obj_t *dict_obj_put(obj_t *dict_obj, obj_method_args_t *args) {
+  if (args == NULL || args->arg == NULL) {
+    printf("Null arg to put()\n");
+    return nil_obj();
+  }
+  obj_t *k = args->arg;
+  obj_t *v = args->next->arg;
+  if (k == NULL || v == NULL) {
+    printf("Two args required to put in dict.\n");
+    return nil_obj();
+  }
+  if (dict_put(dict_obj, k, v) != ERR_NO_ERROR) {
+    return nil_obj();
+  }
+  return v;
+}
+
+obj_t *dict_obj_in(obj_t *dict_obj, obj_method_args_t *args) {
+  if (args == NULL || args->arg == NULL) {
+    printf("Null arg to contains()\n");
+    return nil_obj();
+  }
+  obj_t *k = args->arg;
+  return boolean_obj(dict_contains(dict_obj, k));
+}
+
 static_method get_dict_static_method(static_method_ident_t method_id) {
   switch (method_id) {
+    case METHOD_GET: return dict_obj_get;
+    case METHOD_CONTAINS: return dict_obj_in;
     default: return NULL;
   }
 }

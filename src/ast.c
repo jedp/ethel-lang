@@ -117,7 +117,8 @@ ast_expr_t *ast_list(bytearray_t *type_name, ast_expr_list_t *nullable_init_es) 
 
 ast_expr_t *ast_dict(ast_expr_kv_list_t *nullable_kvs) {
   ast_expr_t *node = ast_node(AST_DICT);
-  node->list = mem_alloc(sizeof(ast_list_t));
+  node->dict = mem_alloc(sizeof(ast_dict_t));
+  node->dict->kv = mem_alloc(sizeof(ast_expr_kv_list_t));
   if (nullable_kvs != NULL) {
     node->dict->kv = nullable_kvs;
   } else {

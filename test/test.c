@@ -27,12 +27,12 @@ int main(int argc, char** argv) {
   test_str();
   test_range();
   test_list();
+  test_dict();
   test_bytearray();
   test_hash();
   test_env();
   test_eval();
   test_examples();
-  test_dict();
 
   UNITY_END();
 }
