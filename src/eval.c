@@ -109,7 +109,7 @@ static void eval_byte_expr(ast_expr_t *expr, eval_result_t *result) {
 
 static void eval_list_expr(ast_list_t *list, eval_result_t *result, env_t *env) {
   if (list->es == NULL) {
-    result->obj = list_obj(list->type_name, NULL);
+    result->obj = list_obj(NULL);
     return;
   }
 
@@ -122,14 +122,7 @@ static void eval_list_expr(ast_list_t *list, eval_result_t *result, env_t *env) 
 
     if (r->err != ERR_NO_ERROR) {
       result->err = r->err;
-      result->obj = list_obj(list->type_name, NULL);
-      return;
-    }
-
-    // TODO user-defined types
-    if (!c_str_eq(bytearray_to_c_str(list->type_name), obj_type_names[r->obj->type])) {
-      result->err = ERR_EVAL_TYPE_ERROR;
-      result->obj = list_obj(list->type_name, NULL);
+      result->obj = list_obj(NULL);
       return;
     }
 
@@ -145,7 +138,7 @@ static void eval_list_expr(ast_list_t *list, eval_result_t *result, env_t *env) 
     elem = elem->next;
   }
 
-  result->obj = list_obj(list->type_name, root_elem);
+  result->obj = list_obj(root_elem);
 }
 
 static void eval_dict_expr(ast_dict_t *expr, eval_result_t *result, env_t *env) {

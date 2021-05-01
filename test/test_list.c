@@ -31,9 +31,8 @@ static obj_method_args_t *n_args(int n, ...) {
 }
 
 static obj_t *make_list(int n_elems, ...) {
-  bytearray_t *typename = c_str_to_bytearray(obj_type_names[TYPE_INT]);
   if (n_elems == 0) {
-    return list_obj(typename, NULL);
+    return list_obj(NULL);
   }
 
   obj_list_element_t *elem = mem_alloc(sizeof(obj_list_element_t));
@@ -59,7 +58,7 @@ static obj_t *make_list(int n_elems, ...) {
 
   va_end(vargs);
 
-  return list_obj(typename, root_elem);
+  return list_obj(root_elem);
 }
 
 void test_list_len(void) {

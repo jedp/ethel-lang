@@ -2,18 +2,16 @@
 #include "../inc/def.h"
 #include "../inc/math.h"
 #include "../inc/mem.h"
-#include "../inc/str.h"
 #include "../inc/obj.h"
 #include "../inc/list.h"
 #include "../inc/type.h"
 
-obj_t *_empty_list(bytearray_t *type_name) {
+obj_t *_empty_list() {
   obj_t *obj = mem_alloc(sizeof(obj_t));
   obj->type = TYPE_LIST;
   obj->flags = F_NONE;
 
   obj_list_t *list = mem_alloc(sizeof(obj_list_t));
-  list->type_name = bytearray_clone(type_name);
   list->elems = NULL;
   obj->list = list;
   return obj;
@@ -74,7 +72,7 @@ obj_t *_list_slice(obj_t *list_obj, int start, int end) {
 
   dim_t len = _list_len(list_obj);
   if (abs(start) > len || abs(end) > len) {
-    return _empty_list(list_obj->list->type_name);
+    return _empty_list();
   }
 
   int i = 0;
@@ -82,7 +80,7 @@ obj_t *_list_slice(obj_t *list_obj, int start, int end) {
 
   while(i != start) {
     if (root == NULL && i != start) {
-      return _empty_list(list_obj->list->type_name);
+      return _empty_list();
     }
 
     // Advance to the start item.
@@ -96,9 +94,6 @@ obj_t *_list_slice(obj_t *list_obj, int start, int end) {
   slice->flags = F_NONE;
   slice->list = mem_alloc(sizeof(obj_list_t));
 
-  // Give it the same type and put the first elem in it.
-  slice->list->type_name = mem_alloc(list_obj->list->type_name->size + 1);
-  slice->list->type_name = bytearray_clone(list_obj->list->type_name);
   slice->list->elems = mem_alloc(sizeof(obj_list_t));
 
   obj_list_element_t *curr = slice->list->elems;
@@ -125,11 +120,6 @@ obj_t *list_contains(obj_t *list_obj, obj_method_args_t *args) {
   if (args == NULL || args->arg == NULL) {
     printf("Null arg to contains()\n");
     return nil_obj();
-  }
-
-  if (!c_str_eq(obj_type_names[args->arg->type], bytearray_to_c_str(list_obj->list->type_name))) {
-    printf("Wrong type: %s not %s\n", obj_type_names[args->arg->type], bytearray_to_c_str(list_obj->list->type_name));
-    return boolean_obj(False);
   }
 
   obj_t *arg = args->arg;
@@ -226,7 +216,7 @@ obj_t *list_head(obj_t *list_obj, obj_method_args_t *args) {
 
 obj_t *list_tail(obj_t *list_obj, obj_method_args_t *args){
   if (_list_len(list_obj) == 1) {
-    return _empty_list(list_obj->list->type_name);
+    return _empty_list();
   }
   return _list_slice(list_obj, 1, -1);
 }
@@ -234,11 +224,6 @@ obj_t *list_tail(obj_t *list_obj, obj_method_args_t *args){
 obj_t *list_prepend(obj_t *list_obj, obj_method_args_t *args) {
   if (args == NULL || args->arg == NULL) {
     printf("Argument missing\n");
-    return nil_obj();
-  }
-
-  if (!c_str_eq(obj_type_names[args->arg->type], bytearray_to_c_str(list_obj->list->type_name))) {
-    printf("Wrong type\n");
     return nil_obj();
   }
 
@@ -254,11 +239,6 @@ obj_t *list_prepend(obj_t *list_obj, obj_method_args_t *args) {
 obj_t *list_append(obj_t *list_obj, obj_method_args_t *args) {
   if (args == NULL || args->arg == NULL) {
     printf("Argument missing\n");
-    return nil_obj();
-  }
-
-  if (!c_str_eq(obj_type_names[args->arg->type], bytearray_to_c_str(list_obj->list->type_name))) {
-    printf("Wrong type\n");
     return nil_obj();
   }
 

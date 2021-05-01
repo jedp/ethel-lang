@@ -41,7 +41,7 @@ Type error
 #### Lists
 
 ```
-> val l = list of Int { 4, 5, 6, 7, 8, 9 }
+> val l = list { 4, 5, 6, 7, 8, 9 }
 { 4, 5, 6, 7, 8, 9 }
 > l.tail().slice(2, 4)
 { 7, 8 }

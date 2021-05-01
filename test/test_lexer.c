@@ -363,13 +363,13 @@ void test_lex_begin_end(void) {
   }
 }
 
-void test_lex_list_of(void) {
-  char *expr = "var x = list of glug";
+void test_lex_list_init(void) {
+  char *expr = "var x = list";
   lexer_t lexer;
   lexer_init(&lexer, expr, c_str_len(expr));
 
   int expected[] = {
-    TAG_VARIABLE, TAG_IDENT, TAG_ASSIGN, TAG_LIST, TAG_OF, TAG_TYPE_NAME
+    TAG_VARIABLE, TAG_IDENT, TAG_ASSIGN, TAG_LIST
   };
   for (int i = 0; i < sizeof(expected) / sizeof(expected[0]); i++) {
     TEST_ASSERT_EQUAL(ERR_NO_ERROR, lexer.err);
@@ -378,14 +378,14 @@ void test_lex_list_of(void) {
   }
 }
 
-void test_lex_list_of_with_init(void) {
-  char *expr = "val x = list of int { 1, 2, 3}";
+void test_lex_list_with_values_init(void) {
+  char *expr = "val x = list { 1, 2.3, \"three\"}";
   lexer_t lexer;
   lexer_init(&lexer, expr, c_str_len(expr));
 
   int expected[] = {
-    TAG_INVARIABLE, TAG_IDENT, TAG_ASSIGN, TAG_LIST, TAG_OF, TAG_TYPE_NAME,
-    TAG_BEGIN, TAG_INT, TAG_COMMA, TAG_INT, TAG_COMMA, TAG_INT, TAG_END
+    TAG_INVARIABLE, TAG_IDENT, TAG_ASSIGN, TAG_LIST,
+    TAG_BEGIN, TAG_INT, TAG_COMMA, TAG_FLOAT, TAG_COMMA, TAG_STRING, TAG_END
   };
   for (int i = 0; i < sizeof(expected) / sizeof(expected[0]); i++) {
     TEST_ASSERT_EQUAL(ERR_NO_ERROR, lexer.err);
@@ -607,7 +607,6 @@ void test_lex_all_tokens(void) {
     (test_data_t) { .text = "'c'", .expected_tag = TAG_BYTE },
     (test_data_t) { .text = "\"string\"", .expected_tag = TAG_STRING },
     (test_data_t) { .text = "list", .expected_tag = TAG_LIST },
-    (test_data_t) { .text = "of", .expected_tag = TAG_OF },
     (test_data_t) { .text = "if", .expected_tag = TAG_IF },
     (test_data_t) { .text = "then", .expected_tag = TAG_THEN },
     (test_data_t) { .text = "else", .expected_tag = TAG_ELSE },
@@ -656,8 +655,8 @@ void test_lexer(void) {
   RUN_TEST(test_lex_only_whitespace_input);
   RUN_TEST(test_lex_comment_only);
   RUN_TEST(test_lex_begin_end);
-  RUN_TEST(test_lex_list_of);
-  RUN_TEST(test_lex_list_of_with_init);
+  RUN_TEST(test_lex_list_init);
+  RUN_TEST(test_lex_list_with_values_init);
   RUN_TEST(test_lex_dict_init);
   RUN_TEST(test_lex_dict_with_kv_init);
   RUN_TEST(test_lex_member_of);

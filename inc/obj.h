@@ -212,7 +212,7 @@ obj_t *bytearray_obj(dim_t size, uint8_t *data);
 obj_t *string_obj(bytearray_t *src);
 obj_t *boolean_obj(boolean);
 obj_t *range_obj(int, int);
-obj_t *list_obj(bytearray_t *type_name, obj_list_element_t* elems);
+obj_t *list_obj(obj_list_element_t* elems);
 obj_t *dict_obj(void);
 obj_t *func_obj(void* code, void* scope);
 obj_t *return_val(obj_t *val);

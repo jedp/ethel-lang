@@ -26,7 +26,7 @@ void test_hash_values(void) {
   TEST_ASSERT_EQUAL(99,         eval_program("'c'.hash()")->obj->intval);
   TEST_ASSERT_EQUAL(0,          eval_program("false.hash()")->obj->intval);
 
-  char *program = "{ val l = list of Int { 1, 2, 3 }\n"
+  char *program = "{ val l = list { 1, 2, 3 }\n"
                   "  l.hash() \n"
                   "}";
   TEST_ASSERT_EQUAL(1456420779, eval_program(program)->obj->intval);

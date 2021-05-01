@@ -247,7 +247,6 @@ static const token_t reserved[] = {
   { TAG_NIL,           .string = (char *) "nil" },
   { TAG_LIST,          .string = (char *) "list" },
   { TAG_DICT,          .string = (char *) "dict" },
-  { TAG_OF,            .string = (char *) "of" },
   { TAG_ARR_DECL,      .string = (char *) "arr" },
   { TAG_TYPE_INT,      .string = (char *) "int" },
   { TAG_TYPE_FLOAT,    .string = (char *) "float" },

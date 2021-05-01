@@ -220,6 +220,7 @@ obj_t *dict_obj_len(obj_t *dict_obj, obj_method_args_t *args) {
 }
 
 obj_t *dict_obj_keys(obj_t *dict_obj, obj_method_args_t *args) {
+  // TODO implement when we remove type requirement from list.
   return nil_obj();
 }
 

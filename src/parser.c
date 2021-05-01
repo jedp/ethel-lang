@@ -382,9 +382,6 @@ ast_expr_t *parse_expr(lexer_t *lexer) {
     }
     case TAG_LIST: {
       advance(lexer);
-      if (!eat(lexer, TAG_OF)) goto error;
-      if (lexer->token.tag != TAG_TYPE_NAME) goto error;
-      ast_expr_t *type_name = parse_expr(lexer);
       if (lexer->token.tag == TAG_BEGIN) {
         eat(lexer, TAG_BEGIN);
         ast_expr_list_t *es = parse_expr_list(lexer);
@@ -392,9 +389,9 @@ ast_expr_t *parse_expr(lexer_t *lexer) {
           mem_free(es);
           goto error;
         }
-        return ast_list(type_name->bytearray, es);
+        return ast_list(es);
       }
-      return ast_list(type_name->bytearray, NULL);
+      return ast_list(NULL);
     }
     case TAG_DICT: {
       advance(lexer);
