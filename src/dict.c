@@ -4,6 +4,7 @@
 #include "../inc/def.h"
 #include "../inc/mem.h"
 #include "../inc/type.h"
+#include "../inc/list.h"
 #include "../inc/dict.h"
 #include "../inc/obj.h"
 
@@ -220,8 +221,15 @@ obj_t *dict_obj_len(obj_t *dict_obj, obj_method_args_t *args) {
 }
 
 obj_t *dict_obj_keys(obj_t *dict_obj, obj_method_args_t *args) {
-  // TODO implement when we remove type requirement from list.
-  return nil_obj();
+  obj_t *list = list_obj(NULL);
+  for (dim_t i = 0; i < dict_obj->dict->buckets; i++) {
+    dict_node_t *kv = dict_obj->dict->nodes[i];
+    while (kv != NULL) {
+      list_append(list, wrap_varargs(1, kv->k));
+      kv = kv->next;
+    }
+  }
+  return list;
 }
 
 obj_t *dict_obj_remove(obj_t *dict_obj, obj_method_args_t *args) {

@@ -967,6 +967,26 @@ void test_eval_dict_remove(void) {
   TEST_ASSERT_EQUAL(1, result->obj->intval);
 }
 
+void test_eval_dict_keys(void) {
+  char *program = "{ val d = dict                        \n"
+                  "  d['a'] = 1                          \n"
+                  "  d[97] = 2                           \n"
+                  "  d[true] = 3                         \n"
+                  "  d[1] = 4                            \n"
+                  "  val l = d.keys()                    \n"
+                  "  var i = 0                           \n"
+                  "  if ('a' in l)  then i = i + 1       \n"
+                  "  if (97 in l)   then i = i + 1       \n"
+                  "  if (true in l) then i = i + 1       \n"
+                  "  if (1 in l)    then i = i + 1       \n"
+                  "  if (l.length() == 4) then i = i + 1 \n"
+                  "  i                                   \n"
+                  "}";
+  eval_result_t *result = eval_program(program);
+  TEST_ASSERT_EQUAL(ERR_NO_ERROR, result->err);
+  TEST_ASSERT_EQUAL(5, result->obj->intval);
+}
+
 void test_eval(void) {
   RUN_TEST(test_eval_calculator);
   RUN_TEST(test_eval_unary_minus);
@@ -1039,5 +1059,6 @@ void test_eval(void) {
   RUN_TEST(test_eval_dict);
   RUN_TEST(test_eval_dict_len);
   RUN_TEST(test_eval_dict_remove);
+  RUN_TEST(test_eval_dict_keys);
 }
 
