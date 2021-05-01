@@ -8,6 +8,10 @@ obj_t *byte_hash(obj_t *obj, obj_method_args_t *args) {
   return int_obj((uint32_t) obj->byteval);
 }
 
+obj_t *byte_copy(obj_t *obj, obj_method_args_t *args) {
+  return byte_obj(obj->byteval);
+}
+
 obj_t *byte_eq(obj_t *obj, obj_method_args_t *args) {
   if (args == NULL || args->arg == NULL) return boolean_obj(False);
   obj_t *arg = args->arg;
@@ -196,6 +200,7 @@ obj_t *byte_bitwise_shr(obj_t *obj, obj_method_args_t *args) {
 static_method get_byte_static_method(static_method_ident_t method_id) {
   switch (method_id) {
     case METHOD_HASH: return byte_hash;
+    case METHOD_COPY: return byte_copy;
     case METHOD_EQ: return byte_eq;
     case METHOD_NE: return byte_ne;
     case METHOD_GT: return byte_gt;

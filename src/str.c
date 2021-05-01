@@ -44,6 +44,11 @@ obj_t *str_hash(obj_t *str_obj, obj_method_args_t /* Ignored */ *args) {
   return arr_hash(str_obj, args);
 }
 
+obj_t *str_copy(obj_t *str_obj, obj_method_args_t /* Ignored */ *args) {
+  // string_obj copies the contents of the source.
+  return string_obj(str_obj->bytearray);
+}
+
 obj_t *str_contains(obj_t *str_obj, obj_method_args_t *args) {
   return arr_contains(str_obj, args);
 }
@@ -533,6 +538,7 @@ obj_t *arr_dump(obj_t *arr_obj) {
 static_method get_str_static_method(static_method_ident_t method_id) {
   switch(method_id) {
     case METHOD_HASH: return str_hash;
+    case METHOD_COPY: return str_copy;
     case METHOD_LENGTH: return str_len;
     case METHOD_CONTAINS: return str_contains;
     case METHOD_GET: return str_get;

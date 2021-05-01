@@ -7,6 +7,8 @@
 #define False     0
 #define Null      0
 
+#define DICT_INIT_BUCKETS 16
+
 // FNV (Fowlwer, Noll, Vo) FNV-1a 32-bit hash constants.
 #define FNV32Prime 0x01000193
 #define FNV32Basis 0x811C9DC5

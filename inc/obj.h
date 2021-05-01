@@ -22,6 +22,7 @@ enum obj_type_enum {
   TYPE_BOOLEAN,
   TYPE_RANGE,
   TYPE_LIST,
+  TYPE_DICT,
   TYPE_IDENT,
   TYPE_MAX,
 };
@@ -42,6 +43,7 @@ static const char* obj_type_names[TYPE_MAX] = {
   "Bool",
   "Range",
   "List",
+  "Dict",
   "Identifier"
 };
 
@@ -73,6 +75,19 @@ typedef struct ObjList {
   obj_list_element_t *elems;
 } obj_list_t;
 
+typedef struct ObjDictKvNode {
+  uint32_t hash_val;
+  obj_t *k;
+  obj_t *v;
+  struct ObjDictKvNode *next;
+} dict_node_t;
+
+typedef struct ObjDictElem {
+  uint32_t buckets;
+  uint32_t nelems;
+  dict_node_t **nodes;
+} obj_dict_t;
+
 typedef struct ObjFuncArg {
   bytearray_t *name;
   struct ObjFuncArg *next;
@@ -96,6 +111,7 @@ typedef struct Obj {
     byte byteval;
     range_t range;
     obj_list_t *list;
+    obj_dict_t *dict;
     bytearray_t *bytearray;
     obj_func_def_t *func_def;
     struct Obj *return_val;
@@ -112,6 +128,7 @@ typedef uint8_t static_method_ident_t;
 enum static_method_ident_enum {
   METHOD_NONE = 0,
   METHOD_HASH,
+  METHOD_COPY,
   METHOD_ABS,
   METHOD_NEG,
   METHOD_EQ,
@@ -149,6 +166,7 @@ typedef struct {
 
 static const static_method_name_t static_method_names[] = {
   { .ident = METHOD_HASH,          .name = "hash" },
+  { .ident = METHOD_COPY,          .name = "copy" },
   { .ident = METHOD_ABS,           .name = "abs" },
   { .ident = METHOD_NEG,           .name = "neg" },
   { .ident = METHOD_EQ,            .name = "eq" },
@@ -191,6 +209,7 @@ obj_t *string_obj(bytearray_t *src);
 obj_t *boolean_obj(boolean);
 obj_t *range_obj(int, int);
 obj_t *list_obj(bytearray_t *type_name, obj_list_element_t* elems);
+obj_t *dict_obj(void);
 obj_t *func_obj(void* code, void* scope);
 obj_t *return_val(obj_t *val);
 obj_method_args_t *wrap_varargs(int n_args, ...);

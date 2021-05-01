@@ -6,6 +6,7 @@
 
 /* Return the integer hash of the integer. */
 obj_t *byte_hash(obj_t *obj, obj_method_args_t *args);
+obj_t *byte_copy(obj_t *obj, obj_method_args_t *args);
 
 /*
  * Return true if the obj and first arg are numerically equal.

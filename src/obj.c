@@ -5,6 +5,7 @@
 #include "../inc/err.h"
 #include "../inc/obj.h"
 #include "../inc/list.h"
+#include "../inc/dict.h"
 #include "../inc/str.h"
 
 obj_t *arg_at(obj_method_args_t *args, int index) {
@@ -108,6 +109,18 @@ obj_t *list_obj(bytearray_t *name, obj_list_element_t *elems) {
   list->elems = elems;
 
   obj->list = list;
+  return obj;
+}
+
+obj_t *dict_obj(void) {
+  obj_t *obj = obj_of(TYPE_DICT);
+  obj_dict_t *dict = mem_alloc(sizeof(obj_dict_t));
+  obj->dict = dict;
+  if (obj->dict == NULL ||
+      dict_init(obj, DICT_INIT_BUCKETS) != ERR_NO_ERROR) {
+    mem_free(obj);
+    return nil_obj();
+  }
   return obj;
 }
 

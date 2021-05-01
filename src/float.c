@@ -9,6 +9,10 @@ obj_t *float_hash(obj_t *obj, obj_method_args_t *args) {
   return int_obj(*ip);
 }
 
+obj_t *float_copy(obj_t *obj, obj_method_args_t *args) {
+  return float_obj(obj->floatval);
+}
+
 obj_t *float_abs(obj_t *obj, obj_method_args_t *args) {
   return float_obj((obj->floatval < 0) ? 1-obj->floatval : obj->floatval);
 }
@@ -132,6 +136,7 @@ obj_t *float_as(obj_t *obj, obj_method_args_t *args) {
 static_method get_float_static_method(static_method_ident_t method_id) {
   switch (method_id) {
     case METHOD_HASH: return float_hash;
+    case METHOD_COPY: return float_copy;
     case METHOD_ABS: return float_abs;
     case METHOD_NEG: return float_neg;
     case METHOD_EQ: return float_eq;

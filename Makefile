@@ -10,6 +10,7 @@ COMPOBJS = src/mem.o \
 					 src/byte.o \
 					 src/int.o \
 					 src/list.o \
+					 src/dict.o \
 					 src/bool.o \
 					 src/type.o \
 					 src/lexer.o \
@@ -21,15 +22,16 @@ COMPOBJS = src/mem.o \
 REPLOBJS = src/repl.o
 
 TESTOBJS = test/unity/unity.o \
+					 test/test_hash.o \
 					 test/test_str.o \
 					 test/test_list.o \
+					 test/test_dict.o \
 					 test/test_range.o \
 					 test/test_mem.o \
 					 test/test_bytearray.o \
 					 test/test_lexer.o \
 					 test/test_parser.o \
 					 test/test_eval.o \
-					 test/test_hash.o \
 					 test/test_env.o \
 					 test/test_examples.o \
 					 test/test.o

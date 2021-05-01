@@ -4,6 +4,7 @@
 #include "test_range.h"
 #include "test_list.h"
 #include "test_bytearray.h"
+#include "test_dict.h"
 #include "test_lexer.h"
 #include "test_parser.h"
 #include "test_eval.h"
@@ -20,17 +21,18 @@ void tearDown(void) {
 int main(int argc, char** argv) {
   UNITY_BEGIN();
 
+  test_lexer();
+  test_parser();
   test_mem();
   test_str();
   test_range();
   test_list();
   test_bytearray();
-  test_lexer();
-  test_parser();
-  test_eval();
   test_hash();
   test_env();
+  test_eval();
   test_examples();
+  test_dict();
 
   UNITY_END();
 }

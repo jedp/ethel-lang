@@ -4,3 +4,4 @@
 void test_bytearray(void);
 
 #endif
+

@@ -8,6 +8,10 @@ obj_t *bool_hash(obj_t *obj, obj_method_args_t *args) {
   return int_obj((uint32_t) obj->boolval);
 }
 
+obj_t *bool_copy(obj_t *obj, obj_method_args_t *args) {
+  return boolean_obj(obj->boolval);
+}
+
 obj_t *bool_eq(obj_t *obj, obj_method_args_t *args) {
   if (args == NULL || args->arg == NULL) return boolean_obj(False);
   obj_t *arg = args->arg;
@@ -39,6 +43,7 @@ obj_t *bool_as(obj_t *obj, obj_method_args_t *args) {
 static_method get_bool_static_method(static_method_ident_t method_id) {
   switch (method_id) {
     case METHOD_HASH: return bool_hash;
+    case METHOD_COPY: return bool_copy;
     case METHOD_EQ: return bool_eq;
     case METHOD_NE: return bool_ne;
     case METHOD_CAST: return bool_as;
