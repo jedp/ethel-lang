@@ -214,10 +214,25 @@ obj_t *dict_obj_in(obj_t *dict_obj, obj_method_args_t *args) {
   return boolean_obj(dict_contains(dict_obj, k));
 }
 
+obj_t *dict_obj_len(obj_t *dict_obj, obj_method_args_t *args) {
+  return int_obj(dict_obj->dict->nelems);
+}
+
+obj_t *dict_obj_keys(obj_t *dict_obj, obj_method_args_t *args) {
+  return nil_obj();
+}
+
+obj_t *dict_obj_remove(obj_t *dict_obj, obj_method_args_t *args) {
+  return nil_obj();
+}
+
 static_method get_dict_static_method(static_method_ident_t method_id) {
   switch (method_id) {
     case METHOD_GET: return dict_obj_get;
     case METHOD_CONTAINS: return dict_obj_in;
+    case METHOD_LENGTH: return dict_obj_len;
+    case METHOD_KEYS: return dict_obj_keys;
+    case METHOD_REMOVE_AT: return dict_obj_remove;
     default: return NULL;
   }
 }

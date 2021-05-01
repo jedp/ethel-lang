@@ -15,6 +15,9 @@ boolean dict_contains(obj_t *dict_obj, obj_t *k);
 // Static methods for actual use.
 obj_t *dict_obj_get(obj_t *dict_obj, obj_method_args_t *args);
 obj_t *dict_obj_put(obj_t *dict_obj, obj_method_args_t *args);
+obj_t *dict_obj_keys(obj_t *dict_obj, obj_method_args_t *args);
+obj_t *dict_obj_len(obj_t *dict_obj, obj_method_args_t *args);
+obj_t *dict_obj_remove(obj_t *dict_obj, obj_method_args_t *args);
 
 static_method get_dict_static_method(static_method_ident_t method_id);
 
