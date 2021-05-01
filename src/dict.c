@@ -104,20 +104,20 @@ boolean dict_contains(obj_t *dict_obj, obj_t *k) {
   return False;
 }
 
-error_t dict_remove(obj_t *dict_obj, obj_t *k) {
+obj_t *dict_remove(obj_t *dict_obj, obj_t *k) {
   if (k->type != TYPE_INT &&
       k->type != TYPE_FLOAT &&
       k->type != TYPE_STRING &&
       k->type != TYPE_BYTE &&
       k->type != TYPE_BOOLEAN) {
-    return ERR_TYPE_UNUSABLE_AS_KEY;
+    return nil_obj();
   }
 
   obj_dict_t *dict = dict_obj->dict;
   obj_t *hash_obj = get_static_method(k->type, METHOD_HASH)(k, NULL);
   if (hash_obj->type == TYPE_NIL) {
     printf("Disaster! No hash method for %s\n", obj_type_names[k->type]);
-    return ERR_NO_SUCH_METHOD;
+    return nil_obj();
   }
   uint32_t hv = hash_obj->intval;
   uint32_t bucket_index = hv % dict->buckets;
@@ -135,15 +135,16 @@ error_t dict_remove(obj_t *dict_obj, obj_t *k) {
       } else if (node->next) {
         dict->nodes[bucket_index] = node->next;
       }
+      obj_t *v = node->v;
       free(node);
       dict->nelems--;
-      return ERR_NO_ERROR;
+      return v;
     }
     prev = node;
     node = node->next;
   }
   
-  return ERR_NO_ERROR;
+  return nil_obj();
 }
 
 obj_t *dict_get(obj_t *dict_obj, obj_t *k) {
@@ -223,7 +224,12 @@ obj_t *dict_obj_keys(obj_t *dict_obj, obj_method_args_t *args) {
 }
 
 obj_t *dict_obj_remove(obj_t *dict_obj, obj_method_args_t *args) {
-  return nil_obj();
+  if (args == NULL || args->arg == NULL) {
+    printf("Null arg to contains()\n");
+    return nil_obj();
+  }
+  obj_t *k = args->arg;
+  return dict_remove(dict_obj, k);
 }
 
 static_method get_dict_static_method(static_method_ident_t method_id) {
@@ -232,7 +238,7 @@ static_method get_dict_static_method(static_method_ident_t method_id) {
     case METHOD_CONTAINS: return dict_obj_in;
     case METHOD_LENGTH: return dict_obj_len;
     case METHOD_KEYS: return dict_obj_keys;
-    case METHOD_REMOVE_AT: return dict_obj_remove;
+    case METHOD_REMOVE_ELEM: return dict_obj_remove;
     default: return NULL;
   }
 }

@@ -157,6 +157,7 @@ enum static_method_ident_enum {
   METHOD_REMOVE_FIRST,
   METHOD_REMOVE_LAST,
   METHOD_REMOVE_AT,
+  METHOD_REMOVE_ELEM,
   METHOD_DUMP,
 };
 
@@ -196,6 +197,7 @@ static const static_method_name_t static_method_names[] = {
   { .ident = METHOD_REMOVE_FIRST,  .name = "removeFirst" },
   { .ident = METHOD_REMOVE_LAST,   .name = "removeLast" },
   { .ident = METHOD_REMOVE_AT,     .name = "removeAt" },
+  { .ident = METHOD_REMOVE_ELEM,   .name = "remove" },
   { .ident = METHOD_DUMP,          .name = "dump" },
 };
 

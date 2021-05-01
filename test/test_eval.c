@@ -955,6 +955,18 @@ void test_eval_dict_len(void) {
   TEST_ASSERT_EQUAL(4, result->obj->intval);
 }
 
+void test_eval_dict_remove(void) {
+  char *program = "{ val d = dict                      \n"
+                  "  d['a'] = 1                        \n"
+                  "  ;; 'a' and 97 hash collide        \n"
+                  "  d[97] = 2                         \n"
+                  "  d.remove('a')                     \n"
+                  "}";
+  eval_result_t *result = eval_program(program);
+  TEST_ASSERT_EQUAL(ERR_NO_ERROR, result->err);
+  TEST_ASSERT_EQUAL(1, result->obj->intval);
+}
+
 void test_eval(void) {
   RUN_TEST(test_eval_calculator);
   RUN_TEST(test_eval_unary_minus);
@@ -1026,5 +1038,6 @@ void test_eval(void) {
   RUN_TEST(test_eval_str_compare);
   RUN_TEST(test_eval_dict);
   RUN_TEST(test_eval_dict_len);
+  RUN_TEST(test_eval_dict_remove);
 }
 
