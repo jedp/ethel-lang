@@ -6,6 +6,7 @@
 /* Return the 32-bit hash of the boolean, which will just be 0 or 1. */
 obj_t *bool_hash(obj_t *obj, obj_method_args_t *args);
 obj_t *bool_copy(obj_t *obj, obj_method_args_t *args);
+obj_t *bool_to_string(obj_t *obj, obj_method_args_t *args);
 
 /* Return true if both objects are truthy. False otherwise.  */
 obj_t *bool_eq(obj_t *obj, obj_method_args_t *args);

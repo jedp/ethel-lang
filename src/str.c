@@ -49,6 +49,17 @@ obj_t *str_copy(obj_t *str_obj, obj_method_args_t /* Ignored */ *args) {
   return string_obj(str_obj->bytearray);
 }
 
+obj_t *str_to_string(obj_t *str_obj, obj_method_args_t /* Ignored */ *args) {
+  bytearray_t *a = bytearray_alloc(str_obj->bytearray->size + 2);
+  // Frame the string value in quotes.
+  a->data[0] = '"';
+  a->data[str_obj->bytearray->size + 1] = '"';
+  for (dim_t i = 0; i < str_obj->bytearray->size; i++) {
+    a->data[i + 1] = str_obj->bytearray->data[i];
+  }
+  return string_obj(a);
+}
+
 obj_t *str_contains(obj_t *str_obj, obj_method_args_t *args) {
   return arr_contains(str_obj, args);
 }
@@ -169,42 +180,6 @@ int bin_to_int(char* s) {
   }
 
   return val;
-}
-
-bytearray_t *int_to_str(int n) {
-  int digits = 0;
-  if (n < 0) digits++; // Sign.
-  int na = abs(n);
-  while (na > 0) {
-    na /= 10;
-    digits++;
-  }
-
-  // Edge case
-  if (digits == 0) {
-    return c_str_to_bytearray("0");
-  }
-
-  bytearray_t *a = bytearray_alloc(digits);
-
-  na = abs(n);
-  int i = digits - 1;
-  while (na > 0) {
-    a->data[i] = (na % 10) + '0';
-    na /= 10;
-    i--;
-  }
-  if (n < 0) a->data[0] = '-';
-
-  return a;
-}
-
-bytearray_t *float_to_str(float n) {
-  // TODO so lazy. Twiddle those bits, shed a dependency.
-  int len = snprintf(NULL, 0, "%f", n);
-  char* s = mem_alloc(len + 1);
-  snprintf(s, len + 1, "%f", n);
-  return c_str_to_bytearray(s);
 }
 
 bytearray_t *int_to_bin(unsigned int n) {
@@ -539,6 +514,7 @@ static_method get_str_static_method(static_method_ident_t method_id) {
   switch(method_id) {
     case METHOD_HASH: return str_hash;
     case METHOD_COPY: return str_copy;
+    case METHOD_TO_STRING: return str_to_string;
     case METHOD_LENGTH: return str_len;
     case METHOD_CONTAINS: return str_contains;
     case METHOD_GET: return str_get;

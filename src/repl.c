@@ -1,6 +1,8 @@
 #include <stdio.h>
 #include "../inc/mem.h"
+#include "../inc/int.h"
 #include "../inc/str.h"
+#include "../inc/type.h"
 #include "../inc/err.h"
 #include "../inc/obj.h"
 #include "../inc/env.h"
@@ -10,55 +12,12 @@
 
 char input[MAX_INPUT] = "";
 
-static char* byte_repr(char c) {
-  if (c >= ' ' && c <= '~') {
-    char* s = mem_alloc(4);
-    s[0] = '\'';
-    s[1] = c;
-    s[2] = '\'';
-    s[3] = '\0';
-    return s;
-  }
-
-  char* s = mem_alloc(5);
-  s[0] = '0';
-  s[1] = 'x';
-  s[2] = hex_char((c & 0xf0) >> 4);
-  s[3] = hex_char(c & 0xf);
-  s[4] = '\0';
-  return s;
-}
-
 void print_value(obj_t *obj) {
-  switch (obj->type) {
-    case TYPE_FUNC_PTR:
-      printf("Function");
-      break;
-    case TYPE_INT:
-      printf("%d", obj->intval);
-      break;
-    case TYPE_FLOAT:
-      printf("%f", (double) obj->floatval);
-      break;
-    case TYPE_STRING:
-      printf("\"%s\"", bytearray_to_c_str(obj->bytearray));
-      break;
-    case TYPE_BYTEARRAY:
-      printf("Byte Array");
-      break;
-    case TYPE_BYTE:
-      // Range check here.
-      printf("%s", byte_repr(obj->byteval));
-      break;
-    case TYPE_BOOLEAN:
-      if (obj->boolval) {
-        printf("true");
-      } else {
-        printf("false");
-      }
-      break;
-    default:
-      printf("<%s>", obj_type_names[obj->type]);
+  static_method to_string = get_static_method(obj->type, METHOD_TO_STRING);
+  if (to_string != NULL) {
+    printf("%s", bytearray_to_c_str(to_string(obj, NULL)->bytearray));
+  } else {
+    printf("<%s>", obj_type_names[obj->type]);
   }
 }
 

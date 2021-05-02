@@ -1,4 +1,5 @@
 #include <stdio.h>
+#include "../inc/arr.h"
 #include "../inc/byte.h"
 #include "../inc/obj.h"
 #include "../inc/str.h"
@@ -10,6 +11,24 @@ obj_t *byte_hash(obj_t *obj, obj_method_args_t *args) {
 
 obj_t *byte_copy(obj_t *obj, obj_method_args_t *args) {
   return byte_obj(obj->byteval);
+}
+
+obj_t *byte_to_string(obj_t *obj, obj_method_args_t *args) {
+  byte c = obj->byteval;
+  if (c >= ' ' && c <= '~') {
+    bytearray_t *a = bytearray_alloc(3);
+    a->data[0] = '\'';
+    a->data[1] = c;
+    a->data[2] = '\'';
+    return string_obj(a);
+  }
+
+  bytearray_t *a = bytearray_alloc(4);
+  a->data[0] = '0';
+  a->data[1] = 'x';
+  a->data[2] = hex_char((c & 0xf0) >> 4);
+  a->data[3] = hex_char(c & 0xf);
+  return string_obj(a);
 }
 
 obj_t *byte_eq(obj_t *obj, obj_method_args_t *args) {
@@ -201,6 +220,7 @@ static_method get_byte_static_method(static_method_ident_t method_id) {
   switch (method_id) {
     case METHOD_HASH: return byte_hash;
     case METHOD_COPY: return byte_copy;
+    case METHOD_TO_STRING: return byte_to_string;
     case METHOD_EQ: return byte_eq;
     case METHOD_NE: return byte_ne;
     case METHOD_GT: return byte_gt;

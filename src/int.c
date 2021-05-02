@@ -14,6 +14,35 @@ obj_t *int_copy(obj_t *obj, obj_method_args_t *args) {
   return int_obj(obj->intval);
 }
 
+obj_t *int_to_string(obj_t *obj, obj_method_args_t *args) {
+  int n = obj->intval;
+  int digits = 0;
+  if (n < 0) digits++; // Sign.
+  int na = abs(n);
+  while (na > 0) {
+    na /= 10;
+    digits++;
+  }
+
+  // Edge case
+  if (digits == 0) {
+    return string_obj(c_str_to_bytearray("0"));
+  }
+
+  bytearray_t *a = bytearray_alloc(digits);
+
+  na = abs(n);
+  int i = digits - 1;
+  while (na > 0) {
+    a->data[i] = (na % 10) + '0';
+    na /= 10;
+    i--;
+  }
+  if (n < 0) a->data[0] = '-';
+
+  return string_obj(a);
+}
+
 obj_t *int_eq(obj_t *obj, obj_method_args_t *args) {
   if (args == NULL || args->arg == NULL) return boolean_obj(False);
   obj_t *arg = args->arg;
@@ -123,7 +152,7 @@ obj_t *int_as(obj_t *obj, obj_method_args_t *args) {
     case TYPE_INT: return obj;
     case TYPE_FLOAT: return float_obj((float) obj->intval);
     case TYPE_BYTE: return byte_obj((uint32_t) obj->intval & 0xff);
-    case TYPE_STRING: return string_obj(int_to_str(obj->intval));
+    case TYPE_STRING: return int_to_string(obj, NULL);
     case TYPE_BOOLEAN: return boolean_obj((obj->intval != 0) ? True : False);
     default:
       printf("Cannot cast %s to type %s.\n",
@@ -218,6 +247,7 @@ static_method get_int_static_method(static_method_ident_t method_id) {
   switch (method_id) {
     case METHOD_HASH: return int_hash;
     case METHOD_COPY: return int_copy;
+    case METHOD_TO_STRING: return int_to_string;
     case METHOD_ABS: return int_abs;
     case METHOD_NEG: return int_neg;
     case METHOD_EQ: return int_eq;

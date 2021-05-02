@@ -9,7 +9,7 @@
 obj_t *_empty_list() {
   obj_t *obj = mem_alloc(sizeof(obj_t));
   obj->type = TYPE_LIST;
-  obj->flags = F_NONE;
+  obj->flags = F_ASSIGNABLE;
 
   obj_list_t *list = mem_alloc(sizeof(obj_list_t));
   list->elems = NULL;

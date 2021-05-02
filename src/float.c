@@ -1,4 +1,5 @@
 #include <stdio.h>
+#include "../inc/mem.h"
 #include "../inc/float.h"
 #include "../inc/str.h"
 #include "../inc/obj.h"
@@ -11,6 +12,15 @@ obj_t *float_hash(obj_t *obj, obj_method_args_t *args) {
 
 obj_t *float_copy(obj_t *obj, obj_method_args_t *args) {
   return float_obj(obj->floatval);
+}
+
+obj_t *float_to_string(obj_t *obj, obj_method_args_t *args) {
+  // TODO so lazy. Twiddle those bits, shed a dependency.
+  float n = obj->floatval;
+  int len = snprintf(NULL, 0, "%f", n);
+  char* s = mem_alloc(len + 1);
+  snprintf(s, len + 1, "%f", n);
+  return string_obj(c_str_to_bytearray(s));
 }
 
 obj_t *float_abs(obj_t *obj, obj_method_args_t *args) {
@@ -121,7 +131,7 @@ obj_t *float_as(obj_t *obj, obj_method_args_t *args) {
   }
 
   if (arg->type == TYPE_STRING) {
-    return string_obj(float_to_str(obj->floatval));
+    return float_to_string(obj, NULL);
   }
 
   if (arg->type == TYPE_BOOLEAN) {
@@ -137,6 +147,7 @@ static_method get_float_static_method(static_method_ident_t method_id) {
   switch (method_id) {
     case METHOD_HASH: return float_hash;
     case METHOD_COPY: return float_copy;
+    case METHOD_TO_STRING: return float_to_string;
     case METHOD_ABS: return float_abs;
     case METHOD_NEG: return float_neg;
     case METHOD_EQ: return float_eq;

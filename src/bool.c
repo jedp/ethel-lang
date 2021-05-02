@@ -12,6 +12,11 @@ obj_t *bool_copy(obj_t *obj, obj_method_args_t *args) {
   return boolean_obj(obj->boolval);
 }
 
+obj_t *bool_to_string(obj_t *obj, obj_method_args_t *args) {
+  return string_obj(c_str_to_bytearray(
+        (obj->boolval == True) ? "true" : "false"));
+}
+
 obj_t *bool_eq(obj_t *obj, obj_method_args_t *args) {
   if (args == NULL || args->arg == NULL) return boolean_obj(False);
   obj_t *arg = args->arg;
@@ -44,6 +49,7 @@ static_method get_bool_static_method(static_method_ident_t method_id) {
   switch (method_id) {
     case METHOD_HASH: return bool_hash;
     case METHOD_COPY: return bool_copy;
+    case METHOD_TO_STRING: return bool_to_string;
     case METHOD_EQ: return bool_eq;
     case METHOD_NE: return bool_ne;
     case METHOD_CAST: return bool_as;
