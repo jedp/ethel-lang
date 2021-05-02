@@ -10,6 +10,7 @@
 #include "test_eval.h"
 #include "test_hash.h"
 #include "test_env.h"
+#include "test_rand.h"
 #include "test_examples.h"
 
 void setUp(void) {
@@ -32,6 +33,7 @@ int main(int argc, char** argv) {
   test_hash();
   test_env();
   test_eval();
+  test_rand();
   test_examples();
 
   UNITY_END();

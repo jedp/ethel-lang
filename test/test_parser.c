@@ -6,12 +6,6 @@
 #include "../inc/str.h"
 #include "../inc/parser.h"
 
-#define USING_PROGRAM(text) \
-    char *program = text; \
-    ast_expr_t *ast = mem_alloc(sizeof(ast_expr_t)); \
-    parse_result_t *parse_result = mem_alloc(sizeof(parse_result_t)); \
-    parse_program(program, ast, parse_result);
-  
 void test_parse_empty(void) {
   char *program = "  ";
   ast_expr_t *ast = mem_alloc(sizeof(ast_expr_t));
