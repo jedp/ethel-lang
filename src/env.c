@@ -4,7 +4,7 @@
 #include "../inc/str.h"
 #include "../inc/env.h"
 
-env_sym_t *new_sym(bytearray_t *name, obj_t *obj, uint8_t flags) {
+env_sym_t *new_sym(bytearray_t *name, obj_t *obj, uint16_t flags) {
   env_sym_t *sym = mem_alloc(sizeof(env_sym_t));
   sym->name = mem_alloc(sizeof(bytearray_t));
   sym->name = bytearray_clone(name);
@@ -82,7 +82,7 @@ static env_sym_t *find_sym(env_t *env, bytearray_t *name, boolean recursive) {
 error_t _put_env(env_t *env,
                  bytearray_t *name,
                  const obj_t *obj,
-                 const uint8_t flags,
+                 const uint16_t flags,
                  boolean can_shadow) {
   if (env->top < 0) {
     return ERR_ENV_NO_SCOPE;
@@ -111,11 +111,11 @@ error_t _put_env(env_t *env,
   return ERR_NO_ERROR;
 }
 
-error_t put_env(env_t *env, bytearray_t *name, const obj_t *obj, const uint8_t flags) {
+error_t put_env(env_t *env, bytearray_t *name, const obj_t *obj, const uint16_t flags) {
   return _put_env(env, name, obj, flags, False);
 }
 
-error_t put_env_shadow(env_t *env, bytearray_t *name, const obj_t *obj, const uint8_t flags) {
+error_t put_env_shadow(env_t *env, bytearray_t *name, const obj_t *obj, const uint16_t flags) {
   return _put_env(env, name, obj, flags, True);
 }
 

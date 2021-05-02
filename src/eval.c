@@ -349,10 +349,10 @@ static void assign(ast_expr_t *lhs,
                    ast_expr_t *rhs,
                    eval_result_t *result,
                    env_t *env) {
-  bytearray_t *name = lhs->bytearray;
-  error_t error = ERR_EVAL_UNHANDLED_OBJECT;
 
   if (lhs->type == AST_SUBSCRIPT) {
+    // TODO this looks like a bug that might find an obj in the env
+    // e.g., if we say "foo"[1] = 'c', and env has an obj named foo.
     bytearray_t *name = lhs->op_args->a->bytearray;
     obj_t *obj = get_env(env, name);
 
@@ -370,16 +370,25 @@ static void assign(ast_expr_t *lhs,
     }
   }
 
+  if (!(lhs->flags & F_ASSIGNABLE)) {
+    result->err = ERR_LHS_NOT_ASSIGNABLE;
+    return;
+  }
+
+  bytearray_t *name = lhs->bytearray;
+  error_t error;
+
   if (rhs->type == AST_FUNCTION_DEF) {
     eval_func_def(rhs->func_def, result, env);
     if (result->err != ERR_NO_ERROR) goto error;
     error = put_env(env, name, result->obj, F_NONE);
-  } else {
-    eval_result_t *r = eval_expr(rhs, env);
-    if ((result->err = r->err) != ERR_NO_ERROR) goto error;
-    error = put_env(env, name, r->obj, lhs->flags);
-    result->obj = r->obj;
+    return;
   }
+
+  eval_result_t *r = eval_expr(rhs, env);
+  if ((result->err = r->err) != ERR_NO_ERROR) goto error;
+  error = put_env(env, name, r->obj, lhs->flags);
+  result->obj = r->obj;
 
   result->err = error;
   if (result->err != ERR_NO_ERROR) goto error;

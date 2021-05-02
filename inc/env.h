@@ -27,8 +27,8 @@ error_t env_init(env_t *env);
 error_t push_scope(env_t *env, env_sym_t *scope);
 error_t enter_scope(env_t *env);
 error_t leave_scope(env_t *env);
-error_t put_env(env_t *env, bytearray_t *name, const obj_t *obj, const uint8_t flags);
-error_t put_env_shadow(env_t *env, bytearray_t *name, const obj_t *obj, const uint8_t flags);
+error_t put_env(env_t *env, bytearray_t *name, const obj_t *obj, const uint16_t flags);
+error_t put_env_shadow(env_t *env, bytearray_t *name, const obj_t *obj, const uint16_t flags);
 error_t del_env(env_t *env, bytearray_t *name);
 obj_t *get_env(env_t *env, bytearray_t *name);
 

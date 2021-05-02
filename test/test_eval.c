@@ -901,6 +901,14 @@ void test_eval_arr_subscript_assign_int(void) {
   TEST_ASSERT_EQUAL_STRING("U Like potatoes", bytearray_to_c_str(result->obj->bytearray));
 } 
 
+void test_eval_lhs_not_assignable(void) {
+  TEST_ASSERT_EQUAL(ERR_LHS_NOT_ASSIGNABLE, eval_program("2 = 3")->err);
+  TEST_ASSERT_EQUAL(ERR_LHS_NOT_ASSIGNABLE, eval_program("2.1 = 2.2")->err);
+  TEST_ASSERT_EQUAL(ERR_LHS_NOT_ASSIGNABLE, eval_program("'c' = 'd'")->err);
+  TEST_ASSERT_EQUAL(ERR_LHS_NOT_ASSIGNABLE, eval_program("\"foo\" = \"bar\"")->err);
+  TEST_ASSERT_EQUAL(ERR_LHS_NOT_ASSIGNABLE, eval_program("arr(2) = 4")->err);
+}
+
 void test_eval_str_compare(void) {
   char *program = "{ val s1 = \"foo\"             \n"
                   "  val s2 = \"bar\"             \n"
@@ -1055,6 +1063,7 @@ void test_eval(void) {
   RUN_TEST(test_eval_arr_subscript_cmp);
   RUN_TEST(test_eval_arr_subscript_assign_byte);
   RUN_TEST(test_eval_arr_subscript_assign_int);
+  RUN_TEST(test_eval_lhs_not_assignable);
   RUN_TEST(test_eval_str_compare);
   RUN_TEST(test_eval_dict);
   RUN_TEST(test_eval_dict_len);

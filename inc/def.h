@@ -14,9 +14,9 @@
 #define FNV32Basis 0x811C9DC5
 
 enum flags {
-  F_NONE   = 0x00,
-  F_UNDEF  = 0x01,
-  F_VAR    = 0x80,
+  F_NONE       = 0x00,
+  F_ASSIGNABLE = 0x01,
+  F_VAR        = 0x80,
 };
 
 typedef uint8_t byte;

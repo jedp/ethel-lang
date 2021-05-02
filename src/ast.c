@@ -105,6 +105,7 @@ ast_expr_t *ast_nil(void) {
 
 ast_expr_t *ast_list(ast_expr_list_t *nullable_init_es) {
   ast_expr_t *node = ast_node(AST_LIST);
+  node->flags |= F_ASSIGNABLE;
   node->list = mem_alloc(sizeof(ast_list_t));
   if (nullable_init_es != NULL) {
     node->list->es = nullable_init_es;
@@ -116,6 +117,7 @@ ast_expr_t *ast_list(ast_expr_list_t *nullable_init_es) {
 
 ast_expr_t *ast_dict(ast_expr_kv_list_t *nullable_kvs) {
   ast_expr_t *node = ast_node(AST_DICT);
+  node->flags |= F_ASSIGNABLE;
   node->dict = mem_alloc(sizeof(ast_dict_t));
   node->dict->kv = mem_alloc(sizeof(ast_expr_kv_list_t));
   if (nullable_kvs != NULL) {
@@ -170,13 +172,14 @@ ast_expr_t *ast_type(ast_type_t type) {
 
 ast_expr_t *ast_ident(bytearray_t *name) {
   ast_expr_t *node = ast_node(AST_IDENT);
+  node->flags |= F_ASSIGNABLE;
   node->bytearray = name;
   return node;
 }
 
 ast_expr_t *ast_ident_decl(bytearray_t *name, uint16_t flags) {
   ast_expr_t *node = ast_ident(name);
-  node->flags = flags | F_UNDEF;
+  node->flags = flags | F_ASSIGNABLE;
   return node;
 }
 
