@@ -86,7 +86,9 @@ true
 
 ```
 > val d = dict { 'x': 42, "foo": 19, 3.14: "pi, roughly" }
-d
+{ 3.140000: "pi, roughly"
+  "foo": 19
+  'x': 42 }
 > d['x']
 42
 > d["foo"] + 1
