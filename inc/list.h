@@ -26,6 +26,7 @@ obj_t *list_append(obj_t *list_obj, obj_method_args_t *args);
 obj_t *list_remove_first(obj_t *list_obj, obj_method_args_t *args);
 obj_t *list_remove_last(obj_t *list_obj, obj_method_args_t *args);
 obj_t *list_remove_at(obj_t *list_obj, obj_method_args_t *args);
+obj_t *list_random_choice(obj_t *list_obj, obj_method_args_t *args);
 
 static_method get_list_static_method(static_method_ident_t method_id);
 

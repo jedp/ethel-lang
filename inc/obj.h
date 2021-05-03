@@ -131,6 +131,7 @@ enum static_method_ident_enum {
   METHOD_COPY,
   METHOD_TO_STRING,
   METHOD_ABS,
+  METHOD_RANDOM_CHOICE,
   METHOD_NEG,
   METHOD_EQ,
   METHOD_NE,
@@ -168,10 +169,12 @@ typedef struct {
 } static_method_name_t;
 
 static const static_method_name_t static_method_names[] = {
+  { .ident = METHOD_NONE,          .name = "<none>" },
   { .ident = METHOD_HASH,          .name = "hash" },
   { .ident = METHOD_COPY,          .name = "copy" },
   { .ident = METHOD_TO_STRING,     .name = "toString" },
   { .ident = METHOD_ABS,           .name = "abs" },
+  { .ident = METHOD_RANDOM_CHOICE, .name = "randomChoice" },
   { .ident = METHOD_NEG,           .name = "neg" },
   { .ident = METHOD_EQ,            .name = "eq" },
   { .ident = METHOD_NE,            .name = "ne" },

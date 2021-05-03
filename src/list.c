@@ -5,6 +5,7 @@
 #include "../inc/obj.h"
 #include "../inc/list.h"
 #include "../inc/type.h"
+#include "../inc/rand.h"
 
 obj_t *_empty_list() {
   obj_t *obj = mem_alloc(sizeof(obj_t));
@@ -332,6 +333,10 @@ obj_t *list_remove_at(obj_t *list_obj, obj_method_args_t *args) {
   return r;
 }
 
+obj_t *list_random_choice(obj_t *list_obj, obj_method_args_t *args) {
+  return _get_elem(list_obj, rand32() % _list_len(list_obj))->node;
+}
+
 static_method get_list_static_method(static_method_ident_t method_id) {
   switch (method_id) {
     case METHOD_HASH: return list_hash;
@@ -348,6 +353,7 @@ static_method get_list_static_method(static_method_ident_t method_id) {
     case METHOD_REMOVE_FIRST: return list_remove_first;
     case METHOD_REMOVE_LAST: return list_remove_last;
     case METHOD_REMOVE_AT: return list_remove_at;
+    case METHOD_RANDOM_CHOICE: return list_random_choice;
     default: return NULL;
   }
 }

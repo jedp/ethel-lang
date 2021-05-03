@@ -33,6 +33,9 @@ obj_t *arr_ne(obj_t *array_obj, obj_method_args_t *args);
 /* Return the array slice as a new array. */
 obj_t *arr_slice(obj_t *array_obj, obj_method_args_t *args);
 
+/* Return a random element from the array, or nil if size is 0. */
+obj_t *arr_random_choice(obj_t *array_obj, obj_method_args_t *args);
+
 static_method get_arr_static_method(static_method_ident_t method_id);
 
 #endif

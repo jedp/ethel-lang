@@ -343,6 +343,10 @@ obj_t *str_substring(obj_t *str_obj, obj_method_args_t *args) {
   return _str_slice(str_obj, start_arg->intval, end_arg->intval);
 }
 
+obj_t *str_random_choice(obj_t *str_obj, obj_method_args_t *args) {
+  return arr_random_choice(str_obj, args);
+}
+
 obj_t *byte_dump(obj_t *byte_obj) {
   // 'x' -> "120  0x78  11111111"
   bytearray_t *a = bytearray_alloc(19);
@@ -522,6 +526,7 @@ static_method get_str_static_method(static_method_ident_t method_id) {
     case METHOD_NE: return str_ne;
     case METHOD_CAST: return str_as;
     case METHOD_SUBSTR: return str_substring;
+    case METHOD_RANDOM_CHOICE: return str_random_choice;
     default: return NULL;
   }
 }

@@ -1,6 +1,7 @@
 #include <stdio.h>
 #include "../inc/math.h"
 #include "../inc/mem.h"
+#include "../inc/rand.h"
 #include "../inc/obj.h"
 #include "../inc/arr.h"
 
@@ -206,6 +207,15 @@ obj_t *arr_slice(obj_t *arr_obj, obj_method_args_t *args) {
   return _arr_slice(arr_obj, start_arg->intval, end_arg->intval);
 }
 
+obj_t *arr_random_choice(obj_t *arr_obj, obj_method_args_t *args) {
+  uint32_t len = arr_obj->bytearray->size;
+  if (len < 1) {
+    printf("Empty string.\n");
+    return nil_obj();
+  }
+  return byte_obj(arr_obj->bytearray->data[rand32() % len]);
+}
+
 static_method get_arr_static_method(static_method_ident_t method_id) {
   switch (method_id) {
     case METHOD_HASH: return arr_hash;
@@ -215,6 +225,7 @@ static_method get_arr_static_method(static_method_ident_t method_id) {
     case METHOD_EQ: return arr_eq;
     case METHOD_NE: return arr_ne;
     case METHOD_SLICE: return arr_slice;
+    case METHOD_RANDOM_CHOICE: return arr_random_choice;
     default: return NULL;
   }
 }
