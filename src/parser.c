@@ -211,6 +211,7 @@ ast_expr_kv_list_t *parse_expr_kv_list(lexer_t *lexer) {
 
   root->k = e->op_args->a;
   root->v = e->op_args->b;
+  root->next = NULL;
 
   while (lexer->token.tag == TAG_COMMA) {
     advance(lexer);
@@ -226,7 +227,7 @@ ast_expr_kv_list_t *parse_expr_kv_list(lexer_t *lexer) {
     next->v = e->op_args->b;
     next->next = NULL;
 
-    root->next = next;
+    node->next = next;
     node = next;
   }
 

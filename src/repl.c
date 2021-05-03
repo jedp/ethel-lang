@@ -2,6 +2,7 @@
 #include "../inc/mem.h"
 #include "../inc/int.h"
 #include "../inc/str.h"
+#include "../inc/dict.h"
 #include "../inc/type.h"
 #include "../inc/err.h"
 #include "../inc/obj.h"
@@ -25,7 +26,7 @@ void print_list(obj_t *list_obj) {
   printf("{ ");
 
   obj_list_element_t *root = list_obj->list->elems;
-  while(root != NULL) {
+  while (root != NULL) {
     print_value(root->node);
     root = root->next;
 
@@ -37,9 +38,29 @@ void print_list(obj_t *list_obj) {
   printf(" }");
 }
 
+void print_dict(obj_t *dict_obj) {
+  if (dict_obj->dict->nelems < 1) {
+    printf("{}");
+    return;
+  }
+
+  printf("{ ");
+  obj_list_element_t *root = dict_obj_keys(dict_obj, NULL)->list->elems;
+  while (root != NULL) {
+    print_value(root->node);
+    printf(": ");
+    print_value(dict_obj_get(dict_obj, wrap_varargs(1, root->node)));
+    root = root->next;
+    if (root != NULL) printf("\n  ");
+  }
+  printf(" }");
+}
+
 void print_result(obj_t *obj) {
   if (obj->type == TYPE_LIST) {
     print_list(obj);
+  } else if (obj->type == TYPE_DICT) {
+    print_dict(obj);
   } else {
     print_value(obj);
   }

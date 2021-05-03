@@ -185,8 +185,6 @@ static void eval_dict_expr(ast_dict_t *expr, eval_result_t *result, env_t *env) 
       return;
     }
 
-    printf("inserted %s key, %s value\n", obj_type_names[k->type], obj_type_names[v->type]);
-
     kv = kv->next;
   }
 
