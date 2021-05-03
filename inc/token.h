@@ -83,6 +83,7 @@ enum tag_enum {
   TAG_FUNC_DEF,
   TAG_FUNC_CALL,
   TAG_FUNC_RETURN,
+  TAG_RAND,
   TAG_ABS,
   TAG_SIN,
   TAG_COS,
@@ -201,6 +202,7 @@ static const char* tag_names[] = {
   "FUNCTION-RETURN",
 
   // Math
+  "RAND",
   "ABS",
   "SIN",
   "COS",
@@ -258,6 +260,7 @@ static const token_t reserved[] = {
   { TAG_TYPEOF,        .string = (char *) "type" },
   { TAG_TRUE,          .string = (char *) "true" },
   { TAG_FALSE,         .string = (char *) "false" },
+  { TAG_RAND,          .string = (char *) "rand" },
   { TAG_ABS,           .string = (char *) "abs" },
   { TAG_SIN,           .string = (char *) "sin" },
   { TAG_COS,           .string = (char *) "cos" },

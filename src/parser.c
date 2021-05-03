@@ -114,6 +114,7 @@ ast_reserved_callable_type_t ast_callable_type_for_tag(tag_t tag) {
     case TAG_DUMP: return AST_CALL_DUMP;
     case TAG_PRINT: return AST_CALL_PRINT;
     case TAG_INPUT: return AST_CALL_INPUT;
+    case TAG_RAND: return AST_CALL_RAND;
     case TAG_ABS: return AST_CALL_ABS;
     case TAG_SIN: return AST_CALL_SIN;
     case TAG_COS: return AST_CALL_COS;
@@ -610,6 +611,7 @@ ast_expr_t *parse_atom(lexer_t *lexer) {
     }
     case TAG_IS:
     case TAG_TYPEOF:
+    case TAG_RAND:
     case TAG_ABS: 
     case TAG_SIN: 
     case TAG_COS: 

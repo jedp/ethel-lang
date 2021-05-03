@@ -11,6 +11,7 @@
 #include "../inc/list.h"
 #include "../inc/dict.h"
 #include "../inc/type.h"
+#include "../inc/rand.h"
 #include "../inc/eval.h"
 #include "../inc/parser.h"
 #include "../inc/ast.h"
@@ -35,6 +36,15 @@ static void eval_boolean_expr(ast_expr_t *expr, eval_result_t *result) {
     return;
   }
   result->obj = boolean_obj(expr->boolval);
+}
+
+static void eval_rand(ast_expr_t *expr, eval_result_t *result, env_t *env) {
+  eval_result_t *r = eval_expr(expr, env);
+  if (r->obj->type != TYPE_INT || r->obj->intval < 1) {
+    result->err = ERR_TYPE_POSITIVE_INT_REQUIRED;
+    return;
+  }
+  result->obj = int_obj(rand32() % r->obj->intval);
 }
 
 static void eval_abs(ast_expr_t *expr, eval_result_t *result, env_t *env) {
@@ -696,6 +706,9 @@ static void resolve_callable_expr(ast_expr_t *expr, env_t *env, eval_result_t *r
       readln_input(result);
       break;
     }
+    case AST_CALL_RAND:
+      eval_rand(args->root, result, env);
+      break;
     case AST_CALL_ABS:
       eval_abs(args->root, result, env);
       break;

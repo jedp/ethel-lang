@@ -4,6 +4,7 @@
 #include "../inc/str.h"
 #include "../inc/env.h"
 #include "../inc/eval.h"
+#include "../inc/rand.h"
 
 eval_result_t *eval_program(char* program) {
   env_t env;
@@ -340,6 +341,19 @@ void test_eval_callable_abs(void) {
 
   obj_t *obj = result->obj;
   TEST_ASSERT_EQUAL(42, obj->intval);
+}
+
+void test_eval_callable_rand(void) {
+  char *program = "rand(1)";  // A number between 0 and 0.
+  eval_result_t *result = eval_program(program);
+  TEST_ASSERT_EQUAL(ERR_NO_ERROR, result->err);
+  TEST_ASSERT_EQUAL(0, result->obj->intval);
+
+  rand32_init();  // Reset RNG to default initial seed.
+  program = "rand(100)";
+  result = eval_program(program);
+  TEST_ASSERT_EQUAL(ERR_NO_ERROR, result->err);
+  TEST_ASSERT_EQUAL(79, result->obj->intval);
 }
 
 void test_eval_callable_hex(void) {
@@ -1024,6 +1038,7 @@ void test_eval(void) {
   RUN_TEST(test_eval_is_type);
   RUN_TEST(test_eval_type_of);
   RUN_TEST(test_eval_callable_abs);
+  RUN_TEST(test_eval_callable_rand);
   RUN_TEST(test_eval_callable_hex);
   RUN_TEST(test_eval_callable_bin);
   RUN_TEST(test_eval_string_length);
