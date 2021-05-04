@@ -1,5 +1,6 @@
 #include "unity/unity.h"
 #include "test_dict.h"
+#include "../inc/def.h"
 #include "../inc/dict.h"
 #include "../inc/str.h"
 #include "../inc/obj.h"
@@ -190,6 +191,20 @@ void test_dict_contains(void) {
   TEST_ASSERT_EQUAL(False, dict_contains(d, boolean_obj(False)));
 }
 
+void test_dict_resize(void) {
+  obj_t *d = dict_obj();
+  TEST_ASSERT_EQUAL(DICT_INIT_BUCKETS, d->dict->buckets);
+
+  // Should resize after number of elems exceeds twice number of buckets.
+  // More or less.
+  obj_t *v = int_obj(0);
+  for (int i = 0; i < DICT_INIT_BUCKETS * 2 + 1; i++) {
+    dict_put(d, int_obj(i), v);
+  }
+
+  TEST_ASSERT_NOT_EQUAL(DICT_INIT_BUCKETS, d->dict->buckets);
+}
+
 void test_dict(void) {
   RUN_TEST(test_dict_init);
   RUN_TEST(test_dict_put);
@@ -199,4 +214,5 @@ void test_dict(void) {
   RUN_TEST(test_dict_replace_val);
   RUN_TEST(test_dict_remove);
   RUN_TEST(test_dict_contains);
+  RUN_TEST(test_dict_resize);
 }

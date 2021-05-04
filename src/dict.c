@@ -8,27 +8,22 @@
 #include "../inc/dict.h"
 #include "../inc/obj.h"
 
-error_t dict_init(obj_t *dict_obj, uint32_t buckets) {
+error_t _dict_init(obj_dict_t *dict, uint32_t buckets) {
   dict_node_t **nodes = mem_alloc(sizeof(dict_node_t*) * buckets);
   if (nodes == NULL) return ERR_OUT_OF_MEMORY;
 
   memset(nodes, 0, sizeof(dict_node_t*) * buckets);
-  dict_obj->dict->buckets = buckets;
-  dict_obj->dict->nelems = 0;
-  dict_obj->dict->nodes = nodes;
+  dict->buckets = buckets;
+  dict->nelems = 0;
+  dict->nodes = nodes;
   return ERR_NO_ERROR;
 }
 
-error_t dict_put(obj_t *obj, obj_t *k, obj_t *v) {
-  if (k->type != TYPE_INT &&
-      k->type != TYPE_FLOAT &&
-      k->type != TYPE_STRING &&
-      k->type != TYPE_BYTE &&
-      k->type != TYPE_BOOLEAN) {
-    return ERR_TYPE_UNUSABLE_AS_KEY;
-  }
+error_t dict_init(obj_t *obj, uint32_t buckets) {
+  return _dict_init(obj->dict, buckets);
+}
 
-  obj_dict_t *dict = obj->dict;
+error_t _dict_put(obj_dict_t *dict, obj_t *k, obj_t *v) {
   obj_t *hash_obj = get_static_method(k->type, METHOD_HASH)(k, NULL);
   if (hash_obj->type == TYPE_NIL) {
     printf("Disaster! No hash method for %s\n", obj_type_names[k->type]);
@@ -73,6 +68,68 @@ error_t dict_put(obj_t *obj, obj_t *k, obj_t *v) {
   return ERR_NO_ERROR;
 }
 
+static error_t dict_resize(obj_t *orig_obj) {
+  // Might want to be bigger or smaller.
+  dim_t new_buckets =
+    DICT_INIT_BUCKETS +
+    (orig_obj->dict->nelems / DICT_INIT_BUCKETS) * DICT_INIT_BUCKETS;
+
+  if (new_buckets == orig_obj->dict->buckets) {
+    return ERR_NO_ERROR;
+  }
+
+  error_t err;
+  // TODO dict_obj needs to report if it can't malloc.
+  obj_dict_t *new_dict = mem_alloc(sizeof(obj_dict_t));
+
+  if ((err = _dict_init(new_dict, new_buckets)) != ERR_NO_ERROR) {
+    mem_free(new_dict);
+    return err;
+  }
+
+  // Put all of orig's items in the new dict.
+  for (dim_t i = 0; i < orig_obj->dict->buckets; i++) {
+    dict_node_t *kv = orig_obj->dict->nodes[i];
+    while(kv != NULL) {
+      _dict_put(new_dict, kv->k, kv->v);
+      kv = kv->next;
+    }
+  }
+
+  // TODO GC
+  obj_dict_t *old_dict = orig_obj->dict;
+  orig_obj->dict = new_dict;
+  mem_free(old_dict);
+
+#ifdef DEBUG
+  printf("Resized dict. Now %d buckets for %d elems.\n",
+      new_dict->buckets, new_dict->nelems);
+#endif
+
+  return ERR_NO_ERROR;
+}
+
+error_t dict_put(obj_t *obj, obj_t *k, obj_t *v) {
+  if (k->type != TYPE_INT &&
+      k->type != TYPE_FLOAT &&
+      k->type != TYPE_STRING &&
+      k->type != TYPE_BYTE &&
+      k->type != TYPE_BOOLEAN) {
+    return ERR_TYPE_UNUSABLE_AS_KEY;
+  }
+
+  obj_dict_t *dict = obj->dict;
+  error_t err;
+
+  if ((err = _dict_put(dict, k, v)) != ERR_NO_ERROR) {
+    return err;
+  }
+
+  dict_resize(obj);
+
+  return ERR_NO_ERROR;
+}
+
 boolean dict_contains(obj_t *dict_obj, obj_t *k) {
   if (k->type != TYPE_INT &&
       k->type != TYPE_FLOAT &&
@@ -105,7 +162,7 @@ boolean dict_contains(obj_t *dict_obj, obj_t *k) {
   return False;
 }
 
-obj_t *dict_remove(obj_t *dict_obj, obj_t *k) {
+obj_t *dict_remove(obj_t *obj, obj_t *k) {
   if (k->type != TYPE_INT &&
       k->type != TYPE_FLOAT &&
       k->type != TYPE_STRING &&
@@ -114,7 +171,7 @@ obj_t *dict_remove(obj_t *dict_obj, obj_t *k) {
     return nil_obj();
   }
 
-  obj_dict_t *dict = dict_obj->dict;
+  obj_dict_t *dict = obj->dict;
   obj_t *hash_obj = get_static_method(k->type, METHOD_HASH)(k, NULL);
   if (hash_obj->type == TYPE_NIL) {
     printf("Disaster! No hash method for %s\n", obj_type_names[k->type]);
@@ -139,6 +196,9 @@ obj_t *dict_remove(obj_t *dict_obj, obj_t *k) {
       obj_t *v = node->v;
       free(node);
       dict->nelems--;
+
+      dict_resize(obj);
+
       return v;
     }
     prev = node;
@@ -148,7 +208,7 @@ obj_t *dict_remove(obj_t *dict_obj, obj_t *k) {
   return nil_obj();
 }
 
-obj_t *dict_get(obj_t *dict_obj, obj_t *k) {
+obj_t *dict_get(obj_t *obj, obj_t *k) {
   if (k->type != TYPE_INT &&
       k->type != TYPE_FLOAT &&
       k->type != TYPE_STRING &&
@@ -157,7 +217,7 @@ obj_t *dict_get(obj_t *dict_obj, obj_t *k) {
     return nil_obj();
   }
 
-  obj_dict_t *dict = dict_obj->dict;
+  obj_dict_t *dict = obj->dict;
   obj_t *hash_obj = get_static_method(k->type, METHOD_HASH)(k, NULL);
   if (hash_obj->type == TYPE_NIL) {
     printf("Disaster! No hash method for %s\n", obj_type_names[k->type]);
@@ -181,16 +241,16 @@ obj_t *dict_get(obj_t *dict_obj, obj_t *k) {
   return nil_obj();
 }
 
-obj_t *dict_obj_get(obj_t *dict_obj, obj_method_args_t *args) {
+obj_t *dict_obj_get(obj_t *obj, obj_method_args_t *args) {
   if (args == NULL || args->arg == NULL) {
     printf("Null arg to get()\n");
     return nil_obj();
   }
   obj_t *k = args->arg;
-  return dict_get(dict_obj, k);
+  return dict_get(obj, k);
 }
 
-obj_t *dict_obj_put(obj_t *dict_obj, obj_method_args_t *args) {
+obj_t *dict_obj_put(obj_t *obj, obj_method_args_t *args) {
   if (args == NULL || args->arg == NULL) {
     printf("Null arg to put()\n");
     return nil_obj();
@@ -201,29 +261,29 @@ obj_t *dict_obj_put(obj_t *dict_obj, obj_method_args_t *args) {
     printf("Two args required to put in dict.\n");
     return nil_obj();
   }
-  if (dict_put(dict_obj, k, v) != ERR_NO_ERROR) {
+  if (dict_put(obj, k, v) != ERR_NO_ERROR) {
     return nil_obj();
   }
   return v;
 }
 
-obj_t *dict_obj_in(obj_t *dict_obj, obj_method_args_t *args) {
+obj_t *dict_obj_in(obj_t *obj, obj_method_args_t *args) {
   if (args == NULL || args->arg == NULL) {
     printf("Null arg to contains()\n");
     return nil_obj();
   }
   obj_t *k = args->arg;
-  return boolean_obj(dict_contains(dict_obj, k));
+  return boolean_obj(dict_contains(obj, k));
 }
 
-obj_t *dict_obj_len(obj_t *dict_obj, obj_method_args_t *args) {
-  return int_obj(dict_obj->dict->nelems);
+obj_t *dict_obj_len(obj_t *obj, obj_method_args_t *args) {
+  return int_obj(obj->dict->nelems);
 }
 
-obj_t *dict_obj_keys(obj_t *dict_obj, obj_method_args_t *args) {
+obj_t *dict_obj_keys(obj_t *obj, obj_method_args_t *args) {
   obj_t *list = list_obj(NULL);
-  for (dim_t i = 0; i < dict_obj->dict->buckets; i++) {
-    dict_node_t *kv = dict_obj->dict->nodes[i];
+  for (dim_t i = 0; i < obj->dict->buckets; i++) {
+    dict_node_t *kv = obj->dict->nodes[i];
     while (kv != NULL) {
       list_append(list, wrap_varargs(1, kv->k));
       kv = kv->next;
@@ -232,13 +292,13 @@ obj_t *dict_obj_keys(obj_t *dict_obj, obj_method_args_t *args) {
   return list;
 }
 
-obj_t *dict_obj_remove(obj_t *dict_obj, obj_method_args_t *args) {
+obj_t *dict_obj_remove(obj_t *obj, obj_method_args_t *args) {
   if (args == NULL || args->arg == NULL) {
     printf("Null arg to contains()\n");
     return nil_obj();
   }
   obj_t *k = args->arg;
-  return dict_remove(dict_obj, k);
+  return dict_remove(obj, k);
 }
 
 static_method get_dict_static_method(static_method_ident_t method_id) {
