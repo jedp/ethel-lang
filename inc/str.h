@@ -79,8 +79,11 @@ bytearray_t *c_str_to_bytearray(const char* s);
  */
 obj_t *str_hash(obj_t *str_obj, obj_method_args_t *args);
 obj_t *str_copy(obj_t *str_obj, obj_method_args_t *args);
+obj_t *str_to_int(obj_t *str_obj, obj_method_args_t *args);
 obj_t *str_to_string(obj_t *str_obj, obj_method_args_t *args);
-
+obj_t *str_to_float(obj_t *str_obj, obj_method_args_t *args);
+obj_t *str_to_byte(obj_t *str_obj, obj_method_args_t *args);
+obj_t *str_add(obj_t *str_obj, obj_method_args_t *args);
 obj_t *str_get(obj_t *str_obj, obj_method_args_t *args);
 obj_t *str_contains(obj_t *str_obj, obj_method_args_t *args);
 obj_t *str_len(obj_t *str_obj, obj_method_args_t *args);

@@ -3,6 +3,7 @@
 #include "../inc/byte.h"
 #include "../inc/obj.h"
 #include "../inc/str.h"
+#include "../inc/type.h"
 
 obj_t *byte_hash(obj_t *obj, obj_method_args_t *args) {
   // 8-bit int is its own 32-bit hash.
@@ -11,6 +12,10 @@ obj_t *byte_hash(obj_t *obj, obj_method_args_t *args) {
 
 obj_t *byte_copy(obj_t *obj, obj_method_args_t *args) {
   return byte_obj(obj->byteval);
+}
+
+obj_t *byte_to_int(obj_t *obj, obj_method_args_t *args) {
+  return int_obj((uint32_t) obj->byteval);
 }
 
 obj_t *byte_to_string(obj_t *obj, obj_method_args_t *args) {
@@ -29,6 +34,27 @@ obj_t *byte_to_string(obj_t *obj, obj_method_args_t *args) {
   a->data[2] = hex_char((c & 0xf0) >> 4);
   a->data[3] = hex_char(c & 0xf);
   return string_obj(a);
+}
+
+obj_t *byte_to_float(obj_t *obj, obj_method_args_t *args) {
+  return float_obj((float) obj->byteval);
+}
+
+obj_t *byte_to_byte(obj_t *obj, obj_method_args_t *args) {
+  return obj;
+}
+
+obj_t *byte_add(obj_t *obj, obj_method_args_t *args) {
+  if (args == NULL || args->arg == NULL) return obj;
+  obj_t *arg = args->arg;
+  static_method m_cast = get_static_method(arg->type, METHOD_TO_BYTE);
+  if (m_cast == NULL) {
+    printf("Cannot add %s to %s",
+        obj_type_names[arg->type], obj_type_names[obj->type]);
+    return obj;
+  }
+
+  return byte_obj((uint32_t) ((obj->byteval + m_cast(arg, NULL)->byteval) & 0xff));
 }
 
 obj_t *byte_eq(obj_t *obj, obj_method_args_t *args) {
@@ -221,6 +247,9 @@ static_method get_byte_static_method(static_method_ident_t method_id) {
     case METHOD_HASH: return byte_hash;
     case METHOD_COPY: return byte_copy;
     case METHOD_TO_STRING: return byte_to_string;
+    case METHOD_TO_INT: return byte_to_int;
+    case METHOD_TO_FLOAT: return byte_to_float;
+    case METHOD_TO_BYTE: return byte_to_byte;
     case METHOD_EQ: return byte_eq;
     case METHOD_NE: return byte_ne;
     case METHOD_GT: return byte_gt;
@@ -233,6 +262,7 @@ static_method get_byte_static_method(static_method_ident_t method_id) {
     case METHOD_BITWISE_NOT: return byte_bitwise_not;
     case METHOD_BITWISE_SHL: return byte_bitwise_shl;
     case METHOD_BITWISE_SHR: return byte_bitwise_shr;
+    case METHOD_ADD: return byte_add;
     case METHOD_CAST: return byte_as;
     default: return NULL;
   }

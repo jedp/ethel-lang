@@ -21,8 +21,8 @@ static void strip_trailing_ws(char* s) {
   }
 }
 
-static obj_t *_str_slice(obj_t *str_obj, int start, int end) {
-  if (end > str_obj->bytearray->size) end = str_obj->bytearray->size;
+static obj_t *_str_slice(obj_t *obj, int start, int end) {
+  if (end > obj->bytearray->size) end = obj->bytearray->size;
 
   if (end < 0 ||
       start < 0 ||
@@ -34,38 +34,38 @@ static obj_t *_str_slice(obj_t *str_obj, int start, int end) {
   dim_t len = end - start;
   bytearray_t *ba = bytearray_alloc(len);
   for (int i = 0; i < end; i++) {
-    ba->data[i] = str_obj->bytearray->data[start+i];
+    ba->data[i] = obj->bytearray->data[start+i];
   }
 
   return string_obj(ba);
 }
 
-obj_t *str_hash(obj_t *str_obj, obj_method_args_t /* Ignored */ *args) {
-  return arr_hash(str_obj, args);
+obj_t *str_hash(obj_t *obj, obj_method_args_t /* Ignored */ *args) {
+  return arr_hash(obj, args);
 }
 
-obj_t *str_copy(obj_t *str_obj, obj_method_args_t /* Ignored */ *args) {
+obj_t *str_copy(obj_t *obj, obj_method_args_t /* Ignored */ *args) {
   // string_obj copies the contents of the source.
-  return string_obj(str_obj->bytearray);
+  return string_obj(obj->bytearray);
 }
 
-obj_t *str_to_string(obj_t *str_obj, obj_method_args_t /* Ignored */ *args) {
-  bytearray_t *a = bytearray_alloc(str_obj->bytearray->size + 2);
+obj_t *str_to_string(obj_t *obj, obj_method_args_t /* Ignored */ *args) {
+  bytearray_t *a = bytearray_alloc(obj->bytearray->size + 2);
   // Frame the string value in quotes.
   a->data[0] = '"';
-  a->data[str_obj->bytearray->size + 1] = '"';
-  for (dim_t i = 0; i < str_obj->bytearray->size; i++) {
-    a->data[i + 1] = str_obj->bytearray->data[i];
+  a->data[obj->bytearray->size + 1] = '"';
+  for (dim_t i = 0; i < obj->bytearray->size; i++) {
+    a->data[i + 1] = obj->bytearray->data[i];
   }
   return string_obj(a);
 }
 
-obj_t *str_contains(obj_t *str_obj, obj_method_args_t *args) {
-  return arr_contains(str_obj, args);
+obj_t *str_contains(obj_t *obj, obj_method_args_t *args) {
+  return arr_contains(obj, args);
 }
 
-obj_t *str_get(obj_t *str_obj, obj_method_args_t *args) {
-  return arr_get(str_obj, args);
+obj_t *str_get(obj_t *obj, obj_method_args_t *args) {
+  return arr_get(obj, args);
 }
 
 dim_t c_str_len(const char* s) {
@@ -198,7 +198,7 @@ bytearray_t *int_to_bin(unsigned int n) {
   return a;
 }
 
-int str_to_int(obj_t *obj) {
+obj_t *str_to_int(obj_t *obj, obj_method_args_t *args) {
   char *end = NULL;
   char *input = mem_alloc(obj->bytearray->size + 1);
   c_str_cp(input, bytearray_to_c_str(obj->bytearray));
@@ -210,14 +210,31 @@ int str_to_int(obj_t *obj) {
   // Can only free input after we're done using the end pointer.
   mem_free(input);
 
-  if (bad_input) return 0;
-  if (l > INT_MAX) return -1;
-  if (l < INT_MIN) return -1;
+  if (bad_input) return int_obj(0);
+  if (l > INT_MAX) return int_obj(-1);
+  if (l < INT_MIN) return int_obj(-1);
 
-  return (int) l;
+  return int_obj((int) l);
 }
 
-float str_to_float(obj_t *obj) {
+obj_t *str_to_byte(obj_t *obj, obj_method_args_t *args) {
+  char *end = NULL;
+  char *input = mem_alloc(obj->bytearray->size + 1);
+  c_str_cp(input, bytearray_to_c_str(obj->bytearray));
+  strip_trailing_ws(input);
+
+  long l = strtol(input, &end, 10);
+  // Expect to have read to the end of the string or to a decimal point.
+  boolean bad_input = (*end != '\0') && (*end != '.');
+  // Can only free input after we're done using the end pointer.
+  mem_free(input);
+
+  if (bad_input) return byte_obj(0);
+
+  return byte_obj(l & 0xff);
+}
+
+obj_t *str_to_float(obj_t *obj, obj_method_args_t *args) {
   char *end = NULL;
   char *input = mem_alloc(obj->bytearray->size + 1);
   c_str_cp(input, bytearray_to_c_str(obj->bytearray));
@@ -228,9 +245,9 @@ float str_to_float(obj_t *obj) {
   boolean bad_input = *end != '\0';
   mem_free(input);
 
-  if (bad_input) return -1;
+  if (bad_input) return float_obj(-1);
 
-  return f;
+  return float_obj(f);
 }
 
 bytearray_t *int_to_hex(unsigned int n) {
@@ -300,35 +317,35 @@ bytearray_t *c_str_to_bytearray(const char* s) {
   return a;
 }
 
-obj_t *str_len(obj_t *str_obj, obj_method_args_t *args) {
-  return int_obj(str_obj->bytearray->size);
+obj_t *str_len(obj_t *obj, obj_method_args_t *args) {
+  return int_obj(obj->bytearray->size);
 }
 
-obj_t *str_eq(obj_t *str_obj, obj_method_args_t *args) {
-  return arr_eq(str_obj, args);
+obj_t *str_eq(obj_t *obj, obj_method_args_t *args) {
+  return arr_eq(obj, args);
 }
 
-obj_t *str_ne(obj_t *str_obj, obj_method_args_t *args) {
-  return arr_ne(str_obj, args);
+obj_t *str_ne(obj_t *obj, obj_method_args_t *args) {
+  return arr_ne(obj, args);
 }
 
-obj_t *str_as(obj_t *str_obj, obj_method_args_t *args) {
+obj_t *str_as(obj_t *obj, obj_method_args_t *args) {
   if (args == NULL || args->arg == NULL) return boolean_obj(False);
   obj_t *type_arg = args->arg;
 
   switch (type_arg->type) {
-    case TYPE_STRING: return str_obj;
-    case TYPE_INT: return int_obj(str_to_int(str_obj));
-    case TYPE_FLOAT: return float_obj(str_to_float(str_obj));
-    case TYPE_BOOLEAN: return boolean_obj(truthy(str_obj) ? True : False);
+    case TYPE_STRING: return obj;
+    case TYPE_INT: return str_to_int(obj, NULL);
+    case TYPE_FLOAT: return str_to_float(obj, NULL);
+    case TYPE_BOOLEAN: return boolean_obj(truthy(obj) ? True : False);
     default:
       printf("Cannot cast %s to type %s.\n",
-             obj_type_names[str_obj->type], obj_type_names[type_arg->type]);
+             obj_type_names[obj->type], obj_type_names[type_arg->type]);
       return boolean_obj(False);
   }
 }
 
-obj_t *str_substring(obj_t *str_obj, obj_method_args_t *args) {
+obj_t *str_substring(obj_t *obj, obj_method_args_t *args) {
   if (args == NULL || args->arg == NULL) {
     printf("Null arg to substring()\n");
     return nil_obj();
@@ -340,11 +357,44 @@ obj_t *str_substring(obj_t *str_obj, obj_method_args_t *args) {
   obj_t *end_arg = args->next->arg;
   if (end_arg->type != TYPE_INT)  return nil_obj();
 
-  return _str_slice(str_obj, start_arg->intval, end_arg->intval);
+  return _str_slice(obj, start_arg->intval, end_arg->intval);
 }
 
-obj_t *str_random_choice(obj_t *str_obj, obj_method_args_t *args) {
-  return arr_random_choice(str_obj, args);
+obj_t *str_add(obj_t *obj, obj_method_args_t *args) {
+  if (args == NULL || args->arg == NULL) {
+    printf("Null arg to add()\n");
+    return obj;
+  }
+
+  obj_t *arg = args->arg;
+  if (arg->type != TYPE_STRING) {
+    printf("Cannot add %s to %s.\n",
+           obj_type_names[arg->type], obj_type_names[obj->type]);
+    return obj;
+  }
+
+  bytearray_t *new = bytearray_alloc(obj->bytearray->size + arg->bytearray->size);
+  if (new == NULL) {
+    printf("Couldn't allocate new string!\n");
+    return obj;
+  }
+  for (dim_t i = 0; i < obj->bytearray->size; i++) {
+    new->data[i] = obj->bytearray->data[i];
+  }
+  dim_t offset = obj->bytearray->size;
+  for (dim_t i = 0; i < arg->bytearray->size; i++) {
+    new->data[offset + i] = arg->bytearray->data[i];
+  }
+
+  bytearray_t *old = obj->bytearray;
+  obj->bytearray = new;
+  mem_free(old);
+
+  return obj;
+}
+
+obj_t *str_random_choice(obj_t *obj, obj_method_args_t *args) {
+  return arr_random_choice(obj, args);
 }
 
 obj_t *byte_dump(obj_t *byte_obj) {
@@ -518,9 +568,13 @@ static_method get_str_static_method(static_method_ident_t method_id) {
   switch(method_id) {
     case METHOD_HASH: return str_hash;
     case METHOD_COPY: return str_copy;
+    case METHOD_TO_INT: return str_to_int;
     case METHOD_TO_STRING: return str_to_string;
+    case METHOD_TO_FLOAT: return str_to_float;
+    case METHOD_TO_BYTE: return str_to_byte;
     case METHOD_LENGTH: return str_len;
     case METHOD_CONTAINS: return str_contains;
+    case METHOD_ADD: return str_add;
     case METHOD_GET: return str_get;
     case METHOD_EQ: return str_eq;
     case METHOD_NE: return str_ne;

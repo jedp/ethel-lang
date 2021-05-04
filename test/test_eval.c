@@ -26,6 +26,24 @@ void test_eval_calculator(void) {
   TEST_ASSERT_EQUAL(14, obj->intval);
 }
 
+void test_eval_add(void) {
+  // Add the primitives in various ways.
+  TEST_ASSERT_EQUAL(4, eval_program("2 + 2")->obj->intval);
+  TEST_ASSERT_EQUAL(4.1, eval_program("2 + 2.1")->obj->floatval);
+  TEST_ASSERT_EQUAL(99, eval_program("2 + 'a'")->obj->intval);
+  TEST_ASSERT_EQUAL(4, eval_program("2 + \"2\"")->obj->intval);
+
+  TEST_ASSERT_EQUAL_STRING("foobar", bytearray_to_c_str(eval_program("\"foo\" + \"bar\"")->obj->bytearray));
+
+  TEST_ASSERT_EQUAL(4.1, eval_program("2.1 + 2")->obj->floatval);
+  TEST_ASSERT_EQUAL(4.2, eval_program("2.1 + 2.1")->obj->floatval);
+  TEST_ASSERT_EQUAL(99.1, eval_program("2.1 + 'a'")->obj->floatval);
+  TEST_ASSERT_EQUAL(4.1, eval_program("2.1 + \"2\"")->obj->floatval);
+
+  TEST_ASSERT_EQUAL(99, eval_program("'a' + 2")->obj->byteval);
+  TEST_ASSERT_EQUAL(194, eval_program("'a' + 'a'")->obj->byteval);
+}
+
 void test_eval_unary_minus(void) {
   char *program = "2*-1+2*-1";
   eval_result_t *result = eval_program(program);
@@ -1011,6 +1029,7 @@ void test_eval_dict_keys(void) {
 
 void test_eval(void) {
   RUN_TEST(test_eval_calculator);
+  RUN_TEST(test_eval_add);
   RUN_TEST(test_eval_unary_minus);
   RUN_TEST(test_eval_assign_immutable);
   RUN_TEST(test_eval_assign_var);

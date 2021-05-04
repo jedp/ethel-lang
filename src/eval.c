@@ -523,6 +523,16 @@ static void bitwise_not(obj_t *a, eval_result_t *result) {
   result->obj = m(a, NULL);
 }
 
+static void add(obj_t *a, obj_t *b, eval_result_t *result) {
+  static_method m = get_static_method(a->type, METHOD_ADD);
+  if (m == NULL) {
+    result->err = ERR_EVAL_TYPE_ERROR;
+    return;
+  }
+
+  result->obj = m(a, wrap_varargs(1, b));
+}
+
 static void range(int from_inclusive, int to_inclusive, eval_result_t *result) {
   if (to_inclusive < from_inclusive) {
     result->err = ERR_RANGE_ERROR;
@@ -846,12 +856,8 @@ eval_result_t *eval_expr(ast_expr_t *expr, env_t *env) {
             if ((result->err = r1->err) != ERR_NO_ERROR) goto error;
             eval_result_t *r2 = eval_expr(expr->op_args->b, env);
             if ((result->err = r2->err) != ERR_NO_ERROR) goto error;
-            obj_t *r = num_add(r1->obj, r2->obj);
-            if (r->type == TYPE_ERROR && ((result->err = r->errno) != ERR_NO_ERROR)) {
-              mem_free(r);
-              goto error;
-            }
-            result->obj = r;
+            add(r1->obj, r2->obj, result);
+            if (result->err != ERR_NO_ERROR) goto error;
             break;
         }
         case AST_SUB: {

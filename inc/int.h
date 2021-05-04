@@ -6,7 +6,10 @@
 /* Return the integer hash of the integer. */
 obj_t *int_hash(obj_t *obj, obj_method_args_t *args);
 obj_t *int_copy(obj_t *obj, obj_method_args_t *args);
+obj_t *int_to_int(obj_t *obj, obj_method_args_t *args);
 obj_t *int_to_string(obj_t *obj, obj_method_args_t *args);
+obj_t *int_to_byte(obj_t *obj, obj_method_args_t *args);
+obj_t *int_to_float(obj_t *obj, obj_method_args_t *args);
 
 /*
  * Return true if the obj and first arg are numerically equal.
@@ -21,6 +24,7 @@ obj_t *int_lt(obj_t *obj, obj_method_args_t *args);
 obj_t *int_gt(obj_t *obj, obj_method_args_t *args);
 obj_t *int_le(obj_t *obj, obj_method_args_t *args);
 obj_t *int_ge(obj_t *obj, obj_method_args_t *args);
+obj_t *int_add(obj_t *obj, obj_method_args_t *args);
 obj_t *int_as(obj_t *obj, obj_method_args_t *args);
 obj_t *int_abs(obj_t *obj, obj_method_args_t *args);
 obj_t *int_neg(obj_t *obj, obj_method_args_t *args);

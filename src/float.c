@@ -3,6 +3,7 @@
 #include "../inc/float.h"
 #include "../inc/str.h"
 #include "../inc/obj.h"
+#include "../inc/type.h"
 
 obj_t *float_hash(obj_t *obj, obj_method_args_t *args) {
   // 32-bit float is its own 32-bit hash value.
@@ -14,6 +15,10 @@ obj_t *float_copy(obj_t *obj, obj_method_args_t *args) {
   return float_obj(obj->floatval);
 }
 
+obj_t *float_to_int(obj_t *obj, obj_method_args_t *args) {
+  return int_obj((int) obj->floatval);
+}
+
 obj_t *float_to_string(obj_t *obj, obj_method_args_t *args) {
   // TODO so lazy. Twiddle those bits, shed a dependency.
   float n = obj->floatval;
@@ -23,12 +28,33 @@ obj_t *float_to_string(obj_t *obj, obj_method_args_t *args) {
   return string_obj(c_str_to_bytearray(s));
 }
 
+obj_t *float_to_float(obj_t *obj, obj_method_args_t *args) {
+  return obj;
+}
+
+obj_t *float_to_byte(obj_t *obj, obj_method_args_t *args) {
+  return byte_obj((byte) ((int) obj->floatval & 0xff));
+}
+
 obj_t *float_abs(obj_t *obj, obj_method_args_t *args) {
   return float_obj((obj->floatval < 0) ? 1-obj->floatval : obj->floatval);
 }
 
 obj_t *float_neg(obj_t *obj, obj_method_args_t *args) {
   return float_obj(-obj->floatval);
+}
+
+obj_t *float_add(obj_t *obj, obj_method_args_t *args) {
+  if (args == NULL || args->arg == NULL) return obj;
+  obj_t *arg = args->arg;
+  static_method m_cast = get_static_method(arg->type, METHOD_TO_FLOAT);
+  if (m_cast == NULL) {
+    printf("Cannot add %s to %s",
+        obj_type_names[arg->type], obj_type_names[obj->type]);
+    return obj;
+  }
+
+  return float_obj(obj->floatval + m_cast(arg, NULL)->floatval);
 }
 
 obj_t *float_eq(obj_t *obj, obj_method_args_t *args) {
@@ -147,7 +173,10 @@ static_method get_float_static_method(static_method_ident_t method_id) {
   switch (method_id) {
     case METHOD_HASH: return float_hash;
     case METHOD_COPY: return float_copy;
+    case METHOD_TO_INT: return float_to_int;
     case METHOD_TO_STRING: return float_to_string;
+    case METHOD_TO_FLOAT: return float_to_float;
+    case METHOD_TO_BYTE: return float_to_byte;
     case METHOD_ABS: return float_abs;
     case METHOD_NEG: return float_neg;
     case METHOD_EQ: return float_eq;
@@ -156,6 +185,7 @@ static_method get_float_static_method(static_method_ident_t method_id) {
     case METHOD_GT: return float_gt;
     case METHOD_LE: return float_le;
     case METHOD_GE: return float_ge;
+    case METHOD_ADD: return float_add;
     case METHOD_CAST: return float_as;
     default: return NULL;
   }

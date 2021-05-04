@@ -4,6 +4,7 @@
 #include "../inc/int.h"
 #include "../inc/str.h"
 #include "../inc/obj.h"
+#include "../inc/type.h"
 
 obj_t *int_hash(obj_t *obj, obj_method_args_t *args) {
   // 32-bit int is its own 32-bit hash.
@@ -12,6 +13,10 @@ obj_t *int_hash(obj_t *obj, obj_method_args_t *args) {
 
 obj_t *int_copy(obj_t *obj, obj_method_args_t *args) {
   return int_obj(obj->intval);
+}
+
+obj_t *int_to_int(obj_t *obj, obj_method_args_t *args) {
+  return obj;
 }
 
 obj_t *int_to_string(obj_t *obj, obj_method_args_t *args) {
@@ -41,6 +46,14 @@ obj_t *int_to_string(obj_t *obj, obj_method_args_t *args) {
   if (n < 0) a->data[0] = '-';
 
   return string_obj(a);
+}
+
+obj_t *int_to_float(obj_t *obj, obj_method_args_t *args) {
+  return float_obj((float) obj->intval);
+}
+
+obj_t *int_to_byte(obj_t *obj, obj_method_args_t *args) {
+  return byte_obj((byte) obj->intval& 0xff);
 }
 
 obj_t *int_eq(obj_t *obj, obj_method_args_t *args) {
@@ -142,6 +155,24 @@ obj_t *int_ge(obj_t *obj, obj_method_args_t *args) {
 
   obj_t *lt = int_lt(obj, args);
   return boolean_obj((lt->boolval == True) ? False : True);
+}
+
+obj_t *int_add(obj_t *obj, obj_method_args_t *args) {
+  if (args == NULL || args->arg == NULL) return obj;
+  obj_t *arg = args->arg;
+  static_method m_cast = get_static_method(arg->type, METHOD_TO_INT);
+  if (m_cast == NULL) {
+    printf("Cannot add %s to %s",
+        obj_type_names[arg->type], obj_type_names[obj->type]);
+    return obj;
+  }
+
+  // This is the weird one.
+  if (arg->type == TYPE_FLOAT) {
+    return float_obj(get_static_method(arg->type, METHOD_ADD)(
+          arg, wrap_varargs(1, obj))->floatval);
+  }
+  return int_obj(obj->intval + m_cast(arg, NULL)->intval);
 }
 
 obj_t *int_as(obj_t *obj, obj_method_args_t *args) {
@@ -247,7 +278,10 @@ static_method get_int_static_method(static_method_ident_t method_id) {
   switch (method_id) {
     case METHOD_HASH: return int_hash;
     case METHOD_COPY: return int_copy;
+    case METHOD_TO_INT: return int_to_int;
     case METHOD_TO_STRING: return int_to_string;
+    case METHOD_TO_FLOAT: return int_to_float;
+    case METHOD_TO_BYTE: return int_to_byte;
     case METHOD_ABS: return int_abs;
     case METHOD_NEG: return int_neg;
     case METHOD_EQ: return int_eq;
@@ -256,6 +290,7 @@ static_method get_int_static_method(static_method_ident_t method_id) {
     case METHOD_LE: return int_le;
     case METHOD_GT: return int_gt;
     case METHOD_GE: return int_ge;
+    case METHOD_ADD: return int_add;
     case METHOD_BITWISE_AND: return int_bitwise_and;
     case METHOD_BITWISE_OR: return int_bitwise_or;
     case METHOD_BITWISE_XOR: return int_bitwise_xor;

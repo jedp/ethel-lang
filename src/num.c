@@ -5,28 +5,6 @@ boolean is_numeric(obj_t *obj) {
   return obj->type == TYPE_INT || obj->type == TYPE_FLOAT;
 }
 
-obj_t *num_add(obj_t *obj, obj_t *other) {
-  if (!is_numeric(obj) || !is_numeric(other)) return error_obj(ERR_EVAL_TYPE_ERROR);
-
-  if ((obj->type == TYPE_INT) && (other->type == TYPE_INT)) {
-    return int_obj(obj->intval + other->intval);
-  }
-
-  if ((obj->type == TYPE_INT) && (other->type == TYPE_FLOAT)) {
-    return float_obj(obj->intval + other->floatval);
-  }
-
-  if ((obj->type == TYPE_FLOAT) && (other->type == TYPE_INT)) {
-    return float_obj(obj->floatval + other->intval);
-  }
-
-  if ((obj->type == TYPE_FLOAT) && (other->type == TYPE_FLOAT)) {
-    return float_obj(obj->floatval + other->floatval);
-  }
-
-  return error_obj(ERR_EVAL_TYPE_ERROR);
-}
-
 obj_t *num_sub(obj_t *obj, obj_t *other) {
   if (!is_numeric(obj) || !is_numeric(other)) return error_obj(ERR_EVAL_TYPE_ERROR);
 
