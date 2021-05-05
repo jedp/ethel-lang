@@ -462,66 +462,6 @@ static void negate(obj_t *a, eval_result_t *result) {
   result->obj = m(a, NULL);
 }
 
-static void bitwise_or(obj_t *a, obj_t *b, eval_result_t *result) {
-  static_method m = get_static_method(a->type, METHOD_BITWISE_OR);
-  if (m == NULL) {
-    result->err = ERR_EVAL_TYPE_ERROR;
-    return;
-  }
-
-  result->obj = m(a, wrap_varargs(1, b));
-}
-
-static void bitwise_xor(obj_t *a, obj_t *b, eval_result_t *result) {
-  static_method m = get_static_method(a->type, METHOD_BITWISE_XOR);
-  if (m == NULL) {
-    result->err = ERR_EVAL_TYPE_ERROR;
-    return;
-  }
-
-  result->obj = m(a, wrap_varargs(1, b));
-}
-
-static void bitwise_and(obj_t *a, obj_t *b, eval_result_t *result) {
-  static_method m = get_static_method(a->type, METHOD_BITWISE_AND);
-  if (m == NULL) {
-    result->err = ERR_EVAL_TYPE_ERROR;
-    return;
-  }
-
-  result->obj = m(a, wrap_varargs(1, b));
-}
-
-static void bitwise_shl(obj_t *a, obj_t *b, eval_result_t *result) {
-  static_method m = get_static_method(a->type, METHOD_BITWISE_SHL);
-  if (m == NULL) {
-    result->err = ERR_EVAL_TYPE_ERROR;
-    return;
-  }
-
-  result->obj = m(a, wrap_varargs(1, b));
-}
-
-static void bitwise_shr(obj_t *a, obj_t *b, eval_result_t *result) {
-  static_method m = get_static_method(a->type, METHOD_BITWISE_SHR);
-  if (m == NULL) {
-    result->err = ERR_EVAL_TYPE_ERROR;
-    return;
-  }
-
-  result->obj = m(a, wrap_varargs(1, b));
-}
-
-static void bitwise_not(obj_t *a, eval_result_t *result) {
-  static_method m = get_static_method(a->type, METHOD_BITWISE_NOT);
-  if (m == NULL) {
-    result->err = ERR_EVAL_TYPE_ERROR;
-    return;
-  }
-
-  result->obj = m(a, NULL);
-}
-
 static void math(obj_t *a, obj_t *b,
                  eval_result_t *result,
                  static_method_ident_t method_id) {
@@ -931,7 +871,7 @@ eval_result_t *eval_expr(ast_expr_t *expr, env_t *env) {
         case AST_BITWISE_NOT: {
             eval_result_t *r1 = eval_expr(expr->op_args->a, env);
             if ((result->err = r1->err) != ERR_NO_ERROR) goto error;
-            bitwise_not(r1->obj, result);
+            math(r1->obj, NULL, result, METHOD_BITWISE_NOT);
             if (result->err != ERR_NO_ERROR) goto error;
             break;
         }
@@ -940,7 +880,7 @@ eval_result_t *eval_expr(ast_expr_t *expr, env_t *env) {
             if ((result->err = r1->err) != ERR_NO_ERROR) goto error;
             eval_result_t *r2 = eval_expr(expr->op_args->b, env);
             if ((result->err = r2->err) != ERR_NO_ERROR) goto error;
-            bitwise_shl(r1->obj, r2->obj, result);
+            math(r1->obj, r2->obj, result, METHOD_BITWISE_SHL);
             if (result->err != ERR_NO_ERROR) goto error;
             break;
         }
@@ -949,7 +889,7 @@ eval_result_t *eval_expr(ast_expr_t *expr, env_t *env) {
             if ((result->err = r1->err) != ERR_NO_ERROR) goto error;
             eval_result_t *r2 = eval_expr(expr->op_args->b, env);
             if ((result->err = r2->err) != ERR_NO_ERROR) goto error;
-            bitwise_shr(r1->obj, r2->obj, result);
+            math(r1->obj, r2->obj, result, METHOD_BITWISE_SHR);
             if (result->err != ERR_NO_ERROR) goto error;
             break;
         }
@@ -958,7 +898,7 @@ eval_result_t *eval_expr(ast_expr_t *expr, env_t *env) {
             if ((result->err = r1->err) != ERR_NO_ERROR) goto error;
             eval_result_t *r2 = eval_expr(expr->op_args->b, env);
             if ((result->err = r2->err) != ERR_NO_ERROR) goto error;
-            bitwise_or(r1->obj, r2->obj, result);
+            math(r1->obj, r2->obj, result, METHOD_BITWISE_OR);
             if (result->err != ERR_NO_ERROR) goto error;
             break;
         }
@@ -967,7 +907,7 @@ eval_result_t *eval_expr(ast_expr_t *expr, env_t *env) {
             if ((result->err = r1->err) != ERR_NO_ERROR) goto error;
             eval_result_t *r2 = eval_expr(expr->op_args->b, env);
             if ((result->err = r2->err) != ERR_NO_ERROR) goto error;
-            bitwise_xor(r1->obj, r2->obj, result);
+            math(r1->obj, r2->obj, result, METHOD_BITWISE_XOR);
             if (result->err != ERR_NO_ERROR) goto error;
             break;
         }
@@ -976,7 +916,7 @@ eval_result_t *eval_expr(ast_expr_t *expr, env_t *env) {
             if ((result->err = r1->err) != ERR_NO_ERROR) goto error;
             eval_result_t *r2 = eval_expr(expr->op_args->b, env);
             if ((result->err = r2->err) != ERR_NO_ERROR) goto error;
-            bitwise_and(r1->obj, r2->obj, result);
+            math(r1->obj, r2->obj, result, METHOD_BITWISE_AND);
             if (result->err != ERR_NO_ERROR) goto error;
             break;
         }
