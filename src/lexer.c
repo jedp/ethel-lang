@@ -308,6 +308,7 @@ token_t *get_token(lexer_t *lexer) {
     case '-': return lex_op(lexer, TAG_MINUS);
     case '*': return lex_op(lexer, TAG_TIMES);
     case '/': return lex_op(lexer, TAG_DIVIDE);
+    case '%': return lex_op(lexer, TAG_MOD);
     case '&': return lex_op(lexer, TAG_BITWISE_AND);
     case '|': return lex_op(lexer, TAG_BITWISE_OR);
     case '^': return lex_op(lexer, TAG_BITWISE_XOR);

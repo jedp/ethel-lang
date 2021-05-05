@@ -2,7 +2,6 @@
 COMPOBJS = src/mem.o \
 					 src/obj.o \
 					 src/math.o \
-					 src/num.o \
 					 src/range.o \
 					 src/arr.o \
 					 src/str.o \

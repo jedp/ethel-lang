@@ -1,7 +1,6 @@
 #include <stdio.h>
 #include "../inc/err.h"
 #include "../inc/mem.h"
-#include "../inc/num.h"
 #include "../inc/range.h"
 #include "../inc/arr.h"
 #include "../inc/int.h"
@@ -523,8 +522,10 @@ static void bitwise_not(obj_t *a, eval_result_t *result) {
   result->obj = m(a, NULL);
 }
 
-static void add(obj_t *a, obj_t *b, eval_result_t *result) {
-  static_method m = get_static_method(a->type, METHOD_ADD);
+static void math(obj_t *a, obj_t *b,
+                 eval_result_t *result,
+                 static_method_ident_t method_id) {
+  static_method m = get_static_method(a->type, method_id);
   if (m == NULL) {
     result->err = ERR_EVAL_TYPE_ERROR;
     return;
@@ -856,7 +857,7 @@ eval_result_t *eval_expr(ast_expr_t *expr, env_t *env) {
             if ((result->err = r1->err) != ERR_NO_ERROR) goto error;
             eval_result_t *r2 = eval_expr(expr->op_args->b, env);
             if ((result->err = r2->err) != ERR_NO_ERROR) goto error;
-            add(r1->obj, r2->obj, result);
+            math(r1->obj, r2->obj, result, METHOD_ADD);
             if (result->err != ERR_NO_ERROR) goto error;
             break;
         }
@@ -865,12 +866,8 @@ eval_result_t *eval_expr(ast_expr_t *expr, env_t *env) {
             if ((result->err = r1->err) != ERR_NO_ERROR) goto error;
             eval_result_t *r2 = eval_expr(expr->op_args->b, env);
             if ((result->err = r2->err) != ERR_NO_ERROR) goto error;
-            obj_t *r = num_sub(r1->obj, r2->obj);
-            if (r->type == TYPE_ERROR && ((result->err = r->errno) != ERR_NO_ERROR)) {
-              mem_free(r);
-              goto error;
-            }
-            result->obj = r;
+            math(r1->obj, r2->obj, result, METHOD_SUB);
+            if (result->err != ERR_NO_ERROR) goto error;
             break;
         }
         case AST_MUL: {
@@ -878,12 +875,8 @@ eval_result_t *eval_expr(ast_expr_t *expr, env_t *env) {
             if ((result->err = r1->err) != ERR_NO_ERROR) goto error;
             eval_result_t *r2 = eval_expr(expr->op_args->b, env);
             if ((result->err = r2->err) != ERR_NO_ERROR) goto error;
-            obj_t *r = num_mul(r1->obj, r2->obj);
-            if (r->type == TYPE_ERROR && ((result->err = r->errno) != ERR_NO_ERROR)) {
-              mem_free(r);
-              goto error;
-            }
-            result->obj = r;
+            math(r1->obj, r2->obj, result, METHOD_MUL);
+            if (result->err != ERR_NO_ERROR) goto error;
             break;
         }
         case AST_DIV: {
@@ -891,12 +884,8 @@ eval_result_t *eval_expr(ast_expr_t *expr, env_t *env) {
             if ((result->err = r1->err) != ERR_NO_ERROR) goto error;
             eval_result_t *r2 = eval_expr(expr->op_args->b, env);
             if ((result->err = r2->err) != ERR_NO_ERROR) goto error;
-            obj_t *r = num_div(r1->obj, r2->obj);
-            if (r->type == TYPE_ERROR && ((result->err = r->errno) != ERR_NO_ERROR)) {
-              mem_free(r);
-              goto error;
-            }
-            result->obj = r;
+            math(r1->obj, r2->obj, result, METHOD_DIV);
+            if (result->err != ERR_NO_ERROR) goto error;
             break;
         }
         case AST_MOD: {
@@ -904,12 +893,8 @@ eval_result_t *eval_expr(ast_expr_t *expr, env_t *env) {
             if ((result->err = r1->err) != ERR_NO_ERROR) goto error;
             eval_result_t *r2 = eval_expr(expr->op_args->b, env);
             if ((result->err = r2->err) != ERR_NO_ERROR) goto error;
-            obj_t *r = num_mod(r1->obj, r2->obj);
-            if (r->type == TYPE_ERROR && ((result->err = r->errno) != ERR_NO_ERROR)) {
-              mem_free(r);
-              goto error;
-            }
-            result->obj = r;
+            math(r1->obj, r2->obj, result, METHOD_MOD);
+            if (result->err != ERR_NO_ERROR) goto error;
             break;
         }
         case AST_AND: {

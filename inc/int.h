@@ -25,6 +25,7 @@ obj_t *int_gt(obj_t *obj, obj_method_args_t *args);
 obj_t *int_le(obj_t *obj, obj_method_args_t *args);
 obj_t *int_ge(obj_t *obj, obj_method_args_t *args);
 obj_t *int_add(obj_t *obj, obj_method_args_t *args);
+obj_t *int_sub(obj_t *obj, obj_method_args_t *args);
 obj_t *int_as(obj_t *obj, obj_method_args_t *args);
 obj_t *int_abs(obj_t *obj, obj_method_args_t *args);
 obj_t *int_neg(obj_t *obj, obj_method_args_t *args);

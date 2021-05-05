@@ -44,17 +44,62 @@ obj_t *byte_to_byte(obj_t *obj, obj_method_args_t *args) {
   return obj;
 }
 
-obj_t *byte_add(obj_t *obj, obj_method_args_t *args) {
+obj_t *byte_math(obj_t *obj, obj_method_args_t *args, static_method_ident_t method_id) {
   if (args == NULL || args->arg == NULL) return obj;
   obj_t *arg = args->arg;
   static_method m_cast = get_static_method(arg->type, METHOD_TO_BYTE);
   if (m_cast == NULL) {
-    printf("Cannot add %s to %s",
+    printf("Cannot do math with %s and %s",
         obj_type_names[arg->type], obj_type_names[obj->type]);
     return obj;
   }
 
-  return byte_obj((uint32_t) ((obj->byteval + m_cast(arg, NULL)->byteval) & 0xff));
+  switch (method_id) {
+    case METHOD_ADD:
+      return byte_obj((byte) ((obj->byteval + m_cast(arg, NULL)->byteval) & 0xff));
+    case METHOD_SUB:
+      return byte_obj((byte) ((obj->byteval - m_cast(arg, NULL)->byteval) & 0xff));
+    case METHOD_MUL:
+      return byte_obj((byte) ((obj->byteval * m_cast(arg, NULL)->byteval) & 0xff));
+    case METHOD_DIV: {
+      byte divisor = m_cast(arg, NULL)->byteval;
+      if (divisor == 0) {
+        return error_obj(ERR_DIVISION_BY_ZERO);
+      }
+      return byte_obj(obj->byteval / divisor);
+    }
+    case METHOD_MOD: {
+      byte divisor = m_cast(arg, NULL)->byteval;
+      if (divisor == 0) {
+        return error_obj(ERR_DIVISION_BY_ZERO);
+      }
+      return byte_obj(obj->byteval % divisor);
+    }
+    default:
+      printf("method_id %d not implemented!\n", method_id);
+      return obj;
+  }
+  return byte_obj((byte) ((obj->byteval + m_cast(arg, NULL)->byteval) & 0xff));
+}
+
+obj_t *byte_add(obj_t *obj, obj_method_args_t *args) {
+  return byte_math(obj, args, METHOD_ADD);
+}
+
+obj_t *byte_sub(obj_t *obj, obj_method_args_t *args) {
+  return byte_math(obj, args, METHOD_SUB);
+}
+
+obj_t *byte_mul(obj_t *obj, obj_method_args_t *args) {
+  return byte_math(obj, args, METHOD_MUL);
+}
+
+obj_t *byte_div(obj_t *obj, obj_method_args_t *args) {
+  return byte_math(obj, args, METHOD_DIV);
+}
+
+obj_t *byte_mod(obj_t *obj, obj_method_args_t *args) {
+  return byte_math(obj, args, METHOD_MOD);
 }
 
 obj_t *byte_eq(obj_t *obj, obj_method_args_t *args) {
@@ -263,6 +308,10 @@ static_method get_byte_static_method(static_method_ident_t method_id) {
     case METHOD_BITWISE_SHL: return byte_bitwise_shl;
     case METHOD_BITWISE_SHR: return byte_bitwise_shr;
     case METHOD_ADD: return byte_add;
+    case METHOD_SUB: return byte_sub;
+    case METHOD_MUL: return byte_mul;
+    case METHOD_DIV: return byte_div;
+    case METHOD_MOD: return byte_mod;
     case METHOD_CAST: return byte_as;
     default: return NULL;
   }

@@ -44,17 +44,52 @@ obj_t *float_neg(obj_t *obj, obj_method_args_t *args) {
   return float_obj(-obj->floatval);
 }
 
-obj_t *float_add(obj_t *obj, obj_method_args_t *args) {
+obj_t *float_math(obj_t *obj,
+                  obj_method_args_t *args,
+                  static_method_ident_t method_id) {
   if (args == NULL || args->arg == NULL) return obj;
   obj_t *arg = args->arg;
   static_method m_cast = get_static_method(arg->type, METHOD_TO_FLOAT);
   if (m_cast == NULL) {
-    printf("Cannot add %s to %s",
+    printf("Cannot do math with %s and %s",
         obj_type_names[arg->type], obj_type_names[obj->type]);
     return obj;
   }
 
-  return float_obj(obj->floatval + m_cast(arg, NULL)->floatval);
+  switch (method_id) {
+    case METHOD_ADD:
+      return float_obj(obj->floatval + m_cast(arg, NULL)->floatval);
+    case METHOD_SUB:
+      return float_obj(obj->floatval - m_cast(arg, NULL)->floatval);
+    case METHOD_MUL:
+      return float_obj(obj->floatval * m_cast(arg, NULL)->floatval);
+    case METHOD_DIV: {
+      float divisor = m_cast(arg, NULL)->floatval;
+      if (divisor == 0) {
+        return error_obj(ERR_DIVISION_BY_ZERO);
+      }
+      return float_obj(obj->floatval / divisor);
+    }
+    default:
+      printf("method_id %d not implemented!\n", method_id);
+      return obj;
+  }
+}
+
+obj_t *float_add(obj_t *obj, obj_method_args_t *args) {
+  return float_math(obj, args, METHOD_ADD);
+}
+
+obj_t *float_sub(obj_t *obj, obj_method_args_t *args) {
+  return float_math(obj, args, METHOD_SUB);
+}
+
+obj_t *float_mul(obj_t *obj, obj_method_args_t *args) {
+  return float_math(obj, args, METHOD_MUL);
+}
+
+obj_t *float_div(obj_t *obj, obj_method_args_t *args) {
+  return float_math(obj, args, METHOD_DIV);
 }
 
 obj_t *float_eq(obj_t *obj, obj_method_args_t *args) {
@@ -186,6 +221,9 @@ static_method get_float_static_method(static_method_ident_t method_id) {
     case METHOD_LE: return float_le;
     case METHOD_GE: return float_ge;
     case METHOD_ADD: return float_add;
+    case METHOD_SUB: return float_sub;
+    case METHOD_MUL: return float_mul;
+    case METHOD_DIV: return float_div;
     case METHOD_CAST: return float_as;
     default: return NULL;
   }

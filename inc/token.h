@@ -233,7 +233,6 @@ static const token_t reserved[] = {
   { TAG_ELSE,          .string = (char *) "else" },
   { TAG_AND,           .string = (char *) "and" },
   { TAG_OR,            .string = (char *) "or" },
-  { TAG_MOD,           .string = (char *) "mod" },
   { TAG_NOT,           .string = (char *) "not" },
   { TAG_INVARIABLE,    .string = (char *) "val" },
   { TAG_VARIABLE,      .string = (char *) "var" },

@@ -27,7 +27,6 @@ void test_eval_calculator(void) {
 }
 
 void test_eval_add(void) {
-  // Add the primitives in various ways.
   TEST_ASSERT_EQUAL(4, eval_program("2 + 2")->obj->intval);
   TEST_ASSERT_EQUAL(4.1, eval_program("2 + 2.1")->obj->floatval);
   TEST_ASSERT_EQUAL(99, eval_program("2 + 'a'")->obj->intval);
@@ -42,6 +41,53 @@ void test_eval_add(void) {
 
   TEST_ASSERT_EQUAL(99, eval_program("'a' + 2")->obj->byteval);
   TEST_ASSERT_EQUAL(194, eval_program("'a' + 'a'")->obj->byteval);
+}
+
+void test_eval_sub(void) {
+  TEST_ASSERT_EQUAL(0, eval_program("2 - 2")->obj->intval);
+  TEST_ASSERT_EQUAL(-0.1, eval_program("2 - 2.1")->obj->floatval);
+  TEST_ASSERT_EQUAL(2, eval_program("99 - 'a'")->obj->intval);
+
+  TEST_ASSERT_EQUAL(0.1, eval_program("2.1 - 2")->obj->floatval);
+  TEST_ASSERT_EQUAL(0.1, eval_program("2.2 - 2.1")->obj->floatval);
+  TEST_ASSERT_EQUAL(2.1, eval_program("99.1 - 'a'")->obj->floatval);
+
+  TEST_ASSERT_EQUAL(120, eval_program("'z' - 2")->obj->byteval);
+  TEST_ASSERT_EQUAL(25, eval_program("'z' - 'a'")->obj->byteval);
+}
+
+void test_eval_mul(void) {
+  TEST_ASSERT_EQUAL(4, eval_program("2 * 2")->obj->intval);
+  TEST_ASSERT_EQUAL(4.2, eval_program("2 * 2.1")->obj->floatval);
+  TEST_ASSERT_EQUAL(194, eval_program("2 * 'a'")->obj->intval);
+
+  TEST_ASSERT_EQUAL(4.2, eval_program("2.1 * 2")->obj->floatval);
+  TEST_ASSERT_EQUAL(4.4, eval_program("2.1 * 2.1")->obj->floatval);
+  TEST_ASSERT_EQUAL(203.7, eval_program("2.1 * 'a'")->obj->floatval);
+
+  TEST_ASSERT_EQUAL(194, eval_program("'a' * 2")->obj->byteval);
+  TEST_ASSERT_EQUAL(194, eval_program("'a' * 0x02")->obj->byteval);
+}
+
+void test_eval_div(void) {
+  TEST_ASSERT_EQUAL(1, eval_program("2 / 2")->obj->intval);
+  TEST_ASSERT_EQUAL(4.0, eval_program("10 / 2.5")->obj->floatval);
+  TEST_ASSERT_EQUAL(10, eval_program("970 / 'a'")->obj->intval);
+
+  TEST_ASSERT_EQUAL(3.3, eval_program("6.6 / 2")->obj->floatval);
+  TEST_ASSERT_EQUAL(3.0, eval_program("6.6 / 2.2")->obj->floatval);
+  TEST_ASSERT_EQUAL(5.1, eval_program("500.5 / 'd'")->obj->floatval);
+
+  TEST_ASSERT_EQUAL('2', eval_program("'d' / 2")->obj->byteval);
+  TEST_ASSERT_EQUAL(1, eval_program("'a' / 'a'")->obj->byteval);
+}
+
+void test_eval_mod(void) {
+  TEST_ASSERT_EQUAL(1, eval_program("5 % 2")->obj->intval);
+  TEST_ASSERT_EQUAL(96, eval_program("500 % 'e'")->obj->intval);
+
+  TEST_ASSERT_EQUAL(1, eval_program("'a' % 2")->obj->byteval);
+  TEST_ASSERT_EQUAL(25, eval_program("'z' % 'a'")->obj->byteval);
 }
 
 void test_eval_unary_minus(void) {
@@ -174,25 +220,6 @@ void test_eval_truthiness(void) {
 
   obj_t *obj = result->obj;
   // 1 is boolean true.
-  TEST_ASSERT_EQUAL(1, obj->intval);
-}
-
-void test_eval_int_mod(void) {
-  char *program = "7 mod 4";
-  eval_result_t *result = eval_program(program);
-  TEST_ASSERT_EQUAL(ERR_NO_ERROR, result->err);
-
-  obj_t *obj = result->obj;
-  TEST_ASSERT_EQUAL(3, obj->intval);
-}
-
-void test_eval_float_mod(void) {
-  char *program = "16.2 mod 3";
-  eval_result_t *result = eval_program(program);
-  TEST_ASSERT_EQUAL(ERR_NO_ERROR, result->err);
-
-  // Modulus is always an int in our world.
-  obj_t *obj = result->obj;
   TEST_ASSERT_EQUAL(1, obj->intval);
 }
 
@@ -1030,6 +1057,10 @@ void test_eval_dict_keys(void) {
 void test_eval(void) {
   RUN_TEST(test_eval_calculator);
   RUN_TEST(test_eval_add);
+  RUN_TEST(test_eval_sub);
+  RUN_TEST(test_eval_mul);
+  RUN_TEST(test_eval_div);
+  RUN_TEST(test_eval_mod);
   RUN_TEST(test_eval_unary_minus);
   RUN_TEST(test_eval_assign_immutable);
   RUN_TEST(test_eval_assign_var);
@@ -1045,8 +1076,6 @@ void test_eval(void) {
   RUN_TEST(test_eval_boolean_false);
   RUN_TEST(test_eval_logical_not);
   RUN_TEST(test_eval_truthiness);
-  RUN_TEST(test_eval_int_mod);
-  RUN_TEST(test_eval_float_mod);
   RUN_TEST(test_eval_numeric_comparison);
   RUN_TEST(test_eval_char_comparison);
   RUN_TEST(test_eval_cast_int);

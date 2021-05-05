@@ -1,6 +1,7 @@
 #include <stdio.h>
 #include "../inc/mem.h"
 #include "../inc/math.h"
+#include "../inc/float.h"
 #include "../inc/int.h"
 #include "../inc/str.h"
 #include "../inc/obj.h"
@@ -157,22 +158,68 @@ obj_t *int_ge(obj_t *obj, obj_method_args_t *args) {
   return boolean_obj((lt->boolval == True) ? False : True);
 }
 
-obj_t *int_add(obj_t *obj, obj_method_args_t *args) {
+obj_t *int_math(obj_t *obj,
+                obj_method_args_t *args,
+                static_method_ident_t method_id) {
   if (args == NULL || args->arg == NULL) return obj;
   obj_t *arg = args->arg;
   static_method m_cast = get_static_method(arg->type, METHOD_TO_INT);
   if (m_cast == NULL) {
-    printf("Cannot add %s to %s",
+    printf("Cannot do math with %s and %s",
         obj_type_names[arg->type], obj_type_names[obj->type]);
     return obj;
   }
 
-  // This is the weird one.
+  // Convert to float if other arg is a float.
   if (arg->type == TYPE_FLOAT) {
-    return float_obj(get_static_method(arg->type, METHOD_ADD)(
-          arg, wrap_varargs(1, obj))->floatval);
+    return float_math(float_obj((float) obj->intval), args, method_id);
   }
-  return int_obj(obj->intval + m_cast(arg, NULL)->intval);
+
+  switch (method_id) {
+    case METHOD_ADD:
+      return int_obj(obj->intval + m_cast(arg, NULL)->intval);
+    case METHOD_SUB:
+      return int_obj(obj->intval - m_cast(arg, NULL)->intval);
+    case METHOD_MUL:
+      return int_obj(obj->intval * m_cast(arg, NULL)->intval);
+    case METHOD_DIV: {
+      int divisor = m_cast(arg, NULL)->intval;
+      if (divisor == 0) {
+        return error_obj(ERR_DIVISION_BY_ZERO);
+      }
+      return int_obj(obj->intval / divisor);
+    }
+    case METHOD_MOD: {
+      int divisor = m_cast(arg, NULL)->intval;
+      if (divisor == 0) {
+        return error_obj(ERR_DIVISION_BY_ZERO);
+      }
+      return int_obj(obj->intval % divisor);
+    }
+    default:
+      printf("method_id %d not implemented!\n", method_id);
+      return obj;
+  }
+}
+
+obj_t *int_add(obj_t *obj, obj_method_args_t *args) {
+  return int_math(obj, args, METHOD_ADD);
+}
+
+obj_t *int_sub(obj_t *obj, obj_method_args_t *args) {
+  return int_math(obj, args, METHOD_SUB);
+}
+
+obj_t *int_mul(obj_t *obj, obj_method_args_t *args) {
+  return int_math(obj, args, METHOD_MUL);
+}
+
+obj_t *int_div(obj_t *obj, obj_method_args_t *args) {
+  return int_math(obj, args, METHOD_DIV);
+}
+
+obj_t *int_mod(obj_t *obj, obj_method_args_t *args) {
+  return int_math(obj, args, METHOD_MOD);
 }
 
 obj_t *int_as(obj_t *obj, obj_method_args_t *args) {
@@ -291,6 +338,10 @@ static_method get_int_static_method(static_method_ident_t method_id) {
     case METHOD_GT: return int_gt;
     case METHOD_GE: return int_ge;
     case METHOD_ADD: return int_add;
+    case METHOD_SUB: return int_sub;
+    case METHOD_MUL: return int_mul;
+    case METHOD_DIV: return int_div;
+    case METHOD_MOD: return int_mod;
     case METHOD_BITWISE_AND: return int_bitwise_and;
     case METHOD_BITWISE_OR: return int_bitwise_or;
     case METHOD_BITWISE_XOR: return int_bitwise_xor;

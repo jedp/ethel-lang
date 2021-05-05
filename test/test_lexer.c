@@ -600,7 +600,6 @@ void test_lex_all_tokens(void) {
     (test_data_t) { .text = ">=", .expected_tag = TAG_GE },
     (test_data_t) { .text = "and", .expected_tag = TAG_AND },
     (test_data_t) { .text = "or", .expected_tag = TAG_OR },
-    (test_data_t) { .text = "mod", .expected_tag = TAG_MOD },
     (test_data_t) { .text = "not", .expected_tag = TAG_NOT },
     (test_data_t) { .text = "42", .expected_tag = TAG_INT },
     (test_data_t) { .text = "3.14", .expected_tag = TAG_FLOAT },

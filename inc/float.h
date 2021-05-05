@@ -25,7 +25,12 @@ obj_t *float_gt(obj_t *obj, obj_method_args_t *args);
 obj_t *float_le(obj_t *obj, obj_method_args_t *args);
 obj_t *float_ge(obj_t *obj, obj_method_args_t *args);
 obj_t *float_as(obj_t *obj, obj_method_args_t *args);
+obj_t *float_math(obj_t *obj, obj_method_args_t *args, static_method_ident_t method_id);
 obj_t *float_add(obj_t *obj, obj_method_args_t *args);
+obj_t *float_sub(obj_t *obj, obj_method_args_t *args);
+obj_t *float_mul(obj_t *obj, obj_method_args_t *args);
+obj_t *float_div(obj_t *obj, obj_method_args_t *args);
+obj_t *float_mod(obj_t *obj, obj_method_args_t *args);
 
 static_method get_float_static_method(static_method_ident_t method_id);
 
