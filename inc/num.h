@@ -4,12 +4,6 @@
 #include "def.h"
 #include "obj.h"
 
-obj_t *num_eq(obj_t *obj, obj_t *other);
-obj_t *num_le(obj_t *obj, obj_t *other);
-obj_t *num_lt(obj_t *obj, obj_t *other);
-obj_t *num_ge(obj_t *obj, obj_t *other);
-obj_t *num_gt(obj_t *obj, obj_t *other);
-obj_t *num_ne(obj_t *obj, obj_t *other);
 obj_t *num_sub(obj_t *obj, obj_t *other);
 obj_t *num_mul(obj_t *obj, obj_t *other);
 obj_t *num_div(obj_t *obj, obj_t *other);
