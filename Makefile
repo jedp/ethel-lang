@@ -11,6 +11,7 @@ COMPOBJS = src/mem.o \
 					 src/list.o \
 					 src/dict.o \
 					 src/bool.o \
+					 src/fn.o \
 					 src/type.o \
 					 src/rand.o \
 					 src/lexer.o \
