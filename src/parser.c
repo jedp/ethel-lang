@@ -670,24 +670,17 @@ void parse_program(char *input, ast_expr_t *ast, parse_result_t *parse_result) {
     return;
   }
 
-  // This feels so wrong.
   ast_expr_t *p = parse_start(&lexer);
 
   parse_result->err = lexer.err;
   parse_result->pos = lexer.pos;
   parse_result->depth = lexer.depth;
   if (lexer.err == ERR_LEX_INCOMPLETE_INPUT) {
+    mem_free(p);
     return;
   }
 
-  // This feels even more wrong.
-  ast->type = p->type;
-  ast->flags = p->flags;
-  // End up assigning the one that isn't null.
-  ast->boolval = p->boolval;
-  ast->intval = p->intval;
-  ast->floatval = p->floatval;
-  ast->byteval = p->byteval;
-  ast->bytearray = p->bytearray;
+  mem_cp(ast, p, sizeof(ast_expr_t));
+  mem_free(p);
 }
 
