@@ -334,7 +334,11 @@ obj_t *list_remove_at(obj_t *list_obj, obj_method_args_t *args) {
 }
 
 obj_t *list_random_choice(obj_t *list_obj, obj_method_args_t *args) {
-  return _get_elem(list_obj, rand32() % _list_len(list_obj))->node;
+  dim_t len = _list_len(list_obj);
+  if (len < 1) {
+    return nil_obj();
+  }
+  return _get_elem(list_obj, rand32() % len)->node;
 }
 
 static_method get_list_static_method(static_method_ident_t method_id) {

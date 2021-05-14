@@ -389,12 +389,20 @@ static void assign(ast_expr_t *lhs,
     eval_func_def(rhs->func_def, result, env);
     if (result->err != ERR_NO_ERROR) goto error;
     error = put_env(env, name, result->obj, F_NONE);
+    if (error != ERR_NO_ERROR) {
+      result->err = error;
+      goto error;
+    }
     return;
   }
 
   eval_result_t *r = eval_expr(rhs, env);
   if ((result->err = r->err) != ERR_NO_ERROR) goto error;
   error = put_env(env, name, r->obj, lhs->flags);
+  if (error != ERR_NO_ERROR) {
+    result->err = error;
+    goto error;
+  }
   result->obj = r->obj;
 
   result->err = error;
