@@ -20,6 +20,7 @@ obj_t *range_contains(obj_t *range_obj, obj_method_args_t *args);
 obj_t *range_get(obj_t *range_obj, obj_method_args_t *args);
 
 obj_t *range_random_choice(obj_t *range_obj, obj_method_args_t *args);
+obj_t *range_to_string(obj_t *range_obj, obj_method_args_t *args);
 
 static_method get_range_static_method(static_method_ident_t method_id);
 

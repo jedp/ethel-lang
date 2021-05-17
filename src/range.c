@@ -3,6 +3,8 @@
 #include "../inc/range.h"
 #include "../inc/rand.h"
 #include "../inc/math.h"
+#include "../inc/str.h"
+#include "../inc/int.h"
 #include "../inc/err.h"
 
 /* Return 1 for upto ranges, -1 for downto. */
@@ -27,6 +29,16 @@ static int _range_get(obj_t *obj, int i, error_t *err) {
   }
 
   return start + (i * incr(obj));
+}
+
+obj_t *range_to_string(obj_t *obj, obj_method_args_t *args) {
+  // Don't look.
+  obj_t *a = string_obj(c_str_to_bytearray("<Range "));
+  obj_t *b = str_add(a, wrap_varargs(1, int_to_string(int_obj(obj->range.from), NULL)));
+  obj_t *c = str_add(b, wrap_varargs(1, string_obj(c_str_to_bytearray(".."))));
+  obj_t *d = str_add(c, wrap_varargs(1, int_to_string(int_obj(obj->range.to), NULL)));
+  obj_t *e = str_add(d, wrap_varargs(1, string_obj(c_str_to_bytearray(">"))));
+  return e;
 }
 
 obj_t *range_length(obj_t *obj, obj_method_args_t *args) {
@@ -81,6 +93,7 @@ obj_t *range_random_choice(obj_t *obj, obj_method_args_t *args) {
 
 static_method get_range_static_method(static_method_ident_t method_id) {
   switch (method_id) {
+    case METHOD_TO_STRING: return range_to_string;
     case METHOD_LENGTH: return range_length;
     case METHOD_CONTAINS: return range_contains;
     case METHOD_GET: return range_get;
