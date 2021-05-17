@@ -25,7 +25,5 @@ void advance(lexer_t *lexer);
 
 boolean eat(lexer_t *lexer, tag_t t);
 
-tag_t peek_token_type(lexer_t *lexer);
-
 #endif
 

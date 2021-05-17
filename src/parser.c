@@ -7,15 +7,14 @@
 #include "../inc/lexer.h"
 #include "../inc/parser.h"
 
-ast_expr_t *parse_start(lexer_t *lexer);
-ast_expr_list_t *parse_expr_list(lexer_t *lexer);
-ast_expr_t *parse_expr(lexer_t *lexer);
-ast_expr_t *parse_atom(lexer_t *lexer);
-ast_expr_t *parse_eof(lexer_t *lexer);
-ast_expr_t *_parse_expr(lexer_t *lexer, int min_preced);
-ast_expr_t *_parse_subscript(lexer_t *lexer, int min_preced);
+static ast_expr_t *parse_start(lexer_t *lexer);
+static ast_expr_list_t *parse_expr_list(lexer_t *lexer);
+static ast_expr_t *parse_expr(lexer_t *lexer);
+static ast_expr_t *parse_atom(lexer_t *lexer);
+static ast_expr_t *_parse_expr(lexer_t *lexer, int min_preced);
+static ast_expr_t *_parse_subscript(lexer_t *lexer, int min_preced);
 
-boolean is_op(token_t *token) {
+static boolean is_op(token_t *token) {
   return token->tag == TAG_AS
       || token->tag == TAG_PLUS
       || token->tag == TAG_MINUS
@@ -47,7 +46,7 @@ boolean is_op(token_t *token) {
       ;
 }
 
-uint8_t op_preced(token_t *token) {
+static uint8_t op_preced(token_t *token) {
   switch (token->tag) {
     case TAG_MEMBER_ACCESS:
       return PRECED_MEMBER_ACCESS;
@@ -104,12 +103,12 @@ uint8_t op_preced(token_t *token) {
   }
 }
 
-int op_preced_inc(token_t *token) {
+static int op_preced_inc(token_t *token) {
   // Return -1 for right-associative ops
   return 1;
 }
 
-ast_reserved_callable_type_t ast_callable_type_for_tag(tag_t tag) {
+static ast_reserved_callable_type_t ast_callable_type_for_tag(tag_t tag) {
   switch (tag) {
     case TAG_TYPEOF: return AST_CALL_TYPE_OF;
     case TAG_TO_HEX: return AST_CALL_TO_HEX;
@@ -130,7 +129,7 @@ ast_reserved_callable_type_t ast_callable_type_for_tag(tag_t tag) {
   }
 }
 
-ast_expr_t *parse_start(lexer_t *lexer) {
+static ast_expr_t *parse_start(lexer_t *lexer) {
   ast_expr_t *e = ast_empty();
   while(lexer->token.tag != TAG_EOF) {
     e = parse_expr(lexer);
@@ -154,7 +153,7 @@ static ast_expr_kv_list_t *empty_expr_kv_list(void) {
   return node;
 }
 
-ast_fn_arg_decl_t *parse_fn_arg_decl(lexer_t *lexer) {
+static ast_fn_arg_decl_t *parse_fn_arg_decl(lexer_t *lexer) {
   ast_fn_arg_decl_t *node = mem_alloc(sizeof(ast_fn_arg_decl_t));
   ast_fn_arg_decl_t *root = node;
   node->name = NULL;
@@ -181,7 +180,7 @@ ast_fn_arg_decl_t *parse_fn_arg_decl(lexer_t *lexer) {
   return root;
 }
 
-ast_expr_list_t *parse_expr_list(lexer_t *lexer) {
+static ast_expr_list_t *parse_expr_list(lexer_t *lexer) {
   ast_expr_list_t *node = empty_expr_list();
   ast_expr_list_t *root = node;
 
@@ -202,7 +201,7 @@ ast_expr_list_t *parse_expr_list(lexer_t *lexer) {
   return root;
 }
 
-ast_expr_kv_list_t *parse_expr_kv_list(lexer_t *lexer) {
+static ast_expr_kv_list_t *parse_expr_kv_list(lexer_t *lexer) {
   ast_expr_kv_list_t *node = empty_expr_kv_list();
   ast_expr_kv_list_t *root = node;
 
@@ -237,7 +236,7 @@ ast_expr_kv_list_t *parse_expr_kv_list(lexer_t *lexer) {
   return root;
 }
 
-ast_expr_list_t *parse_block(lexer_t *lexer) {
+static ast_expr_list_t *parse_block(lexer_t *lexer) {
   ast_expr_list_t *node = empty_expr_list();
   ast_expr_list_t *root = node;
 
@@ -272,7 +271,7 @@ ast_expr_t *_parse_subscript(lexer_t *lexer, int min_preced) {
   return expr;
 }
 
-ast_expr_list_t *_parse_fn_args(lexer_t *lexer, int min_preced) {
+static ast_expr_list_t *_parse_fn_args(lexer_t *lexer, int min_preced) {
   // Emtpy arglist?
   if (lexer->token.tag == TAG_RPAREN) {
     eat(lexer, TAG_RPAREN);
@@ -289,7 +288,7 @@ ast_expr_list_t *_parse_fn_args(lexer_t *lexer, int min_preced) {
   return args;
 }
 
-ast_expr_t *_parse_expr(lexer_t *lexer, int min_preced) {
+static ast_expr_t *_parse_expr(lexer_t *lexer, int min_preced) {
   ast_expr_t *lhs = parse_atom(lexer);
 
   // The recursively recursive precedence-climbing algorithm.
@@ -349,7 +348,7 @@ done:
   return lhs;
 }
 
-ast_expr_t *parse_expr(lexer_t *lexer) {
+static ast_expr_t *parse_expr(lexer_t *lexer) {
   switch(lexer->token.tag) {
     case TAG_BEGIN: {
       lexer->depth++;
@@ -467,7 +466,7 @@ error:
   return ast_empty();
 }
 
-ast_expr_t *parse_atom(lexer_t *lexer) {
+static ast_expr_t *parse_atom(lexer_t *lexer) {
   switch (lexer->token.tag) {
     case TAG_NIL: {
       advance(lexer);

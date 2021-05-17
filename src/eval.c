@@ -41,6 +41,7 @@ static void eval_rand(ast_expr_t *expr, eval_result_t *result, env_t *env) {
   eval_result_t *r = eval_expr(expr, env);
   if (r->obj->type != TYPE_INT || r->obj->intval < 1) {
     result->err = ERR_TYPE_POSITIVE_INT_REQUIRED;
+    result->obj = nil_obj();
     return;
   }
   result->obj = int_obj(rand32() % r->obj->intval);
@@ -198,7 +199,6 @@ static void _eval_block_expr_in_scope(ast_expr_list_t *block_exprs,
   while (node != NULL) {
     eval_result_t *r = eval_expr(node->root, env);
     if ((result->err = r->err) != ERR_NO_ERROR) {
-      leave_scope(env);
       return;
     }
 
@@ -256,17 +256,30 @@ static void eval_func_call(ast_func_call_t *func_call, eval_result_t *result, en
 
   /* Push the scope the function was defined in ... */
   error_t err = push_scope(env, scope);
-  if ((result->err = err) != ERR_NO_ERROR) return;
+  if ((result->err = err) != ERR_NO_ERROR) {
+    leave_scope(env);
+    result->obj = nil_obj();
+    return;
+  }
 
   /* ... and create a new scope for the function itself. */
   err = enter_scope(env);
-  if ((result->err = err) != ERR_NO_ERROR) return;
+  if ((result->err = err) != ERR_NO_ERROR) {
+    // Not a typo. There was a push_scope and an enter_scope.
+    leave_scope(env);
+    leave_scope(env);
+    result->obj = nil_obj();
+    return;
+  }
 
   ast_fn_arg_decl_t *argnames = fn->argnames;
   ast_expr_list_t *callargs = func_call->args;
   while (argnames != NULL) {
     if (callargs == NULL) {
       result->err = ERR_WRONG_ARG_COUNT;
+      // Not a typo. There was a push_scope and an enter_scope.
+      leave_scope(env);
+      leave_scope(env);
       return;
     }
     bytearray_t *name = argnames->name;
@@ -274,6 +287,8 @@ static void eval_func_call(ast_func_call_t *func_call, eval_result_t *result, en
     error_t err = put_env_shadow(env, name, r->obj, F_NONE);
     if (err != ERR_NO_ERROR) {
       result->err = err;
+      // Not a typo. There was a push_scope and an enter_scope.
+      leave_scope(env);
       leave_scope(env);
       return;
     }
@@ -284,8 +299,10 @@ static void eval_func_call(ast_func_call_t *func_call, eval_result_t *result, en
 
   _eval_block_expr_in_scope(fn->block_exprs, result, env);
 
+  // Not a typo. There was a push_scope and an enter_scope.
   leave_scope(env);
   leave_scope(env);
+  return;
 }
 
 static void eval_string_expr(ast_expr_t *expr, eval_result_t *result) {
@@ -737,6 +754,7 @@ static void eval_for_loop(ast_expr_t *expr, env_t *env, eval_result_t *result) {
   int start_val = range->obj->range.from;
   int end_val = range->obj->range.to;
   if (start_val < 0 || end_val < 0) {
+    printf("this one\n");
     result->err = ERR_TYPE_POSITIVE_INT_REQUIRED;
     goto error;
   }
@@ -750,7 +768,6 @@ static void eval_for_loop(ast_expr_t *expr, env_t *env, eval_result_t *result) {
       // Eval predicate.
       r = eval_expr(expr->for_loop->pred, env);
       if ((result->err = r->err) != ERR_NO_ERROR) {
-        leave_scope(env);
         goto error;
       }
     }
@@ -763,7 +780,6 @@ static void eval_for_loop(ast_expr_t *expr, env_t *env, eval_result_t *result) {
       // Eval predicate.
       r = eval_expr(expr->for_loop->pred, env);
       if ((result->err = r->err) != ERR_NO_ERROR) {
-        leave_scope(env);
         goto error;
       }
     }
@@ -775,6 +791,8 @@ static void eval_for_loop(ast_expr_t *expr, env_t *env, eval_result_t *result) {
   return;
 
 error:
+  printf("leaving scope\n");
+  leave_scope(env);
   mem_free(r);
   result->obj = undef_obj();
 }

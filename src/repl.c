@@ -13,7 +13,7 @@
 
 char input[MAX_INPUT] = "";
 
-void print_value(obj_t *obj) {
+static void print_value(obj_t *obj) {
   static_method to_string = get_static_method(obj->type, METHOD_TO_STRING);
   if (to_string != NULL) {
     printf("%s", bytearray_to_c_str(to_string(obj, NULL)->bytearray));
@@ -22,7 +22,7 @@ void print_value(obj_t *obj) {
   }
 }
 
-void print_list(obj_t *list_obj) {
+static void print_list(obj_t *list_obj) {
   printf("{ ");
 
   obj_list_element_t *root = list_obj->list->elems;
@@ -38,7 +38,7 @@ void print_list(obj_t *list_obj) {
   printf(" }");
 }
 
-void print_dict(obj_t *dict_obj) {
+static void print_dict(obj_t *dict_obj) {
   if (dict_obj->dict->nelems < 1) {
     printf("{}");
     return;
@@ -56,7 +56,7 @@ void print_dict(obj_t *dict_obj) {
   printf(" }");
 }
 
-void print_result(obj_t *obj) {
+static void print_result(obj_t *obj) {
   if (obj->type == TYPE_LIST) {
     print_list(obj);
   } else if (obj->type == TYPE_DICT) {

@@ -43,12 +43,12 @@ static token_t *lexer_error(lexer_t *lexer) {
   return &lexer->next_token;
 }
 
-token_t *lex_eof(lexer_t *lexer) {
+static token_t *lex_eof(lexer_t *lexer) {
   lexer->next_token.tag = TAG_EOF;
   return &lexer->next_token;
 }
 
-token_t *lex_eol(lexer_t *lexer) {
+static token_t *lex_eol(lexer_t *lexer) {
   lexer->next_token.tag = TAG_EOL;
   return &lexer->next_token;
 }
@@ -244,18 +244,7 @@ static token_t *lex_string(lexer_t *lexer) {
   return &lexer->next_token;
 }
 
-boolean is_whitespace(char c) {
-  switch(c) {
-    case ' ':
-    case '\t':
-    case '\r':
-    case '\n':
-      return True;
-  }
-  return False;
-}
-
-token_t *get_token(lexer_t *lexer) {
+static token_t *get_token(lexer_t *lexer) {
   consume_ws(lexer);
   char ch = lexer->nextch;
 
