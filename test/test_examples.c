@@ -4,6 +4,7 @@
 #include "../inc/str.h"
 #include "../inc/env.h"
 #include "../inc/eval.h"
+#include "../inc/rand.h"
 
 #define BA(x) (c_str_to_bytearray(x))
 
@@ -67,7 +68,35 @@ void test_ex_quicksort(void) {
   TEST_ASSERT_EQUAL_STRING("  !Ieeiiklp", bytearray_to_c_str(result->obj->bytearray));
 }
 
+void test_ex_shuffle(void) {
+  rand32_init();
+  char *program = "{ val deck = list {                                \n"
+                  "  \"A\", \"2\", \"3\", \"4\", \"5\", \"6\", \"7\", \n"
+                  "  \"8\", \"9\", \"10\", \"J\", \"Q\", \"K\"        \n"
+                  "  }                                                \n"
+                  "  val shuffle = fn(cards) {                        \n"
+                  "    for i in 0..cards.length()-1 {                 \n"
+                  "      val n = rand(cards.length() - i) + i         \n"
+                  "      val temp = cards[i]                          \n"
+                  "      cards[i] = cards[n]                          \n"
+                  "      cards[n] = temp                              \n"
+                  "    }                                              \n"
+                  "  }                                                \n"
+                  "  shuffle(deck)                                    \n"
+                  "  val expected = list {                            \n"
+                  "  \"3\", \"10\", \"6\", \"J\", \"9\", \"A\", \"K\",\n"
+                  "  \"5\", \"2\", \"7\", \"4\", \"Q\", \"8\"         \n"
+                  "  }                                                \n"
+                  "  deck == expected                                 \n"
+                  "}";
+  eval_result_t *result = eval_program(program);
+
+  TEST_ASSERT_EQUAL(ERR_NO_ERROR, result->err);
+  TEST_ASSERT_EQUAL(True, result->obj->boolval);
+}
+
 void test_examples(void) {
   RUN_TEST(test_ex_fibonacci);
   RUN_TEST(test_ex_quicksort);
+  RUN_TEST(test_ex_shuffle);
 }

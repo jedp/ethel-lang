@@ -201,6 +201,36 @@ static ast_expr_list_t *parse_expr_list(lexer_t *lexer) {
   return root;
 }
 
+static ast_expr_list_t *parse_list_expr_list(lexer_t *lexer) {
+  ast_expr_list_t *node = empty_expr_list();
+  ast_expr_list_t *root = node;
+  node->root = NULL;
+
+  ast_expr_t *e = parse_expr(lexer);
+  if (e->type > AST_EMPTY) node->root = e;
+
+  while (lexer->token.tag == TAG_COMMA || lexer->token.tag == TAG_EOL) {
+    advance(lexer);
+    ast_expr_list_t *next = mem_alloc(sizeof(ast_expr_list_t));
+    e = parse_expr(lexer);
+    if (e->type > AST_EMPTY) {
+
+      // This is ghastly.
+      if (node->root == NULL) {
+        node->root = e;
+      } else {
+        next->root = e;
+        next->next = NULL;
+
+        node->next = next;
+        node = next;
+      }
+    }
+  }
+
+  return root;
+}
+
 static ast_expr_kv_list_t *parse_expr_kv_list(lexer_t *lexer) {
   ast_expr_kv_list_t *node = empty_expr_kv_list();
   ast_expr_kv_list_t *root = node;
@@ -403,10 +433,12 @@ static ast_expr_t *parse_expr(lexer_t *lexer) {
       return ast_for_loop(index, range, pred);
     }
     case TAG_LIST: {
+      // TODO - consolidate block parsing
       advance(lexer);
       if (lexer->token.tag == TAG_BEGIN) {
+        lexer->depth++;
         eat(lexer, TAG_BEGIN);
-        ast_expr_list_t *es = parse_expr_list(lexer);
+        ast_expr_list_t *es = parse_list_expr_list(lexer);
         if (!eat(lexer, TAG_END)) {
           mem_free(es);
           goto error;

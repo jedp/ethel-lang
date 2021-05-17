@@ -338,6 +338,24 @@ static void cast(obj_t *obj, obj_t *type_obj, eval_result_t *result) {
   result->obj = m(obj, wrap_varargs(1, type_obj));
 }
 
+static void list_subscript_assign(obj_t *obj,
+                                  ast_expr_t *lhs,
+                                  ast_expr_t *rhs,
+                                  eval_result_t *result,
+                                  env_t *env) {
+  eval_result_t *r1 = eval_expr(lhs->op_args->b, env);
+  if ((result->err = r1->err) != ERR_NO_ERROR) goto error;
+  obj_t *offset = r1->obj;
+  eval_result_t *r2 = eval_expr(rhs, env);
+  if ((result->err = r2->err) != ERR_NO_ERROR) goto error;
+  obj_t *val = r2->obj;
+  result->obj = list_set(obj, wrap_varargs(2, offset, val));
+  return;
+
+error:
+  result->obj = nil_obj();
+}
+
 static void arr_subscript_assign(obj_t *obj,
                                  ast_expr_t *lhs,
                                  ast_expr_t *rhs,
@@ -387,7 +405,10 @@ static void assign(ast_expr_t *lhs,
     obj_t *obj = get_env(env, name);
 
     switch(obj->type) {
-      case TYPE_STRING:
+      case TYPE_LIST:
+        list_subscript_assign(obj, lhs, rhs, result, env);
+        return;
+      case TYPE_STRING:    // fall-through
       case TYPE_BYTEARRAY:
         arr_subscript_assign(obj, lhs, rhs, result, env);
         return;

@@ -15,6 +15,7 @@ obj_t *list_ne(obj_t *list_obj, obj_method_args_t *args);
 
 obj_t *list_len(obj_t *list_obj, obj_method_args_t *args);
 obj_t *list_get(obj_t *list_obj, obj_method_args_t *args);
+obj_t *list_set(obj_t *list_obj, obj_method_args_t *args);
 obj_t *list_slice(obj_t *list_obj, obj_method_args_t *args);
 obj_t *list_contains(obj_t *list_obj, obj_method_args_t *args);
 obj_t *list_subscript_get(obj_t *list_obj, obj_method_args_t *args);

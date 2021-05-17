@@ -99,7 +99,7 @@ obj_t *arr_get(obj_t *arr_obj, obj_method_args_t *args) {
 
 obj_t *arr_set(obj_t *arr_obj, obj_method_args_t *args) {
   if (args == NULL || args->arg == NULL) {
-    printf("Null arg to get()\n");
+    printf("Null arg to set()\n");
     return nil_obj();
   }
   // Get first arg as int offset.
