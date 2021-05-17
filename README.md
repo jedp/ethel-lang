@@ -198,6 +198,8 @@ Byte Array
 41
 > 1 << 4
 16
+> 5 & 7 == 5 and 1 << 4 + 2 == 18 ;; Un-astonishing order of operations.
+true
 > 0x7ff0 ^ 0b11001101101          ;; Mix and match hex and bin representations.
 31133
 > hex(0x7ff0 ^ 0b11001101101)

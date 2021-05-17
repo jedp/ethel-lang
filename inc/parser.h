@@ -5,6 +5,9 @@
 #include "lexer.h"
 #include "ast.h"
 
+/*
+ * Following the Principle of Least Astonishment.
+ */
 typedef enum {
   PRECED_NONE = 0, // Lowest precedence
   PRECED_ASSIGN,
@@ -12,20 +15,20 @@ typedef enum {
   PRECED_MAPS_TO,
   PRECED_OR,
   PRECED_AND,
+  PRECED_EQ,
+  PRECED_GLT,
   PRECED_BITWISE_OR,
   PRECED_BITWISE_XOR,
   PRECED_BITWISE_AND,
-  PRECED_MEMBERSHIP,
-  PRECED_EQ,
-  PRECED_GLT,
-  PRECED_BITWISE_SHIFT,
   PRECED_ADD,
   PRECED_MUL,
-  PRECED_CAST,
+  PRECED_MEMBERSHIP,
+  PRECED_BITWISE_SHIFT,
   PRECED_BITWISE_NOT,
   PRECED_NOT,
   PRECED_SUBSCRIPT,
   PRECED_FUNCTION_CALL,
+  PRECED_CAST,
   PRECED_RANGE,
   PRECED_MEMBER_ACCESS,
 } preced_t;
