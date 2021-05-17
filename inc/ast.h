@@ -227,7 +227,7 @@ typedef struct AstFunc {
 } ast_func_def_t;
 
 typedef struct AstFuncCall {
-  bytearray_t *name;
+  ast_expr_t *expr;
   ast_expr_list_t *args;
 } ast_func_call_t;
 
@@ -308,7 +308,7 @@ ast_expr_t *ast_ident(bytearray_t *name);
 ast_expr_t *ast_ident_decl(bytearray_t *name, uint16_t flags);
 ast_expr_t *ast_field(bytearray_t *s);
 ast_expr_t *ast_func_def(ast_fn_arg_decl_t *args, ast_expr_list_t *es);
-ast_expr_t *ast_func_call(bytearray_t *name, ast_expr_list_t *args);
+ast_expr_t *ast_func_call(ast_expr_t *expr, ast_expr_list_t *args);
 ast_expr_t *ast_func_return(ast_expr_list_t *func_return_values);
 ast_expr_t *ast_method_call(bytearray_t *name, ast_expr_list_t *args);
 ast_expr_t *ast_member_access(ast_expr_t *receiver,

@@ -539,7 +539,7 @@ void test_lex_function_call(void) {
 
   int expected[] = {
     TAG_INVARIABLE, TAG_IDENT, TAG_ASSIGN,
-    TAG_FUNC_CALL, TAG_LPAREN, TAG_INT, TAG_RPAREN
+    TAG_IDENT, TAG_LPAREN, TAG_INT, TAG_RPAREN
   };
   for (int i = 0; i < sizeof(expected) / sizeof(expected[0]); i++) {
     TEST_ASSERT_EQUAL(ERR_NO_ERROR, lexer.err);

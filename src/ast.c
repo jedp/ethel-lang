@@ -246,10 +246,10 @@ ast_expr_t *ast_func_def(ast_fn_arg_decl_t *argnames,
   return node;
 }
 
-ast_expr_t *ast_func_call(bytearray_t *name, ast_expr_list_t *args) {
+ast_expr_t *ast_func_call(ast_expr_t *expr, ast_expr_list_t *args) {
   ast_expr_t *node = ast_node(AST_FUNCTION_CALL);
   node->func_call = mem_alloc(sizeof(ast_func_call_t));
-  node->func_call->name = name;
+  node->func_call->expr = expr;
   node->func_call->args = args;
   return node;
 }

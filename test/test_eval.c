@@ -845,6 +845,37 @@ void test_eval_function_lexical_scope(void) {
   TEST_ASSERT_EQUAL(42, result->obj->intval);
 }
 
+void test_eval_func_in_list(void) {
+  char *program = "{ val l = list            \n"
+                  "  val f = fn(x) { x + 1 } \n"
+                  "  l.append(f)             \n"
+                  "  l[f(-1)](5)             \n"
+                  "}";
+
+  eval_result_t *result = eval_program(program);
+
+  TEST_ASSERT_EQUAL(ERR_NO_ERROR, result->err);
+  TEST_ASSERT_EQUAL(6, result->obj->intval);
+}
+
+void test_eval_func_in_dict(void) {
+  char *program = "{ val d = dict                            \n"
+                  "  val f = fn(x) { x + 1 }                 \n"
+                  "  var i = 0                               \n"
+                  "  d[\"incr\"] = f                         \n"
+                  "  d[\"decr\"] = fn(x) { x - 1 }           \n"
+                  "  if (d[\"incr\"](0) == 1) then i = i + 1 \n"
+                  "  if (d[\"decr\"](1) == 0) then i = i + 1 \n"
+                  "  i                                       \n"
+                  "}";
+
+  eval_result_t *result = eval_program(program);
+
+  TEST_ASSERT_EQUAL(ERR_NO_ERROR, result->err);
+  TEST_ASSERT_EQUAL(2, result->obj->intval);
+
+}
+
 void test_eval_block_scope(void) {
   char *program = "{ val x = 42       \n"
                   "  { { { x } } }    \n"
@@ -1118,6 +1149,8 @@ void test_eval(void) {
   RUN_TEST(test_eval_function_wrong_args);
   RUN_TEST(test_eval_function_return);
   RUN_TEST(test_eval_function_lexical_scope);
+  RUN_TEST(test_eval_func_in_list);
+  RUN_TEST(test_eval_func_in_dict);
   RUN_TEST(test_eval_block_scope);
   RUN_TEST(test_eval_in_list);
   RUN_TEST(test_eval_in_range);

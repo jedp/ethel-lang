@@ -347,7 +347,6 @@ void test_parse_func_call(void) {
   TEST_ASSERT_EQUAL(AST_IDENT, ((ast_expr_t*) ast->assignment->ident)->type);
   TEST_ASSERT_EQUAL(AST_FUNCTION_CALL, ((ast_expr_t*) ast->assignment->value)->type);
   ast_func_call_t *func_call = (ast_func_call_t*) ast->assignment->value->func_call;
-  TEST_ASSERT_EQUAL_STRING("f", bytearray_to_c_str(func_call->name));
   TEST_ASSERT_EQUAL(42, func_call->args->root->intval);
   mem_free(ast);
 }

@@ -237,9 +237,15 @@ static void eval_func_def(ast_func_def_t *func_def, eval_result_t *result, env_t
 }
 
 static void eval_func_call(ast_func_call_t *func_call, eval_result_t *result, env_t *env) {
-  obj_t *obj = get_env(env, func_call->name);
+  eval_result_t *r = eval_expr(func_call->expr, env);
+  if (r->err != ERR_NO_ERROR) {
+    result->err = ERR_FUNCTION_UNDEFINED;
+    result->obj = nil_obj();
+    return;
+  }
+  obj_t *obj = r->obj;
 
-  if (obj->type == TYPE_UNDEF) {
+  if (obj->type != TYPE_FUNC_PTR) {
     result->err = ERR_FUNCTION_UNDEFINED;
     result->obj = nil_obj();
     return;

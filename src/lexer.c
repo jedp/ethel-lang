@@ -195,17 +195,7 @@ static token_t *lex_word(lexer_t *lexer) {
     }
   }
 
-  // Look ahead to see if it's a function call.
-  readch(lexer);
-  if (lexer->nextch == '(') {
-    unreadch(lexer);
-    lexer->next_token.tag = TAG_FUNC_CALL;
-    lexer->next_token.string = next_word_buf;
-    return &lexer->next_token;
-  }
-  unreadch(lexer);
-
-  // If none of the above, it's a plain old identifier.
+  // It's a plain old identifier.
   lexer->next_token.tag = TAG_IDENT;
   lexer->next_token.string = next_word_buf;
   return &lexer->next_token;

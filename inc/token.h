@@ -81,7 +81,6 @@ enum tag_enum {
   TAG_FIELD_NAME,
   TAG_METHOD_CALL,
   TAG_FUNC_DEF,
-  TAG_FUNC_CALL,
   TAG_FUNC_RETURN,
   TAG_RAND,
   TAG_RANDOM_CHOICE,
@@ -199,7 +198,6 @@ static const char* tag_names[] = {
   "FIELD-NAME",
   "METHOD-CALL",
   "FUNCTION-DEFINITION",
-  "FUNCTION-CALL",
   "FUNCTION-RETURN",
 
   // Math

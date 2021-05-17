@@ -41,6 +41,7 @@ boolean is_op(token_t *token) {
       || token->tag == TAG_IN
       || token->tag == TAG_MEMBER_ACCESS
       || token->tag == TAG_LBRACKET  // Always subscript
+      || token->tag == TAG_LPAREN
       || token->tag == TAG_COLON  // Always dict kv association
       || token->tag == TAG_ASSIGN
       ;
@@ -50,6 +51,8 @@ uint8_t op_preced(token_t *token) {
   switch (token->tag) {
     case TAG_MEMBER_ACCESS:
       return PRECED_MEMBER_ACCESS;
+    case TAG_LPAREN:
+      return PRECED_FUNCTION_CALL;
     case TAG_LBRACKET:
       return PRECED_SUBSCRIPT;
     case TAG_AS:
@@ -269,6 +272,23 @@ ast_expr_t *_parse_subscript(lexer_t *lexer, int min_preced) {
   return expr;
 }
 
+ast_expr_list_t *_parse_fn_args(lexer_t *lexer, int min_preced) {
+  // Emtpy arglist?
+  if (lexer->token.tag == TAG_RPAREN) {
+    eat(lexer, TAG_RPAREN);
+    return empty_expr_list();
+  }
+
+  ast_expr_list_t *args = parse_expr_list(lexer);
+  if (!eat(lexer, TAG_RPAREN)) {
+    printf("Expected to eat right paren. Could not eat tasty right paren.\n");
+    lexer->err = ERR_SYNTAX_ERROR;
+    return empty_expr_list();
+  }
+
+  return args;
+}
+
 ast_expr_t *_parse_expr(lexer_t *lexer, int min_preced) {
   ast_expr_t *lhs = parse_atom(lexer);
 
@@ -312,6 +332,7 @@ ast_expr_t *_parse_expr(lexer_t *lexer, int min_preced) {
       case TAG_NE:             lhs = ast_op(AST_NE,            lhs, _parse_expr(lexer, next_min_preced)); break;
       case TAG_IS:             lhs = ast_op(AST_IS,            lhs, _parse_expr(lexer, next_min_preced)); break;
       case TAG_IN:             lhs = ast_op(AST_IN,            lhs, _parse_expr(lexer, next_min_preced)); break;
+      case TAG_LPAREN:         lhs = ast_func_call(            lhs, _parse_fn_args(lexer, next_min_preced)); break;
       case TAG_LBRACKET:       lhs = ast_op(AST_SUBSCRIPT,     lhs, _parse_subscript(lexer, next_min_preced)); break;
       case TAG_COLON:          lhs = ast_op(AST_MAPS_TO,       lhs, _parse_expr(lexer, next_min_preced)); break;
       case TAG_AS:             lhs = ast_cast(                 lhs, _parse_expr(lexer, next_min_preced)); break;
@@ -561,17 +582,6 @@ ast_expr_t *parse_atom(lexer_t *lexer) {
       if (lexer->token.tag != TAG_BEGIN) { mem_free(args); goto error; }
       ast_expr_t *block = parse_expr(lexer);
       return ast_func_def(args, block->block_exprs);
-    }
-    case TAG_FUNC_CALL: {
-      bytearray_t *name = c_str_to_bytearray(lexer->token.string);
-      advance(lexer);
-      if (!eat(lexer, TAG_LPAREN)) { mem_free(name); goto error; }
-      ast_expr_list_t *args = NULL;
-      if (lexer->token.tag != TAG_RPAREN) {
-        args = parse_expr_list(lexer);
-      }
-      if (!eat(lexer, TAG_RPAREN)) { mem_free(name); mem_free(args); goto error; }
-      return ast_func_call(name, args);
     }
     case TAG_FUNC_RETURN: {
       // syntax: return a, b
