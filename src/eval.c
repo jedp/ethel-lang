@@ -506,10 +506,6 @@ static void math(obj_t *a, obj_t *b,
 }
 
 static void range(int from_inclusive, int to_inclusive, eval_result_t *result) {
-  if (to_inclusive < from_inclusive) {
-    result->err = ERR_RANGE_ERROR;
-    return;
-  }
   result->obj = range_obj(from_inclusive, to_inclusive);
 }
 
