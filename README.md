@@ -85,18 +85,18 @@ true
 #### Dictionaries
 
 ```
-> val d = dict { 'x': 42, "foo": 19, 3.14: "pi, roughly" }
+> val d = dict { 'x': 42, "incr": fn(x) { x + 1 }, 3.14: "pi, roughly" }
 { 3.140000: "pi, roughly"
   "foo": 19
   'x': 42 }
 > d['x']
 42
-> d["foo"] + 1
-20
+> d["incr"](9)
+10
 > 3.14 in d
-True
+true
 > d.keys()
-{ 'x', "foo", 3.14 }
+{ 3.140000, 'x', "incr" }
 ```
 
 #### Functions
