@@ -1097,6 +1097,24 @@ void test_eval_dict_keys(void) {
   TEST_ASSERT_EQUAL(5, result->obj->intval);
 }
 
+void test_eval_iterable_random_choice() {
+  rand32_init();
+  char *program = "{ var i = 0;                             \n"
+                  "  val l = list {'a', 'b', 'c'}           \n"
+                  "  val d = dict { 1: 1, 2: 1, 3: 1}       \n"
+                  "  val r = 1..10                          \n"
+                  "  val s = \"I like pie\"                 \n"
+                  "  if l.rand() == 'c'      then i = i + 1 \n"
+                  "  if d.keys().rand() == 3 then i = i + 1 \n"
+                  "  if r.rand() == 6        then i = i + 1 \n"
+                  "  if s.rand() == 'p'      then i = i + 1 \n"
+                  "  i                                      \n"
+                  "}";
+  eval_result_t *result = eval_program(program);
+  TEST_ASSERT_EQUAL(ERR_NO_ERROR, result->err);
+  TEST_ASSERT_EQUAL(4, result->obj->intval);
+}
+
 void test_eval(void) {
   RUN_TEST(test_eval_calculator);
   RUN_TEST(test_eval_preced_not_astonishing);
@@ -1178,5 +1196,6 @@ void test_eval(void) {
   RUN_TEST(test_eval_dict_len);
   RUN_TEST(test_eval_dict_remove);
   RUN_TEST(test_eval_dict_keys);
+  RUN_TEST(test_eval_iterable_random_choice);
 }
 

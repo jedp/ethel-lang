@@ -260,7 +260,6 @@ static const token_t reserved[] = {
   { TAG_TRUE,          .string = (char *) "true" },
   { TAG_FALSE,         .string = (char *) "false" },
   { TAG_RAND,          .string = (char *) "rand" },
-  { TAG_RANDOM_CHOICE, .string = (char *) "randomChoice" },
   { TAG_ABS,           .string = (char *) "abs" },
   { TAG_SIN,           .string = (char *) "sin" },
   { TAG_COS,           .string = (char *) "cos" },
