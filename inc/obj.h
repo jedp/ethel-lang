@@ -232,7 +232,5 @@ obj_t *return_val(obj_t *val);
 obj_method_args_t *wrap_varargs(int n_args, ...);
 boolean obj_prim_eq(obj_t *a, obj_t *b);
 
-boolean truthy(obj_t *obj);
-
 #endif
 

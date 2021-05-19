@@ -8,7 +8,7 @@ obj_t *bool_hash(obj_t *obj, obj_method_args_t *args);
 obj_t *bool_copy(obj_t *obj, obj_method_args_t *args);
 obj_t *bool_to_string(obj_t *obj, obj_method_args_t *args);
 
-/* Return true if both objects are truthy. False otherwise.  */
+/* Return true if both objects are boolean true. False otherwise.  */
 obj_t *bool_eq(obj_t *obj, obj_method_args_t *args);
 
 /* Return true if the two objects are not bool_eq. */

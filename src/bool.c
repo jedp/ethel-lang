@@ -21,7 +21,8 @@ obj_t *bool_eq(obj_t *obj, obj_method_args_t *args) {
   if (args == NULL || args->arg == NULL) return boolean_obj(False);
   obj_t *arg = args->arg;
 
-  return boolean_obj(obj->boolval == truthy(arg));
+  if (arg->type != TYPE_BOOLEAN) return boolean_obj(False);
+  return boolean_obj(obj->boolval == arg->boolval);
 }
 
 obj_t *bool_ne(obj_t *obj, obj_method_args_t *args) {

@@ -496,6 +496,20 @@ static void subscript_of(obj_t *a, obj_t *b, eval_result_t *result) {
   result->obj = m(a, wrap_varargs(1, b));
 }
 
+static boolean truthy(obj_t *obj) {
+  switch(obj->type) {
+    case TYPE_NIL: return False;
+    case TYPE_INT: return obj->intval != 0;
+    case TYPE_FLOAT: return obj->floatval != 0;
+    case TYPE_STRING: return obj->bytearray->size > 0;
+    case TYPE_BYTE: return obj->byteval != 0x0;
+    case TYPE_BOOLEAN: return obj->boolval;
+    default:
+      printf("Unknown type: %d\n", obj->type);
+      return False;
+  }
+}
+
 static void boolean_and(obj_t *a, obj_t *b, eval_result_t *result) {
   result->obj = boolean_obj(truthy(a) && truthy(b)); 
 }

@@ -98,22 +98,16 @@ static const char* tag_names[] = {
   "EOF",
   "EOL",
   "COMMENT",
-
-  // Identifiers
   "IDENT",
   "TYPE-NAME",
   "ASSIGN",
   "INVARIABLE",
   "VARIABLE",
   "DELETE",
-
-  // Association
   "LPAREN",
   "RPAREN",
   "COMMA",
   "COLON",
-
-  // Arithmetic
   "PLUS",
   "MINUS",
   "TIMES",
@@ -128,8 +122,6 @@ static const char* tag_names[] = {
   "BITWISE_OR",
   "BITWISE_XOR",
   "BITWISE_NOT",
-
-  // Types
   "BIN",
   "HEX",
   "INT",
@@ -140,12 +132,9 @@ static const char* tag_names[] = {
   "FALSE",
   "NIL",
   "LIST",
+  "DICT",
   "OF",
-
-  // Array constructor
   "ARRAY-DECL",
-
-  // Type declarations
   "INT-TYPE",
   "FLOAT-TYPE",
   "BYTE-TYPE",
@@ -154,15 +143,9 @@ static const char* tag_names[] = {
   "AS",
   "IS",
   "TYPE-OF",
-
-  // Sequence
   "RANGE-TO",
-
-  // Element access
   "OPEN_SUBSCRIPT_BRACKET",
   "CLOSE_SUBSCRIPT_BRACKET",
-
-  // Structure
   "IF",
   "THEN",
   "ELSE",
@@ -171,36 +154,24 @@ static const char* tag_names[] = {
   "IN",
   "MATCH",
   "STEP",
-
-  // Comparison
   "GT",
   "LT",
   "GE",
   "LE",
   "EQ",
   "NE",
-
-  // IO
   "DUMP",
   "PRINT",
   "INPUT",
-
-  // Formatting
   "TO-HEX",
   "TO-BIN",
-
-  // Blocks
   "BEGIN",
   "END",
-
-  // Field and method access
   "MEMBER-ACCESS",
   "FIELD-NAME",
   "METHOD-CALL",
   "FUNCTION-DEFINITION",
   "FUNCTION-RETURN",
-
-  // Math
   "RAND",
   "RANDOM-CHOICE",
   "ABS",

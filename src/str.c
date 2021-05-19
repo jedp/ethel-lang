@@ -337,7 +337,7 @@ obj_t *str_as(obj_t *obj, obj_method_args_t *args) {
     case TYPE_STRING: return obj;
     case TYPE_INT: return str_to_int(obj, NULL);
     case TYPE_FLOAT: return str_to_float(obj, NULL);
-    case TYPE_BOOLEAN: return boolean_obj(truthy(obj) ? True : False);
+    case TYPE_BOOLEAN: return boolean_obj(obj->bytearray->size ? True : False);
     default:
       printf("Cannot cast %s to type %s.\n",
              obj_type_names[obj->type], obj_type_names[type_arg->type]);

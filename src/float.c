@@ -196,7 +196,7 @@ obj_t *float_as(obj_t *obj, obj_method_args_t *args) {
   }
 
   if (arg->type == TYPE_BOOLEAN) {
-    return boolean_obj(truthy(obj) ? True : False);
+    return boolean_obj(obj->floatval ? True : False);
   }
 
   printf("Cannot cast %s to %s.\n",
