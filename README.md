@@ -1,12 +1,12 @@
-## Ethel
+# Ethel
 
 A basic programming language.
 
 Very much in progress and not useful yet.
 
-### Features
+## Features
 
-#### Expressions all the way down
+### Expressions all the way down
 
 ```
 > val age = 42
@@ -19,7 +19,7 @@ Very much in progress and not useful yet.
 5
 ```
 
-#### Dynamic typing
+### Dynamic typing
 
 ```
 > val s = 101
@@ -38,22 +38,24 @@ Int
 Type error
 ```
 
-#### Lists
+### Data Types
 
-```
-> val l = list { 4, 5, 6, 7, 8, 9 }
-{ 4, 5, 6, 7, 8, 9 }
-> l.tail().slice(2, 4)
-{ 7, 8 }
-> l.tail().slice(2, 4).tail().head()
-8
-> l.removeFirst() * l.head()
-20
-> l
-{ 5, 6, 7, 8, 9 }
-> 7 in l
-true
-```
+Primitives:
+- Boolean (`True`, `False`)
+- Byte (`'c'`, `42`, `0x17`)
+- Int (`123`)
+- Float (`3.14`)
+- Byte Array (`arr(n)`)
+- String (`"hello, world"`)
+
+Compound:
+- List (`list { 1, 'x', "foo", fn(x) { x + 1 }, ... }`)
+- Dictionary (`dict { 'a': 1, 42: True, "up": fn(vec) { list { vec[0], vec[1] + 1 } }  ... }`)
+- Function (`fn(x) { x + 1 }`)
+
+Keys of dictionary can be any primitive type.
+
+Values of lists and dictionaries can be any type, including other lists and dictionaries.
 
 #### Byte Arrays and Strings
 
@@ -82,6 +84,23 @@ ByteArray(4)
 true
 ```
 
+#### Lists
+
+```
+> val l = list { 4, 5, 6, 7, 8, 9 }
+{ 4, 5, 6, 7, 8, 9 }
+> l.tail().slice(2, 4)
+{ 7, 8 }
+> l.tail().slice(2, 4).tail().head()
+8
+> l.removeFirst() * l.head()
+20
+> l
+{ 5, 6, 7, 8, 9 }
+> 7 in l
+true
+```
+
 #### Dictionaries
 
 ```
@@ -99,12 +118,14 @@ true
 { 3.140000, 'x', "incr" }
 ```
 
-#### Functions
+### Functions
 
-Functions have lexical scope.
+Functions are first-class objects.
 
 ```
-> val f = fn(a, b) { a * b }
+> fn(x) { x + 1 }(5)         ;; Anonymous (lambda)
+6
+> val f = fn(a, b) { a * b } ;; As durable values
 f
 > f(2, 5)
 10
@@ -166,7 +187,11 @@ I like potatoes!
   !Iaeeikloopstt
 ```
 
-#### Loops
+### Loops
+
+- For
+- Do-While
+- While
 
 ```
 > var x = 10
@@ -187,7 +212,7 @@ I like potatoes!
 <Nil>
 ```
 
-#### Bitwise operators
+### Bitwise operators
 
 ```
 > val a = arr(4)
@@ -206,7 +231,9 @@ true
 0x799d
 ```
 
-#### Dumps of internal representation
+### Dumps of internal representation
+
+It's always instructive to see how data is actually stored as bits.
 
 ```
 > dump("This is the quickening!") ;; Strings get a canonical hex dump.
