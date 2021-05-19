@@ -609,6 +609,7 @@ void test_lex_all_tokens(void) {
     (test_data_t) { .text = "if", .expected_tag = TAG_IF },
     (test_data_t) { .text = "then", .expected_tag = TAG_THEN },
     (test_data_t) { .text = "else", .expected_tag = TAG_ELSE },
+    (test_data_t) { .text = "do", .expected_tag = TAG_DO },
     (test_data_t) { .text = "while", .expected_tag = TAG_WHILE },
     (test_data_t) { .text = "for", .expected_tag = TAG_FOR },
     (test_data_t) { .text = "in", .expected_tag = TAG_IN },

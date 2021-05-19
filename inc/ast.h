@@ -58,6 +58,7 @@ enum ast_type_enum {
   AST_RESERVED_CALLABLE,
   AST_IF_THEN,
   AST_IF_THEN_ELSE,
+  AST_DO_WHILE_LOOP,
   AST_WHILE_LOOP,
   AST_FOR_LOOP,
 };
@@ -115,6 +116,7 @@ static const char *ast_node_names[] = {
   "RESERVED-CALLABLE",
   "IF-THEN",
   "IF-THEN-ELSE",
+  "DO-WHILE-LOOP",
   "WHILE-LOOP",
   "FOR-LOOP",
 };
@@ -200,6 +202,11 @@ typedef struct AstReservedCallable {
   ast_expr_list_t *es;
 } ast_reserved_callable_t;
 
+typedef struct AstDoWhileLoop {
+  ast_expr_t *pred;
+  ast_expr_t *cond;
+} ast_do_while_loop_t;
+
 typedef struct AstWhileLoop {
   ast_expr_t *cond;
   ast_expr_t *pred;
@@ -272,6 +279,7 @@ typedef struct __attribute__((__packed__)) AstExpr {
     ast_reserved_callable_t *reserved_callable;
     ast_if_then_args_t *if_then_args;
     ast_if_then_else_args_t *if_then_else_args;
+    ast_do_while_loop_t *do_while_loop;
     ast_while_loop_t *while_loop;
     ast_for_loop_t *for_loop;
     ast_array_decl_t *array_decl;
@@ -322,6 +330,7 @@ ast_expr_t *ast_reserved_callable(ast_reserved_callable_type_t type, ast_expr_li
 ast_expr_t *ast_delete(ast_expr_t *ident);
 ast_expr_t *ast_if_then(ast_expr_t *if_clause, ast_expr_t *then_clause);
 ast_expr_t *ast_if_then_else(ast_expr_t *if_clause, ast_expr_t *then_clause, ast_expr_t *else_clause);
+ast_expr_t *ast_do_while_loop(ast_expr_t *pred, ast_expr_t *cond);
 ast_expr_t *ast_while_loop(ast_expr_t *cond, ast_expr_t *pred);
 ast_expr_t *ast_for_loop(ast_expr_t *index, ast_expr_t *range, ast_expr_t *pred);
 ast_expr_t *ast_empty(void);

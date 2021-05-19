@@ -146,6 +146,21 @@ void test_eval_for_loop(void) {
   TEST_ASSERT_EQUAL(10, obj->intval);
 }
 
+void test_eval_do_while_loop(void) {
+  char *program = "{ var x = 10                \n"
+                  "  do {                      \n"
+                  "    x = x - 1               \n"
+                  "  } while (x > 0)           \n"
+                  "  x                         \n"
+                  "}                           \n";
+  eval_result_t *result = eval_program(program);
+  TEST_ASSERT_EQUAL(ERR_NO_ERROR, result->err);
+
+  obj_t *obj = result->obj;
+  TEST_ASSERT_EQUAL(TYPE_INT, obj->type);
+  TEST_ASSERT_EQUAL(0, obj->intval);
+}
+
 void test_eval_while_loop(void) {
   char *program = "{ var x = 10                \n"
                   "  while x > 0 { x = x - 1 } \n"
@@ -1129,6 +1144,7 @@ void test_eval(void) {
   RUN_TEST(test_eval_assign_multiple);
   RUN_TEST(test_eval_del);
   RUN_TEST(test_eval_for_loop);
+  RUN_TEST(test_eval_do_while_loop);
   RUN_TEST(test_eval_while_loop);
   RUN_TEST(test_eval_if_else);
   RUN_TEST(test_eval_if_else_nil);

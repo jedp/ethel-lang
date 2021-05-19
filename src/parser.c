@@ -413,6 +413,15 @@ static ast_expr_t *parse_expr(lexer_t *lexer) {
       }
       return ast_if_then(if_clause, then_clause);
     }
+    case TAG_DO: {
+      advance(lexer);
+      ast_expr_t *pred = parse_expr(lexer);
+      if (pred->type == AST_EMPTY) goto error;
+      if (!eat(lexer, TAG_WHILE)) goto error;
+      ast_expr_t *cond = parse_expr(lexer);
+      if (cond->type == AST_EMPTY) goto error;
+      return ast_do_while_loop(pred, cond);
+    }
     case TAG_WHILE: {
       advance(lexer);
       ast_expr_t *cond = parse_expr(lexer);

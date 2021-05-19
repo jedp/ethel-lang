@@ -735,6 +735,33 @@ error:
       result->obj = undef_obj();
 }
 
+static void eval_do_while_loop(ast_expr_t *expr, env_t *env, eval_result_t *result) {
+  eval_result_t *cond;
+  eval_result_t *r;
+  result->obj = nil_obj();
+  result->err = ERR_NO_ERROR;
+
+  for(;;) {
+    r = eval_expr(expr->do_while_loop->pred, env);
+    if (r->err != ERR_NO_ERROR) {
+      result->err = r->err;
+      result->obj = undef_obj();
+      return;
+    }
+
+    result->obj = r->obj;
+
+    cond = eval_expr(expr->do_while_loop->cond, env);
+    if (cond->err != ERR_NO_ERROR) {
+      result->err = cond->err;
+      result->obj = undef_obj();
+      return;
+    }
+
+    if (!truthy(cond->obj)) return;
+  }
+}
+
 static void eval_while_loop(ast_expr_t *expr, env_t *env, eval_result_t *result) {
   eval_result_t *cond;
   eval_result_t *r;
@@ -1153,6 +1180,9 @@ eval_result_t *eval_expr(ast_expr_t *expr, env_t *env) {
           result->obj = nil_obj();
           break;
         }
+        case AST_DO_WHILE_LOOP:
+          eval_do_while_loop(expr, env, result);
+          break;
         case AST_WHILE_LOOP:
           eval_while_loop(expr, env, result);
           break;

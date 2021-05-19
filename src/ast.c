@@ -292,6 +292,14 @@ ast_expr_t *ast_if_then_else(ast_expr_t *if_clause, ast_expr_t *then_clause, ast
   return node;
 }
 
+ast_expr_t *ast_do_while_loop(ast_expr_t *pred, ast_expr_t *cond) {
+  ast_expr_t *node = ast_node(AST_DO_WHILE_LOOP);
+  node->do_while_loop = mem_alloc(sizeof(ast_do_while_loop_t));
+  node->do_while_loop->pred = pred;
+  node->do_while_loop->cond = cond;
+  return node;
+}
+
 ast_expr_t *ast_while_loop(ast_expr_t *cond, ast_expr_t *pred) {
   ast_expr_t *node = ast_node(AST_WHILE_LOOP);
   node->while_loop = mem_alloc(sizeof(ast_while_loop_t));
