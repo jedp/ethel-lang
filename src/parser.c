@@ -469,25 +469,6 @@ static ast_expr_t *parse_expr(lexer_t *lexer) {
       }
       return ast_dict(NULL);
     }
-    case TAG_INPUT: {
-      ast_reserved_callable_type_t callable_type = ast_callable_type_for_tag(lexer->token.tag);
-      advance(lexer);
-      if (lexer->token.tag == TAG_LPAREN) {
-        eat(lexer, TAG_LPAREN);
-        // More than 0 args.
-        if (lexer->token.tag != TAG_RPAREN) {
-          ast_expr_list_t *es = parse_expr_list(lexer);
-          if (!eat(lexer, TAG_RPAREN)) {
-            mem_free(es);
-            goto error;
-          }
-          return ast_reserved_callable(callable_type, es);
-        }
-        if (!eat(lexer, TAG_RPAREN)) goto error;
-        return ast_reserved_callable(callable_type, empty_expr_list());
-      }
-      return ast_ident(c_str_to_bytearray(lexer->token.string));
-    }
   }
 
   return _parse_expr(lexer, PRECED_NONE);
@@ -674,6 +655,7 @@ static ast_expr_t *parse_atom(lexer_t *lexer) {
     case TAG_TO_HEX:
     case TAG_TO_BIN:
     case TAG_DUMP:
+    case TAG_INPUT:
     case TAG_PRINT: {
       ast_reserved_callable_type_t callable_type = ast_callable_type_for_tag(lexer->token.tag);
       advance(lexer);

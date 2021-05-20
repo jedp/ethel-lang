@@ -38,6 +38,20 @@ void test_eval_preced_not_astonishing(void) {
   TEST_ASSERT_EQUAL(True, obj->boolval);
 }
 
+void test_eval_preced_cast(void) {
+  char *program = "{ val l = list {\"2\", \"3\", \"4\" } \n"
+                  "  val n = l.head() as int             \n"
+                  "  n"
+                  "}";
+
+  eval_result_t *result = eval_program(program);
+  TEST_ASSERT_EQUAL(ERR_NO_ERROR, result->err);
+
+  obj_t *obj = result->obj;
+  TEST_ASSERT_EQUAL(TYPE_INT, obj->type);
+  TEST_ASSERT_EQUAL(2, obj->intval);
+}
+
 void test_eval_add(void) {
   TEST_ASSERT_EQUAL(4, eval_program("2 + 2")->obj->intval);
   TEST_ASSERT_EQUAL(4.1, eval_program("2 + 2.1")->obj->floatval);
@@ -1133,6 +1147,7 @@ void test_eval_iterable_random_choice() {
 void test_eval(void) {
   RUN_TEST(test_eval_calculator);
   RUN_TEST(test_eval_preced_not_astonishing);
+  RUN_TEST(test_eval_preced_cast);
   RUN_TEST(test_eval_add);
   RUN_TEST(test_eval_sub);
   RUN_TEST(test_eval_mul);
