@@ -301,6 +301,38 @@ obj_t *dict_obj_remove(obj_t *obj, obj_method_args_t *args) {
   return dict_remove(obj, k);
 }
 
+static obj_t *iter_next(obj_iter_t *iterable) {
+  switch(iterable->state) {
+    case ITER_NOT_STARTED:
+      iterable->state = ITER_ITERATING;
+      // TODO if you're grossed out by this copy of all keys, fix it.
+      obj_t *keys = dict_obj_keys(iterable->obj, NULL);
+      iterable->state_obj->list = keys->list;
+      // Fall through to ITERATING.
+
+    case ITER_ITERATING: {
+      obj_t *elem = list_remove_first(iterable->state_obj, NULL);
+      if (elem->type == TYPE_NIL) {
+        iterable->state = ITER_STOPPED;
+        return nil_obj();
+      }
+      return elem;
+    }
+
+    case ITER_STOPPED:
+      return nil_obj();
+
+    default:
+      printf("Unexpected iteration state enum! %d\n", iterable->state);
+      return nil_obj();
+  }
+}
+
+obj_t *dict_obj_iterator(obj_t *obj, obj_method_args_t *args) {
+  obj_t *start_state = list_obj(NULL);
+  return iterator_obj(obj, start_state, iter_next);
+}
+
 static_method get_dict_static_method(static_method_ident_t method_id) {
   switch (method_id) {
     case METHOD_GET: return dict_obj_get;
@@ -308,6 +340,7 @@ static_method get_dict_static_method(static_method_ident_t method_id) {
     case METHOD_LENGTH: return dict_obj_len;
     case METHOD_KEYS: return dict_obj_keys;
     case METHOD_REMOVE_ELEM: return dict_obj_remove;
+    case METHOD_ITERATOR: return dict_obj_iterator;
     default: return NULL;
   }
 }
