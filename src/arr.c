@@ -17,8 +17,8 @@ static boolean _eq(bytearray_t *a, bytearray_t *b) {
   return True;
 }
 
-static obj_t *_arr_slice(obj_t *arr_obj, int start, int end) {
-  if (end > arr_obj->bytearray->size) end = arr_obj->bytearray->size;
+static obj_t *_arr_slice(obj_t *obj, int start, int end) {
+  if (end > obj->bytearray->size) end = obj->bytearray->size;
 
   if (end < 0 ||
       start < 0 ||
@@ -30,7 +30,7 @@ static obj_t *_arr_slice(obj_t *arr_obj, int start, int end) {
   dim_t len = end - start;
   obj_t *new = bytearray_obj(len, NULL);
   for (int i = 0; i < len; i++) {
-    new->bytearray->data[i] = arr_obj->bytearray->data[start+i];
+    new->bytearray->data[i] = obj->bytearray->data[start+i];
   }
 
   return new;
@@ -50,11 +50,11 @@ static byte obj_to_byte(obj_t *obj) {
   }
 }
 
-obj_t *arr_hash(obj_t *arr_obj, obj_method_args_t /* Ignored */ *args) {
+obj_t *arr_hash(obj_t *obj, obj_method_args_t /* Ignored */ *args) {
   uint32_t temp;
   byte b;
 
-  if (arr_obj->bytearray->size == 0) {
+  if (obj->bytearray->size == 0) {
     return nil_obj();
   }
 
@@ -64,8 +64,8 @@ obj_t *arr_hash(obj_t *arr_obj, obj_method_args_t /* Ignored */ *args) {
    */
   temp = FNV32Basis;
   dim_t i = 0;
-  while (i < arr_obj->bytearray->size) {
-    b = arr_obj->bytearray->data[i];
+  while (i < obj->bytearray->size) {
+    b = obj->bytearray->data[i];
     temp = FNV32Prime * (temp ^ b);
     i++;
   }
@@ -73,11 +73,19 @@ obj_t *arr_hash(obj_t *arr_obj, obj_method_args_t /* Ignored */ *args) {
   return int_obj(temp);
 }
 
-obj_t *arr_size(obj_t *arr_obj, obj_method_args_t /* Ignored */ *args) {
-  return int_obj(arr_obj->bytearray->size);
+obj_t *arr_size(obj_t *obj, obj_method_args_t /* Ignored */ *args) {
+  return int_obj(obj->bytearray->size);
 }
 
-obj_t *arr_get(obj_t *arr_obj, obj_method_args_t *args) {
+obj_t *_arr_get(obj_t *obj, int i) {
+  if (i < 0 || i >= obj->bytearray->size) {
+    return nil_obj();
+  }
+
+  return byte_obj(obj->bytearray->data[i]);
+}
+
+obj_t *arr_get(obj_t *obj, obj_method_args_t *args) {
   if (args == NULL || args->arg == NULL) {
     printf("Null arg to get()\n");
     return nil_obj();
@@ -87,17 +95,10 @@ obj_t *arr_get(obj_t *arr_obj, obj_method_args_t *args) {
   if (arg->type != TYPE_INT) {
     return nil_obj();
   }
-  int i = arg->intval;
-
-  if (i < 0 || i >= arr_obj->bytearray->size) {
-    printf("Out of bounds\n");
-    return nil_obj();
-  }
-
-  return byte_obj(arr_obj->bytearray->data[i]);
+  return _arr_get(obj, arg->intval);
 }
 
-obj_t *arr_set(obj_t *arr_obj, obj_method_args_t *args) {
+obj_t *arr_set(obj_t *obj, obj_method_args_t *args) {
   if (args == NULL || args->arg == NULL) {
     printf("Null arg to set()\n");
     return nil_obj();
@@ -109,7 +110,7 @@ obj_t *arr_set(obj_t *arr_obj, obj_method_args_t *args) {
     return nil_obj();
   }
   int i = a->intval;
-  if (i < 0 || i >= arr_obj->bytearray->size) {
+  if (i < 0 || i >= obj->bytearray->size) {
     printf("Out of bounds\n");
     return nil_obj();
   }
@@ -122,11 +123,11 @@ obj_t *arr_set(obj_t *arr_obj, obj_method_args_t *args) {
   }
  
   byte val = obj_to_byte(b);
-  arr_obj->bytearray->data[i] = val;
+  obj->bytearray->data[i] = val;
   return byte_obj(val);
 }
 
-obj_t *arr_contains(obj_t *arr_obj, obj_method_args_t *args) {
+obj_t *arr_contains(obj_t *obj, obj_method_args_t *args) {
   if (args == NULL || args->arg == NULL) {
     printf("Null arg to contains()\n");
     return nil_obj();
@@ -153,8 +154,8 @@ obj_t *arr_contains(obj_t *arr_obj, obj_method_args_t *args) {
     return nil_obj();
   }
 
-  for (dim_t i = 0; i < arr_obj->bytearray->size; i++) {
-    if (arr_obj->bytearray->data[i] == b) {
+  for (dim_t i = 0; i < obj->bytearray->size; i++) {
+    if (obj->bytearray->data[i] == b) {
       return boolean_obj(True);
     }
   }
@@ -162,7 +163,7 @@ obj_t *arr_contains(obj_t *arr_obj, obj_method_args_t *args) {
   return boolean_obj(False);
 }
 
-obj_t *arr_eq(obj_t *arr_obj, obj_method_args_t *args) {
+obj_t *arr_eq(obj_t *obj, obj_method_args_t *args) {
   if (args == NULL || args->arg == NULL) {
     printf("Null arg to eq()\n");
     return nil_obj();
@@ -174,10 +175,10 @@ obj_t *arr_eq(obj_t *arr_obj, obj_method_args_t *args) {
     return nil_obj();
   }
 
-  return boolean_obj(_eq(arr_obj->bytearray, other->bytearray));
+  return boolean_obj(_eq(obj->bytearray, other->bytearray));
 }
 
-obj_t *arr_ne(obj_t *arr_obj, obj_method_args_t *args) {
+obj_t *arr_ne(obj_t *obj, obj_method_args_t *args) {
   if (args == NULL || args->arg == NULL) {
     printf("Null arg to ne()\n");
     return nil_obj();
@@ -189,10 +190,10 @@ obj_t *arr_ne(obj_t *arr_obj, obj_method_args_t *args) {
     return nil_obj();
   }
 
-  return boolean_obj(!_eq(arr_obj->bytearray, other->bytearray));
+  return boolean_obj(!_eq(obj->bytearray, other->bytearray));
 }
 
-obj_t *arr_slice(obj_t *arr_obj, obj_method_args_t *args) {
+obj_t *arr_slice(obj_t *obj, obj_method_args_t *args) {
   if (args == NULL || args->arg == NULL) {
     printf("Null arg to slice()\n");
     return nil_obj();
@@ -204,16 +205,50 @@ obj_t *arr_slice(obj_t *arr_obj, obj_method_args_t *args) {
   obj_t *end_arg = args->next->arg;
   if (end_arg->type != TYPE_INT)  return nil_obj();
 
-  return _arr_slice(arr_obj, start_arg->intval, end_arg->intval);
+  return _arr_slice(obj, start_arg->intval, end_arg->intval);
 }
 
-obj_t *arr_random_choice(obj_t *arr_obj, obj_method_args_t *args) {
-  uint32_t len = arr_obj->bytearray->size;
+obj_t *arr_random_choice(obj_t *obj, obj_method_args_t *args) {
+  uint32_t len = obj->bytearray->size;
   if (len < 1) {
     printf("Empty string.\n");
     return nil_obj();
   }
-  return byte_obj(arr_obj->bytearray->data[rand32() % len]);
+  return byte_obj(obj->bytearray->data[rand32() % len]);
+}
+
+static obj_t *iter_next(obj_iter_t *iterable) {
+  int i;
+
+  switch(iterable->state) {
+    case ITER_NOT_STARTED:
+      i = 0;
+      iterable->state_obj->intval = i;
+      iterable->state = ITER_ITERATING;
+      // Fall through to ITERATING.
+
+    case ITER_ITERATING:
+      i = iterable->state_obj->intval;
+      obj_t *next_val = _arr_get(iterable->obj, i);
+      if (i >= iterable->obj->bytearray->size) {
+        iterable->state = ITER_STOPPED;
+        return nil_obj();
+      }
+      iterable->state_obj->intval = i + 1;
+      return next_val;
+
+    case ITER_STOPPED:
+      return nil_obj();
+
+    default:
+      printf("Unexpected iteration state enum! %d\n", iterable->state);
+      return nil_obj();
+  }
+}
+
+obj_t *arr_iterator(obj_t *obj, obj_method_args_t *args) {
+  obj_t *state = int_obj(0);
+  return iterator_obj(obj, state, iter_next);
 }
 
 static_method get_arr_static_method(static_method_ident_t method_id) {
@@ -226,6 +261,7 @@ static_method get_arr_static_method(static_method_ident_t method_id) {
     case METHOD_NE: return arr_ne;
     case METHOD_SLICE: return arr_slice;
     case METHOD_RANDOM_CHOICE: return arr_random_choice;
+    case METHOD_ITERATOR: return arr_iterator;
     default: return NULL;
   }
 }

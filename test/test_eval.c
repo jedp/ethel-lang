@@ -188,6 +188,23 @@ void test_eval_for_loop_dict(void) {
   TEST_ASSERT_EQUAL(4, obj->intval);
 }
 
+void test_eval_for_loop_arr(void) {
+  char *program = "{ val a = arr(3)                \n"
+                  "  a[0] = 0x10                   \n"
+                  "  a[1] = 0x12                   \n"
+                  "  a[2] = 0x14                   \n"
+                  "  var n = 0                     \n"
+                  "  for i in a { n = n + i }      \n"
+                  "  n                             \n"
+                  "}";
+  eval_result_t *result = eval_program(program);
+  TEST_ASSERT_EQUAL(ERR_NO_ERROR, result->err);
+
+  obj_t *obj = result->obj;
+  TEST_ASSERT_EQUAL(TYPE_INT, obj->type);
+  TEST_ASSERT_EQUAL(54, obj->intval);
+}
+
 void test_eval_do_while_loop(void) {
   char *program = "{ var x = 10                \n"
                   "  do {                      \n"
@@ -1189,6 +1206,7 @@ void test_eval(void) {
   RUN_TEST(test_eval_for_loop_range);
   RUN_TEST(test_eval_for_loop_list);
   RUN_TEST(test_eval_for_loop_dict);
+  RUN_TEST(test_eval_for_loop_arr);
   RUN_TEST(test_eval_do_while_loop);
   RUN_TEST(test_eval_while_loop);
   RUN_TEST(test_eval_if_else);
