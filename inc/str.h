@@ -91,6 +91,7 @@ obj_t *str_eq(obj_t *obj, obj_method_args_t *args);
 obj_t *str_ne(obj_t *obj, obj_method_args_t *args);
 obj_t *str_substring(obj_t *obj, obj_method_args_t *args);
 obj_t *str_random_choice(obj_t *obj, obj_method_args_t *args);
+obj_t *str_iterator(obj_t *obj, obj_method_args_t *args);
 
 static_method get_str_static_method(static_method_ident_t method_id);
 

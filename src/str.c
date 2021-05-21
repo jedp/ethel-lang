@@ -581,6 +581,7 @@ static_method get_str_static_method(static_method_ident_t method_id) {
     case METHOD_CAST: return str_as;
     case METHOD_SUBSTR: return str_substring;
     case METHOD_RANDOM_CHOICE: return str_random_choice;
+    case METHOD_ITERATOR: return arr_iterator;
     default: return NULL;
   }
 }
