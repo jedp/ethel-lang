@@ -57,6 +57,7 @@ static void print_dict(obj_t *dict_obj) {
 }
 
 static void print_result(obj_t *obj) {
+  printf(" => ");
   if (obj->type == TYPE_LIST) {
     print_list(obj);
   } else if (obj->type == TYPE_DICT) {
