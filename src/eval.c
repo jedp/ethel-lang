@@ -790,57 +790,44 @@ static void eval_while_loop(ast_expr_t *expr, env_t *env, eval_result_t *result)
 }
 
 static void eval_for_loop(ast_expr_t *expr, env_t *env, eval_result_t *result) {
-  bytearray_t* index_name = ((ast_expr_t*) expr->for_loop->index)->bytearray;
   eval_result_t *r = mem_alloc(sizeof(eval_result_t));
   r->obj = undef_obj();
 
-  // range
-  if (((obj_t*)expr->for_loop->range)->type != AST_RANGE) {
-    result->err = ERR_SYNTAX_ERROR;
+  // Local name for the variable holding each element.
+  // This is what gets updated as we iterate.
+  bytearray_t *elem_name = ((ast_expr_t*) expr->for_loop->elem)->bytearray;
+
+  // The object whose elements we want to iterate over.
+  // Evaluate the iterable expression to get it.
+  eval_result_t *iter_r = eval_expr(expr->for_loop->iterable, env);
+  if ((result->err = iter_r->err) != ERR_NO_ERROR) goto error;
+  obj_t *iter_obj = iter_r->obj;
+
+  // An iterator object that points to said object and maintains
+  // state as we iterate.
+  static_method get_iterator = get_static_method(iter_obj->type, METHOD_ITERATOR);
+  if (get_iterator == NULL) {
+    r->err = ERR_NO_SUCH_METHOD;
     goto error;
   }
-  eval_result_t *range = eval_expr(expr->for_loop->range, env);
-  if ((result->err = range->err) != ERR_NO_ERROR) goto error;
+  obj_iter_t *iter = get_iterator(iter_obj, NULL)->iterator;
 
   // Push a new scope and store the index variable.
   // We will mutate this variable with each iteration through the loop.
   enter_scope(env);
-  obj_t *index_obj = int_obj(range->obj->intval);
-  // Not mutable in code.
-  put_env(env, index_name, index_obj, F_NONE);
+  obj_t *next_elem = iter->next(iter);
 
-  int start_val = range->obj->range.from;
-  int end_val = range->obj->range.to;
-  if (start_val < 0 || end_val < 0) {
-    printf("this one\n");
-    result->err = ERR_TYPE_POSITIVE_INT_REQUIRED;
-    goto error;
-  }
+  // The actual iteration. Done when we encounter Nil as a sentinel.
+  while(next_elem->type != TYPE_NIL) {
+    // Not mutable in user code.
+    put_env(env, elem_name, next_elem, F_OVERWRITE);
 
-  if (start_val <= end_val) {
-    for (int i = start_val; i <= end_val; ++i) {
-      // Overflow?
-      if (i < 0) { result->err = ERR_OVERFLOW_ERROR; goto error; }
-      index_obj->intval = i;
-      mem_free(r);
-      // Eval predicate.
-      r = eval_expr(expr->for_loop->pred, env);
-      if ((result->err = r->err) != ERR_NO_ERROR) {
-        goto error;
-      }
+    r = eval_expr(expr->for_loop->pred, env);
+    if ((result->err = r->err) != ERR_NO_ERROR) {
+      goto error;
     }
-  } else {
-    for (int i = start_val; i >= end_val; --i) {
-      // Overflow?
-      if (i < 0) { result->err = ERR_OVERFLOW_ERROR; goto error; }
-      index_obj->intval = i;
-      mem_free(r);
-      // Eval predicate.
-      r = eval_expr(expr->for_loop->pred, env);
-      if ((result->err = r->err) != ERR_NO_ERROR) {
-        goto error;
-      }
-    }
+
+    next_elem = iter->next(iter);
   }
 
   leave_scope(env);
@@ -849,7 +836,7 @@ static void eval_for_loop(ast_expr_t *expr, env_t *env, eval_result_t *result) {
   return;
 
 error:
-  printf("leaving scope\n");
+  printf("leaving scope on error\n");
   leave_scope(env);
   mem_free(r);
   result->obj = undef_obj();

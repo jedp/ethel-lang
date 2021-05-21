@@ -130,6 +130,17 @@ obj_t *func_obj(void* code, void* scope) {
   return obj;
 }
 
+obj_t *iterator_obj(obj_t *obj, obj_t *state_obj, obj_t *(*next)(obj_iter_t *iterable)) {
+  obj_t *iter = obj_of(TYPE_ITERATOR);
+  iter->iterator = mem_alloc(sizeof(obj_iter_t));
+
+  iter->iterator->state = ITER_NOT_STARTED;
+  iter->iterator->obj = obj;
+  iter->iterator->state_obj = state_obj;
+  iter->iterator->next = next;
+  return iter;
+}
+
 obj_t *return_val(obj_t *val) {
   obj_t *obj = obj_of(TYPE_RETURN_VAL);
   obj->return_val = val;

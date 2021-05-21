@@ -20,8 +20,9 @@ static int _range_length(obj_t *obj) {
 }
 
 static int _range_get(obj_t *obj, int i, error_t *err) {
-  int start = obj->range.from;
-  int len = _range_length(obj);
+  // Spooky. The compiler is optimizing these out.
+  volatile int start = obj->range.from;
+  volatile int len = _range_length(obj);
 
   if (i < 0 || i > len - 1) {
     *err = ERR_RANGE_ERROR;
@@ -91,6 +92,46 @@ obj_t *range_random_choice(obj_t *obj, obj_method_args_t *args) {
   return int_obj((rand32() % max) + obj->range.from);
 }
 
+static obj_t *iter_next(obj_iter_t *iterable) {
+  int current_val;
+  error_t error;
+
+  switch(iterable->state) {
+    // The state object stores our offset from the start of the range.
+    // So on initialization, set that to 0.
+    // Then fall through to the Iterating state.
+    case ITER_NOT_STARTED:
+      iterable->state = ITER_ITERATING;
+      current_val = 0;
+      iterable->state_obj->intval = current_val;
+      // Fall through to ITERATING.
+
+    // While iterating, get the range element at the state value's offset.
+    // Update the offset for the next iteration and return the value.
+    case ITER_ITERATING:
+      current_val = iterable->state_obj->intval;
+      int next_val = _range_get(iterable->obj, current_val, &error);
+      if (error != ERR_NO_ERROR) {
+        iterable->state = ITER_STOPPED;
+        return nil_obj();
+      }
+      iterable->state_obj->intval += 1;
+      return int_obj(next_val);
+
+    // Having iterated over all the elements, return Nil as a sentinel.
+    case ITER_STOPPED:
+      return nil_obj();
+    default:
+      printf("Unexpected iteration state enum! %d\n", iterable->state);
+      return nil_obj();
+  }
+}
+
+obj_t *range_iterator(obj_t *obj, obj_method_args_t *args) {
+  obj_t *start_state = int_obj(0);
+  return iterator_obj(obj, start_state, iter_next);
+}
+
 static_method get_range_static_method(static_method_ident_t method_id) {
   switch (method_id) {
     case METHOD_TO_STRING: return range_to_string;
@@ -98,6 +139,7 @@ static_method get_range_static_method(static_method_ident_t method_id) {
     case METHOD_CONTAINS: return range_contains;
     case METHOD_GET: return range_get;
     case METHOD_RANDOM_CHOICE: return range_random_choice;
+    case METHOD_ITERATOR: return range_iterator;
     default: return NULL;
   }
 }

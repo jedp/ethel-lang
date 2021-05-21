@@ -16,7 +16,7 @@
 enum flags {
   F_NONE           = 0x00,
   F_ASSIGNABLE     = 0x01,
-  F_METH_TO_STRING = 0x10,
+  F_OVERWRITE      = 0x10,
   F_VAR            = 0x80,
 };
 

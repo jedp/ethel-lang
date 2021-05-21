@@ -91,7 +91,7 @@ error_t _put_env(env_t *env,
   env_sym_t *found = find_sym(env, name, !can_shadow);
   // Already exists in scopes we can access.
   if (found != NULL) {
-    if (!(found->flags & F_VAR)) {
+    if (!(flags & F_OVERWRITE) && !(found->flags & F_VAR)) {
       return ERR_ENV_SYMBOL_REDEFINED;
     }
 

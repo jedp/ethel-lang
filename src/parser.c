@@ -433,13 +433,13 @@ static ast_expr_t *parse_expr(lexer_t *lexer) {
     case TAG_FOR: {
       advance(lexer);
       // Be sure not to interpret the 'in' as part of a binop.
-      ast_expr_t *index = parse_atom(lexer);
-      if (index->type != AST_IDENT) goto error;
+      ast_expr_t *elem = parse_atom(lexer);
+      if (elem->type != AST_IDENT) goto error;
       if (!eat(lexer, TAG_IN)) goto error;
-      ast_expr_t *range = parse_expr(lexer);
+      ast_expr_t *iterable = parse_expr(lexer);
       ast_expr_t *pred = parse_expr(lexer);
       if (pred->type == AST_EMPTY) goto error;
-      return ast_for_loop(index, range, pred);
+      return ast_for_loop(elem, iterable, pred);
     }
     case TAG_LIST: {
       // TODO - consolidate block parsing

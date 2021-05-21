@@ -308,13 +308,13 @@ ast_expr_t *ast_while_loop(ast_expr_t *cond, ast_expr_t *pred) {
   return node;
 }
 
-ast_expr_t *ast_for_loop(ast_expr_t *index,
-                         ast_expr_t *range,
+ast_expr_t *ast_for_loop(ast_expr_t *elem,
+                         ast_expr_t *iterable,
                          ast_expr_t *pred) {
   ast_expr_t *node = ast_node(AST_FOR_LOOP);
   node->for_loop = mem_alloc(sizeof(ast_for_loop_t));
-  node->for_loop->index = index;
-  node->for_loop->range = range;
+  node->for_loop->elem = elem;
+  node->for_loop->iterable = iterable;
   node->for_loop->pred = pred;
   return node;
 }

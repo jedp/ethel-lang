@@ -24,7 +24,14 @@ enum obj_type_enum {
   TYPE_LIST,
   TYPE_DICT,
   TYPE_IDENT,
+  TYPE_ITERATOR,
   TYPE_MAX,
+};
+
+enum iter_state {
+  ITER_NOT_STARTED,
+  ITER_ITERATING,
+  ITER_STOPPED,
 };
 
 static const char* obj_type_names[TYPE_MAX] = {
@@ -44,7 +51,8 @@ static const char* obj_type_names[TYPE_MAX] = {
   "Range",
   "List",
   "Dict",
-  "Identifier"
+  "Identifier",
+  "Iterator",
 };
 
 typedef struct Obj obj_t;
@@ -100,6 +108,13 @@ typedef struct ObjFuncDef {
   void* scope;
 } obj_func_def_t;
 
+typedef struct ObjIterator {
+  int state;
+  obj_t *obj;
+  obj_t *state_obj;
+  struct Obj *(*next)(struct ObjIterator *iterable);
+} obj_iter_t;
+
 typedef struct Obj {
   uint16_t type;
   uint16_t flags;
@@ -114,6 +129,7 @@ typedef struct Obj {
     obj_dict_t *dict;
     bytearray_t *bytearray;
     obj_func_def_t *func_def;
+    obj_iter_t *iterator;
     struct Obj *return_val;
   };
   obj_method_t *methods;
@@ -121,6 +137,7 @@ typedef struct Obj {
 
 typedef obj_t* (*static_method)(obj_t *obj, obj_method_args_t *args);
 typedef obj_t* (*binop_method)(obj_t *obj, obj_t *other);
+typedef obj_t* (*iterator_next)(obj_t *obj);
 
 obj_t *arg_at(obj_method_args_t *args, int index);
 
@@ -168,6 +185,7 @@ enum static_method_ident_enum {
   METHOD_REMOVE_LAST,
   METHOD_REMOVE_AT,
   METHOD_REMOVE_ELEM,
+  METHOD_ITERATOR,
   METHOD_DUMP,
 };
 
@@ -228,6 +246,7 @@ obj_t *range_obj(int, int);
 obj_t *list_obj(obj_list_element_t* elems);
 obj_t *dict_obj(void);
 obj_t *func_obj(void* code, void* scope);
+obj_t *iterator_obj(obj_t *obj, obj_t *state_obj, obj_t *(*next)(obj_iter_t *iterable));
 obj_t *return_val(obj_t *val);
 obj_method_args_t *wrap_varargs(int n_args, ...);
 boolean obj_prim_eq(obj_t *a, obj_t *b);
