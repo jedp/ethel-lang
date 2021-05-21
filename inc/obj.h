@@ -25,6 +25,7 @@ enum obj_type_enum {
   TYPE_DICT,
   TYPE_IDENT,
   TYPE_ITERATOR,
+  TYPE_BREAK,
   TYPE_MAX,
 };
 
@@ -53,6 +54,7 @@ static const char* obj_type_names[TYPE_MAX] = {
   "Dict",
   "Identifier",
   "Iterator",
+  "Break",
 };
 
 typedef struct Obj obj_t;
@@ -248,6 +250,7 @@ obj_t *dict_obj(void);
 obj_t *func_obj(void* code, void* scope);
 obj_t *iterator_obj(obj_t *obj, obj_t *state_obj, obj_t *(*next)(obj_iter_t *iterable));
 obj_t *return_val(obj_t *val);
+obj_t *break_obj(void);
 obj_method_args_t *wrap_varargs(int n_args, ...);
 boolean obj_prim_eq(obj_t *a, obj_t *b);
 

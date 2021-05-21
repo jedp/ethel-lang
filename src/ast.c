@@ -319,6 +319,10 @@ ast_expr_t *ast_for_loop(ast_expr_t *elem,
   return node;
 }
 
+ast_expr_t *ast_break(void) {
+  return ast_node(AST_BREAK);
+}
+
 void _pretty_print(ast_expr_t *expr, int indent) {
   for (int i = 0; i < indent * 2; i++) {
     printf(" ");

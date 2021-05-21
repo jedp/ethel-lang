@@ -490,6 +490,10 @@ error:
 
 static ast_expr_t *parse_atom(lexer_t *lexer) {
   switch (lexer->token.tag) {
+    case TAG_BREAK: {
+      advance(lexer);
+      return ast_break();
+    }
     case TAG_NIL: {
       advance(lexer);
       return ast_nil();
