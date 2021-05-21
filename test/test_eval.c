@@ -150,7 +150,7 @@ void test_eval_del(void) {
   TEST_ASSERT_EQUAL(ERR_ENV_SYMBOL_UNDEFINED, result->err);
 }
 
-void test_eval_for_loop(void) {
+void test_eval_for_loop_range(void) {
   char *program = "for i in 1..10 { i }";
   eval_result_t *result = eval_program(program);
   TEST_ASSERT_EQUAL(ERR_NO_ERROR, result->err);
@@ -158,6 +158,20 @@ void test_eval_for_loop(void) {
   obj_t *obj = result->obj;
   TEST_ASSERT_EQUAL(TYPE_INT, obj->type);
   TEST_ASSERT_EQUAL(10, obj->intval);
+}
+
+void test_eval_for_loop_list(void) {
+  char *program = "{ val l = list { 1, 3, 5 }   \n"
+                  "  var n = 0                  \n"
+                  "  for e in l { n = n + e }   \n"
+                  "  n                          \n"
+                  "}";
+  eval_result_t *result = eval_program(program);
+  TEST_ASSERT_EQUAL(ERR_NO_ERROR, result->err);
+
+  obj_t *obj = result->obj;
+  TEST_ASSERT_EQUAL(TYPE_INT, obj->type);
+  TEST_ASSERT_EQUAL(9, obj->intval);
 }
 
 void test_eval_do_while_loop(void) {
@@ -1158,7 +1172,8 @@ void test_eval(void) {
   RUN_TEST(test_eval_assign_var);
   RUN_TEST(test_eval_assign_multiple);
   RUN_TEST(test_eval_del);
-  RUN_TEST(test_eval_for_loop);
+  RUN_TEST(test_eval_for_loop_range);
+  RUN_TEST(test_eval_for_loop_list);
   RUN_TEST(test_eval_do_while_loop);
   RUN_TEST(test_eval_while_loop);
   RUN_TEST(test_eval_if_else);

@@ -8,26 +8,27 @@
  *
  * This is a function of the hash of each object in the list.
  */
-obj_t *list_hash(obj_t *list_obj, obj_method_args_t *args);
+obj_t *list_hash(obj_t *obj, obj_method_args_t *args);
 
-obj_t *list_eq(obj_t *list_obj, obj_method_args_t *args);
-obj_t *list_ne(obj_t *list_obj, obj_method_args_t *args);
+obj_t *list_eq(obj_t *obj, obj_method_args_t *args);
+obj_t *list_ne(obj_t *obj, obj_method_args_t *args);
 
-obj_t *list_len(obj_t *list_obj, obj_method_args_t *args);
-obj_t *list_get(obj_t *list_obj, obj_method_args_t *args);
-obj_t *list_set(obj_t *list_obj, obj_method_args_t *args);
-obj_t *list_slice(obj_t *list_obj, obj_method_args_t *args);
-obj_t *list_contains(obj_t *list_obj, obj_method_args_t *args);
-obj_t *list_subscript_get(obj_t *list_obj, obj_method_args_t *args);
-obj_t *list_subscript_set(obj_t *list_obj, obj_method_args_t *args);
-obj_t *list_head(obj_t *list_obj, obj_method_args_t *args);
-obj_t *list_tail(obj_t *list_obj, obj_method_args_t *args);
-obj_t *list_prepend(obj_t *list_obj, obj_method_args_t *args);
-obj_t *list_append(obj_t *list_obj, obj_method_args_t *args);
-obj_t *list_remove_first(obj_t *list_obj, obj_method_args_t *args);
-obj_t *list_remove_last(obj_t *list_obj, obj_method_args_t *args);
-obj_t *list_remove_at(obj_t *list_obj, obj_method_args_t *args);
-obj_t *list_random_choice(obj_t *list_obj, obj_method_args_t *args);
+obj_t *list_len(obj_t *obj, obj_method_args_t *args);
+obj_t *list_get(obj_t *obj, obj_method_args_t *args);
+obj_t *list_set(obj_t *obj, obj_method_args_t *args);
+obj_t *list_slice(obj_t *obj, obj_method_args_t *args);
+obj_t *list_contains(obj_t *obj, obj_method_args_t *args);
+obj_t *list_subscript_get(obj_t *obj, obj_method_args_t *args);
+obj_t *list_subscript_set(obj_t *obj, obj_method_args_t *args);
+obj_t *list_head(obj_t *obj, obj_method_args_t *args);
+obj_t *list_tail(obj_t *obj, obj_method_args_t *args);
+obj_t *list_prepend(obj_t *obj, obj_method_args_t *args);
+obj_t *list_append(obj_t *obj, obj_method_args_t *args);
+obj_t *list_remove_first(obj_t *obj, obj_method_args_t *args);
+obj_t *list_remove_last(obj_t *obj, obj_method_args_t *args);
+obj_t *list_remove_at(obj_t *obj, obj_method_args_t *args);
+obj_t *list_random_choice(obj_t *obj, obj_method_args_t *args);
+obj_t *list_iterator(obj_t *obj, obj_method_args_t *args);
 
 static_method get_list_static_method(static_method_ident_t method_id);
 

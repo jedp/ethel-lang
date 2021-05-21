@@ -375,6 +375,40 @@ obj_t *list_random_choice(obj_t *obj, obj_method_args_t *args) {
   return _get_elem(obj, rand32() % len)->node;
 }
 
+static obj_t *iter_next(obj_iter_t *iterable) {
+  int current_index;
+
+  switch(iterable->state) {
+    case ITER_NOT_STARTED:
+      iterable->state = ITER_ITERATING;
+      current_index = 0;
+      iterable->state_obj->intval = current_index;
+      // Fall through to ITERATING.
+
+    case ITER_ITERATING:
+      current_index = iterable->state_obj->intval;
+      obj_t *next_val = _list_get(iterable->obj, current_index);
+      if (next_val->type == TYPE_NIL) {
+        iterable->state = ITER_STOPPED;
+        return next_val;
+      }
+      iterable->state_obj->intval += 1;
+      return next_val;
+
+    case ITER_STOPPED:
+      return nil_obj();
+
+    default:
+      printf("Unexpected iteration state enum! %d\n", iterable->state);
+      return nil_obj();
+  }
+}
+
+obj_t *list_iterator(obj_t *obj, obj_method_args_t *args) {
+  obj_t *start_state = int_obj(0);
+  return iterator_obj(obj, start_state, iter_next);
+}
+
 static_method get_list_static_method(static_method_ident_t method_id) {
   switch (method_id) {
     case METHOD_HASH: return list_hash;
@@ -392,6 +426,7 @@ static_method get_list_static_method(static_method_ident_t method_id) {
     case METHOD_REMOVE_LAST: return list_remove_last;
     case METHOD_REMOVE_AT: return list_remove_at;
     case METHOD_RANDOM_CHOICE: return list_random_choice;
+    case METHOD_ITERATOR: return list_iterator;
     default: return NULL;
   }
 }
