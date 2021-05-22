@@ -20,7 +20,6 @@ static int _range_length(obj_t *obj) {
 }
 
 static int _range_get(obj_t *obj, int i, error_t *err) {
-  // Spooky. The compiler is optimizing these out.
   volatile int start = obj->range.from;
   volatile int len = _range_length(obj);
 

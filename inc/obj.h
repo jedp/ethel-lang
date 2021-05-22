@@ -134,7 +134,6 @@ typedef struct Obj {
     obj_iter_t *iterator;
     struct Obj *return_val;
   };
-  obj_method_t *methods;
 } obj_t;
 
 typedef obj_t* (*static_method)(obj_t *obj, obj_method_args_t *args);

@@ -52,6 +52,7 @@ EXTRA_CFLAGS = \
  -Wwrite-strings \
  -Wint-to-pointer-cast \
  --pedantic-errors \
+ -fverbose-asm \
  -fno-common \
  -fno-omit-frame-pointer \
  -fsanitize=address

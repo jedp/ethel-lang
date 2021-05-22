@@ -24,7 +24,6 @@ obj_t *obj_of(obj_type_t type) {
   obj_t *obj = mem_alloc(sizeof(obj_t));
   obj->type = type;
   obj->flags = F_NONE;
-  obj->methods = NULL;
 
   return obj;
 }
