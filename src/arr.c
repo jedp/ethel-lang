@@ -77,6 +77,10 @@ obj_t *arr_size(obj_t *obj, obj_method_args_t /* Ignored */ *args) {
   return int_obj(obj->bytearray->size);
 }
 
+obj_t *arr_copy(obj_t *obj, obj_method_args_t *args) {
+  return bytearray_obj(obj->bytearray->size, obj->bytearray->data);
+}
+
 obj_t *_arr_get(obj_t *obj, int i) {
   if (i < 0 || i >= obj->bytearray->size) {
     return nil_obj();
@@ -254,6 +258,7 @@ obj_t *arr_iterator(obj_t *obj, obj_method_args_t *args) {
 static_method get_arr_static_method(static_method_ident_t method_id) {
   switch (method_id) {
     case METHOD_HASH: return arr_hash;
+    case METHOD_COPY: return arr_copy;
     case METHOD_LENGTH: return arr_size;
     case METHOD_GET: return arr_get;
     case METHOD_CONTAINS: return arr_contains;
