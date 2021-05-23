@@ -62,6 +62,7 @@ enum ast_type_enum {
   AST_WHILE_LOOP,
   AST_FOR_LOOP,
   AST_BREAK,
+  AST_CONTINUE,
 };
 
 static const char *ast_node_names[] = {
@@ -121,6 +122,7 @@ static const char *ast_node_names[] = {
   "WHILE-LOOP",
   "FOR-LOOP",
   "BREAK",
+  "CONTINUE",
 };
 
 typedef uint8_t ast_reserved_callable_type_t;
@@ -336,6 +338,7 @@ ast_expr_t *ast_do_while_loop(ast_expr_t *pred, ast_expr_t *cond);
 ast_expr_t *ast_while_loop(ast_expr_t *cond, ast_expr_t *pred);
 ast_expr_t *ast_for_loop(ast_expr_t *elem, ast_expr_t *iterable, ast_expr_t *pred);
 ast_expr_t *ast_break(void);
+ast_expr_t *ast_continue(void);
 ast_expr_t *ast_empty(void);
 
 #endif

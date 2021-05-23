@@ -213,6 +213,11 @@ static void _eval_block_expr_in_scope(ast_expr_list_t *block_exprs,
       return;
     }
 
+    if (r->obj->type == TYPE_CONTINUE) {
+      result->obj = continue_obj();
+      return;
+    }
+
     // The last meaningful object in the block is its value.
     // TODO destructuring or something for return vals
     if (r->obj->type != TYPE_NOTHING) {
@@ -757,9 +762,11 @@ static void eval_do_while_loop(ast_expr_t *expr, env_t *env, eval_result_t *resu
     if (r->obj->type == TYPE_BREAK) {
       result->obj = nil_obj();
       return;
+    } else if(r->obj->type == TYPE_CONTINUE) {
+      result->obj = nil_obj();
+    } else {
+      result->obj = r->obj;
     }
-
-    result->obj = r->obj;
 
     cond = eval_expr(expr->do_while_loop->cond, env);
     if (cond->err != ERR_NO_ERROR) {
@@ -798,9 +805,11 @@ static void eval_while_loop(ast_expr_t *expr, env_t *env, eval_result_t *result)
     if (r->obj->type == TYPE_BREAK) {
       result->obj = nil_obj();
       return;
+    } else if (r->obj->type == TYPE_CONTINUE) {
+      result->obj = nil_obj();
+    } else {
+      result->obj = r->obj;
     }
-
-    result->obj = r->obj;
   }
 }
 
@@ -845,6 +854,10 @@ static void eval_for_loop(ast_expr_t *expr, env_t *env, eval_result_t *result) {
     if (r->obj->type == TYPE_BREAK) {
       r->obj = nil_obj();
       goto done;
+    }
+
+    if (r->obj->type == TYPE_CONTINUE) {
+      r->obj = nil_obj();
     }
 
     next_elem = iter->next(iter);
@@ -1199,6 +1212,9 @@ eval_result_t *eval_expr(ast_expr_t *expr, env_t *env) {
           break;
         case AST_BREAK:
           result->obj = break_obj();
+          break;
+        case AST_CONTINUE:
+          result->obj = continue_obj();
           break;
         default:
           result->err = ERR_EVAL_UNHANDLED_OBJECT;

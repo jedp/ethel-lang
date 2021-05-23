@@ -150,6 +150,10 @@ obj_t *break_obj(void) {
   return obj_of(TYPE_BREAK);
 }
 
+obj_t *continue_obj(void) {
+  return obj_of(TYPE_CONTINUE);
+}
+
 obj_method_args_t *wrap_varargs(int n_args, ...) {
   va_list vargs;
   va_start(vargs, n_args);

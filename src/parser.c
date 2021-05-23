@@ -494,6 +494,10 @@ static ast_expr_t *parse_atom(lexer_t *lexer) {
       advance(lexer);
       return ast_break();
     }
+    case TAG_CONTINUE: {
+      advance(lexer);
+      return ast_continue();
+    }
     case TAG_NIL: {
       advance(lexer);
       return ast_nil();

@@ -296,6 +296,59 @@ void test_eval_do_while_loop_break(void) {
   TEST_ASSERT_EQUAL(3, obj->intval);
 }
 
+void test_eval_for_loop_continue(void) {
+  char *program = "{ val s = \"abc\"               \n"
+                  "  var n = 0                     \n"
+                  "  for c in s {                  \n"
+                  "    if c == 'b' then continue   \n"
+                  "    n = n + c                   \n"
+                  "  }                             \n"
+                  "  n                             \n"
+                  "}";
+  eval_result_t *result = eval_program(program);
+  TEST_ASSERT_EQUAL(ERR_NO_ERROR, result->err);
+
+  obj_t *obj = result->obj;
+  TEST_ASSERT_EQUAL(TYPE_INT, obj->type);
+  TEST_ASSERT_EQUAL(97 + 99, obj->intval);
+}
+
+void test_eval_while_loop_continue(void) {
+  char *program = "{ var x = 10                \n"
+                  "  var n = 0                 \n"
+                  "  while x > 0 {             \n"
+                  "    x = x - 1               \n"
+                  "    if x % 2 then continue  \n"
+                  "    n = n + 1               \n"
+                  "  }                         \n"
+                  "  n                         \n"
+                  "}                           \n";
+  eval_result_t *result = eval_program(program);
+  TEST_ASSERT_EQUAL(ERR_NO_ERROR, result->err);
+
+  obj_t *obj = result->obj;
+  TEST_ASSERT_EQUAL(TYPE_INT, obj->type);
+  TEST_ASSERT_EQUAL(5, obj->intval);
+}
+
+void test_eval_do_while_loop_continue(void) {
+  char *program = "{ var x = 10                \n"
+                  "  var n = 0                 \n"
+                  "  do {                      \n"
+                  "    x = x - 1               \n"
+                  "    if x % 2 then continue  \n"
+                  "    n = n + 1               \n"
+                  "  } while (x > 0)           \n"
+                  "  n                         \n"
+                  "}                           \n";
+  eval_result_t *result = eval_program(program);
+  TEST_ASSERT_EQUAL(ERR_NO_ERROR, result->err);
+
+  obj_t *obj = result->obj;
+  TEST_ASSERT_EQUAL(TYPE_INT, obj->type);
+  TEST_ASSERT_EQUAL(5, obj->intval);
+}
+
 void test_eval_if_else(void) {
   char *program = "if 12 then val x = 5";
   eval_result_t *result = eval_program(program);
@@ -1276,6 +1329,9 @@ void test_eval(void) {
   RUN_TEST(test_eval_for_loop_break);
   RUN_TEST(test_eval_while_loop_break);
   RUN_TEST(test_eval_do_while_loop_break);
+  RUN_TEST(test_eval_for_loop_continue);
+  RUN_TEST(test_eval_while_loop_continue);
+  RUN_TEST(test_eval_do_while_loop_continue);
   RUN_TEST(test_eval_if_else);
   RUN_TEST(test_eval_if_else_nil);
   RUN_TEST(test_eval_if_else_assign);

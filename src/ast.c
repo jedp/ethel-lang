@@ -323,6 +323,10 @@ ast_expr_t *ast_break(void) {
   return ast_node(AST_BREAK);
 }
 
+ast_expr_t *ast_continue(void) {
+  return ast_node(AST_CONTINUE);
+}
+
 void _pretty_print(ast_expr_t *expr, int indent) {
   for (int i = 0; i < indent * 2; i++) {
     printf(" ");
