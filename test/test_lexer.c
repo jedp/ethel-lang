@@ -174,7 +174,7 @@ void test_lex_arithmetic_no_spaces(void) {
 }
 
 void test_lex_inequality(void) {
-  char *expr = "if a < 1 and b <= 2 and c > 3 and d >= 4";
+  char *expr = "if a24z < 1 and b_prime <= 2 and _c > 3 and __d32 >= 4";
   lexer_t lexer;
   lexer_init(&lexer, expr, c_str_len(expr));
 

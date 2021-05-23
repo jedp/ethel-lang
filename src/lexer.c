@@ -70,7 +70,7 @@ static void lex_word_raw(lexer_t *lexer) {
   do {
     next_word_buf[i++] = lexer->nextch;
     readch(lexer);
-  } while (isalnum(lexer->nextch));
+  } while (isalnum(lexer->nextch) || lexer->nextch == '_');
   unreadch(lexer);
 }
 
@@ -270,7 +270,8 @@ static token_t *get_token(lexer_t *lexer) {
   if (ch >= '0' && ch <= '9') return lex_num(lexer);
 
   if ((ch >= 'a' && ch <= 'z') ||
-      (ch >= 'A' && ch <= 'Z')) return lex_word(lexer);
+      (ch >= 'A' && ch <= 'Z') ||
+      (ch == '_')) return lex_word(lexer);
        
   switch(ch) {
     case ';': return lex_comment(lexer);
