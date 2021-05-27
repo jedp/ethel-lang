@@ -20,8 +20,8 @@ static int _range_length(obj_t *obj) {
 }
 
 static int _range_get(obj_t *obj, int i, error_t *err) {
-  volatile int start = obj->range.from;
-  volatile int len = _range_length(obj);
+  int start = obj->range.from;
+  int len = _range_length(obj);
 
   if (i < 0 || i > len - 1) {
     *err = ERR_RANGE_ERROR;
@@ -93,7 +93,7 @@ obj_t *range_random_choice(obj_t *obj, obj_method_args_t *args) {
 
 static obj_t *iter_next(obj_iter_t *iterable) {
   int current_val;
-  error_t error;
+  error_t error = ERR_NO_ERROR;
 
   switch(iterable->state) {
     // The state object stores our offset from the start of the range.
