@@ -554,6 +554,13 @@ static void range(int from_inclusive, int to_inclusive, eval_result_t *result) {
   result->obj = range_obj(from_inclusive, to_inclusive);
 }
 
+static void range_step(int from_inclusive,
+                       int to_inclusive,
+                       int step,
+                       eval_result_t *result) {
+  result->obj = range_step_obj(from_inclusive, to_inclusive, step);
+}
+
 static void apply(ast_expr_t *expr, eval_result_t *result, env_t *env) {
   if (expr->type != AST_APPLY) {
     result->err = ERR_SYNTAX_ERROR;
@@ -1074,7 +1081,17 @@ eval_result_t *eval_expr(ast_expr_t *expr, env_t *env) {
             eval_result_t *r2 = eval_expr(expr->range->to, env);
             if (r2->obj->type != AST_INT) result->err = ERR_TYPE_INT_REQUIRED;
             if ((result->err = r2->err) != ERR_NO_ERROR) goto error;
-            range(r1->obj->intval, r2->obj->intval, result);
+            if (expr->range->step != NULL) {
+              eval_result_t *r3 = eval_expr(expr->range->step, env);
+              if (r2->obj->type != AST_INT) result->err = ERR_TYPE_INT_REQUIRED;
+              if ((result->err = r2->err) != ERR_NO_ERROR) goto error;
+              range_step(r1->obj->intval,
+                         r2->obj->intval,
+                         r3->obj->intval,
+                         result);
+            } else {
+              range(r1->obj->intval, r2->obj->intval, result);
+            }
             if (result->err != ERR_NO_ERROR) goto error;
             break;
         }

@@ -94,7 +94,17 @@ obj_t *boolean_obj(boolean t) {
 
 obj_t *range_obj(int from, int to) {
   obj_t *obj = obj_of(TYPE_RANGE);
-  obj->range = (range_t) { from, to };
+  obj->range = (range_t) { from, to, 1 };
+  return obj;
+}
+
+obj_t *range_step_obj(int from, int to, int step) {
+  if (step < 1) {
+    printf("invalid step: %d\n", step);
+    return nil_obj();
+  }
+  obj_t *obj = obj_of(TYPE_RANGE);
+  obj->range = (range_t) { from, to, step };
   return obj;
 }
 

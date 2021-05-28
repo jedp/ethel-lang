@@ -114,7 +114,7 @@ static obj_t *iter_next(obj_iter_t *iterable) {
         iterable->state = ITER_STOPPED;
         return nil_obj();
       }
-      iterable->state_obj->intval += 1;
+      iterable->state_obj->intval += iterable->obj->range.step;
       return int_obj(next_val);
 
     // Having iterated over all the elements, return Nil as a sentinel.

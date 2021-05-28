@@ -210,7 +210,17 @@ ast_expr_t *ast_range(ast_expr_t *from, ast_expr_t *to) {
   node->range = mem_alloc(sizeof(ast_range_args_t));
   node->range->from = from;
   node->range->to = to;
+  node->range->step = NULL;
   return node;
+}
+
+ast_expr_t *ast_range_step(ast_expr_t *expr, ast_expr_t *step) {
+  if (expr->type != AST_RANGE) {
+    printf("left operand to step not a range\n");
+    return ast_nil();
+  }
+  expr->range->step = step;
+  return expr;
 }
 
 ast_expr_t *ast_method_call(bytearray_t *name, ast_expr_list_t *args) {

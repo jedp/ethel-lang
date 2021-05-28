@@ -95,8 +95,31 @@ void test_ex_shuffle(void) {
   TEST_ASSERT_EQUAL(True, result->obj->boolval);
 }
 
+void test_100_doors(void) {
+  char *program = "{ val doors = arr(100)            \n"
+                  "  for i in 0..99 {                \n"
+                  "    for j in 0..99 step i+1 {     \n"
+                  "      doors[j] = doors[j] ^ 1     \n"
+                  "    }                             \n"
+                  "  }                               \n"
+                  "  ; Sum of doors that are open    \n"
+                  "  ; is sum of squares, or 285.    \n"
+                  "  var n = 0                       \n"
+                  "  for i in 0..99 {                \n"
+                  "    if doors[i] then n = n + i    \n"
+                  "  }                               \n"
+                  "  n                               \n"
+                  "}";
+  eval_result_t *result = eval_program(program);
+
+  TEST_ASSERT_EQUAL(ERR_NO_ERROR, result->err);
+  TEST_ASSERT_EQUAL(TYPE_INT, result->obj->type);
+  TEST_ASSERT_EQUAL(285, result->obj->intval);
+}
+
 void test_examples(void) {
   RUN_TEST(test_ex_fibonacci);
   RUN_TEST(test_ex_quicksort);
   RUN_TEST(test_ex_shuffle);
+  RUN_TEST(test_100_doors);
 }

@@ -232,11 +232,11 @@ void test_lex_inequality_nested_expressions(void) {
 }
 
 void test_lex_range(void) {
-  char *expr = "1 .. 10";
+  char *expr = "1 .. 10 step 2";
   lexer_t lexer;
   lexer_init(&lexer, expr, c_str_len(expr));
 
-  int expected[] = { TAG_INT, TAG_RANGE, TAG_INT };
+  int expected[] = { TAG_INT, TAG_RANGE, TAG_INT, TAG_STEP, TAG_INT };
 
   for (int i = 0; i < sizeof(expected) / sizeof(expected[0]); i++) {
     TEST_ASSERT_EQUAL(ERR_NO_ERROR, lexer.err);
@@ -245,7 +245,7 @@ void test_lex_range(void) {
   }
 
   // Also without whitespace, so we don't misconstrue this as a broken float.
-  char *expr2 = "1 .. 10";
+  char *expr2 = "1..10 step 2";
   lexer_init(&lexer, expr2, c_str_len(expr));
   for (int i = 0; i < sizeof(expected) / sizeof(expected[0]); i++) {
     TEST_ASSERT_EQUAL(ERR_NO_ERROR, lexer.err);

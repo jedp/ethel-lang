@@ -164,6 +164,7 @@ typedef struct AstOpArgs {
 typedef struct AstRangeArgs {
   ast_expr_t *from;
   ast_expr_t *to;
+  ast_expr_t *step;
 } ast_range_args_t;
 
 typedef struct AstCastArgs {
@@ -328,6 +329,7 @@ ast_expr_t *ast_member_access(ast_expr_t *receiver,
                               ast_expr_list_t *args);
 ast_expr_t *ast_type_name(bytearray_t *name);
 ast_expr_t *ast_range(ast_expr_t *from, ast_expr_t *to);
+ast_expr_t *ast_range_step(ast_expr_t *range, ast_expr_t *step);
 ast_expr_t *ast_access(ast_expr_t *object, ast_expr_t *member);
 ast_expr_t *ast_block(ast_expr_list_t *es);
 ast_expr_t *ast_reserved_callable(ast_reserved_callable_type_t type, ast_expr_list_t *es);

@@ -160,6 +160,22 @@ void test_eval_for_loop_range(void) {
   TEST_ASSERT_EQUAL(10, obj->intval);
 }
 
+void test_eval_for_loop_range_step(void) {
+  char *program = "{ var n = 0                  \n"
+                  "  for i in 1..10 step 4 {    \n"
+                  "    ;; 1, 5, 9               \n"
+                  "    n = n + i                \n"
+                  "  }                          \n"
+                  "  n                          \n"
+                  "}";
+  eval_result_t *result = eval_program(program);
+  TEST_ASSERT_EQUAL(ERR_NO_ERROR, result->err);
+
+  obj_t *obj = result->obj;
+  TEST_ASSERT_EQUAL(TYPE_INT, obj->type);
+  TEST_ASSERT_EQUAL(15, obj->intval);
+}
+
 void test_eval_for_loop_list(void) {
   char *program = "{ val l = list { 1, 3, 5 }   \n"
                   "  var n = 0                  \n"
@@ -1320,6 +1336,7 @@ void test_eval(void) {
   RUN_TEST(test_eval_assign_multiple);
   RUN_TEST(test_eval_del);
   RUN_TEST(test_eval_for_loop_range);
+  RUN_TEST(test_eval_for_loop_range_step);
   RUN_TEST(test_eval_for_loop_list);
   RUN_TEST(test_eval_for_loop_dict);
   RUN_TEST(test_eval_for_loop_arr);

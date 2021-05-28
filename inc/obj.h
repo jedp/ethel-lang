@@ -75,6 +75,7 @@ typedef struct Method {
 typedef struct Range {
   int from;
   int to;
+  int step;
 } range_t;
 
 typedef struct ObjListElem {
@@ -245,7 +246,8 @@ obj_t *byte_obj(byte);
 obj_t *bytearray_obj(dim_t size, uint8_t *data);
 obj_t *string_obj(bytearray_t *src);
 obj_t *boolean_obj(boolean);
-obj_t *range_obj(int, int);
+obj_t *range_obj(int from_inclusive, int to_inclusive);
+obj_t *range_step_obj(int from_inclusive, int to_inclusive, int step);
 obj_t *list_obj(obj_list_element_t* elems);
 obj_t *dict_obj(void);
 obj_t *func_obj(void* code, void* scope);

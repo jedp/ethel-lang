@@ -21,6 +21,7 @@ static boolean is_op(token_t *token) {
       || token->tag == TAG_TIMES
       || token->tag == TAG_DIVIDE
       || token->tag == TAG_RANGE
+      || token->tag == TAG_STEP
       || token->tag == TAG_AND
       || token->tag == TAG_OR
       || token->tag == TAG_MOD
@@ -92,6 +93,7 @@ static uint8_t op_preced(token_t *token) {
     case TAG_OR:
       return PRECED_OR;
     case TAG_RANGE:
+    case TAG_STEP:
       return PRECED_RANGE;
     case TAG_COLON:
       return PRECED_MAPS_TO;
@@ -366,6 +368,7 @@ static ast_expr_t *_parse_expr(lexer_t *lexer, int min_preced) {
       case TAG_COLON:          lhs = ast_op(AST_MAPS_TO,       lhs, _parse_expr(lexer, next_min_preced)); break;
       case TAG_AS:             lhs = ast_cast(                 lhs, _parse_expr(lexer, next_min_preced)); break;
       case TAG_RANGE:          lhs = ast_range(                lhs, _parse_expr(lexer, next_min_preced)); break;
+      case TAG_STEP:           lhs = ast_range_step(           lhs, _parse_expr(lexer, next_min_preced)); break;
       case TAG_MEMBER_ACCESS:  lhs = ast_access(               lhs, _parse_expr(lexer, next_min_preced)); break;
 
       default:
