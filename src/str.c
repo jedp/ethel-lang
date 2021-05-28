@@ -50,14 +50,7 @@ obj_t *str_copy(obj_t *obj, obj_method_args_t /* Ignored */ *args) {
 }
 
 obj_t *str_to_string(obj_t *obj, obj_method_args_t /* Ignored */ *args) {
-  bytearray_t *a = bytearray_alloc(obj->bytearray->size + 2);
-  // Frame the string value in quotes.
-  a->data[0] = '"';
-  a->data[obj->bytearray->size + 1] = '"';
-  for (dim_t i = 0; i < obj->bytearray->size; i++) {
-    a->data[i + 1] = obj->bytearray->data[i];
-  }
-  return string_obj(a);
+  return obj;
 }
 
 obj_t *str_contains(obj_t *obj, obj_method_args_t *args) {
