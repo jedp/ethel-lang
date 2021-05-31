@@ -22,6 +22,8 @@ COMPOBJS = src/mem.o \
 
 REPLOBJS = src/repl.o
 
+RUNOBJS = src/run.o
+
 TESTOBJS = test/unity/unity.o \
 					 test/test_hash.o \
 					 test/test_str.o \
@@ -59,7 +61,7 @@ EXTRA_CFLAGS = \
 TESTFLAGS = -I test -fno-omit-frame-pointer -fsanitize=address
 LDFLAGS = -lm -lreadline -ldl
 
-all: test repl
+all: test repl run
 
 debug: CFLAGS += -DDEBUG
 debug: repl
@@ -68,6 +70,9 @@ debug: repl
 	$(CC) $(CFLAGS) -c -o $@ $<
 
 repl: $(REPLOBJS) $(COMPOBJS)
+	$(CC) $(CFLAGS) $(EXTRA_CFLAGS) -o $@ $^ $(LDFLAGS)
+
+run: $(RUNOBJS) $(COMPOBJS)
 	$(CC) $(CFLAGS) $(EXTRA_CFLAGS) -o $@ $^ $(LDFLAGS)
 
 test: $(COMPOBJS) $(TESTOBJS)
@@ -79,6 +84,6 @@ wc:
 
 .PHONY: all clean test debug
 clean:
-	rm -f $(COMPOBJS) $(REPLOBJS) $(TESTOBJS)
+	rm -f $(COMPOBJS) $(REPLOBJS) $(RUNOBJS) $(TESTOBJS)
 	rm -f repl test/test
 

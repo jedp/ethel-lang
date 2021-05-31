@@ -1,6 +1,6 @@
 *.o
 repl
-calc
+run
 test/test
 
 tags
