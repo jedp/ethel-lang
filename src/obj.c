@@ -40,9 +40,9 @@ obj_t *nil_obj(void) {
   return obj_of(TYPE_NIL);
 }
 
-obj_t *error_obj(error_t errno) {
+obj_t *error_obj(error_t errval) {
   obj_t *obj = obj_of(TYPE_ERROR);
-  obj->errno = errno;
+  obj->errval = errval;
   return obj;
 }
 
