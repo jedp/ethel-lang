@@ -1,5 +1,6 @@
 #include <stdio.h>
 #include "../inc/def.h"
+#include "../inc/ptr.h"
 #include "../inc/mem.h"
 #include "../inc/arr.h"
 #include "../inc/str.h"

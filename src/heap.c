@@ -1,6 +1,7 @@
 #include <assert.h>
 #include <stdlib.h>
 #include <stdio.h>
+#include "../inc/ptr.h"
 #include "../inc/heap.h"
 
 // Ye olde heape.
@@ -10,17 +11,6 @@ static uint32_t heap[HEAP_BYTES] = { 0 };
 #define HEAP_DATA_END ((size_t) heap + HEAP_BYTES)
 #define DATA_FOR_NODE(node) ((void*) ((size_t) node + sizeof(heap_node_t)))
 #define NODE_FOR_DATA(data_ptr) ((heap_node_t*) ((size_t) data_ptr - sizeof(heap_node_t)))
-
-
-static void* mem_cp(void *dst, void *src, size_t size) {
-  assert(size > 0);
-
-  unsigned char *p1 = (unsigned char*) dst;
-  const unsigned char *p2 = (const unsigned char*) src;
-
-  while (size-- > 0) *p1++ = *p2++;
-  return dst;
-}
 
 // A global template we will use to construct new node data
 // before copying it to memory.

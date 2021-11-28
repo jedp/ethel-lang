@@ -1,5 +1,6 @@
 
-COMPOBJS = src/heap.o \
+COMPOBJS = src/ptr.o \
+					 src/heap.o \
 					 src/mem.o \
 					 src/obj.o \
 					 src/math.o \
@@ -31,8 +32,8 @@ TESTOBJS = test/unity/unity.o \
 					 test/test_list.o \
 					 test/test_dict.o \
 					 test/test_range.o \
+					 test/test_ptr.o \
 					 test/test_heap.o \
-					 test/test_mem.o \
 					 test/test_bytearray.o \
 					 test/test_lexer.o \
 					 test/test_parser.o \

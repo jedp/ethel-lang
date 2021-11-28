@@ -15,14 +15,8 @@ void* mem_alloc(dim_t size);
  */
 void* mem_realloc(void *b, dim_t size);
 
-/* Copy n bytes from src to dst. Return pointer to dst. */
-void* mem_cp(void* dst, void* src, dim_t size);
-
 /* Free allocated memory. */
 void mem_free(void *b);
-
-/* Set the first len bytest in b to val. */
-void mem_set(void *b, int val, dim_t len);
 
 #endif
 

@@ -1,6 +1,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <limits.h>
+#include "../inc/ptr.h"
 #include "../inc/mem.h"
 #include "../inc/obj.h"
 #include "../inc/arr.h"

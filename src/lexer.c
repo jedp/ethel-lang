@@ -1,4 +1,5 @@
 #include <ctype.h>
+#include "../inc/ptr.h"
 #include "../inc/mem.h"
 #include "../inc/str.h"
 #include "../inc/token.h"

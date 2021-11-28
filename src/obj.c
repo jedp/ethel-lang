@@ -1,6 +1,7 @@
 #include <stdio.h>
 #include <stdarg.h>
 #include <stdint.h>
+#include "../inc/ptr.h"
 #include "../inc/mem.h"
 #include "../inc/err.h"
 #include "../inc/obj.h"
