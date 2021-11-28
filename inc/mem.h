@@ -18,5 +18,8 @@ void* mem_realloc(void *b, dim_t size);
 /* Free allocated memory. */
 void mem_free(void *b);
 
+/* Initialize memory management. */
+void mem_init(void);
+
 #endif
 

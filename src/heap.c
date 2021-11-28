@@ -28,6 +28,8 @@ heap_info_t heap_info = {
   .bytes_free = HEAP_BYTES
 };
 
+static void dump_heap(void);
+
 /*
  * Take a piece of a node at the specified new size. If the new size
  * is smaller than the current node, break it into two nodes.
@@ -43,7 +45,7 @@ heap_info_t heap_info = {
 static void fracture_node(heap_node_t *node, uint32_t new_size) {
   assert(new_size >= 0);
   assert(new_size <= node->size);
-  uint32_t remaining = node->size - new_size;
+  size_t remaining = node->size - new_size;
 
   // If too small to fracture, do nothing.
   if (remaining < sizeof(heap_node_t)) return;
@@ -114,12 +116,14 @@ void *ealloc(uint32_t bytes) {
 
   if (node == NULL) {
     printf("Out of heap space!\n");
+    dump_heap();
     return NULL;
   }
 
   // Out of memory :(
   if (node->size < bytes || !(node->flags & F_FREE)) {
     printf("No nodes with sufficient capacity. Out of memory!\n");
+    dump_heap();
     return NULL;
   }
 
@@ -187,13 +191,15 @@ void efree(void *data_ptr) {
  *
  * Exposed for testing.
  */
-void heap_init() {
+void heap_init(void) {
   // Create a node containing the entire heap.
   node_template.prev = NULL;
   node_template.next = NULL;
   node_template.size = HEAP_BYTES - sizeof(heap_node_t);
   node_template.flags = F_FREE;
   mem_cp(heap, &node_template, sizeof(heap_node_t));
+  printf("Memory reset.\n");
+  dump_heap();
 }
 
 heap_info_t *get_heap_info() {
@@ -216,5 +222,17 @@ heap_info_t *get_heap_info() {
   }
 
   return &heap_info;
+}
+
+void dump_heap(void) {
+  printf("Heap start: 0x%lx\n", HEAP_DATA_BEGIN);
+  printf("Heap end:   0x%lx\n", HEAP_DATA_END);
+  printf("Heap bytes: %zu\n", HEAP_BYTES);
+  get_heap_info();
+  printf("==== Heap\n");
+  printf("  Total nodes: %d\n", heap_info.total_nodes);
+  printf("   Free nodes: %d\n", heap_info.free_nodes);
+  printf("   Bytes used: %d\n", heap_info.bytes_used);
+  printf("   Bytes free: %d\n", heap_info.bytes_free);
 }
 

@@ -391,6 +391,7 @@ static ast_expr_t *parse_expr(lexer_t *lexer) {
         ast_expr_list_t *es = parse_block(lexer);
         if (!eat(lexer, TAG_END)) {
           mem_free(es);
+          es = NULL;
           goto error;
         }
         return ast_block(es);
@@ -454,6 +455,7 @@ static ast_expr_t *parse_expr(lexer_t *lexer) {
         ast_expr_list_t *es = parse_list_expr_list(lexer);
         if (!eat(lexer, TAG_END)) {
           mem_free(es);
+          es = NULL;
           goto error;
         }
         return ast_list(es);
@@ -467,6 +469,7 @@ static ast_expr_t *parse_expr(lexer_t *lexer) {
         ast_expr_kv_list_t *kv = parse_expr_kv_list(lexer);
         if (!eat(lexer, TAG_END)) {
           mem_free(kv);
+          kv = NULL;
           goto error;
         }
         return ast_dict(kv);
@@ -611,8 +614,8 @@ static ast_expr_t *parse_atom(lexer_t *lexer) {
       if (lexer->token.tag != TAG_RPAREN) {
         args = parse_fn_arg_decl(lexer);
       }
-      if (!eat(lexer, TAG_RPAREN)) { mem_free(args); goto error; }
-      if (lexer->token.tag != TAG_BEGIN) { mem_free(args); goto error; }
+      if (!eat(lexer, TAG_RPAREN)) { mem_free(args); args = NULL; goto error; }
+      if (lexer->token.tag != TAG_BEGIN) { mem_free(args); args = NULL; goto error; }
       ast_expr_t *block = parse_expr(lexer);
       return ast_func_def(args, block->block_exprs);
     }
@@ -626,18 +629,20 @@ static ast_expr_t *parse_atom(lexer_t *lexer) {
     case TAG_METHOD_CALL: {
       bytearray_t *name = c_str_to_bytearray(lexer->token.string);
       advance(lexer);
-      if (!eat(lexer, TAG_LPAREN)) { mem_free(name); goto error; }
+      if (!eat(lexer, TAG_LPAREN)) { mem_free(name); name = NULL; goto error; }
       if (lexer->token.tag == TAG_RPAREN) {
         ast_expr_t *id = ast_method_call(name, NULL);
         mem_free(name);
+        name = NULL;
         advance(lexer);
         return id;
       }
       // More than 0 args.
       ast_expr_list_t *args = parse_expr_list(lexer);
-      if (!eat(lexer, TAG_RPAREN)) { mem_free(name); goto error; }
+      if (!eat(lexer, TAG_RPAREN)) { mem_free(name); name = NULL; goto error; }
       ast_expr_t *id = ast_method_call(name, args);
       mem_free(name);
+      name = NULL;
       return id;
     }
     case TAG_TYPE_NAME: {
@@ -649,8 +654,8 @@ static ast_expr_t *parse_atom(lexer_t *lexer) {
       advance(lexer);
       if (!eat(lexer, TAG_LPAREN)) goto error;
       ast_expr_t *id = ast_ident(c_str_to_bytearray(lexer->token.string));
-      if (!eat(lexer, TAG_IDENT)) { mem_free(id); goto error; }
-      if (!eat(lexer, TAG_RPAREN)) { mem_free(id); goto error; }
+      if (!eat(lexer, TAG_IDENT)) { mem_free(id); id = NULL; goto error; }
+      if (!eat(lexer, TAG_RPAREN)) { mem_free(id); id = NULL; goto error; }
       return ast_delete(id);
     }
     case TAG_IS:
@@ -721,10 +726,12 @@ void parse_program(char *input, ast_expr_t *ast, parse_result_t *parse_result) {
   parse_result->depth = lexer.depth;
   if (lexer.err == ERR_LEX_INCOMPLETE_INPUT) {
     mem_free(p);
+    p = NULL;
     return;
   }
 
   mem_cp(ast, p, sizeof(ast_expr_t));
   mem_free(p);
+  p = NULL;
 }
 

@@ -130,16 +130,25 @@ void test_dict_replace_val(void) {
 void test_dict_remove(void) {
   obj_t *d = dict_obj();
   dict_put(d, byte_obj('a'), int_obj(1));
+  dict_put(d, byte_obj('a'), int_obj(3)); // Overwrite just for fun.
   dict_put(d, int_obj(97), int_obj(10)); // Collides with 'a'.
-  TEST_ASSERT_EQUAL(1, dict_get(d, byte_obj('a'))->intval);
+  TEST_ASSERT_EQUAL(3, dict_get(d, byte_obj('a'))->intval);
   TEST_ASSERT_EQUAL(10, dict_get(d, int_obj(97))->intval);
 
-  dict_remove(d, byte_obj('a'));
+  obj_t *o1 = dict_remove(d, byte_obj('a'));
+  TEST_ASSERT_EQUAL(TYPE_INT, o1->type);
+  TEST_ASSERT_EQUAL(3, o1->intval);
+  TEST_ASSERT_FALSE(dict_contains(d, byte_obj('a')));
+  TEST_ASSERT_TRUE(dict_contains(d, int_obj(97)));
   TEST_ASSERT_EQUAL(TYPE_NIL, dict_get(d, byte_obj('a'))->type);
   TEST_ASSERT_EQUAL(10, dict_get(d, int_obj(97))->intval);
   TEST_ASSERT_EQUAL(1, d->dict->nelems);
 
-  dict_remove(d, int_obj(97));
+  obj_t *o2 = dict_remove(d, int_obj(97));
+  TEST_ASSERT_EQUAL(TYPE_INT, o2->type);
+  TEST_ASSERT_EQUAL(10, o2->intval);
+  TEST_ASSERT_FALSE(dict_contains(d, byte_obj('a')));
+  TEST_ASSERT_FALSE(dict_contains(d, int_obj(97)));
   TEST_ASSERT_EQUAL(TYPE_NIL, dict_get(d, byte_obj('a'))->type);
   TEST_ASSERT_EQUAL(TYPE_NIL, dict_get(d, int_obj(97))->type);
   TEST_ASSERT_EQUAL(0, d->dict->nelems);

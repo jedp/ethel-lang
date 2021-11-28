@@ -1,3 +1,4 @@
+#include "../inc/mem.h"
 #include "unity/unity.h"
 #include "test_heap.h"
 #include "test_ptr.h"
@@ -15,6 +16,7 @@
 #include "test_examples.h"
 
 void setUp(void) {
+  mem_init();
 }
 
 void tearDown(void) {
@@ -33,10 +35,10 @@ int main(int argc, char** argv) {
   test_dict();
   test_bytearray();
   test_hash();
-  test_env();
-  test_eval();
+//  test_env();
+//  test_eval();
   test_rand();
-  test_examples();
+//  test_examples();
 
   UNITY_END();
 }

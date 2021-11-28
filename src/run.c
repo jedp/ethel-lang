@@ -1,5 +1,4 @@
 #include <stdio.h>
-#include <stdlib.h>
 #include <sys/errno.h>
 #include "../inc/err.h"
 #include "../inc/mem.h"
@@ -75,6 +74,7 @@ int run(char* fname) {
   return _eval(program);
 
   mem_free(program);
+  program = NULL;
   return 0;
 }
 

@@ -315,6 +315,7 @@ obj_t *list_remove_last(obj_t *obj, obj_method_args_t *args) {
     obj_t *obj = first->node;
     obj->list->elems = NULL;
     mem_free(last);
+    last = NULL;
     first->node = NULL;
     first->next = NULL;
     return obj;
@@ -323,9 +324,10 @@ obj_t *list_remove_last(obj_t *obj, obj_method_args_t *args) {
   obj_list_element_t *new_last = _get_elem(obj, len - 2);
   new_last->next = NULL;
   obj_t *result = last->node;
-  mem_free(last);
   last->node = NULL;
   last->next = NULL;
+  mem_free(last);
+  last = NULL;
   return result;
 }
 
@@ -361,9 +363,10 @@ obj_t *list_remove_at(obj_t *obj, obj_method_args_t *args) {
 
   obj_t *r = target->node;
 
-  mem_free(target);
   target->node = NULL;
   target->next = NULL;
+  mem_free(target);
+  target = NULL;
   return r;
 }
 
