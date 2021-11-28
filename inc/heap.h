@@ -13,8 +13,6 @@
  * A node is flagged F_FREE if it is available for allocation, or not if it is
  * in use.
  *
- * Size designates the number of available bytes in this node.
- *
  * There is no pointer to the data buffer here. Instead, ealloc() and efree()
  * figure it out via pointer arithmetic.
  *
@@ -24,7 +22,6 @@
 typedef struct HeapNode {
   struct HeapNode *prev;
   struct HeapNode *next;
-  uint32_t size;
   uint32_t flags;
 } heap_node_t;
 

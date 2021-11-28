@@ -17,7 +17,6 @@ static uint32_t heap[HEAP_BYTES] = { 0 };
 heap_node_t node_template = {
   .prev = NULL,
   .next = NULL,
-  .size = 17,   // Impossible value as an error marker.
   .flags = 42   // Weird flags as an error marker.
 };
 
@@ -29,6 +28,14 @@ heap_info_t heap_info = {
 };
 
 static void dump_heap(void);
+
+static uint32_t node_size(heap_node_t *node) {
+  if (node->next == NULL) {
+    return (uint32_t) (HEAP_DATA_END - (size_t) node) - sizeof(heap_node_t);
+  }
+
+  return (uint32_t) ((size_t) node->next - (size_t) node) - sizeof(heap_node_t);
+}
 
 /*
  * Take a piece of a node at the specified new size. If the new size
@@ -44,13 +51,12 @@ static void dump_heap(void);
  */
 static void fracture_node(heap_node_t *node, uint32_t new_size) {
   assert(new_size >= 0);
-  assert(new_size <= node->size);
-  size_t remaining = node->size - new_size;
+  uint32_t size = node_size(node);
+  assert(new_size <= size);
+  size_t remaining = size - new_size;
 
   // If too small to fracture, do nothing.
   if (remaining < sizeof(heap_node_t)) return;
-
-  node->size = new_size;
 
   // Create a new, smaller node with the remainder.
   // Everything should still be a multiple of heap node size.
@@ -59,7 +65,6 @@ static void fracture_node(heap_node_t *node, uint32_t new_size) {
   // Create new node.
   node_template.prev = NULL;
   node_template.next = NULL;
-  node_template.size = remaining - sizeof(heap_node_t);
   node_template.flags = F_FREE; // New node is by definition unused.
 
   // Jam it into memory and get a pointer to it.
@@ -86,7 +91,6 @@ static void coalesce_nodes(heap_node_t *left,
   if (!((left->flags & right->flags) & F_FREE)) return;
 
   // Combine sizes and absorb the header bytes.
-  left->size += right->size + sizeof(heap_node_t);
   left->next = right->next;
   if (left->next != NULL) {
     left->next->prev = left;
@@ -95,7 +99,6 @@ static void coalesce_nodes(heap_node_t *left,
   // Null out the original right-side node for safety.
   right->prev = NULL;
   right->next = NULL;
-  right->size = 17;
   right->flags = 42;
 }
 
@@ -110,7 +113,7 @@ void *ealloc(uint32_t bytes) {
   // Find the first free node of sufficient size.
   heap_node_t *node = (heap_node_t*) heap;
   while(node != NULL) {
-    if (bytes <= node->size && (node->flags & F_FREE)) break;
+    if (bytes <= node_size(node) && (node->flags & F_FREE)) break;
     node = node->next;
   }
 
@@ -121,7 +124,7 @@ void *ealloc(uint32_t bytes) {
   }
 
   // Out of memory :(
-  if (node->size < bytes || !(node->flags & F_FREE)) {
+  if (node_size(node) < bytes || !(node->flags & F_FREE)) {
     printf("No nodes with sufficient capacity. Out of memory!\n");
     dump_heap();
     return NULL;
@@ -148,7 +151,7 @@ void *erealloc(void* data_ptr, uint32_t size) {
   heap_node_t *node = NODE_FOR_DATA(data_ptr);
 
   // Change the allocation if bytes is smaller than existing node.
-  if (size < node->size) {
+  if (size < node_size(node)) {
     fracture_node(node, size);
     return node;
   }
@@ -158,7 +161,7 @@ void *erealloc(void* data_ptr, uint32_t size) {
   if (new_node == NULL) return NULL;
 
   void *new_ptr = DATA_FOR_NODE(new_node);
-  mem_cp(data_ptr, new_ptr, node->size);
+  mem_cp(data_ptr, new_ptr, node_size(node));
 
   // Move the flags from src to dst.
   new_node->flags = node->flags;
@@ -195,7 +198,6 @@ void heap_init(void) {
   // Create a node containing the entire heap.
   node_template.prev = NULL;
   node_template.next = NULL;
-  node_template.size = HEAP_BYTES - sizeof(heap_node_t);
   node_template.flags = F_FREE;
   mem_cp(heap, &node_template, sizeof(heap_node_t));
 }
@@ -212,9 +214,9 @@ heap_info_t *get_heap_info() {
     heap_info.total_nodes++;
     if (node->flags & F_FREE) {
       heap_info.free_nodes++;
-      heap_info.bytes_free += node->size;
+      heap_info.bytes_free += node_size(node);
     } else {
-      heap_info.bytes_used += node->size;
+      heap_info.bytes_used += node_size(node);
     }
     node = node->next;
   }

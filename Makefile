@@ -66,7 +66,7 @@ LDFLAGS = -lm -lreadline -ldl
 
 all: test repl run
 
-debug: CFLAGS += -DDEBUG
+debug: CFLAGS += -DDEBUG -DUSE_ETHEL_MEM
 debug: repl
 
 %.o: %.c
