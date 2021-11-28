@@ -35,10 +35,10 @@ int main(int argc, char** argv) {
   test_dict();
   test_bytearray();
   test_hash();
-//  test_env();
-//  test_eval();
+  test_env();
+  test_eval();
   test_rand();
-//  test_examples();
+  test_examples();
 
   UNITY_END();
 }
