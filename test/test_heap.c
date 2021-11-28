@@ -36,16 +36,20 @@ void test_heap_alloc(void) {
 void test_heap_free(void) {
   heap_init();
 
-  // Allocate a node.
-  void *p1 = ealloc(BLOCK_SIZE);
+  // Allocate some nodes. Four data blocks in all.
+  void *p1 = ealloc(BLOCK_SIZE - 1);
+  void *p2 = ealloc(BLOCK_SIZE);
+  void *p3 = ealloc(BLOCK_SIZE + 1);
   heap_info_t *heap = get_heap_info();
-  TEST_ASSERT_EQUAL(2, heap->total_nodes);
+  TEST_ASSERT_EQUAL(4, heap->total_nodes);
   TEST_ASSERT_EQUAL(1, heap->free_nodes);
-  TEST_ASSERT_EQUAL(BLOCK_SIZE, heap->bytes_used);
+  TEST_ASSERT_EQUAL(4 * BLOCK_SIZE, heap->bytes_used);
   TEST_ASSERT_NOT_EQUAL(HEAP_MAX, heap->bytes_free);
 
   // Free the node and return to original state.
+  efree(p3);
   efree(p1);
+  efree(p2);
   heap = get_heap_info();
   TEST_ASSERT_EQUAL(1, heap->total_nodes);
   TEST_ASSERT_EQUAL(1, heap->free_nodes);
@@ -197,6 +201,93 @@ void test_heap_free_and_coalesce_everything(void) {
   TEST_ASSERT_EQUAL(HEAP_MAX, heap->bytes_free);
 }
 
+void test_heap_realloc_null_and_zero(void) {
+  heap_init();
+
+  heap_info_t *heap = get_heap_info();
+  uint32_t size = heap->bytes_free;
+
+  // Allocates a minimum-size object.
+  void *p = erealloc(NULL, 0);
+
+  heap = get_heap_info();
+  TEST_ASSERT_NOT_NULL(p);
+  TEST_ASSERT_EQUAL(2, heap->total_nodes);
+  TEST_ASSERT_EQUAL(1, heap->free_nodes);
+  TEST_ASSERT_EQUAL(size - 2 * BLOCK_SIZE, heap->bytes_free);
+}
+
+void test_heap_realloc_null(void) {
+  heap_init();
+
+  heap_info_t *heap = get_heap_info();
+  uint32_t size = heap->bytes_free;
+
+  // Equivalent to ealloc().
+  void *p = erealloc(NULL, BLOCK_SIZE + 1);
+
+  heap = get_heap_info();
+  TEST_ASSERT_NOT_NULL(p);
+  TEST_ASSERT_EQUAL(2, heap->total_nodes);
+  TEST_ASSERT_EQUAL(1, heap->free_nodes);
+  TEST_ASSERT_EQUAL(size - 3 * BLOCK_SIZE, heap->bytes_free);
+}
+
+void test_heap_realloc_smaller(void) {
+  heap_init();
+
+  void *p = ealloc(BLOCK_SIZE + 1);
+  // A second allocation to force fragmentation when we realloc.
+  ealloc(BLOCK_SIZE);
+  heap_info_t *heap = get_heap_info();
+  TEST_ASSERT_NOT_NULL(p);
+  TEST_ASSERT_EQUAL(3, heap->total_nodes);
+  TEST_ASSERT_EQUAL(1, heap->free_nodes);
+
+  // Equivalent to ealloc().
+  void *p2 = erealloc(p, BLOCK_SIZE);
+
+  heap = get_heap_info();
+  TEST_ASSERT_NOT_NULL(p2);
+  TEST_ASSERT_EQUAL(4, heap->total_nodes);
+  TEST_ASSERT_EQUAL(2, heap->free_nodes);
+}
+
+void test_heap_realloc_larger(void) {
+  heap_init();
+
+  void *p = ealloc(BLOCK_SIZE);
+  heap_info_t *heap = get_heap_info();
+  TEST_ASSERT_NOT_NULL(p);
+  TEST_ASSERT_EQUAL(2, heap->total_nodes);
+  TEST_ASSERT_EQUAL(1, heap->free_nodes);
+
+  // Grow block larger. Will allocate new and leave fragmentation.
+  void *p2 = erealloc(p, BLOCK_SIZE + 1);
+  heap = get_heap_info();
+  TEST_ASSERT_NOT_NULL(p2);
+  TEST_ASSERT_EQUAL(3, heap->total_nodes);
+  TEST_ASSERT_EQUAL(2, heap->free_nodes);
+}
+
+void test_heap_realloc_too_large(void) {
+  heap_init();
+
+  void *p = ealloc(BLOCK_SIZE);
+  heap_info_t *heap = get_heap_info();
+  TEST_ASSERT_NOT_NULL(p);
+  TEST_ASSERT_EQUAL(2, heap->total_nodes);
+  TEST_ASSERT_EQUAL(1, heap->free_nodes);
+
+  // Grow block too large!
+  void *p2 = erealloc(p, HEAP_MAX);
+  heap = get_heap_info();
+  TEST_ASSERT_NULL(p2);
+  TEST_ASSERT_NOT_NULL(p);
+  TEST_ASSERT_EQUAL(2, heap->total_nodes);
+  TEST_ASSERT_EQUAL(1, heap->free_nodes);
+}
+
 void test_heap(void) {
   RUN_TEST(test_heap_init);
   RUN_TEST(test_heap_alloc);
@@ -207,5 +298,10 @@ void test_heap(void) {
   RUN_TEST(test_heap_free_and_coalesce_right);
   RUN_TEST(test_heap_free_and_coalesce_three);
   RUN_TEST(test_heap_free_and_coalesce_everything);
+  RUN_TEST(test_heap_realloc_null_and_zero);
+  RUN_TEST(test_heap_realloc_null);
+  RUN_TEST(test_heap_realloc_smaller);
+  RUN_TEST(test_heap_realloc_larger);
+  RUN_TEST(test_heap_realloc_too_large);
 }
 

@@ -8,7 +8,9 @@ static uint32_t heap[HEAP_BYTES] = { 0 };
 
 #define HEAP_DATA_BEGIN ((size_t) heap + sizeof(heap_node_t))
 #define HEAP_DATA_END ((size_t) heap + HEAP_BYTES)
-#define DATA_ADDR(node) ((size_t) node + sizeof(heap_node_t))
+#define DATA_FOR_NODE(node) ((void*) ((size_t) node + sizeof(heap_node_t)))
+#define NODE_FOR_DATA(data_ptr) ((heap_node_t*) ((size_t) data_ptr - sizeof(heap_node_t)))
+
 
 static void* mem_cp(void *dst, void *src, size_t size) {
   assert(size > 0);
@@ -120,6 +122,11 @@ void *ealloc(uint32_t bytes) {
     node = node->next;
   }
 
+  if (node == NULL) {
+    printf("Out of heap space!\n");
+    return NULL;
+  }
+
   // Out of memory :(
   if (node->size < bytes || !(node->flags & F_FREE)) {
     printf("No nodes with sufficient capacity. Out of memory!\n");
@@ -131,7 +138,40 @@ void *ealloc(uint32_t bytes) {
   node->flags &= ~F_FREE;
 
   // Return pointer to the data buffer.
-  return (void*) DATA_ADDR(node);
+  return DATA_FOR_NODE(node);
+}
+
+void *erealloc(void* data_ptr, uint32_t size) {
+  assert(size >= 0);
+
+  // If null and no size, return a minimal allocation.
+  if (data_ptr == NULL && size == 0) return ealloc(1);
+
+  // If null, behaves as ealloc(size);
+  if (data_ptr == NULL) return ealloc(size);
+
+  // Get the heap node associated with this pointer.
+  heap_node_t *node = NODE_FOR_DATA(data_ptr);
+
+  // Change the allocation if bytes is smaller than existing node.
+  if (size < node->size) {
+    fracture_node(node, size);
+    return node;
+  }
+
+  // Try to allocate a bigger space for it. This may fail and return NULL.
+  heap_node_t *new_node = ealloc(size);
+  if (new_node == NULL) return NULL;
+
+  void *new_ptr = DATA_FOR_NODE(new_node);
+  mem_cp(data_ptr, new_ptr, node->size);
+
+  // Move the flags from src to dst.
+  new_node->flags = node->flags;
+  node->flags = F_FREE;
+
+  // TODO: NULL out data_ptr or not?
+  return new_ptr;
 }
 
 void efree(void *data_ptr) {
@@ -139,7 +179,7 @@ void efree(void *data_ptr) {
   assert((size_t) data_ptr <= HEAP_DATA_END);
 
   // Pointer arithmetic to find metadata for node.
-  heap_node_t *node = (heap_node_t*) ((size_t) data_ptr - sizeof(heap_node_t));
+  heap_node_t *node = NODE_FOR_DATA(data_ptr);
   assert(((size_t) node - (size_t) heap) % sizeof(heap_node_t) == 0);
 
   // Mark as free.
