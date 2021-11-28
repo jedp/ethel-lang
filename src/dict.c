@@ -1,7 +1,6 @@
 #include <stdio.h>
-#include <stdlib.h>
-#include <string.h>
 #include "../inc/def.h"
+#include "../inc/ptr.h"
 #include "../inc/mem.h"
 #include "../inc/type.h"
 #include "../inc/list.h"
@@ -12,7 +11,7 @@ error_t _dict_init(obj_dict_t *dict, uint32_t buckets) {
   dict_node_t **nodes = mem_alloc(sizeof(dict_node_t*) * buckets);
   if (nodes == NULL) return ERR_OUT_OF_MEMORY;
 
-  memset(nodes, 0, sizeof(dict_node_t*) * buckets);
+  mem_set(nodes, 0, sizeof(dict_node_t*) * buckets);
   dict->buckets = buckets;
   dict->nelems = 0;
   dict->nodes = nodes;
@@ -84,6 +83,7 @@ static error_t dict_resize(obj_t *orig_obj) {
 
   if ((err = _dict_init(new_dict, new_buckets)) != ERR_NO_ERROR) {
     mem_free(new_dict);
+    new_dict = NULL;
     return err;
   }
 
@@ -100,6 +100,7 @@ static error_t dict_resize(obj_t *orig_obj) {
   obj_dict_t *old_dict = orig_obj->dict;
   orig_obj->dict = new_dict;
   mem_free(old_dict);
+  old_dict = NULL;
 
 #ifdef DEBUG
   printf("Resized dict. Now %d buckets for %d elems.\n",
@@ -188,16 +189,22 @@ obj_t *dict_remove(obj_t *obj, obj_t *k) {
     if (node->hash_val == hv &&
         node->k->type == k->type &&
         eq(node->k, wrap_varargs(1, k))) {
-      if (prev) {
+
+      // Remove the node from the linked list.
+      if (prev != NULL) {
+        // If there was a previous node, link around this one.
         prev->next = node->next;
-      } else if (node->next) {
+      } else {
+        // If this was the first in the list, its next is now the head.
         dict->nodes[bucket_index] = node->next;
       }
       obj_t *v = node->v;
-      free(node);
-      dict->nelems--;
 
+      dict->nelems--;
       dict_resize(obj);
+
+      mem_free(node);
+      node = NULL;
 
       return v;
     }

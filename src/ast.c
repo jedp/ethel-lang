@@ -42,6 +42,7 @@ ast_expr_t *ast_unary(ast_type_t type, ast_expr_t *a) {
     default:
       printf("Unary type %d unfamiliar\n", type);
       mem_free(node);
+      node = NULL;
       return ast_empty();
   }
 
@@ -82,6 +83,7 @@ ast_expr_t *ast_op(ast_type_t type, ast_expr_t *a, ast_expr_t *b) {
     default:
       printf("Op %s unfamiliar\n", ast_node_names[type]);
       mem_free(node);
+      node = NULL;
       return ast_empty();
   }
 

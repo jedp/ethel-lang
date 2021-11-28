@@ -1,6 +1,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <limits.h>
+#include "../inc/ptr.h"
 #include "../inc/mem.h"
 #include "../inc/obj.h"
 #include "../inc/arr.h"
@@ -202,6 +203,7 @@ obj_t *str_to_int(obj_t *obj, obj_method_args_t *args) {
   boolean bad_input = (*end != '\0') && (*end != '.');
   // Can only free input after we're done using the end pointer.
   mem_free(input);
+  input = NULL;
 
   if (bad_input) return int_obj(0);
   if (l > INT_MAX) return int_obj(-1);
@@ -221,6 +223,7 @@ obj_t *str_to_byte(obj_t *obj, obj_method_args_t *args) {
   boolean bad_input = (*end != '\0') && (*end != '.');
   // Can only free input after we're done using the end pointer.
   mem_free(input);
+  input = NULL;
 
   if (bad_input) return byte_obj(0);
 
@@ -237,6 +240,7 @@ obj_t *str_to_float(obj_t *obj, obj_method_args_t *args) {
 
   boolean bad_input = *end != '\0';
   mem_free(input);
+  input = NULL;
 
   if (bad_input) return float_obj(-1);
 
@@ -382,6 +386,7 @@ obj_t *str_add(obj_t *obj, obj_method_args_t *args) {
   bytearray_t *old = obj->bytearray;
   obj->bytearray = new;
   mem_free(old);
+  old = NULL;
 
   return obj;
 }

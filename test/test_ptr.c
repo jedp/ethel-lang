@@ -1,5 +1,6 @@
 #include "unity/unity.h"
-#include "test_mem.h"
+#include "test_ptr.h"
+#include "../inc/ptr.h"
 #include "../inc/mem.h"
 #include "../inc/str.h"
 
@@ -15,7 +16,7 @@ void test_mem_set(void) {
   TEST_ASSERT_EQUAL(5, c_str_len(s));
 }
 
-void test_mem(void) {
+void test_ptr(void) {
   RUN_TEST(test_mem_set);
 }
 

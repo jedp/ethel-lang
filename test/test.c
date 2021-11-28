@@ -1,5 +1,7 @@
+#include "../inc/mem.h"
 #include "unity/unity.h"
-#include "test_mem.h"
+#include "test_heap.h"
+#include "test_ptr.h"
 #include "test_str.h"
 #include "test_range.h"
 #include "test_list.h"
@@ -14,6 +16,7 @@
 #include "test_examples.h"
 
 void setUp(void) {
+  mem_init();
 }
 
 void tearDown(void) {
@@ -24,7 +27,8 @@ int main(int argc, char** argv) {
 
   test_lexer();
   test_parser();
-  test_mem();
+  test_heap();
+  test_ptr();
   test_str();
   test_range();
   test_list();

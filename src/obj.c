@@ -1,6 +1,7 @@
 #include <stdio.h>
 #include <stdarg.h>
 #include <stdint.h>
+#include "../inc/ptr.h"
 #include "../inc/mem.h"
 #include "../inc/err.h"
 #include "../inc/obj.h"
@@ -126,6 +127,7 @@ obj_t *dict_obj(void) {
   if (obj->dict == NULL ||
       dict_init(obj, DICT_INIT_BUCKETS) != ERR_NO_ERROR) {
     mem_free(obj);
+    obj = NULL;
     return nil_obj();
   }
   return obj;

@@ -1,29 +1,39 @@
 #include <stdlib.h>
-#include <stdio.h>
 #include "../inc/mem.h"
 
+#ifdef USE_ETHEL_MEM
+#include "../inc/heap.h"
+#else
+#include <stdio.h>
+#endif
+
 void* mem_alloc(dim_t size) {
+#ifdef USE_ETHEL_MEM
+  return ealloc(size);
+#else
   return malloc(size);
+#endif
 }
 
 void* mem_realloc(void *b, dim_t size) {
+#ifdef USE_ETHEL_MEM
+  return erealloc(b, size);
+#else
   return realloc(b, size);
-}
-
-void* mem_cp(void *dst, void *src, dim_t size) {
-  unsigned char *p1 = (unsigned char*) dst;
-  const unsigned char *p2 = (const unsigned char*) src;
-
-  while (size-- > 0) *p1++ = *p2++;
-  return dst;
+#endif
 }
 
 void mem_free(void *b) {
+#ifdef USE_ETHEL_MEM
+  return efree(b);
+#else
   free(b);
+#endif
 }
 
-void mem_set(void *b, int val, dim_t len) {
-  unsigned char *p = b;
-  while (len-- > 0) *p++ = val;
+void mem_init(void) {
+#ifdef USE_ETHEL_MEM
+  heap_init();
+#endif
 }
 

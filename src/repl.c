@@ -1,4 +1,5 @@
 #include <stdio.h>
+#include "../inc/ptr.h"
 #include "../inc/mem.h"
 #include "../inc/int.h"
 #include "../inc/str.h"
@@ -68,6 +69,8 @@ static void print_result(obj_t *obj) {
 }
 
 int main(int argc, char** argv) {
+  mem_init();
+
   mem_set(input, 0, MAX_INPUT);
 
   char* program = mem_alloc(2);
@@ -114,6 +117,7 @@ int main(int argc, char** argv) {
 
 done:
   mem_free(program);
+  program = NULL;
   return 0;
 }
 
