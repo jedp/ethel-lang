@@ -30,7 +30,7 @@ typedef struct HeapNode {
 
 // Heap size must be a multiple of heap_node_t size.
 // Remove a smidge if necessary.
-#define HEAP_BYTES (HEAP_SIZE_BYTES - HEAP_SIZE_BYTES % sizeof(heap_node_t))
+#define HEAP_BYTES (ETHEL_HEAP_SIZE_BYTES - ETHEL_HEAP_SIZE_BYTES % sizeof(heap_node_t))
 
 typedef struct {
   uint32_t total_nodes;

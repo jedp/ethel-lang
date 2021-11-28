@@ -198,8 +198,6 @@ void heap_init(void) {
   node_template.size = HEAP_BYTES - sizeof(heap_node_t);
   node_template.flags = F_FREE;
   mem_cp(heap, &node_template, sizeof(heap_node_t));
-  printf("Memory reset.\n");
-  dump_heap();
 }
 
 heap_info_t *get_heap_info() {
