@@ -47,10 +47,9 @@ error_t leave_scope(env_t *env) {
     while (next != NULL) {
       env_sym_t *temp = next;
       next = next->next;
-      // no fakey gc
-      //mem_free(temp->name);
-      //mem_free(temp);
+      mem_free(temp->name);
       temp->name = NULL;
+      mem_free(temp);
       temp = NULL;
     }
   }
@@ -128,8 +127,7 @@ error_t del_env(env_t *env, bytearray_t *name) {
   env_sym_t *prev = sym->prev;
   if (sym->next != NULL) sym->next->prev = prev;
   prev->next = sym->next;
-  // no fakey gc
-  //mem_free(sym);
+  mem_free(sym);
   sym = NULL;
 
   return ERR_NO_ERROR;
