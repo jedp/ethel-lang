@@ -93,5 +93,7 @@ void efree(void *data_ptr);
  */
 heap_info_t *get_heap_info();
 
+void dump_heap(void);
+
 #endif
 
