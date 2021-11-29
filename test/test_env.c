@@ -5,24 +5,13 @@
 #include "../inc/str.h"
 #include "../inc/env.h"
 
-#define NAME(x) (string_obj(c_str_to_bytearray(x)))
+#define NAME(x) (c_str_to_bytearray(x))
 
 void test_env_init() {
   env_t env;
   env_init(&env);
 
   TEST_ASSERT_EQUAL(TYPE_UNDEF, TYPEOF(get_env(&env, NAME("pie"))));
-}
-
-void test_env_no_scope_error() {
-  env_t env;
-  env_init(&env);
-
-  TEST_ASSERT_EQUAL(ERR_ENV_NO_SCOPE, put_env(&env, NAME("foo"), int_obj(42), F_NONE));
-
-  // First, create the initial scope.
-  TEST_ASSERT_EQUAL(ERR_NO_ERROR, enter_scope(&env));
-  TEST_ASSERT_EQUAL(ERR_NO_ERROR, put_env(&env, NAME("foo"), int_obj(42), F_NONE));
 }
 
 void test_env_put_get() {
@@ -140,7 +129,6 @@ void test_env_scopes() {
   TEST_ASSERT_EQUAL(TYPE_UNDEF, TYPEOF(get_env(&env, NAME("one-1"))));
 
   // Sanity check. We should be out of all scopes now.
-  TEST_ASSERT_EQUAL(ERR_ENV_NO_SCOPE, put_env(&env, NAME("one-new-1"), int_obj(42), F_NONE));
   TEST_ASSERT_EQUAL(ERR_NO_ERROR, enter_scope(&env));
   TEST_ASSERT_EQUAL(0, env.top);
 
@@ -174,7 +162,6 @@ void test_env_redefinition_error(void) {
 
 void test_env(void) {
   RUN_TEST(test_env_init);
-  RUN_TEST(test_env_no_scope_error);
   RUN_TEST(test_env_put_get);
   RUN_TEST(test_env_put_del_get);
   RUN_TEST(test_env_scopes);

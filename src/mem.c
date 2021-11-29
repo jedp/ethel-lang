@@ -21,12 +21,12 @@ void mem_init(unsigned char initval) {
 
 void mark_traceable(void *obj, type_t type, flags_t flags) {
   gc_header_t *hdr = (gc_header_t*) obj;
-  assert(type > TYPE_ERR_DO_NOT_USE);
+  assert(type > TYPE_ERR_DO_NOT_USE && type < TYPE_MAX);
 
   hdr->type = type;
   hdr->flags = flags;
 
-  switch(TYPEOF(obj)) {
+  switch(type) {
     // Primitive and simple types with no children.
     case TYPE_UNKNOWN:
     case TYPE_NOTHING:

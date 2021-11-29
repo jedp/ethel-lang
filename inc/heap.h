@@ -27,6 +27,9 @@ typedef struct HeapNode {
 // Remove a smidge if necessary.
 #define HEAP_BYTES (ETHEL_HEAP_SIZE_BYTES - ETHEL_HEAP_SIZE_BYTES % sizeof(heap_node_t))
 
+#define DATA_FOR_NODE(node) ((void*) ((size_t) node + sizeof(heap_node_t)))
+#define NODE_FOR_DATA(data_ptr) ((heap_node_t*) ((size_t) data_ptr - sizeof(heap_node_t)))
+
 typedef struct {
   size_t total_nodes;
   size_t free_nodes;
@@ -91,7 +94,15 @@ void efree(void *data_ptr);
 /*
  * Traverse the heap and examine it. Useful for assertions in tests.
  */
-heap_info_t *get_heap_info();
+heap_info_t *get_heap_info(void);
+
+void dump_heap(void);
+
+size_t node_size(heap_node_t *node);
+
+heap_node_t *heap_head(void);
+
+heap_info_t *get_heap_info(void);
 
 void dump_heap(void);
 

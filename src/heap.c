@@ -9,8 +9,6 @@ static size_t heap[HEAP_BYTES] = { 0 };
 
 #define HEAP_DATA_BEGIN ((size_t) heap + sizeof(heap_node_t))
 #define HEAP_DATA_END ((size_t) heap + HEAP_BYTES)
-#define DATA_FOR_NODE(node) ((void*) ((size_t) node + sizeof(heap_node_t)))
-#define NODE_FOR_DATA(data_ptr) ((heap_node_t*) ((size_t) data_ptr - sizeof(heap_node_t)))
 
 // A global template we will use to construct new node data
 // before copying it to memory.
@@ -24,10 +22,11 @@ heap_node_t node_template = {
 heap_info_t heap_info = {
   .total_nodes = 0,
   .free_nodes = 0,
+  .bytes_used = 0,
   .bytes_free = HEAP_BYTES
 };
 
-static size_t node_size(heap_node_t *node) {
+size_t node_size(heap_node_t *node) {
   // Last node in the heap?
   if (node->next == NULL) {
     return (size_t) heap + HEAP_BYTES - (size_t) node - sizeof(heap_node_t);
@@ -90,8 +89,7 @@ static void fracture_node(heap_node_t *node, size_t new_size) {
  * If the two nodes are both free, coalesce them into a single
  * free node.
  */
-static void coalesce_nodes(heap_node_t *left,
-                           heap_node_t *right) {
+static void coalesce_nodes(heap_node_t *left, heap_node_t *right) {
   if (left == NULL || right == NULL) return;
   if (!((left->flags & right->flags) & F_GC_FREE)) {
     return;
@@ -106,7 +104,7 @@ static void coalesce_nodes(heap_node_t *left,
   // Null out the original right-side node for safety.
   right->prev = NULL;
   right->next = NULL;
-  right->flags = 255;
+  right->flags = 0;
 }
 
 void *ealloc(size_t bytes) {
@@ -241,14 +239,13 @@ void heap_init(unsigned char initval) {
   mem_cp(heap, &node_template, sizeof(heap_node_t));
 }
 
-heap_info_t *get_heap_info() {
+heap_info_t *get_heap_info(void) {
   heap_info.total_nodes = 0;
   heap_info.free_nodes = 0;
   heap_info.bytes_used = 0;
   heap_info.bytes_free = 0;
 
   heap_node_t *node = (heap_node_t*) heap;
-
   while (node != NULL) {
     heap_info.total_nodes++;
     if (node->flags & F_GC_FREE) {
@@ -264,10 +261,10 @@ heap_info_t *get_heap_info() {
 }
 
 void dump_heap(void) {
+  get_heap_info();
   printf("Heap start: 0x%lx\n", HEAP_DATA_BEGIN);
   printf("Heap end:   0x%lx\n", HEAP_DATA_END);
   printf("Heap bytes: %zu\n", HEAP_BYTES);
-  get_heap_info();
   printf("==== Heap\n");
   printf("  Total nodes: %zu\n", heap_info.total_nodes);
   printf("   Free nodes: %zu\n", heap_info.free_nodes);
@@ -275,3 +272,6 @@ void dump_heap(void) {
   printf("   Bytes free: %zu\n", heap_info.bytes_free);
 }
 
+heap_node_t *heap_head(void) {
+  return (heap_node_t*) heap;
+}

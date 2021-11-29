@@ -20,12 +20,20 @@
 #define FNV32Prime 0x01000193
 #define FNV32Basis 0x811C9DC5
 
-enum flags {
-  F_NONE           = 0x00,
-  F_GC_FREE        = (1 << 1),
-  F_ENV_ASSIGNABLE = (1 << 2),
-  F_ENV_OVERWRITE  = (1 << 3),
-  F_ENV_VAR        = (1 << 4),
+enum gc_flags {
+  F_GC_FREE        = (1 << 1),  // Node is on the free list.
+  F_GC_UNREACHED   = (1 << 2),
+  F_GC_UNSCANNED   = (1 << 3),
+  F_GC_SCANNED     = (1 << 4),
+};
+
+enum obj_flags {
+  F_NONE           = 0,
+  F_ENV_TYPE_OBJ   = (1 << 1),
+  F_ENV_TYPE_VOID  = (1 << 2),
+  F_ENV_ASSIGNABLE = (1 << 3),
+  F_ENV_OVERWRITE  = (1 << 4),
+  F_ENV_VAR        = (1 << 5),
 };
 
 enum every_type {
@@ -157,7 +165,7 @@ enum every_type {
 };
 
 static const char* type_names[TYPE_MAX] = {
-  "Huge Mistake! Null pointer?",
+  "NO TYPE! (Null pointer?)",
   "<AST-EMPTY>",
   "AST_EXPR_LIST",
   "AST-ADD",
@@ -280,7 +288,7 @@ static const char* type_names[TYPE_MAX] = {
   "Iterator Data",
   "Break",
   "Continue",
-  "Environment Symbol",
+  "<Env Symbol>",
 };
 
 typedef uint8_t byte;

@@ -1,6 +1,7 @@
 #include "../inc/mem.h"
 #include "unity/unity.h"
 #include "test_heap.h"
+#include "test_gc.h"
 #include "test_ptr.h"
 #include "test_trace.h"
 #include "test_str.h"
@@ -29,6 +30,7 @@ int main(int argc, char** argv) {
   test_lexer();
   test_parser();
   test_heap();
+  test_gc();
   test_ptr();
   test_trace();
   test_str();
@@ -40,7 +42,7 @@ int main(int argc, char** argv) {
   test_env();
   test_eval();
   test_rand();
-//  test_examples();
+  test_examples();
 
   UNITY_END();
 }

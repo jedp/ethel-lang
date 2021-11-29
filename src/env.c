@@ -6,7 +6,7 @@
 #include "../inc/str.h"
 #include "../inc/env.h"
 
-env_sym_t *new_sym(obj_t *name_obj, obj_t *obj, flags_t flags) {
+env_sym_t *new_sym(bytearray_t *name_obj, obj_t *obj, flags_t flags) {
   env_sym_t *sym = mem_alloc(sizeof(env_sym_t));
   mark_traceable(sym, ENV_SYM, flags);
   mark_traceable(obj, TYPEOF(obj), flags);
@@ -39,19 +39,19 @@ error_t leave_scope(env_t *env) {
   return ERR_NO_ERROR;
 }
 
-static env_sym_t *find_sym(env_t *env, obj_t *name_obj, boolean recursive) {
+static env_sym_t *find_sym(env_t *env, bytearray_t *sym_name, boolean recursive) {
   if (env->top < 0) {
     return NULL;
   }
 
-  bytearray_t *name = name_obj->bytearray;
+  bytearray_t *name = sym_name;
   assert(name != NULL);
   // Search back through the scopes to find the name.
   for (int i = env->top; i >= 0; --i) {
     // Start at the node the root points to.
     env_sym_t *node = env->symbols[i];
     while (node != NULL) {
-      if (bytearray_eq(name, node->name_obj->bytearray)) {
+      if (bytearray_eq(name, node->name_obj)) {
         return node;
       }
       node = node->next;
@@ -64,13 +64,11 @@ static env_sym_t *find_sym(env_t *env, obj_t *name_obj, boolean recursive) {
 }
 
 error_t _put_env(env_t *env,
-                 obj_t *name_obj,
+                 bytearray_t *name_obj,
                  const obj_t *obj,
                  const uint16_t flags,
                  boolean can_shadow) {
-  if (env->top < 0) {
-    return ERR_ENV_NO_SCOPE;
-  }
+  assert(env->top >= 0);
 
   env_sym_t *found = find_sym(env, name_obj, !can_shadow);
   // Already exists in scopes we can access.
@@ -102,16 +100,16 @@ error_t _put_env(env_t *env,
   return ERR_NO_ERROR;
 }
 
-error_t put_env(env_t *env, obj_t *name_string_obj, const obj_t *obj, const flags_t flags) {
-  return _put_env(env, name_string_obj, obj, flags, False);
+error_t put_env(env_t *env, bytearray_t *name_obj, const obj_t *obj, const flags_t flags) {
+  return _put_env(env, name_obj, obj, flags, False);
 }
 
-error_t put_env_shadow(env_t *env, obj_t *name_string_obj, const obj_t *obj, const flags_t flags) {
-  return _put_env(env, name_string_obj, obj, flags, True);
+error_t put_env_shadow(env_t *env, bytearray_t *name_obj, const obj_t *obj, const flags_t flags) {
+  return _put_env(env, name_obj, obj, flags, True);
 }
 
-error_t del_env(env_t *env, obj_t *name_string_obj) {
-  env_sym_t *sym = find_sym(env, name_string_obj, True);
+error_t del_env(env_t *env, bytearray_t *name_obj) {
+  env_sym_t *sym = find_sym(env, name_obj, True);
   if (sym == NULL) return ERR_ENV_SYMBOL_UNDEFINED;
 
   env_sym_t *prev = sym->prev;
@@ -122,14 +120,14 @@ error_t del_env(env_t *env, obj_t *name_string_obj) {
 
   if (prev != NULL) prev->next = sym->next;
   if (sym->next != NULL) sym->next->prev = prev;
-  mem_free(sym);
+  prev->next = sym->next;
   sym = NULL;
 
   return ERR_NO_ERROR;
 }
 
-obj_t *get_env(env_t *env, obj_t *name_string_obj) {
-  env_sym_t *sym = find_sym(env, name_string_obj, True);
+obj_t *get_env(env_t *env, bytearray_t *name_obj) {
+  env_sym_t *sym = find_sym(env, name_obj, True);
   if (sym == NULL) return undef_obj();
 
   return sym->obj;
