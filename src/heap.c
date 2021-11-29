@@ -27,8 +27,6 @@ heap_info_t heap_info = {
   .bytes_free = HEAP_BYTES
 };
 
-static void dump_heap(void);
-
 static uint32_t node_size(heap_node_t *node) {
   if (node->next == NULL) {
     return (uint32_t) (HEAP_DATA_END - (size_t) node) - sizeof(heap_node_t);

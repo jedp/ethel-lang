@@ -79,6 +79,12 @@ int run(char* fname) {
 }
 
 int main(int argc, char** argv) {
+  /*
+   * Init the ethel memory manager. This file hackily uses both stdlib's
+   * heap and the heap in ethel. TODO: Fix.
+   */
+  mem_init();
+
   if (argc != 2) {
     fputs("Usage: run <file.e>\n", stderr);
     return -1;

@@ -1,3 +1,4 @@
+#include <stdlib.h>
 #include <stdio.h>
 #include "../inc/ptr.h"
 #include "../inc/mem.h"
@@ -12,6 +13,11 @@
 
 #define MAX_INPUT 1024
 
+/*
+ * TODO this repl is a big hack that uses both the stdlib memory manager
+ * and the ethel memory manager. The TODO is to stop being lazy and do it
+ * all with ethel.
+ */
 char input[MAX_INPUT] = "";
 
 static void print_value(obj_t *obj) {
@@ -69,11 +75,12 @@ static void print_result(obj_t *obj) {
 }
 
 int main(int argc, char** argv) {
+  // Init ethel memory management.
   mem_init();
 
   mem_set(input, 0, MAX_INPUT);
 
-  char* program = mem_alloc(2);
+  char* program = malloc(2);
   program[0] = 0;
   unsigned int indent = 0;
 
@@ -94,7 +101,7 @@ int main(int argc, char** argv) {
       goto done;
     }
     size_t program_len = c_str_len(program) + c_str_len(input) + 1;
-    program = (char*) mem_realloc(program, program_len);
+    program = (char*) realloc(program, program_len);
     c_str_ncat(program, input, program_len);
 
     eval_result_t *result = eval(&env, program);
@@ -102,10 +109,9 @@ int main(int argc, char** argv) {
     indent = result->depth;
 
     if (result->err != ERR_LEX_INCOMPLETE_INPUT) {
-      mem_free(program);
-      program = mem_alloc(2);
-      indent = 0;
+      program = realloc(program, 2);
       program[0] = 0;
+      indent = 0;
 
       if (result->err == ERR_NO_ERROR && obj->type != TYPE_NOTHING) {
         print_result(obj);
@@ -116,7 +122,7 @@ int main(int argc, char** argv) {
   }
 
 done:
-  mem_free(program);
+  free(program);
   program = NULL;
   return 0;
 }
