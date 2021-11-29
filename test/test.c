@@ -1,6 +1,7 @@
 #include "../inc/mem.h"
 #include "unity/unity.h"
 #include "test_heap.h"
+#include "test_gc.h"
 #include "test_ptr.h"
 #include "test_str.h"
 #include "test_range.h"
@@ -25,9 +26,11 @@ void tearDown(void) {
 int main(int argc, char** argv) {
   UNITY_BEGIN();
 
+  /*
   test_lexer();
   test_parser();
   test_heap();
+//  test_gc();
   test_ptr();
   test_str();
   test_range();
@@ -39,6 +42,9 @@ int main(int argc, char** argv) {
   test_eval();
   test_rand();
   test_examples();
+  */
+
+  test_gc();
 
   UNITY_END();
 }

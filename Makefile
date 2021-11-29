@@ -1,6 +1,7 @@
 
 COMPOBJS = src/ptr.o \
 					 src/heap.o \
+					 src/gc.o \
 					 src/mem.o \
 					 src/obj.o \
 					 src/math.o \
@@ -34,6 +35,7 @@ TESTOBJS = test/unity/unity.o \
 					 test/test_range.o \
 					 test/test_ptr.o \
 					 test/test_heap.o \
+					 test/test_gc.o \
 					 test/test_bytearray.o \
 					 test/test_lexer.o \
 					 test/test_parser.o \

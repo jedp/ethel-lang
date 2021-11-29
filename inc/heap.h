@@ -5,7 +5,10 @@
 #include "../inc/def.h"
 
 // Node flags.
-#define F_FREE (1 << 0)  // Node is on the free list.
+#define F_FREE          (1 << 0)  // Node is on the free list.
+#define F_GC_UNREACHED  (1 << 1)
+#define F_GC_UNSCANNED  (1 << 2)
+#define F_GC_SCANNED    (1 << 3)
 
 /*
  * The heap is a simple doubly-linked list of nodes.
@@ -28,6 +31,9 @@ typedef struct HeapNode {
 // Heap size must be a multiple of heap_node_t size.
 // Remove a smidge if necessary.
 #define HEAP_BYTES (ETHEL_HEAP_SIZE_BYTES - ETHEL_HEAP_SIZE_BYTES % sizeof(heap_node_t))
+
+#define DATA_FOR_NODE(node) ((void*) ((size_t) node + sizeof(heap_node_t)))
+#define NODE_FOR_DATA(data_ptr) ((heap_node_t*) ((size_t) data_ptr - sizeof(heap_node_t)))
 
 typedef struct {
   uint32_t total_nodes;
@@ -91,7 +97,15 @@ void efree(void *data_ptr);
 /*
  * Traverse the heap and examine it. Useful for assertions in tests.
  */
-heap_info_t *get_heap_info();
+heap_info_t *get_heap_info(void);
+
+void dump_heap(void);
+
+uint32_t node_size(heap_node_t *node);
+
+heap_node_t *heap_head(void);
+
+heap_info_t *get_heap_info(void);
 
 void dump_heap(void);
 
