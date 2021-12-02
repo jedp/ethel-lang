@@ -20,7 +20,7 @@ typedef struct __attribute__((__packed__)) Symbol {
 /* A stack of symbol tables in scope. */
 typedef struct Env {
     int top;
-    env_sym_t symbols[ENV_MAX_STACK_DEPTH];
+    env_sym_t *symbols[ENV_MAX_STACK_DEPTH];
 } env_t;
 
 error_t env_init(env_t *env);

@@ -9,16 +9,12 @@ env_sym_t *new_sym(bytearray_t *name, obj_t *obj, uint16_t flags) {
   sym->name = mem_alloc(sizeof(bytearray_t));
   sym->name = bytearray_clone(name);
   sym->flags = flags;
-  sym->refcount = 0;
+  sym->refcount = 1;
   sym->obj = obj;
   sym->prev = NULL;
   sym->next = NULL; 
 
   return sym;
-}
-
-env_sym_t *empty_sym() {
-  return new_sym(c_str_to_bytearray(""), NULL, F_NONE);
 }
 
 error_t push_scope(env_t *env, env_sym_t *scope) {
@@ -27,32 +23,33 @@ error_t push_scope(env_t *env, env_sym_t *scope) {
     return ERR_ENV_MAX_DEPTH_EXCEEDED;
   }
 
-  env->symbols[env->top] = *scope;
-  scope->refcount += 1;
+  env->symbols[env->top] = scope;
+  if (scope != NULL) scope->refcount += 1;
   return ERR_NO_ERROR;
 }
 
 error_t enter_scope(env_t *env) {
-  return push_scope(env, empty_sym());
+  return push_scope(env, NULL);
 }
 
 error_t leave_scope(env_t *env) {
-  env_sym_t *next = env->symbols[env->top].next;
+  env_sym_t *node = env->symbols[env->top];
   // TODO buggy
   // Decrement refcount when popping scope.
   // Once refcount is 0, we know it's not under something else's scope.
-  if (next != NULL && --next->refcount < 1) {
+  if (node != NULL && --node->refcount < 1) {
     // Delete any symbols at this level.
     // Don't delete the root node.
-    while (next != NULL) {
-      env_sym_t *temp = next;
-      next = next->next;
+    while (node != NULL) {
+      env_sym_t *temp = node;
+      node = node->next;
       mem_free(temp->name);
       temp->name = NULL;
       mem_free(temp);
       temp = NULL;
     }
   }
+  env->symbols[env->top] = NULL;
   env->top -= 1;
 
   return ERR_NO_ERROR;
@@ -66,7 +63,7 @@ static env_sym_t *find_sym(env_t *env, bytearray_t *name, boolean recursive) {
   // Search back through the scopes to find the name.
   for (int i = env->top; i >= 0; --i) {
     // Start at the node the root points to.
-    env_sym_t *node = env->symbols[i].next;
+    env_sym_t *node = env->symbols[i];
     while (node != NULL) {
       if (bytearray_eq(name, node->name)) {
         return node;
@@ -102,8 +99,15 @@ error_t _put_env(env_t *env,
   }
 
   // Not found. Put it in the current scope.
-  env_sym_t *top = &(env->symbols[env->top]);
+  env_sym_t *top = env->symbols[env->top];
   env_sym_t *new = new_sym(name, (obj_t *) obj, flags);
+
+  // First thing in this scope?
+  if (top == NULL) {
+    env->symbols[env->top]= new;
+    return ERR_NO_ERROR;
+  }
+
   new->next = top->next;
   if (top->next != NULL) top->next->prev = new;
   new->prev = top;
@@ -125,8 +129,13 @@ error_t del_env(env_t *env, bytearray_t *name) {
   if (sym == NULL) return ERR_ENV_SYMBOL_UNDEFINED;
 
   env_sym_t *prev = sym->prev;
+  if (prev == NULL && sym->next == NULL) {
+    env->symbols[env->top] = NULL;
+    return ERR_NO_ERROR;
+  }
+
+  if (prev != NULL) prev->next = sym->next;
   if (sym->next != NULL) sym->next->prev = prev;
-  prev->next = sym->next;
   mem_free(sym);
   sym = NULL;
 
@@ -141,8 +150,9 @@ obj_t *get_env(env_t *env, bytearray_t *name) {
 }
 
 error_t env_init(env_t *env) {
+  // Intialize all pointers.
   for (int i = 0; i < ENV_MAX_STACK_DEPTH; ++i) {
-    env->symbols[i] = *empty_sym();
+    env->symbols[i] = NULL;
   }
 
   // An outer new_scope() is required.

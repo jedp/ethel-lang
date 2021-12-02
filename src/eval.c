@@ -244,7 +244,7 @@ static void eval_return_expr(ast_expr_list_t *block_exprs, eval_result_t *result
 
 /* Wrap the function pointer in an obj. */
 static void eval_func_def(ast_func_def_t *func_def, eval_result_t *result, env_t *env) {
-  result->obj = func_obj((void *) func_def, (void *) &env->symbols[env->top]);
+  result->obj = func_obj((void *) func_def, env->symbols[env->top]);
 }
 
 static void eval_func_call(ast_func_call_t *func_call, eval_result_t *result, env_t *env) {
