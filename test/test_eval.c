@@ -1066,12 +1066,12 @@ void test_eval_function_lexical_scope(void) {
 void test_eval_function_composition(void) {
   char *program = "{ val f = fn(x) { x + 1 } \n"
                   "  val g = fn(x) { x + 2 } \n"
-                  "  f(g(1))                 \n"
+                  "  f(g(f(g(1))))           \n"
                   "}";
   eval_result_t *result = eval_program(program);
 
   TEST_ASSERT_EQUAL(ERR_NO_ERROR, result->err);
-  TEST_ASSERT_EQUAL(4, result->obj->intval);
+  TEST_ASSERT_EQUAL(7, result->obj->intval);
 }
 
 void test_eval_func_in_list(void) {
