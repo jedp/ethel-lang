@@ -663,6 +663,34 @@ static void println_args(ast_expr_list_t *args, eval_result_t *result, env_t *en
   printf("\n");
 }
 
+// For messing about in the repl.
+static void eval_read_file(ast_expr_t *expr, eval_result_t *result, env_t *env) {
+  eval_result_t *r = eval_expr(expr, env);
+  if (r->obj->type != TYPE_STRING) {
+    result->err = ERR_BAD_FILENAME;
+    result->obj = nil_obj();
+    return;
+  }
+
+  FILE *f = fopen(bytearray_to_c_str(r->obj->bytearray), "rb");
+  if (!f) {
+    result->err = ERR_BAD_FILENAME;
+    result->obj = nil_obj();
+    return;
+  }
+
+  long file_len;
+  fseek(f, 0, SEEK_END);
+  file_len = ftell(f);
+  obj_t *buffer = bytearray_obj(file_len, NULL);
+
+  fseek(f, 0, SEEK_SET);
+  fread (buffer->bytearray->data, 1, file_len, f);
+  fclose(f);
+
+  result->obj = buffer;
+}
+
 static void dump_args(ast_expr_list_t *args, eval_result_t *result, env_t *env) {
   if (args->root == NULL) {
     result->obj = nil_obj();
@@ -736,6 +764,9 @@ static void resolve_callable_expr(ast_expr_t *expr, env_t *env, eval_result_t *r
       readln_input(result);
       break;
     }
+    case AST_CALL_READ:
+      eval_read_file(args->root, result, env);
+      break;
     case AST_CALL_RAND:
       eval_rand(args->root, result, env);
       break;

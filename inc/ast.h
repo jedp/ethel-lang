@@ -134,6 +134,7 @@ enum ast_call_type_enum {
   AST_CALL_DUMP,
   AST_CALL_PRINT,
   AST_CALL_INPUT,
+  AST_CALL_READ,
   AST_CALL_RAND,
   AST_CALL_ABS,
   AST_CALL_SIN,
