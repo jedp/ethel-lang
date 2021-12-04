@@ -97,11 +97,6 @@ typedef struct ObjDictElem {
   dict_node_t **nodes;
 } obj_dict_t;
 
-typedef struct ObjFuncArg {
-  bytearray_t *name;
-  struct ObjFuncArg *next;
-} obj_func_arg_t;
-
 typedef struct ObjFuncDef {
   /* Pointer to the ast_func_def_t to execute. */
   void* code;
