@@ -67,6 +67,14 @@ boolean bytearray_eq(bytearray_t *a, bytearray_t *b);
 /* Return true if the string and bytearray have the same contents. */
 boolean c_str_eq_bytearray(const char *s, bytearray_t *a);
 
+/*
+ * Returns a pointer to a static buffer of chars. The buffer may not be
+ * big enough to hold the entire bytearray. Also, there's only one c_str
+ * buffer, so if you hold onto the pointer too long, its contents may
+ * change on you. It's expected that this is all fine because this
+ * function is really just for printing stuff in the repl or debugging.
+ * This won't exist in the long run.
+ */
 char* bytearray_to_c_str(bytearray_t *a);
 
 bytearray_t *c_str_to_bytearray(const char* s);

@@ -8,6 +8,9 @@
 #include "../inc/math.h"
 #include "../inc/str.h"
 
+#define C_STR_BUF_SIZ 180
+static char c_str_buf[C_STR_BUF_SIZ];
+
 static void strip_trailing_ws(char* s) {
   int end = c_str_len(s) - 1;
   while (end > 0) {
@@ -301,10 +304,11 @@ boolean c_str_eq_bytearray(const char *s, bytearray_t *a) {
 }
 
 char* bytearray_to_c_str(bytearray_t *a) {
-  char* s = mem_alloc(a->size + 1);
-  mem_cp(s, a->data, a->size);
-  s[a->size] = '\0';
-  return s;
+  int size = min(a->size, C_STR_BUF_SIZ-1);
+  mem_cp(c_str_buf, a->data, size);
+  c_str_buf[size] = '\0';
+  printf("copied %d bytes from thing with %d bytes\n", size, a->size);
+  return c_str_buf;
 }
 
 bytearray_t *c_str_to_bytearray(const char* s) {
