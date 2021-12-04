@@ -17,3 +17,8 @@ void mem_init(void) {
   heap_init();
 }
 
+void mark_traceable(void *obj, uint16_t type) {
+  ((traceable_obj_t*) obj)->type = type;
+  ((traceable_obj_t*) obj)->flags = F_NONE;
+}
+

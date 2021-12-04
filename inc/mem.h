@@ -21,5 +21,8 @@ void mem_free(void *b);
 /* Initialize memory management. */
 void mem_init(void);
 
+/* Tag the object so it can be traced in GC. */
+void mark_traceable(void* obj, uint16_t type);
+
 #endif
 

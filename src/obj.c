@@ -23,8 +23,7 @@ obj_t *arg_at(obj_method_args_t *args, int index) {
 
 obj_t *obj_of(obj_type_t type) {
   obj_t *obj = mem_alloc(sizeof(obj_t));
-  obj->type = type;
-  obj->flags = F_NONE;
+  mark_traceable(obj, type);
 
   return obj;
 }
