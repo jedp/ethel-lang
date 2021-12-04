@@ -45,7 +45,7 @@ static byte obj_to_byte(obj_t *obj) {
       return (byte) obj->intval;
     }
     default:
-      printf("Don't know how to convert %s to byte.\n", obj_type_names[obj->type]);
+      printf("Don't know how to convert %s to byte.\n", type_names[obj->type]);
       return 0x0;
   }
 }

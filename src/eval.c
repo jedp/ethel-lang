@@ -68,7 +68,7 @@ static void eval_type_of(ast_expr_t *expr, eval_result_t *result, env_t *env) {
   }
 
   // TODO fix when we have user-defined types
-  result->obj = string_obj(c_str_to_bytearray(obj_type_names[r->obj->type]));
+  result->obj = string_obj(c_str_to_bytearray(type_names[r->obj->type]));
 }
 
 static void eval_to_hex(ast_expr_t *expr, eval_result_t *result, env_t *env) {
@@ -165,7 +165,7 @@ static void eval_dict_expr(ast_dict_t *expr, eval_result_t *result, env_t *env) 
   while(kv != NULL) {
     r = eval_expr(kv->k, env);
     if ((result->err = r->err) != ERR_NO_ERROR) {
-      printf("Failed to evaluate %s for key.\n", ast_node_names[kv->k->type]);
+      printf("Failed to evaluate %s for key.\n", type_names[kv->k->type]);
       result->obj = nil_obj();
       return;
     }
@@ -173,7 +173,7 @@ static void eval_dict_expr(ast_dict_t *expr, eval_result_t *result, env_t *env) 
 
     r = eval_expr(kv->v, env);
     if ((result->err = r->err) != ERR_NO_ERROR) {
-      printf("Failed to evaluate %s for value.\n", ast_node_names[kv->v->type]);
+      printf("Failed to evaluate %s for value.\n", type_names[kv->v->type]);
       result->obj = nil_obj();
       return;
     }
@@ -714,7 +714,7 @@ static void dump_args(ast_expr_list_t *args, eval_result_t *result, env_t *env) 
       result->obj = arr_dump(r->obj);
       break;
     default:
-      printf("Cannot dump object of type %s.\n", obj_type_names[r->obj->type]);
+      printf("Cannot dump object of type %s.\n", type_names[r->obj->type]);
       result->obj = nil_obj();
   }
 }

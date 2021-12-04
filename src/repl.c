@@ -25,7 +25,7 @@ static void print_value(obj_t *obj) {
   if (to_string != NULL) {
     printf("%s", bytearray_to_c_str(to_string(obj, NULL)->bytearray));
   } else {
-    printf("<%s>", obj_type_names[obj->type]);
+    printf("<%s>", type_names[obj->type]);
   }
 }
 

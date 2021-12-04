@@ -6,59 +6,11 @@
 #include "def.h"
 
 typedef uint8_t obj_type_t;
-enum obj_type_enum {
-  TYPE_UNKNOWN = 0,
-  TYPE_NOTHING,
-  TYPE_UNDEF,
-  TYPE_NIL,
-  TYPE_ERROR,
-  TYPE_METHOD_ARGS,
-  TYPE_FUNC_PTR,
-  TYPE_RETURN_VAL,
-  TYPE_INT,
-  TYPE_FLOAT,
-  TYPE_BYTE,
-  TYPE_BYTEARRAY,
-  TYPE_STRING,
-  TYPE_BOOLEAN,
-  TYPE_RANGE,
-  TYPE_LIST,
-  TYPE_DICT,
-  TYPE_IDENT,
-  TYPE_ITERATOR,
-  TYPE_BREAK,
-  TYPE_CONTINUE,
-  TYPE_MAX,
-};
 
 enum iter_state {
   ITER_NOT_STARTED,
   ITER_ITERATING,
   ITER_STOPPED,
-};
-
-static const char* obj_type_names[TYPE_MAX] = {
-  "Unknown",
-  "Nothing",
-  "Undefined",
-  "Nil",
-  "Error",
-  "Method Arg(s)",
-  "Function",
-  "Return Val",
-  "Int",
-  "Float",
-  "Byte",
-  "Byte Array",
-  "Str",
-  "Bool",
-  "Range",
-  "List",
-  "Dict",
-  "Identifier",
-  "Iterator",
-  "Break",
-  "Continue",
 };
 
 typedef struct Obj obj_t;
@@ -111,6 +63,7 @@ typedef struct ObjIterator {
   struct Obj *(*next)(struct ObjIterator *iterable);
 } obj_iter_t;
 
+// The type field must stay put. Used by GC.
 typedef struct Obj {
   uint16_t type;
   uint16_t flags;

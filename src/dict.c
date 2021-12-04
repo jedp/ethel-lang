@@ -25,7 +25,7 @@ error_t dict_init(obj_t *obj, uint32_t buckets) {
 error_t _dict_put(obj_dict_t *dict, obj_t *k, obj_t *v) {
   obj_t *hash_obj = get_static_method(k->type, METHOD_HASH)(k, NULL);
   if (hash_obj->type == TYPE_NIL) {
-    printf("Disaster! No hash method for %s\n", obj_type_names[k->type]);
+    printf("Disaster! No hash method for %s\n", type_names[k->type]);
     return ERR_NO_SUCH_METHOD;
   }
   uint32_t hv = hash_obj->intval;
@@ -143,7 +143,7 @@ boolean dict_contains(obj_t *dict_obj, obj_t *k) {
   obj_dict_t *dict = dict_obj->dict;
   obj_t *hash_obj = get_static_method(k->type, METHOD_HASH)(k, NULL);
   if (hash_obj->type == TYPE_NIL) {
-    printf("Disaster! No hash method for %s\n", obj_type_names[k->type]);
+    printf("Disaster! No hash method for %s\n", type_names[k->type]);
     return ERR_NO_SUCH_METHOD;
   }
   uint32_t hv = hash_obj->intval;
@@ -175,7 +175,7 @@ obj_t *dict_remove(obj_t *obj, obj_t *k) {
   obj_dict_t *dict = obj->dict;
   obj_t *hash_obj = get_static_method(k->type, METHOD_HASH)(k, NULL);
   if (hash_obj->type == TYPE_NIL) {
-    printf("Disaster! No hash method for %s\n", obj_type_names[k->type]);
+    printf("Disaster! No hash method for %s\n", type_names[k->type]);
     return nil_obj();
   }
   uint32_t hv = hash_obj->intval;
@@ -227,7 +227,7 @@ obj_t *dict_get(obj_t *obj, obj_t *k) {
   obj_dict_t *dict = obj->dict;
   obj_t *hash_obj = get_static_method(k->type, METHOD_HASH)(k, NULL);
   if (hash_obj->type == TYPE_NIL) {
-    printf("Disaster! No hash method for %s\n", obj_type_names[k->type]);
+    printf("Disaster! No hash method for %s\n", type_names[k->type]);
     return nil_obj();
   }
   uint32_t hv = hash_obj->intval;

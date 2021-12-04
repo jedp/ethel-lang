@@ -43,7 +43,7 @@ obj_t *bool_as(obj_t *obj, obj_t *args_obj) {
                             (obj->boolval == True) ? "true":  "false"));
     default:
       printf("Cannot cast %s to type %s.\n",
-             obj_type_names[TYPE_BOOLEAN], obj_type_names[type_arg->type]);
+             type_names[TYPE_BOOLEAN], type_names[type_arg->type]);
       return boolean_obj(False);
   }
 }

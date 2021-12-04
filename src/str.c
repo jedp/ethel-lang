@@ -341,7 +341,7 @@ obj_t *str_as(obj_t *obj, obj_t *args_obj) {
     case TYPE_BOOLEAN: return boolean_obj(obj->bytearray->size ? True : False);
     default:
       printf("Cannot cast %s to type %s.\n",
-             obj_type_names[obj->type], obj_type_names[type_arg->type]);
+             type_names[obj->type], type_names[type_arg->type]);
       return boolean_obj(False);
   }
 }
@@ -372,7 +372,7 @@ obj_t *str_add(obj_t *obj, obj_t *args_obj) {
   obj_t *arg = args->arg;
   if (arg->type != TYPE_STRING) {
     printf("Cannot add %s to %s.\n",
-           obj_type_names[arg->type], obj_type_names[obj->type]);
+           type_names[arg->type], type_names[obj->type]);
     return obj;
   }
 

@@ -25,7 +25,7 @@ static int _eval(char* program) {
   static_method to_string = get_static_method(obj->type, METHOD_TO_STRING);
   if (to_string != NULL) {
     printf("=> [%s] %s\n",
-      obj_type_names[obj->type],
+      type_names[obj->type],
       bytearray_to_c_str(to_string(obj, NULL)->bytearray));
   }
 

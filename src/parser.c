@@ -255,7 +255,7 @@ static ast_expr_kv_list_t *parse_expr_kv_list(lexer_t *lexer) {
     e = parse_expr(lexer);
 
     if (e->type != AST_MAPS_TO) {
-      printf("Syntax error. got %s\n.", ast_node_names[e->type]);
+      printf("Syntax error. got %s\n.", type_names[e->type]);
       return empty_expr_kv_list();
     }
 

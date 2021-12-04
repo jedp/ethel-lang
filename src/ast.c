@@ -81,7 +81,7 @@ ast_expr_t *ast_op(ast_type_t type, ast_expr_t *a, ast_expr_t *b) {
       node->type = type;
       break;
     default:
-      printf("Op %s unfamiliar\n", ast_node_names[type]);
+      printf("Op %s unfamiliar\n", type_names[type]);
       mem_free(node);
       node = NULL;
       return ast_empty();
@@ -235,7 +235,7 @@ ast_expr_t *ast_method_call(bytearray_t *name, ast_expr_list_t *args) {
 
 ast_expr_t *ast_access(ast_expr_t *object, ast_expr_t *member) {
   if (member->type != AST_METHOD_CALL) {
-    printf("Method access only. Not allowed: '%s'\n", ast_node_names[member->type]);
+    printf("Method access only. Not allowed: '%s'\n", type_names[member->type]);
     return ast_empty();
   }
 
@@ -344,7 +344,7 @@ void _pretty_print(ast_expr_t *expr, int indent) {
     printf(" ");
   }
 
-  printf("(%s", ast_node_names[expr->type]);
+  printf("(%s", type_names[expr->type]);
   switch(expr->type) {
     case AST_INT:
       printf(" %d", expr->intval);
@@ -364,7 +364,7 @@ void _pretty_print(ast_expr_t *expr, int indent) {
       }
       break;
     default:
-      printf(" <%s> ", ast_node_names[expr->type]);
+      printf(" <%s> ", type_names[expr->type]);
       break;
   }
 
