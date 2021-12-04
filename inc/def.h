@@ -224,6 +224,11 @@ typedef uint8_t byte;
 typedef uint32_t boolean;
 typedef uint32_t dim_t;
 
+typedef struct TraceableObj {
+  uint16_t type;
+  uint16_t flags;
+} traceable_obj_t;
+
 typedef struct __attribute__((__packed__)) {
   dim_t size;
   byte data[];

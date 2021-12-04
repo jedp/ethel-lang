@@ -16,11 +16,15 @@ enum iter_state {
 typedef struct Obj obj_t;
 
 typedef struct MethodArg {
+  uint16_t type;  // Traceable obj header
+  uint16_t flags;
   obj_t *arg;
   struct MethodArg *next;
 } obj_method_args_t;
 
 typedef struct Method {
+  uint16_t type;  // Traceable obj header
+  uint16_t flags;
   bytearray_t *name;
   struct Obj *(*callable)(struct Obj *obj, struct MethodArg *args);
   struct Method *next;
@@ -33,16 +37,22 @@ typedef struct Range {
 } range_t;
 
 typedef struct ObjListElem {
+  uint16_t type;  // Traceable obj header
+  uint16_t flags;
   obj_t *node;
   struct ObjListElem *next;
 } obj_list_element_t;
 
 typedef struct ObjList {
+  uint16_t type;  // Traceable obj header
+  uint16_t flags;
   bytearray_t *type_name;
   obj_list_element_t *elems;
 } obj_list_t;
 
 typedef struct ObjDictKvNode {
+  uint16_t type;  // Traceable obj header
+  uint16_t flags;
   uint32_t hash_val;
   obj_t *k;
   obj_t *v;
@@ -50,12 +60,16 @@ typedef struct ObjDictKvNode {
 } dict_node_t;
 
 typedef struct ObjDictElem {
+  uint16_t type;  // Traceable obj header
+  uint16_t flags;
   uint32_t buckets;
   uint32_t nelems;
   dict_node_t **nodes;
 } obj_dict_t;
 
 typedef struct ObjFuncDef {
+  uint16_t type;  // Traceable obj header
+  uint16_t flags;
   /* Pointer to the ast_func_def_t to execute. */
   void* code;
   /* Pointer to the env_sym_t scope the function was declared in. */
@@ -63,15 +77,16 @@ typedef struct ObjFuncDef {
 } obj_func_def_t;
 
 typedef struct ObjIterator {
+  uint16_t type;  // Traceable obj header
+  uint16_t flags;
   int state;
   obj_t *obj;
   obj_t *state_obj;
   struct Obj *(*next)(struct ObjIterator *iterable);
 } obj_iter_t;
 
-// The type field must stay put. Used by GC.
 typedef struct Obj {
-  uint16_t type;
+  uint16_t type;  // Traceable obj header
   uint16_t flags;
   union {
     error_t errval;
