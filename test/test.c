@@ -2,6 +2,7 @@
 #include "unity/unity.h"
 #include "test_heap.h"
 #include "test_ptr.h"
+#include "test_trace.h"
 #include "test_str.h"
 #include "test_range.h"
 #include "test_list.h"
@@ -29,6 +30,7 @@ int main(int argc, char** argv) {
   test_parser();
   test_heap();
   test_ptr();
+  test_trace();
   test_str();
   test_range();
   test_list();

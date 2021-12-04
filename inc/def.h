@@ -109,6 +109,7 @@ enum every_type {
   TYPE_FLOAT,
   TYPE_BYTE,
   TYPE_BYTEARRAY,
+  TYPE_BYTEARRAY_DATA,
   TYPE_STRING,
   TYPE_BOOLEAN,
   TYPE_RANGE,
@@ -209,6 +210,7 @@ static const char* type_names[TYPE_MAX] = {
   "Float",
   "Byte",
   "Byte Array",
+  "Byte Array Data",
   "Str",
   "Bool",
   "Range",
@@ -230,6 +232,8 @@ typedef struct TraceableObj {
 } traceable_obj_t;
 
 typedef struct __attribute__((__packed__)) {
+  uint16_t type;
+  uint16_t flags;
   dim_t size;
   byte data[];
 } bytearray_t;

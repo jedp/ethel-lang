@@ -35,6 +35,7 @@ TESTOBJS = test/unity/unity.o \
 					 test/test_range.o \
 					 test/test_ptr.o \
 					 test/test_heap.o \
+					 test/test_trace.o \
 					 test/test_bytearray.o \
 					 test/test_lexer.o \
 					 test/test_parser.o \

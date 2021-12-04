@@ -56,6 +56,7 @@ obj_t *bytearray_obj(dim_t size, uint8_t *data) {
     mem_set(a->data, '\0', size);
   }
   obj->bytearray = a;
+  mark_traceable(obj->bytearray, TYPE_BYTEARRAY_DATA);
   return obj;
 }
 
@@ -77,6 +78,7 @@ obj_t *string_obj(bytearray_t *src) {
   a->size = src->size;
   mem_cp(a->data, src->data, src->size);
   obj->bytearray = a;
+  mark_traceable(obj->bytearray, TYPE_BYTEARRAY_DATA);
   return obj;
 }
 
