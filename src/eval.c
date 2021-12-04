@@ -295,7 +295,7 @@ static void eval_func_call(ast_func_call_t *func_call, eval_result_t *result, en
     }
     bytearray_t *name = argnames->name;
     eval_result_t *r = eval_expr(callargs->root, env);
-    error_t err = put_env_shadow(env, name, r->obj, F_NONE);
+    error_t err = put_env_shadow(env, string_obj(name), r->obj, F_NONE);
     if (err != ERR_NO_ERROR) {
       result->err = err;
       // Not a typo. There was a push_scope and an enter_scope.
@@ -413,7 +413,7 @@ static void assign(ast_expr_t *lhs,
     // TODO this looks like a bug that might find an obj in the env
     // e.g., if we say "foo"[1] = 'c', and env has an obj named foo.
     bytearray_t *name = lhs->op_args->a->bytearray;
-    obj_t *obj = get_env(env, name);
+    obj_t *obj = get_env(env, string_obj(name));
 
     switch(obj->type) {
       case TYPE_LIST:
@@ -443,7 +443,7 @@ static void assign(ast_expr_t *lhs,
   if (rhs->type == AST_FUNCTION_DEF) {
     eval_func_def(rhs->func_def, result, env);
     if (result->err != ERR_NO_ERROR) goto error;
-    error = put_env(env, name, result->obj, F_NONE);
+    error = put_env(env, string_obj(name), result->obj, F_NONE);
     if (error != ERR_NO_ERROR) {
       result->err = error;
       goto error;
@@ -453,7 +453,7 @@ static void assign(ast_expr_t *lhs,
 
   eval_result_t *r = eval_expr(rhs, env);
   if ((result->err = r->err) != ERR_NO_ERROR) goto error;
-  error = put_env(env, name, r->obj, lhs->flags);
+  error = put_env(env, string_obj(name), r->obj, lhs->flags);
   if (error != ERR_NO_ERROR) {
     result->err = error;
     goto error;
@@ -885,7 +885,7 @@ static void eval_for_loop(ast_expr_t *expr, env_t *env, eval_result_t *result) {
   // The actual iteration. Done when we encounter Nil as a sentinel.
   while(next_elem->type != TYPE_NIL) {
     // Not mutable in user code.
-    put_env(env, elem_name, next_elem, F_OVERWRITE);
+    put_env(env, string_obj(elem_name), next_elem, F_OVERWRITE);
 
     r = eval_expr(expr->for_loop->pred, env);
     if ((result->err = r->err) != ERR_NO_ERROR) {
@@ -1162,7 +1162,7 @@ eval_result_t *eval_expr(ast_expr_t *expr, env_t *env) {
             break;
         case AST_IDENT: {
             bytearray_t *name = expr->bytearray;
-            obj_t *obj = get_env(env, name);
+            obj_t *obj = get_env(env, string_obj(name));
             if (obj->type == TYPE_UNDEF) {
               result->err = ERR_ENV_SYMBOL_UNDEFINED;
               goto error;
@@ -1215,7 +1215,7 @@ eval_result_t *eval_expr(ast_expr_t *expr, env_t *env) {
           break;
         }
         case AST_DELETE: {
-          error_t error = del_env(env, expr->bytearray);
+          error_t error = del_env(env, string_obj(expr->bytearray));
           if (error != ERR_NO_ERROR) {
             result->err = error;
             goto error;
