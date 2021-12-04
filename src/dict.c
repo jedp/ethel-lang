@@ -8,10 +8,10 @@
 #include "../inc/obj.h"
 
 error_t _dict_init(obj_dict_t *dict, uint32_t buckets) {
-  obj_t **nodes = mem_alloc(sizeof(obj_dict_kv_node_t*) * buckets);
+  dict_node_t **nodes = mem_alloc(sizeof(dict_node_t*) * buckets);
   if (nodes == NULL) return ERR_OUT_OF_MEMORY;
 
-  mem_set(nodes, 0, sizeof(obj_dict_kv_node_t*) * buckets);
+  mem_set(nodes, 0, sizeof(dict_node_t*) * buckets);
   dict->buckets = buckets;
   dict->nelems = 0;
   dict->nodes = nodes;
@@ -37,28 +37,30 @@ error_t _dict_put(obj_dict_t *dict, obj_t *k, obj_t *v) {
     return ERR_EVAL_UNHANDLED_OBJECT;
   }
 
-  obj_t *node = dict->nodes[bucket_index];
+  dict_node_t *node = dict->nodes[bucket_index];
   static_method eq = get_static_method(k->type, METHOD_EQ);
 
   // See if this key is already in the dictionary.
   while (node != NULL) {
-    if (node->dict_nodes->hash_val == hv &&
-        node->dict_nodes->k->type == k->type &&
-        eq(node->dict_nodes->k, wrap_varargs(1, k))) {
+    if (node->hash_val == hv &&
+        node->k->type == k->type &&
+        eq(node->k, wrap_varargs(1, k))) {
       // There's an existing node for this key; update the value.
-      node->dict_nodes->v = v;
+      node->v = v;
       return ERR_NO_ERROR;
     }  
-    node = node->dict_nodes->next;
+    node = node->next;
   }
 
   // Create a new node and put it in the bucket.
-  obj_t *new_node = dict_kv_obj(k_copy, v);
+  dict_node_t *new_node = mem_alloc(sizeof(dict_node_t));
   if (!new_node) return ERR_OUT_OF_MEMORY;
 
-  new_node->dict_nodes->hash_val = hv;
+  new_node->hash_val = hv;
+  new_node->k = k_copy;
+  new_node->v = v;
   // Put the new node at the head of the list.
-  new_node->dict_nodes->next = dict->nodes[bucket_index];
+  new_node->next = dict->nodes[bucket_index];
   dict->nodes[bucket_index] = new_node;
   dict->nelems++;
 
@@ -87,10 +89,10 @@ static error_t dict_resize(obj_t *orig_obj) {
 
   // Put all of orig's items in the new dict.
   for (dim_t i = 0; i < orig_obj->dict->buckets; i++) {
-    obj_t *kv = orig_obj->dict->nodes[i];
+    dict_node_t *kv = orig_obj->dict->nodes[i];
     while(kv != NULL) {
-      _dict_put(new_dict, kv->dict_nodes->k, kv->dict_nodes->v);
-      kv = kv->dict_nodes->next;
+      _dict_put(new_dict, kv->k, kv->v);
+      kv = kv->next;
     }
   }
 
@@ -147,15 +149,15 @@ boolean dict_contains(obj_t *dict_obj, obj_t *k) {
   uint32_t hv = hash_obj->intval;
   uint32_t bucket_index = hv % dict->buckets;
 
-  obj_t *node = dict->nodes[bucket_index];
+  dict_node_t *node = dict->nodes[bucket_index];
   static_method eq = get_static_method(k->type, METHOD_EQ);
   while (node != NULL) {
-    if (node->dict_nodes->hash_val == hv &&
-        node->dict_nodes->k->type == k->type &&
-        eq(node->dict_nodes->k, wrap_varargs(1, k))) {
+    if (node->hash_val == hv &&
+        node->k->type == k->type &&
+        eq(node->k, wrap_varargs(1, k))) {
       return True;
     }
-    node = node->dict_nodes->next;
+    node = node->next;
   }
 
   return False;
@@ -180,23 +182,23 @@ obj_t *dict_remove(obj_t *obj, obj_t *k) {
   uint32_t bucket_index = hv % dict->buckets;
   static_method eq = get_static_method(k->type, METHOD_EQ);
 
-  obj_t *prev = NULL;
-  obj_t *node = dict->nodes[bucket_index];
+  dict_node_t *prev = NULL;
+  dict_node_t *node = dict->nodes[bucket_index];
   while (node != NULL) {
     // Remove this node and splice the list together.
-    if (node->dict_nodes->hash_val == hv &&
-        node->dict_nodes->k->type == k->type &&
-        eq(node->dict_nodes->k, wrap_varargs(1, k))) {
+    if (node->hash_val == hv &&
+        node->k->type == k->type &&
+        eq(node->k, wrap_varargs(1, k))) {
 
       // Remove the node from the linked list.
       if (prev != NULL) {
         // If there was a previous node, link around this one.
-        prev->dict_nodes->next = node->dict_nodes->next;
+        prev->next = node->next;
       } else {
         // If this was the first in the list, its next is now the head.
-        dict->nodes[bucket_index] = node->dict_nodes->next;
+        dict->nodes[bucket_index] = node->next;
       }
-      obj_t *v = node->dict_nodes->v;
+      obj_t *v = node->v;
 
       dict->nelems--;
       dict_resize(obj);
@@ -207,7 +209,7 @@ obj_t *dict_remove(obj_t *obj, obj_t *k) {
       return v;
     }
     prev = node;
-    node = node->dict_nodes->next;
+    node = node->next;
   }
   
   return nil_obj();
@@ -231,16 +233,16 @@ obj_t *dict_get(obj_t *obj, obj_t *k) {
   uint32_t hv = hash_obj->intval;
   uint32_t bucket_index = hv % dict->buckets;
 
-  obj_t *node = dict->nodes[bucket_index];
+  dict_node_t *node = dict->nodes[bucket_index];
   static_method eq = get_static_method(k->type, METHOD_EQ);
   while (node != NULL) {
-    if (node->dict_nodes->hash_val == hv &&
-        k->type == node->dict_nodes->k->type &&
-        eq(k, wrap_varargs(1, node->dict_nodes->k))) {
-      return node->dict_nodes->v;
+    if (node->hash_val == hv &&
+        k->type == node->k->type &&
+        eq(k, wrap_varargs(1, node->k))) {
+      return node->v;
     }
 
-    node = node->dict_nodes->next;
+    node = node->next;
   }
 
   return nil_obj();
@@ -291,10 +293,10 @@ obj_t *dict_obj_len(obj_t *obj, obj_t *args_obj) {
 obj_t *dict_obj_keys(obj_t *obj, obj_t *args_obj) {
   obj_t *list = list_obj(NULL);
   for (dim_t i = 0; i < obj->dict->buckets; i++) {
-    obj_t *kv = obj->dict->nodes[i];
+    dict_node_t *kv = obj->dict->nodes[i];
     while (kv != NULL) {
-      list_append(list, wrap_varargs(1, kv->dict_nodes->k));
-      kv = kv->dict_nodes->next;
+      list_append(list, wrap_varargs(1, kv->k));
+      kv = kv->next;
     }
   }
   return list;

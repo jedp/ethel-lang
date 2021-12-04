@@ -40,13 +40,13 @@ typedef struct ObjDictKvNode {
   uint32_t hash_val;
   obj_t *k;
   obj_t *v;
-  obj_t *next;
-} obj_dict_kv_node_t;
+  struct ObjDictKvNode *next;
+} dict_node_t;
 
 typedef struct ObjDictElem {
   uint32_t buckets;
   uint32_t nelems;
-  obj_t **nodes;
+  dict_node_t **nodes;
 } obj_dict_t;
 
 typedef struct ObjFuncDef {
@@ -76,7 +76,6 @@ typedef struct Obj {
     range_t range;
     obj_list_t *list;
     obj_dict_t *dict;
-    obj_dict_kv_node_t *dict_nodes;
     bytearray_t *bytearray;
     obj_method_args_t *method_args;
     obj_func_def_t *func_def;
@@ -196,7 +195,6 @@ obj_t *range_obj(int from_inclusive, int to_inclusive);
 obj_t *range_step_obj(int from_inclusive, int to_inclusive, int step);
 obj_t *list_obj(obj_list_element_t* elems);
 obj_t *dict_obj(void);
-obj_t *dict_kv_obj(obj_t *k, obj_t *v);
 obj_t *func_obj(void* code, void* scope);
 obj_t *iterator_obj(obj_t *obj, obj_t *state_obj, obj_t *(*next)(obj_iter_t *iterable));
 obj_t *return_val(obj_t *val);
