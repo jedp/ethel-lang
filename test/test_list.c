@@ -7,7 +7,7 @@
 #include "../inc/list.h"
 #include "../inc/obj.h"
 
-static obj_method_args_t *n_args(int n, ...) {
+static obj_t *n_args(int n, ...) {
   va_list vargs;
   va_start(vargs, n);
 
@@ -27,7 +27,7 @@ static obj_method_args_t *n_args(int n, ...) {
     args = args->next;
   }
 
-  return root;
+  return method_args_obj(root);
 }
 
 static obj_t *make_list(int n_elems, ...) {

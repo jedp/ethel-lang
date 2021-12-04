@@ -5,21 +5,21 @@
 #include "../inc/obj.h"
 #include "../inc/type.h"
 
-obj_t *float_hash(obj_t *obj, obj_method_args_t *args) {
+obj_t *float_hash(obj_t *obj, obj_t *args_obj) {
   // 32-bit float is its own 32-bit hash value.
   uint32_t *ip = (uint32_t *) &(obj->floatval);
   return int_obj(*ip);
 }
 
-obj_t *float_copy(obj_t *obj, obj_method_args_t *args) {
+obj_t *float_copy(obj_t *obj, obj_t *args_obj) {
   return float_obj(obj->floatval);
 }
 
-obj_t *float_to_int(obj_t *obj, obj_method_args_t *args) {
+obj_t *float_to_int(obj_t *obj, obj_t *args_obj) {
   return int_obj((int) obj->floatval);
 }
 
-obj_t *float_to_string(obj_t *obj, obj_method_args_t *args) {
+obj_t *float_to_string(obj_t *obj, obj_t *args_obj) {
   // TODO so lazy. Twiddle those bits, shed a dependency.
   float n = obj->floatval;
   int len = snprintf(NULL, 0, "%f", n);
@@ -28,25 +28,26 @@ obj_t *float_to_string(obj_t *obj, obj_method_args_t *args) {
   return string_obj(c_str_to_bytearray(s));
 }
 
-obj_t *float_to_float(obj_t *obj, obj_method_args_t *args) {
+obj_t *float_to_float(obj_t *obj, obj_t *args_obj) {
   return obj;
 }
 
-obj_t *float_to_byte(obj_t *obj, obj_method_args_t *args) {
+obj_t *float_to_byte(obj_t *obj, obj_t *args_obj) {
   return byte_obj((byte) ((int) obj->floatval & 0xff));
 }
 
-obj_t *float_abs(obj_t *obj, obj_method_args_t *args) {
+obj_t *float_abs(obj_t *obj, obj_t *args_obj) {
   return float_obj((obj->floatval < 0) ? 1-obj->floatval : obj->floatval);
 }
 
-obj_t *float_neg(obj_t *obj, obj_method_args_t *args) {
+obj_t *float_neg(obj_t *obj, obj_t *args_obj) {
   return float_obj(-obj->floatval);
 }
 
 obj_t *float_math(obj_t *obj,
-                  obj_method_args_t *args,
+                  obj_t *args_obj,
                   static_method_ident_t method_id) {
+  obj_method_args_t *args = args_obj->method_args;
   if (args == NULL || args->arg == NULL) return obj;
   obj_t *arg = args->arg;
   static_method m_cast = get_static_method(arg->type, METHOD_TO_FLOAT);
@@ -76,23 +77,24 @@ obj_t *float_math(obj_t *obj,
   }
 }
 
-obj_t *float_add(obj_t *obj, obj_method_args_t *args) {
-  return float_math(obj, args, METHOD_ADD);
+obj_t *float_add(obj_t *obj, obj_t *args_obj) {
+  return float_math(obj, args_obj, METHOD_ADD);
 }
 
-obj_t *float_sub(obj_t *obj, obj_method_args_t *args) {
-  return float_math(obj, args, METHOD_SUB);
+obj_t *float_sub(obj_t *obj, obj_t *args_obj) {
+  return float_math(obj, args_obj, METHOD_SUB);
 }
 
-obj_t *float_mul(obj_t *obj, obj_method_args_t *args) {
-  return float_math(obj, args, METHOD_MUL);
+obj_t *float_mul(obj_t *obj, obj_t *args_obj) {
+  return float_math(obj, args_obj, METHOD_MUL);
 }
 
-obj_t *float_div(obj_t *obj, obj_method_args_t *args) {
-  return float_math(obj, args, METHOD_DIV);
+obj_t *float_div(obj_t *obj, obj_t *args_obj) {
+  return float_math(obj, args_obj, METHOD_DIV);
 }
 
-obj_t *float_eq(obj_t *obj, obj_method_args_t *args) {
+obj_t *float_eq(obj_t *obj, obj_t *args_obj) {
+  obj_method_args_t *args = args_obj->method_args;
   if (args == NULL || args->arg == NULL) return boolean_obj(False);
   obj_t *arg = args->arg;
 
@@ -108,7 +110,8 @@ obj_t *float_eq(obj_t *obj, obj_method_args_t *args) {
   }
 }
 
-obj_t *float_ne(obj_t *obj, obj_method_args_t *args) {
+obj_t *float_ne(obj_t *obj, obj_t *args_obj) {
+  obj_method_args_t *args = args_obj->method_args;
   if (args == NULL || args->arg == NULL) return boolean_obj(False);
   obj_t *arg = args->arg;
   if (arg->type != TYPE_FLOAT && arg->type != TYPE_INT) {
@@ -117,11 +120,12 @@ obj_t *float_ne(obj_t *obj, obj_method_args_t *args) {
     return boolean_obj(False);
   }
 
-  obj_t *eq = float_eq(obj, args);
+  obj_t *eq = float_eq(obj, args_obj);
   return boolean_obj(eq->boolval == True ? False : True);
 }
 
-obj_t *float_lt(obj_t *obj, obj_method_args_t *args) {
+obj_t *float_lt(obj_t *obj, obj_t *args_obj) {
+  obj_method_args_t *args = args_obj->method_args;
   if (args == NULL || args->arg == NULL) return boolean_obj(False);
   obj_t *arg = args->arg;
 
@@ -137,7 +141,8 @@ obj_t *float_lt(obj_t *obj, obj_method_args_t *args) {
   }
 }
 
-obj_t *float_gt(obj_t *obj, obj_method_args_t *args) {
+obj_t *float_gt(obj_t *obj, obj_t *args_obj) {
+  obj_method_args_t *args = args_obj->method_args;
   if (args == NULL || args->arg == NULL) return boolean_obj(False);
   obj_t *arg = args->arg;
 
@@ -153,7 +158,8 @@ obj_t *float_gt(obj_t *obj, obj_method_args_t *args) {
   }
 }
 
-obj_t *float_le(obj_t *obj, obj_method_args_t *args) {
+obj_t *float_le(obj_t *obj, obj_t *args_obj) {
+  obj_method_args_t *args = args_obj->method_args;
   if (args == NULL || args->arg == NULL) return boolean_obj(False);
   obj_t *arg = args->arg;
   if (arg->type != TYPE_FLOAT && arg->type != TYPE_INT) {
@@ -162,11 +168,12 @@ obj_t *float_le(obj_t *obj, obj_method_args_t *args) {
     return boolean_obj(False);
   }
 
-  obj_t *gt = float_gt(obj, args);
+  obj_t *gt = float_gt(obj, args_obj);
   return boolean_obj((gt->boolval == True) ? False : True);
 }
 
-obj_t *float_ge(obj_t *obj, obj_method_args_t *args) {
+obj_t *float_ge(obj_t *obj, obj_t *args_obj) {
+  obj_method_args_t *args = args_obj->method_args;
   if (args == NULL || args->arg == NULL) return boolean_obj(False);
   obj_t *arg = args->arg;
   if (arg->type != TYPE_FLOAT && arg->type != TYPE_INT) {
@@ -175,11 +182,12 @@ obj_t *float_ge(obj_t *obj, obj_method_args_t *args) {
     return boolean_obj(False);
   }
 
-  obj_t *lt = float_lt(obj, args);
+  obj_t *lt = float_lt(obj, args_obj);
   return boolean_obj((lt->boolval == True) ? False : True);
 }
 
-obj_t *float_as(obj_t *obj, obj_method_args_t *args) {
+obj_t *float_as(obj_t *obj, obj_t *args_obj) {
+  obj_method_args_t *args = args_obj->method_args;
   if (args == NULL || args->arg == NULL) return boolean_obj(False);
   obj_t *arg = args->arg;
 
