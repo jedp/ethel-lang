@@ -124,6 +124,7 @@ static void eval_list_expr(ast_list_t *list, eval_result_t *result, env_t *env) 
   }
 
   obj_list_element_t *elem = mem_alloc(sizeof(obj_list_element_t));
+  mark_traceable(elem, TYPE_LIST_ELEM_DATA);
   obj_list_element_t *root_elem = elem;
 
   ast_expr_list_t *ast_node = list->es;
@@ -142,6 +143,7 @@ static void eval_list_expr(ast_list_t *list, eval_result_t *result, env_t *env) 
     elem->node = r->obj;
     if (ast_node != NULL)  {
       elem->next = mem_alloc(sizeof(obj_list_element_t));
+      mark_traceable(elem->next, TYPE_LIST_ELEM_DATA);
     } else {
       elem->next = NULL;
     }

@@ -111,10 +111,12 @@ obj_t *range_step_obj(int from, int to, int step) {
 }
 
 obj_t *list_obj(obj_list_element_t *elems) {
+  if (elems != NULL) mark_traceable(elems, TYPE_LIST_ELEM_DATA);
+
   obj_t *obj = obj_of(TYPE_LIST);
   obj_list_t *list = mem_alloc(sizeof(obj_list_t));
+  mark_traceable(list, TYPE_LIST_DATA);
 
-  list->elems = mem_alloc(sizeof(obj_list_element_t));
   list->elems = elems;
 
   obj->list = list;

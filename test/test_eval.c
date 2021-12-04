@@ -1,21 +1,11 @@
 #include <stdio.h>
+#include "util.h"
 #include "unity/unity.h"
 #include "test_eval.h"
 #include "../inc/str.h"
 #include "../inc/env.h"
 #include "../inc/eval.h"
 #include "../inc/rand.h"
-
-eval_result_t *eval_program(char* program) {
-  env_t env;
-  env_init(&env);
-
-  enter_scope(&env);
-
-  return eval(&env, program);
-  
-  leave_scope(&env);
-}
 
 void test_eval_calculator(void) {
   char *program = "4 + 3 * (3+2) + -10/2";

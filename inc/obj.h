@@ -46,7 +46,6 @@ typedef struct ObjListElem {
 typedef struct ObjList {
   uint16_t type;  // Traceable obj header
   uint16_t flags;
-  bytearray_t *type_name;
   obj_list_element_t *elems;
 } obj_list_t;
 
