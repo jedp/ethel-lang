@@ -27,6 +27,7 @@ REPLOBJS = src/repl.o
 RUNOBJS = src/run.o
 
 TESTOBJS = test/unity/unity.o \
+					 test/util.o \
 					 test/test_hash.o \
 					 test/test_str.o \
 					 test/test_list.o \
