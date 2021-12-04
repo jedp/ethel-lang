@@ -41,16 +41,16 @@ void test_dict_put_collision(void) {
   TEST_ASSERT_EQUAL(3, d->dict->nelems);
 
   // The implementation puts the new nodes at the head of the list.
-  TEST_ASSERT_EQUAL(TYPE_INT, d->dict->nodes[1]->k->type);
-  TEST_ASSERT_EQUAL(97, d->dict->nodes[1]->k->intval);
-  TEST_ASSERT_EQUAL(43, d->dict->nodes[1]->v->intval);
-  TEST_ASSERT_EQUAL(TYPE_BYTE, d->dict->nodes[1]->next->k->type);
-  TEST_ASSERT_EQUAL('a', d->dict->nodes[1]->next->k->byteval);
-  TEST_ASSERT_EQUAL(42, d->dict->nodes[1]->next->v->intval);
+  TEST_ASSERT_EQUAL(TYPE_INT, d->dict->nodes[1]->dict_nodes->k->type);
+  TEST_ASSERT_EQUAL(97, d->dict->nodes[1]->dict_nodes->k->intval);
+  TEST_ASSERT_EQUAL(43, d->dict->nodes[1]->dict_nodes->v->intval);
+  TEST_ASSERT_EQUAL(TYPE_BYTE, d->dict->nodes[1]->dict_nodes->next->dict_nodes->k->type);
+  TEST_ASSERT_EQUAL('a', d->dict->nodes[1]->dict_nodes->next->dict_nodes->k->byteval);
+  TEST_ASSERT_EQUAL(42, d->dict->nodes[1]->dict_nodes->next->dict_nodes->v->intval);
   // And the 'b' key. 'b' hashes to 98, which is bucket 2 of 16.
-  TEST_ASSERT_EQUAL(TYPE_BYTE, d->dict->nodes[2]->k->type);
-  TEST_ASSERT_EQUAL('b', d->dict->nodes[2]->k->byteval);
-  TEST_ASSERT_EQUAL(44, d->dict->nodes[2]->v->intval);
+  TEST_ASSERT_EQUAL(TYPE_BYTE, d->dict->nodes[2]->dict_nodes->k->type);
+  TEST_ASSERT_EQUAL('b', d->dict->nodes[2]->dict_nodes->k->byteval);
+  TEST_ASSERT_EQUAL(44, d->dict->nodes[2]->dict_nodes->v->intval);
 }
 
 void test_dict_get(void) {

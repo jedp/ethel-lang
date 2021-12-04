@@ -121,6 +121,15 @@ obj_t *list_obj(obj_list_element_t *elems) {
   return obj;
 }
 
+obj_t *dict_kv_obj(obj_t *k, obj_t *v) {
+  obj_t *obj = obj_of(TYPE_DICT_KV);
+  obj->dict_nodes = mem_alloc(sizeof(obj_dict_kv_node_t));
+  obj->dict_nodes->k = k;
+  obj->dict_nodes->v = v;
+  obj->dict_nodes->next = NULL;
+  return obj;
+}
+
 obj_t *dict_obj(void) {
   obj_t *obj = obj_of(TYPE_DICT);
   obj_dict_t *dict = mem_alloc(sizeof(obj_dict_t));
