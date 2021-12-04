@@ -7,20 +7,20 @@
 #include "../inc/obj.h"
 #include "../inc/type.h"
 
-obj_t *int_hash(obj_t *obj, obj_t *args_obj) {
+obj_t *int_hash(obj_t *obj, obj_method_args_t *args) {
   // 32-bit int is its own 32-bit hash.
   return int_obj(obj->intval);
 }
 
-obj_t *int_copy(obj_t *obj, obj_t *args_obj) {
+obj_t *int_copy(obj_t *obj, obj_method_args_t *args) {
   return int_obj(obj->intval);
 }
 
-obj_t *int_to_int(obj_t *obj, obj_t *args_obj) {
+obj_t *int_to_int(obj_t *obj, obj_method_args_t *args) {
   return obj;
 }
 
-obj_t *int_to_string(obj_t *obj, obj_t *args_obj) {
+obj_t *int_to_string(obj_t *obj, obj_method_args_t *args) {
   int n = obj->intval;
   int digits = 0;
   if (n < 0) digits++; // Sign.
@@ -49,16 +49,15 @@ obj_t *int_to_string(obj_t *obj, obj_t *args_obj) {
   return string_obj(a);
 }
 
-obj_t *int_to_float(obj_t *obj, obj_t *args_obj) {
+obj_t *int_to_float(obj_t *obj, obj_method_args_t *args) {
   return float_obj((float) obj->intval);
 }
 
-obj_t *int_to_byte(obj_t *obj, obj_t *args_obj) {
+obj_t *int_to_byte(obj_t *obj, obj_method_args_t *args) {
   return byte_obj((byte) obj->intval& 0xff);
 }
 
-obj_t *int_eq(obj_t *obj, obj_t *args_obj) {
-  obj_method_args_t *args = args_obj->method_args;
+obj_t *int_eq(obj_t *obj, obj_method_args_t *args) {
   if (args == NULL || args->arg == NULL) return boolean_obj(False);
   obj_t *arg = args->arg;
 
@@ -76,8 +75,7 @@ obj_t *int_eq(obj_t *obj, obj_t *args_obj) {
   }
 }
 
-obj_t *int_ne(obj_t *obj, obj_t *args_obj) {
-  obj_method_args_t *args = args_obj->method_args;
+obj_t *int_ne(obj_t *obj, obj_method_args_t *args) {
   if (args == NULL || args->arg == NULL) return boolean_obj(False);
   obj_t *arg = args->arg;
   if (arg->type != TYPE_INT &&
@@ -88,12 +86,11 @@ obj_t *int_ne(obj_t *obj, obj_t *args_obj) {
     return boolean_obj(False);
   }
 
-  obj_t *eq = int_eq(obj, args_obj);
+  obj_t *eq = int_eq(obj, args);
   return boolean_obj((eq->boolval == True) ? False : True);
 }
 
-obj_t *int_lt(obj_t *obj, obj_t *args_obj) {
-  obj_method_args_t *args = args_obj->method_args;
+obj_t *int_lt(obj_t *obj, obj_method_args_t *args) {
   if (args == NULL || args->arg == NULL) return boolean_obj(False);
   obj_t *arg = args->arg;
 
@@ -112,8 +109,7 @@ obj_t *int_lt(obj_t *obj, obj_t *args_obj) {
   }
 }
 
-obj_t *int_gt(obj_t *obj, obj_t *args_obj) {
-  obj_method_args_t *args = args_obj->method_args;
+obj_t *int_gt(obj_t *obj, obj_method_args_t *args) {
   if (args == NULL || args->arg == NULL) return boolean_obj(False);
   obj_t *arg = args->arg;
 
@@ -132,8 +128,7 @@ obj_t *int_gt(obj_t *obj, obj_t *args_obj) {
   }
 }
 
-obj_t *int_le(obj_t *obj, obj_t *args_obj) {
-  obj_method_args_t *args = args_obj->method_args;
+obj_t *int_le(obj_t *obj, obj_method_args_t *args) {
   if (args == NULL || args->arg == NULL) return boolean_obj(False);
   obj_t *arg = args->arg;
   if (arg->type != TYPE_INT &&
@@ -144,12 +139,11 @@ obj_t *int_le(obj_t *obj, obj_t *args_obj) {
     return boolean_obj(False);
   }
 
-  obj_t *gt = int_gt(obj, args_obj);
+  obj_t *gt = int_gt(obj, args);
   return boolean_obj((gt->boolval == True) ? False : True);
 }
 
-obj_t *int_ge(obj_t *obj, obj_t *args_obj) {
-  obj_method_args_t *args = args_obj->method_args;
+obj_t *int_ge(obj_t *obj, obj_method_args_t *args) {
   if (args == NULL || args->arg == NULL) return boolean_obj(False);
   obj_t *arg = args->arg;
   if (arg->type != TYPE_INT &&
@@ -160,14 +154,13 @@ obj_t *int_ge(obj_t *obj, obj_t *args_obj) {
     return boolean_obj(False);
   }
 
-  obj_t *lt = int_lt(obj, args_obj);
+  obj_t *lt = int_lt(obj, args);
   return boolean_obj((lt->boolval == True) ? False : True);
 }
 
 obj_t *int_math(obj_t *obj,
-                obj_t *args_obj,
+                obj_method_args_t *args,
                 static_method_ident_t method_id) {
-  obj_method_args_t *args = args_obj->method_args;
   if (args == NULL || args->arg == NULL) return obj;
   obj_t *arg = args->arg;
   static_method m_cast = get_static_method(arg->type, METHOD_TO_INT);
@@ -179,7 +172,7 @@ obj_t *int_math(obj_t *obj,
 
   // Convert to float if other arg is a float.
   if (arg->type == TYPE_FLOAT) {
-    return float_math(float_obj((float) obj->intval), args_obj, method_id);
+    return float_math(float_obj((float) obj->intval), args, method_id);
   }
 
   switch (method_id) {
@@ -209,28 +202,27 @@ obj_t *int_math(obj_t *obj,
   }
 }
 
-obj_t *int_add(obj_t *obj, obj_t *args_obj) {
-  return int_math(obj, args_obj, METHOD_ADD);
+obj_t *int_add(obj_t *obj, obj_method_args_t *args) {
+  return int_math(obj, args, METHOD_ADD);
 }
 
-obj_t *int_sub(obj_t *obj, obj_t *args_obj) {
-  return int_math(obj, args_obj, METHOD_SUB);
+obj_t *int_sub(obj_t *obj, obj_method_args_t *args) {
+  return int_math(obj, args, METHOD_SUB);
 }
 
-obj_t *int_mul(obj_t *obj, obj_t *args_obj) {
-  return int_math(obj, args_obj, METHOD_MUL);
+obj_t *int_mul(obj_t *obj, obj_method_args_t *args) {
+  return int_math(obj, args, METHOD_MUL);
 }
 
-obj_t *int_div(obj_t *obj, obj_t *args_obj) {
-  return int_math(obj, args_obj, METHOD_DIV);
+obj_t *int_div(obj_t *obj, obj_method_args_t *args) {
+  return int_math(obj, args, METHOD_DIV);
 }
 
-obj_t *int_mod(obj_t *obj, obj_t *args_obj) {
-  return int_math(obj, args_obj, METHOD_MOD);
+obj_t *int_mod(obj_t *obj, obj_method_args_t *args) {
+  return int_math(obj, args, METHOD_MOD);
 }
 
-obj_t *int_as(obj_t *obj, obj_t *args_obj) {
-  obj_method_args_t *args = args_obj->method_args;
+obj_t *int_as(obj_t *obj, obj_method_args_t *args) {
   if (args == NULL || args->arg == NULL) return boolean_obj(False);
   obj_t *type_arg = args->arg;
 
@@ -247,16 +239,15 @@ obj_t *int_as(obj_t *obj, obj_t *args_obj) {
   }
 }
 
-obj_t *int_abs(obj_t *obj, obj_t *args_obj) {
+obj_t *int_abs(obj_t *obj, obj_method_args_t /* Ignored */ *args) {
   return int_obj(abs(obj->intval));
 }
 
-obj_t *int_neg(obj_t *obj, obj_t *args_obj) {
+obj_t *int_neg(obj_t *obj, obj_method_args_t /* Ignored */ *args) {
   return int_obj(-obj->intval);
 }
 
-obj_t *int_bitwise_and(obj_t *obj, obj_t *args_obj) {
-  obj_method_args_t *args = args_obj->method_args;
+obj_t *int_bitwise_and(obj_t *obj, obj_method_args_t *args) {
   if (args == NULL || args->arg == NULL) return obj;
   obj_t *arg = args->arg;
 
@@ -270,8 +261,7 @@ obj_t *int_bitwise_and(obj_t *obj, obj_t *args_obj) {
   }
 }
 
-obj_t *int_bitwise_or(obj_t *obj, obj_t *args_obj) {
-  obj_method_args_t *args = args_obj->method_args;
+obj_t *int_bitwise_or(obj_t *obj, obj_method_args_t *args) {
   if (args == NULL || args->arg == NULL) return obj;
   obj_t *arg = args->arg;
 
@@ -285,8 +275,7 @@ obj_t *int_bitwise_or(obj_t *obj, obj_t *args_obj) {
   }
 }
 
-obj_t *int_bitwise_xor(obj_t *obj, obj_t *args_obj) {
-  obj_method_args_t *args = args_obj->method_args;
+obj_t *int_bitwise_xor(obj_t *obj, obj_method_args_t *args) {
   if (args == NULL || args->arg == NULL) return obj;
   obj_t *arg = args->arg;
 
@@ -300,12 +289,11 @@ obj_t *int_bitwise_xor(obj_t *obj, obj_t *args_obj) {
   }
 }
 
-obj_t *int_bitwise_not(obj_t *obj, obj_t *args_obj) {
+obj_t *int_bitwise_not(obj_t *obj, obj_method_args_t /* Ignored */ *args) {
   return int_obj(~obj->intval);
 }
 
-obj_t *int_bitwise_shl(obj_t *obj, obj_t *args_obj) {
-  obj_method_args_t *args = args_obj->method_args;
+obj_t *int_bitwise_shl(obj_t *obj, obj_method_args_t *args) {
   if (args == NULL || args->arg == NULL) return obj;
   obj_t *arg = args->arg;
 
@@ -319,8 +307,7 @@ obj_t *int_bitwise_shl(obj_t *obj, obj_t *args_obj) {
   }
 }
 
-obj_t *int_bitwise_shr(obj_t *obj, obj_t *args_obj) {
-  obj_method_args_t *args = args_obj->method_args;
+obj_t *int_bitwise_shr(obj_t *obj, obj_method_args_t *args) {
   if (args == NULL || args->arg == NULL) return obj;
   obj_t *arg = args->arg;
 

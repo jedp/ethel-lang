@@ -50,7 +50,7 @@ static byte obj_to_byte(obj_t *obj) {
   }
 }
 
-obj_t *arr_hash(obj_t *obj, obj_t /* Ignored */ *args_obj) {
+obj_t *arr_hash(obj_t *obj, obj_method_args_t /* Ignored */ *args) {
   uint32_t temp;
   byte b;
 
@@ -73,11 +73,11 @@ obj_t *arr_hash(obj_t *obj, obj_t /* Ignored */ *args_obj) {
   return int_obj(temp);
 }
 
-obj_t *arr_size(obj_t *obj, obj_t /* Ignored */ *args_obj) {
+obj_t *arr_size(obj_t *obj, obj_method_args_t /* Ignored */ *args) {
   return int_obj(obj->bytearray->size);
 }
 
-obj_t *arr_copy(obj_t *obj, obj_t *args_obj) {
+obj_t *arr_copy(obj_t *obj, obj_method_args_t *args) {
   return bytearray_obj(obj->bytearray->size, obj->bytearray->data);
 }
 
@@ -89,8 +89,7 @@ obj_t *_arr_get(obj_t *obj, int i) {
   return byte_obj(obj->bytearray->data[i]);
 }
 
-obj_t *arr_get(obj_t *obj, obj_t *args_obj) {
-  obj_method_args_t *args = args_obj->method_args;
+obj_t *arr_get(obj_t *obj, obj_method_args_t *args) {
   if (args == NULL || args->arg == NULL) {
     printf("Null arg to get()\n");
     return nil_obj();
@@ -103,8 +102,7 @@ obj_t *arr_get(obj_t *obj, obj_t *args_obj) {
   return _arr_get(obj, arg->intval);
 }
 
-obj_t *arr_set(obj_t *obj, obj_t *args_obj) {
-  obj_method_args_t *args = args_obj->method_args;
+obj_t *arr_set(obj_t *obj, obj_method_args_t *args) {
   if (args == NULL || args->arg == NULL) {
     printf("Null arg to set()\n");
     return nil_obj();
@@ -133,8 +131,7 @@ obj_t *arr_set(obj_t *obj, obj_t *args_obj) {
   return byte_obj(val);
 }
 
-obj_t *arr_contains(obj_t *obj, obj_t *args_obj) {
-  obj_method_args_t *args = args_obj->method_args;
+obj_t *arr_contains(obj_t *obj, obj_method_args_t *args) {
   if (args == NULL || args->arg == NULL) {
     printf("Null arg to contains()\n");
     return nil_obj();
@@ -170,8 +167,7 @@ obj_t *arr_contains(obj_t *obj, obj_t *args_obj) {
   return boolean_obj(False);
 }
 
-obj_t *arr_eq(obj_t *obj, obj_t *args_obj) {
-  obj_method_args_t *args = args_obj->method_args;
+obj_t *arr_eq(obj_t *obj, obj_method_args_t *args) {
   if (args == NULL || args->arg == NULL) {
     printf("Null arg to eq()\n");
     return nil_obj();
@@ -186,8 +182,7 @@ obj_t *arr_eq(obj_t *obj, obj_t *args_obj) {
   return boolean_obj(_eq(obj->bytearray, other->bytearray));
 }
 
-obj_t *arr_ne(obj_t *obj, obj_t *args_obj) {
-  obj_method_args_t *args = args_obj->method_args;
+obj_t *arr_ne(obj_t *obj, obj_method_args_t *args) {
   if (args == NULL || args->arg == NULL) {
     printf("Null arg to ne()\n");
     return nil_obj();
@@ -202,8 +197,7 @@ obj_t *arr_ne(obj_t *obj, obj_t *args_obj) {
   return boolean_obj(!_eq(obj->bytearray, other->bytearray));
 }
 
-obj_t *arr_slice(obj_t *obj, obj_t *args_obj) {
-  obj_method_args_t *args = args_obj->method_args;
+obj_t *arr_slice(obj_t *obj, obj_method_args_t *args) {
   if (args == NULL || args->arg == NULL) {
     printf("Null arg to slice()\n");
     return nil_obj();
@@ -218,7 +212,7 @@ obj_t *arr_slice(obj_t *obj, obj_t *args_obj) {
   return _arr_slice(obj, start_arg->intval, end_arg->intval);
 }
 
-obj_t *arr_random_choice(obj_t *obj, obj_t *args_obj) {
+obj_t *arr_random_choice(obj_t *obj, obj_method_args_t *args) {
   uint32_t len = obj->bytearray->size;
   if (len < 1) {
     printf("Empty string.\n");
@@ -256,7 +250,7 @@ static obj_t *iter_next(obj_iter_t *iterable) {
   }
 }
 
-obj_t *arr_iterator(obj_t *obj, obj_t *args_obj) {
+obj_t *arr_iterator(obj_t *obj, obj_method_args_t *args) {
   obj_t *state = int_obj(0);
   return iterator_obj(obj, state, iter_next);
 }

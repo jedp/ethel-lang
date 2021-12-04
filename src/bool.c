@@ -3,22 +3,21 @@
 #include "../inc/str.h"
 #include "../inc/obj.h"
 
-obj_t *bool_hash(obj_t *obj, obj_t *args_obj) {
+obj_t *bool_hash(obj_t *obj, obj_method_args_t *args) {
   // 32-bit int is its own 32-bit hash.
   return int_obj((uint32_t) obj->boolval);
 }
 
-obj_t *bool_copy(obj_t *obj, obj_t *args_obj) {
+obj_t *bool_copy(obj_t *obj, obj_method_args_t *args) {
   return boolean_obj(obj->boolval);
 }
 
-obj_t *bool_to_string(obj_t *obj, obj_t *args_obj) {
+obj_t *bool_to_string(obj_t *obj, obj_method_args_t *args) {
   return string_obj(c_str_to_bytearray(
         (obj->boolval == True) ? "true" : "false"));
 }
 
-obj_t *bool_eq(obj_t *obj, obj_t *args_obj) {
-  obj_method_args_t *args = args_obj->method_args;
+obj_t *bool_eq(obj_t *obj, obj_method_args_t *args) {
   if (args == NULL || args->arg == NULL) return boolean_obj(False);
   obj_t *arg = args->arg;
 
@@ -26,12 +25,11 @@ obj_t *bool_eq(obj_t *obj, obj_t *args_obj) {
   return boolean_obj(obj->boolval == arg->boolval);
 }
 
-obj_t *bool_ne(obj_t *obj, obj_t *args_obj) {
-  return boolean_obj(bool_eq(obj, args_obj)->boolval == True ? False : True);
+obj_t *bool_ne(obj_t *obj, obj_method_args_t *args) {
+  return boolean_obj(bool_eq(obj, args)->boolval == True ? False : True);
 }
 
-obj_t *bool_as(obj_t *obj, obj_t *args_obj) {
-  obj_method_args_t *args = args_obj->method_args;
+obj_t *bool_as(obj_t *obj, obj_method_args_t *args) {
   if (args == NULL || args->arg == NULL) return boolean_obj(False);
   obj_t *type_arg = args->arg;
 

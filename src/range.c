@@ -31,7 +31,7 @@ static int _range_get(obj_t *obj, int i, error_t *err) {
   return start + (i * incr(obj));
 }
 
-obj_t *range_to_string(obj_t *obj, obj_t *args_obj) {
+obj_t *range_to_string(obj_t *obj, obj_method_args_t *args) {
   // Don't look.
   obj_t *a = string_obj(c_str_to_bytearray("<Range "));
   obj_t *b = str_add(a, wrap_varargs(1, int_to_string(int_obj(obj->range.from), NULL)));
@@ -41,12 +41,11 @@ obj_t *range_to_string(obj_t *obj, obj_t *args_obj) {
   return e;
 }
 
-obj_t *range_length(obj_t *obj, obj_t *args_obj) {
+obj_t *range_length(obj_t *obj, obj_method_args_t *args) {
   return int_obj(_range_length(obj));
 }
 
-obj_t *range_contains(obj_t *obj, obj_t *args_obj) {
-  obj_method_args_t *args = args_obj->method_args;
+obj_t *range_contains(obj_t *obj, obj_method_args_t *args) {
   if (args == NULL || args->arg == NULL) {
     printf("Null arg to contains()\n");
     return nil_obj();
@@ -64,8 +63,7 @@ obj_t *range_contains(obj_t *obj, obj_t *args_obj) {
   return boolean_obj(val <= obj->range.from && val >= obj->range.to);
 }
 
-obj_t *range_get(obj_t *obj, obj_t *args_obj) {
-  obj_method_args_t *args = args_obj->method_args;
+obj_t *range_get(obj_t *obj, obj_method_args_t *args) {
   if (args == NULL || args->arg == NULL) {
     printf("Null arg to get()\n");
     return nil_obj();
@@ -87,7 +85,7 @@ obj_t *range_get(obj_t *obj, obj_t *args_obj) {
   return int_obj(n);
 }
 
-obj_t *range_random_choice(obj_t *obj, obj_t *args_obj) {
+obj_t *range_random_choice(obj_t *obj, obj_method_args_t *args) {
   uint32_t max = obj->range.to - obj->range.from;
   // Overflow much?
   return int_obj((rand32() % max) + obj->range.from);
@@ -128,7 +126,7 @@ static obj_t *iter_next(obj_iter_t *iterable) {
   }
 }
 
-obj_t *range_iterator(obj_t *obj, obj_t *args_obj) {
+obj_t *range_iterator(obj_t *obj, obj_method_args_t *args) {
   obj_t *start_state = int_obj(0);
   return iterator_obj(obj, start_state, iter_next);
 }

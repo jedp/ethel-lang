@@ -20,6 +20,12 @@ typedef struct MethodArg {
   struct MethodArg *next;
 } obj_method_args_t;
 
+typedef struct Method {
+  bytearray_t *name;
+  struct Obj *(*callable)(struct Obj *obj, struct MethodArg *args);
+  struct Method *next;
+} obj_method_t;
+
 typedef struct Range {
   int from;
   int to;
@@ -77,18 +83,17 @@ typedef struct Obj {
     obj_list_t *list;
     obj_dict_t *dict;
     bytearray_t *bytearray;
-    obj_method_args_t *method_args;
     obj_func_def_t *func_def;
     obj_iter_t *iterator;
     struct Obj *return_val;
   };
 } obj_t;
 
-typedef obj_t* (*static_method)(obj_t *obj, obj_t *args_obj);
+typedef obj_t* (*static_method)(obj_t *obj, obj_method_args_t *args);
 typedef obj_t* (*binop_method)(obj_t *obj, obj_t *other);
 typedef obj_t* (*iterator_next)(obj_t *obj);
 
-obj_t *arg_at(obj_t *args_obj, int index);
+obj_t *arg_at(obj_method_args_t *args, int index);
 
 typedef uint8_t static_method_ident_t;
 enum static_method_ident_enum {
@@ -200,8 +205,7 @@ obj_t *iterator_obj(obj_t *obj, obj_t *state_obj, obj_t *(*next)(obj_iter_t *ite
 obj_t *return_val(obj_t *val);
 obj_t *break_obj(void);
 obj_t *continue_obj(void);
-obj_t *method_args_obj(obj_method_args_t *method_args);
-obj_t *wrap_varargs(int n_args, ...);
+obj_method_args_t *wrap_varargs(int n_args, ...);
 boolean obj_prim_eq(obj_t *a, obj_t *b);
 
 #endif

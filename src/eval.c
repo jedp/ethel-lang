@@ -621,8 +621,7 @@ found:
       }
     }
 
-    obj_t *args_obj = method_args_obj(method_args_root);
-    result->obj = method(obj, args_obj);
+    result->obj = method(obj, method_args_root);
   }
 }
 

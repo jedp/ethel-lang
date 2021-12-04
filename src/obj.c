@@ -9,9 +9,8 @@
 #include "../inc/dict.h"
 #include "../inc/str.h"
 
-obj_t *arg_at(obj_t *args_obj, int index) {
+obj_t *arg_at(obj_method_args_t *args, int index) {
   int i = 0;
-  obj_method_args_t *args = args_obj->method_args;
   obj_method_args_t *head = args;
   while(head->arg != NULL) {
     if (i++ == index) return head->arg;
@@ -167,14 +166,7 @@ obj_t *continue_obj(void) {
   return obj_of(TYPE_CONTINUE);
 }
 
-obj_t *method_args_obj(obj_method_args_t *method_args) {
-  obj_t *obj = obj_of(TYPE_METHOD_ARGS);
-  obj->method_args = mem_alloc(sizeof(obj_method_args_t));
-  obj->method_args = method_args;
-  return obj;
-}
-
-obj_t *wrap_varargs(int n_args, ...) {
+obj_method_args_t *wrap_varargs(int n_args, ...) {
   va_list vargs;
   va_start(vargs, n_args);
 
@@ -194,10 +186,7 @@ obj_t *wrap_varargs(int n_args, ...) {
     args = args->next;
   }
 
-  obj_t *obj = obj_of(TYPE_METHOD_ARGS);
-  obj->method_args = root;
-
-  return obj;
+  return root;
 }
 
 boolean obj_prim_eq(obj_t *a, obj_t *b) {

@@ -3,7 +3,7 @@
 #include "../inc/str.h"
 #include "../inc/obj.h"
 
-obj_t *fn_to_string(obj_t *obj, obj_t *args_obj) {
+obj_t *fn_to_string(obj_t *obj, obj_method_args_t *args) {
   return string_obj(c_str_to_bytearray("<Function>"));
 }
 
