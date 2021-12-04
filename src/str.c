@@ -307,7 +307,6 @@ char* bytearray_to_c_str(bytearray_t *a) {
   int size = min(a->size, C_STR_BUF_SIZ-1);
   mem_cp(c_str_buf, a->data, size);
   c_str_buf[size] = '\0';
-  printf("copied %d bytes from thing with %d bytes\n", size, a->size);
   return c_str_buf;
 }
 
