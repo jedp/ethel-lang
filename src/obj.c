@@ -181,6 +181,7 @@ obj_method_args_t *wrap_varargs(int n_args, ...) {
 
   obj_method_args_t *args = mem_alloc(sizeof(obj_method_args_t));
   obj_method_args_t *root = args;
+  mark_traceable(root, TYPE_VARIABLE_ARGS);
 
   for (int i = 0; i < n_args; i++) {
     obj_t *val = va_arg(vargs, obj_t*);
@@ -188,6 +189,7 @@ obj_method_args_t *wrap_varargs(int n_args, ...) {
 
     if (i < n_args - 1) {
       args->next = mem_alloc(sizeof(obj_method_args_t));
+      mark_traceable(args->next, TYPE_VARIABLE_ARGS);
     } else {
       args->next = NULL;
     }

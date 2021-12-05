@@ -101,6 +101,14 @@ void test_traceable_iterator(void) {
   TEST_ASSERT_EQUAL(TYPE_ITERATOR_DATA, ((traceable_obj_t*) iter)->type);
 }
 
+void test_traceable_varargs(void) {
+  obj_method_args_t *args = wrap_varargs(2,
+                                         float_obj(42.0),
+                                         int_obj(19));
+  TEST_ASSERT_EQUAL(TYPE_VARIABLE_ARGS, ((traceable_obj_t*) args)->type);
+  TEST_ASSERT_EQUAL(TYPE_VARIABLE_ARGS, ((traceable_obj_t*) args->next)->type);
+}
+
 void test_trace(void) {
   RUN_TEST(test_traceable_primitive);
   RUN_TEST(test_traceable_bytearray);
@@ -109,5 +117,6 @@ void test_trace(void) {
   RUN_TEST(test_traceable_dict);
   RUN_TEST(test_traceable_function);
   RUN_TEST(test_traceable_iterator);
+  RUN_TEST(test_traceable_varargs);
 }
 
