@@ -17,7 +17,7 @@ static uint32_t heap[HEAP_BYTES] = { 0 };
 heap_node_t node_template = {
   .prev = NULL,
   .next = NULL,
-  .flags = 42   // Weird flags as an error marker.
+  .flags = 19191919   // Weird flags as an error marker.
 };
 
 // Heap info is statically allocated so it won't interfere with the heap.
@@ -97,7 +97,7 @@ static void coalesce_nodes(heap_node_t *left,
   // Null out the original right-side node for safety.
   right->prev = NULL;
   right->next = NULL;
-  right->flags = 42;
+  right->flags = 18181818;
 }
 
 void *ealloc(uint32_t bytes) {

@@ -4,7 +4,9 @@
 #include "../inc/env.h"
 #include "../inc/eval.h"
 #include "../inc/obj.h"
+#include "../inc/type.h"
 #include "../inc/str.h"
+#include "../inc/dict.h"
 
 void test_traceable_primitive(void) {
   obj_t *obj = int_obj(42);
@@ -52,10 +54,34 @@ void test_traceable_list(void) {
   TEST_ASSERT_EQUAL(TYPE_LIST_ELEM_DATA, ((traceable_obj_t*) e3)->type);
 }
 
+void test_traceable_dict(void) {
+  // Use eval because dicts are constructed dynamically.
+  eval_result_t *result = eval_program("{ val d = dict  \n"
+                                       "  d['x'] = 1.23 \n"
+                                       "  d             \n"
+                                       "}");
+  obj_t *obj = result->obj;
+  TEST_ASSERT_EQUAL(ERR_NO_ERROR, result->err);
+  TEST_ASSERT_EQUAL(TYPE_DICT, obj->type);
+  TEST_ASSERT_EQUAL(F_NONE, obj->flags);
+  TEST_ASSERT_EQUAL(1, obj->dict->nelems);
+
+  // Not a very unit-testy way of going, but we have to find the
+  // KV bucket that 'x' is in to see if it has the correct tag.
+  obj_t *k = byte_obj('x');
+  obj_t *hash_obj = get_static_method(k->type, METHOD_HASH)(k, NULL);
+  uint32_t hv = hash_obj->intval;
+  uint32_t bucket_index = hv % obj->dict->buckets;
+
+  dict_node_t *node = obj->dict->nodes[bucket_index];
+  TEST_ASSERT_EQUAL(TYPE_DICT_DATA, node->type);
+}
+
 void test_trace(void) {
   RUN_TEST(test_traceable_primitive);
   RUN_TEST(test_traceable_bytearray);
   RUN_TEST(test_traceable_string);
   RUN_TEST(test_traceable_list);
+  RUN_TEST(test_traceable_dict);
 }
 
