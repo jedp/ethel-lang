@@ -16,7 +16,7 @@ void test_traceable_primitive(void) {
 
 void test_traceable_bytearray(void) {
   obj_t *obj = bytearray_obj(0, NULL);
-  TEST_ASSERT_EQUAL(TYPE_BYTEARRAY, obj->type);
+  TEST_ASSERT_EQUAL(TYPE_BYTEARRAY, ((traceable_obj_t*) obj)->type);
   TEST_ASSERT_EQUAL(F_NONE, obj->flags);
 
   TEST_ASSERT_EQUAL(TYPE_BYTEARRAY_DATA, ((traceable_obj_t*) obj->bytearray)->type);
@@ -25,7 +25,7 @@ void test_traceable_bytearray(void) {
 
 void test_traceable_string(void) {
   obj_t *obj = string_obj(c_str_to_bytearray("Hi!"));
-  TEST_ASSERT_EQUAL(TYPE_STRING, obj->type);
+  TEST_ASSERT_EQUAL(TYPE_STRING, ((traceable_obj_t*) obj)->type);
   TEST_ASSERT_EQUAL(F_NONE, obj->flags);
 
   TEST_ASSERT_EQUAL(TYPE_BYTEARRAY_DATA, ((traceable_obj_t*) obj->bytearray)->type);
@@ -37,7 +37,7 @@ void test_traceable_list(void) {
   eval_result_t *result = eval_program("list { 1, 'b', 4.4 }");
   obj_t *obj = result->obj;
   TEST_ASSERT_EQUAL(ERR_NO_ERROR, result->err);
-  TEST_ASSERT_EQUAL(TYPE_LIST, obj->type);
+  TEST_ASSERT_EQUAL(TYPE_LIST, ((traceable_obj_t*) obj)->type);
   TEST_ASSERT_EQUAL(F_NONE, obj->flags);
 
   obj_list_t *obj_list = obj->list;
@@ -62,7 +62,7 @@ void test_traceable_dict(void) {
                                        "}");
   obj_t *obj = result->obj;
   TEST_ASSERT_EQUAL(ERR_NO_ERROR, result->err);
-  TEST_ASSERT_EQUAL(TYPE_DICT, obj->type);
+  TEST_ASSERT_EQUAL(TYPE_DICT, ((traceable_obj_t*) obj)->type);
   TEST_ASSERT_EQUAL(F_NONE, obj->flags);
   TEST_ASSERT_EQUAL(1, obj->dict->nelems);
 
@@ -81,7 +81,7 @@ void test_traceable_function(void) {
   eval_result_t *result = eval_program("fn(x) { x + 1 }");
   obj_t *obj = result->obj;
   TEST_ASSERT_EQUAL(ERR_NO_ERROR, result->err);
-  TEST_ASSERT_EQUAL(TYPE_FUNCTION, obj->type);
+  TEST_ASSERT_EQUAL(TYPE_FUNCTION, ((traceable_obj_t*) obj)->type);
   TEST_ASSERT_EQUAL(F_NONE, obj->flags);
 
   TEST_ASSERT_EQUAL(TYPE_FUNCTION_PTR_DATA, ((traceable_obj_t*) obj->func_def)->type);
@@ -92,7 +92,7 @@ void test_traceable_iterator(void) {
   eval_result_t *result = eval_program("1..10");
   obj_t *obj = result->obj;
   TEST_ASSERT_EQUAL(ERR_NO_ERROR, result->err);
-  TEST_ASSERT_EQUAL(TYPE_RANGE, obj->type);
+  TEST_ASSERT_EQUAL(TYPE_RANGE, ((traceable_obj_t*) obj)->type);
   TEST_ASSERT_EQUAL(F_NONE, obj->flags);
 
   static_method get_iterator = get_static_method(obj->type, METHOD_ITERATOR);
