@@ -17,7 +17,7 @@
 #include "test_examples.h"
 
 void setUp(void) {
-  mem_init();
+  mem_init(0xDEADBEEF);
 }
 
 void tearDown(void) {

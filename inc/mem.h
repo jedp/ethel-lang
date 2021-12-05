@@ -18,8 +18,8 @@ void* mem_realloc(void *b, dim_t size);
 /* Free allocated memory. */
 void mem_free(void *b);
 
-/* Initialize memory management. */
-void mem_init(void);
+/* Initialize memory management. Initialize all words with initval. */
+void mem_init(uint32_t initval);
 
 /* Tag the object so it can be traced in GC. */
 void mark_traceable(void* obj, uint16_t type);

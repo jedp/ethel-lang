@@ -87,6 +87,20 @@ void test_traceable_function(void) {
   TEST_ASSERT_EQUAL(TYPE_FUNCTION_PTR_DATA, ((traceable_obj_t*) obj->func_def)->type);
 }
 
+void test_traceable_iterator(void) {
+  // Return an iterable and extract its iterator.
+  eval_result_t *result = eval_program("1..10");
+  obj_t *obj = result->obj;
+  TEST_ASSERT_EQUAL(ERR_NO_ERROR, result->err);
+  TEST_ASSERT_EQUAL(TYPE_RANGE, obj->type);
+  TEST_ASSERT_EQUAL(F_NONE, obj->flags);
+
+  static_method get_iterator = get_static_method(obj->type, METHOD_ITERATOR);
+  TEST_ASSERT_NOT_NULL(get_iterator);
+  obj_iter_t *iter = get_iterator(obj, NULL)->iterator;
+  TEST_ASSERT_EQUAL(TYPE_ITERATOR_DATA, ((traceable_obj_t*) iter)->type);
+}
+
 void test_trace(void) {
   RUN_TEST(test_traceable_primitive);
   RUN_TEST(test_traceable_bytearray);
@@ -94,5 +108,6 @@ void test_trace(void) {
   RUN_TEST(test_traceable_list);
   RUN_TEST(test_traceable_dict);
   RUN_TEST(test_traceable_function);
+  RUN_TEST(test_traceable_iterator);
 }
 

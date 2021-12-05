@@ -6,8 +6,6 @@
 #define HEAP_MAX ((uint32_t) HEAP_BYTES - BLOCK_SIZE)
 
 void test_heap_init(void) {
-  heap_init();
-
   heap_info_t *heap = get_heap_info();
   TEST_ASSERT_EQUAL(1, heap->total_nodes);
   TEST_ASSERT_EQUAL(1, heap->free_nodes);
@@ -16,8 +14,6 @@ void test_heap_init(void) {
 }
 
 void test_heap_alloc(void) {
-  heap_init();
-
   // This will require BLOCK_SIZE bytes.
   ealloc(BLOCK_SIZE - 5);
   heap_info_t *heap = get_heap_info();
@@ -34,8 +30,6 @@ void test_heap_alloc(void) {
 }
 
 void test_heap_free(void) {
-  heap_init();
-
   // Allocate some nodes. Four data blocks in all.
   void *p1 = ealloc(BLOCK_SIZE - 1);
   void *p2 = ealloc(BLOCK_SIZE);
@@ -58,8 +52,6 @@ void test_heap_free(void) {
 }
 
 void test_heap_free_then_fill_hole(void) {
-  heap_init();
-
   ealloc(BLOCK_SIZE);
   void *p = ealloc(BLOCK_SIZE + 1); // req 2 blocks
   ealloc(BLOCK_SIZE);
@@ -82,8 +74,6 @@ void test_heap_free_then_fill_hole(void) {
 }
 
 void test_heap_free_then_partially_fill_hole(void) {
-  heap_init();
-
   ealloc(BLOCK_SIZE);
   void *p = ealloc(BLOCK_SIZE + 1); // req 2 blocks
   ealloc(BLOCK_SIZE);
@@ -107,8 +97,6 @@ void test_heap_free_then_partially_fill_hole(void) {
 }
 
 void test_heap_free_and_coalesce_left(void) {
-  heap_init();
-
   ealloc(BLOCK_SIZE);
   void *p1 = ealloc(BLOCK_SIZE);
   void *p2 = ealloc(BLOCK_SIZE);
@@ -130,8 +118,6 @@ void test_heap_free_and_coalesce_left(void) {
 }
 
 void test_heap_free_and_coalesce_right(void) {
-  heap_init();
-
   ealloc(BLOCK_SIZE);
   void *p1 = ealloc(BLOCK_SIZE);
   void *p2 = ealloc(BLOCK_SIZE);
@@ -153,8 +139,6 @@ void test_heap_free_and_coalesce_right(void) {
 }
 
 void test_heap_free_and_coalesce_three(void) {
-  heap_init();
-
   ealloc(BLOCK_SIZE);
   void *p1 = ealloc(BLOCK_SIZE);
   void *p2 = ealloc(BLOCK_SIZE);
@@ -180,8 +164,6 @@ void test_heap_free_and_coalesce_three(void) {
 }
 
 void test_heap_free_and_coalesce_everything(void) {
-  heap_init();
-
   void *p1 = ealloc(BLOCK_SIZE);
   void *p2 = ealloc(BLOCK_SIZE * 2);
   void *p3 = ealloc(BLOCK_SIZE * 4);
@@ -202,8 +184,6 @@ void test_heap_free_and_coalesce_everything(void) {
 }
 
 void test_heap_realloc_null_and_zero(void) {
-  heap_init();
-
   heap_info_t *heap = get_heap_info();
   uint32_t size = heap->bytes_free;
 
@@ -218,8 +198,6 @@ void test_heap_realloc_null_and_zero(void) {
 }
 
 void test_heap_realloc_null(void) {
-  heap_init();
-
   heap_info_t *heap = get_heap_info();
   uint32_t size = heap->bytes_free;
 
@@ -234,8 +212,6 @@ void test_heap_realloc_null(void) {
 }
 
 void test_heap_realloc_smaller(void) {
-  heap_init();
-
   void *p = ealloc(BLOCK_SIZE + 1);
   // A second allocation to force fragmentation when we realloc.
   ealloc(BLOCK_SIZE);
@@ -254,8 +230,6 @@ void test_heap_realloc_smaller(void) {
 }
 
 void test_heap_realloc_larger(void) {
-  heap_init();
-
   void *p = ealloc(BLOCK_SIZE);
   heap_info_t *heap = get_heap_info();
   TEST_ASSERT_NOT_NULL(p);
@@ -271,8 +245,6 @@ void test_heap_realloc_larger(void) {
 }
 
 void test_heap_realloc_too_large(void) {
-  heap_init();
-
   void *p = ealloc(BLOCK_SIZE);
   heap_info_t *heap = get_heap_info();
   TEST_ASSERT_NOT_NULL(p);

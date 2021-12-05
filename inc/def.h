@@ -121,6 +121,7 @@ enum every_type {
   TYPE_DICT_DATA,
   TYPE_IDENT,
   TYPE_ITERATOR,
+  TYPE_ITERATOR_DATA,
   TYPE_BREAK,
   TYPE_CONTINUE,
   TYPE_MAX,
@@ -226,6 +227,7 @@ static const char* type_names[TYPE_MAX] = {
   "Dict Data",
   "Identifier",
   "Iterator",
+  "Iterator Data",
   "Break",
   "Continue",
 };

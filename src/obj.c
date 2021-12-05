@@ -149,12 +149,15 @@ obj_t *func_obj(void* code, void* scope) {
 
 obj_t *iterator_obj(obj_t *obj, obj_t *state_obj, obj_t *(*next)(obj_iter_t *iterable)) {
   obj_t *iter = obj_of(TYPE_ITERATOR);
+  // Assume the caller has marked obj and state_obj as traceble.
   iter->iterator = mem_alloc(sizeof(obj_iter_t));
 
   iter->iterator->state = ITER_NOT_STARTED;
   iter->iterator->obj = obj;
   iter->iterator->state_obj = state_obj;
   iter->iterator->next = next;
+
+  mark_traceable(iter->iterator, TYPE_ITERATOR_DATA);
   return iter;
 }
 

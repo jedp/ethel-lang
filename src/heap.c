@@ -192,7 +192,16 @@ void efree(void *data_ptr) {
  *
  * Exposed for testing.
  */
-void heap_init(void) {
+void heap_init(uint32_t initval) {
+  // Clear the heap
+  uint32_t *p = heap;
+  uint32_t size = HEAP_BYTES;
+  while (size > 0) {
+    *p = initval;
+    *p += 4;
+    size -= 4;
+  }
+
   // Create a node containing the entire heap.
   node_template.prev = NULL;
   node_template.next = NULL;

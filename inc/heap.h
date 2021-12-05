@@ -39,11 +39,13 @@ typedef struct {
 /*
  * Initialize the heap. Do this once.
  *
+ * Set all words to initval.
+ *
  * Rebuilds the heap data structure, which means any lingering pointers to data
  * on the heap should not be used again. Intended to be done once on first
  * execution. Exposed for testing.
  */
-void heap_init(void);
+void heap_init(uint32_t initval);
 
 /*
  * Try to allocate the given number of bytes. Allocations are always a multiple

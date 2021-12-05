@@ -13,8 +13,8 @@ void mem_free(void *b) {
   return efree(b);
 }
 
-void mem_init(void) {
-  heap_init();
+void mem_init(uint32_t initval) {
+  heap_init(initval);
 }
 
 void mark_traceable(void *obj, uint16_t type) {
