@@ -77,11 +77,22 @@ void test_traceable_dict(void) {
   TEST_ASSERT_EQUAL(TYPE_DICT_DATA, node->type);
 }
 
+void test_traceable_function(void) {
+  eval_result_t *result = eval_program("fn(x) { x + 1 }");
+  obj_t *obj = result->obj;
+  TEST_ASSERT_EQUAL(ERR_NO_ERROR, result->err);
+  TEST_ASSERT_EQUAL(TYPE_FUNCTION, obj->type);
+  TEST_ASSERT_EQUAL(F_NONE, obj->flags);
+
+  TEST_ASSERT_EQUAL(TYPE_FUNCTION_PTR_DATA, ((traceable_obj_t*) obj->func_def)->type);
+}
+
 void test_trace(void) {
   RUN_TEST(test_traceable_primitive);
   RUN_TEST(test_traceable_bytearray);
   RUN_TEST(test_traceable_string);
   RUN_TEST(test_traceable_list);
   RUN_TEST(test_traceable_dict);
+  RUN_TEST(test_traceable_function);
 }
 

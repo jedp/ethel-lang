@@ -258,7 +258,7 @@ static void eval_func_call(ast_func_call_t *func_call, eval_result_t *result, en
   }
   obj_t *obj = r->obj;
 
-  if (obj->type != TYPE_FUNC_PTR) {
+  if (obj->type != TYPE_FUNCTION) {
     result->err = ERR_FUNCTION_UNDEFINED;
     result->obj = nil_obj();
     return;

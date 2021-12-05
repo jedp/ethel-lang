@@ -24,7 +24,7 @@ static_method get_static_method(obj_type_t obj_type,
     case TYPE_DICT:      return get_dict_static_method(method_id);
     case TYPE_STRING:    return get_str_static_method(method_id);
     case TYPE_RANGE:     return get_range_static_method(method_id);
-    case TYPE_FUNC_PTR:  return get_fn_static_method(method_id);
+    case TYPE_FUNCTION:  return get_fn_static_method(method_id);
     default: return NULL;
   }
 }

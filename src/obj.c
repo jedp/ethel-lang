@@ -126,6 +126,7 @@ obj_t *list_obj(obj_list_element_t *elems) {
 obj_t *dict_obj(void) {
   obj_t *obj = obj_of(TYPE_DICT);
   obj_dict_t *dict = mem_alloc(sizeof(obj_dict_t));
+  mark_traceable(dict, TYPE_DICT_DATA);
   obj->dict = dict;
   if (obj->dict == NULL ||
       dict_init(obj, DICT_INIT_BUCKETS) != ERR_NO_ERROR) {
@@ -137,10 +138,12 @@ obj_t *dict_obj(void) {
 }
 
 obj_t *func_obj(void* code, void* scope) {
-  obj_t *obj = obj_of(TYPE_FUNC_PTR);
+  obj_t *obj = obj_of(TYPE_FUNCTION);
   obj->func_def = mem_alloc(sizeof(obj_func_def_t));
   obj->func_def->code = code;
   obj->func_def->scope = scope;
+
+  mark_traceable(obj->func_def, TYPE_FUNCTION_PTR_DATA);
   return obj;
 }
 
