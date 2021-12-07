@@ -71,7 +71,7 @@ obj_t *_list_slice(obj_t *obj, int start, int end) {
     return nil_obj();
   }
 
-  dim_t len = _list_len(obj);
+  size_t len = _list_len(obj);
   if (abs(start) > len || abs(end) > len) {
     return _empty_list();
   }
@@ -137,7 +137,7 @@ obj_t *list_contains(obj_t *obj, obj_method_args_t *args) {
 obj_t *list_hash(obj_t *obj, obj_method_args_t /* Ignored */ *args) {
   uint32_t temp = FNV32Basis;
 
-  for (dim_t i = 0; i < _list_len(obj); i++) {
+  for (size_t i = 0; i < _list_len(obj); i++) {
     obj_t *val = _list_get(obj, i);
     obj_type_t t = val->type;
     uint32_t h = get_static_method(t, METHOD_HASH)(val, NULL)->intval;
@@ -371,7 +371,7 @@ obj_t *list_remove_at(obj_t *obj, obj_method_args_t *args) {
 }
 
 obj_t *list_random_choice(obj_t *obj, obj_method_args_t *args) {
-  dim_t len = _list_len(obj);
+  size_t len = _list_len(obj);
   if (len < 1) {
     return nil_obj();
   }

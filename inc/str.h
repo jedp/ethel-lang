@@ -5,7 +5,7 @@
 #include "obj.h"
 
 /* Return the length of a c string, not including the terminating null.  */
-dim_t c_str_len(const char* s);
+size_t c_str_len(const char* s);
 
 /* Return true if the c strings are char-wise equal; false otherwise. */
 boolean c_str_eq(const char* a, const char* b);
@@ -17,7 +17,7 @@ void c_str_cp(char* dst, const char* src);
  * Append a copy of null-terminated string b to null-terminated string a,
  * copying no more than n chars, then add the trailing null.
  */
-char* c_str_ncat(char *a, const char *b, dim_t n);
+char* c_str_ncat(char *a, const char *b, size_t n);
 
 /* Convert the decimal value in 0..15 to a hex character. */
 byte hex_char(int n);
@@ -56,7 +56,7 @@ obj_t *int32_dump(obj_t *int_obj);
 /* Return a binary dump of the float as a string. */
 obj_t *float32_dump(obj_t *float_obj);
 
-bytearray_t *bytearray_alloc(dim_t size);
+bytearray_t *bytearray_alloc(size_t size);
 
 /* Return a new bytearray that is a bytewise copy of the original. */
 bytearray_t *bytearray_clone(bytearray_t *src);

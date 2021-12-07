@@ -5,7 +5,7 @@
 #include "../inc/heap.h"
 
 // Ye olde heape.
-static uint32_t heap[HEAP_BYTES] = { 0 };
+static size_t heap[HEAP_BYTES] = { 0 };
 
 #define HEAP_DATA_BEGIN ((size_t) heap + sizeof(heap_node_t))
 #define HEAP_DATA_END ((size_t) heap + HEAP_BYTES)
@@ -27,12 +27,12 @@ heap_info_t heap_info = {
   .bytes_free = HEAP_BYTES
 };
 
-static uint32_t node_size(heap_node_t *node) {
+static size_t node_size(heap_node_t *node) {
   if (node->next == NULL) {
-    return (uint32_t) (HEAP_DATA_END - (size_t) node) - sizeof(heap_node_t);
+    return (size_t) (HEAP_DATA_END - (size_t) node) - sizeof(heap_node_t);
   }
 
-  return (uint32_t) ((size_t) node->next - (size_t) node) - sizeof(heap_node_t);
+  return (size_t) ((size_t) node->next - (size_t) node) - sizeof(heap_node_t);
 }
 
 /*
@@ -47,9 +47,9 @@ static uint32_t node_size(heap_node_t *node) {
  *
  * Mutates the properties of the node, but leaves flags untouched.
  */
-static void fracture_node(heap_node_t *node, uint32_t new_size) {
+static void fracture_node(heap_node_t *node, size_t new_size) {
   assert(new_size >= 0);
-  uint32_t size = node_size(node);
+  size_t size = node_size(node);
   assert(new_size <= size);
   size_t remaining = size - new_size;
 
@@ -77,6 +77,11 @@ static void fracture_node(heap_node_t *node, uint32_t new_size) {
     node->next->prev = new_node;
   }
   node->next = new_node;
+
+  assert((size_t) node >= (size_t) heap);
+  assert((size_t) new_node >= (size_t) node);
+  assert((size_t) new_node <= (size_t) heap + HEAP_BYTES - sizeof(heap_node_t));
+  assert((size_t) node <= (size_t) new_node - sizeof(heap_node_t));
 }
 
 /*
@@ -100,7 +105,7 @@ static void coalesce_nodes(heap_node_t *left,
   right->flags = 18181818;
 }
 
-void *ealloc(uint32_t bytes) {
+void *ealloc(size_t bytes) {
   if (bytes == 0) return NULL;
 
   // We allocate things in heap-node-size blocks.
@@ -132,11 +137,14 @@ void *ealloc(uint32_t bytes) {
   fracture_node(node, bytes);
   node->flags &= ~F_FREE;
 
+  assert((size_t) node >= (size_t) heap);
+  assert((size_t) node <= (size_t) heap + HEAP_BYTES - sizeof(heap_node_t));
+
   // Return pointer to the data buffer.
   return DATA_FOR_NODE(node);
 }
 
-void *erealloc(void* data_ptr, uint32_t size) {
+void *erealloc(void* data_ptr, size_t size) {
   assert(size >= 0);
 
   // If null and no size, return a minimal allocation.
@@ -170,6 +178,7 @@ void *erealloc(void* data_ptr, uint32_t size) {
 }
 
 void efree(void *data_ptr) {
+  if (data_ptr == NULL) return;
   assert((size_t) data_ptr >= HEAP_DATA_BEGIN);
   assert((size_t) data_ptr <= HEAP_DATA_END);
 
@@ -192,14 +201,14 @@ void efree(void *data_ptr) {
  *
  * Exposed for testing.
  */
-void heap_init(uint32_t initval) {
+void heap_init(unsigned char initval) {
   // Clear the heap
-  uint32_t *p = heap;
-  uint32_t size = HEAP_BYTES;
+  size_t *p = heap;
+  size_t size = HEAP_BYTES;
   while (size > 0) {
     *p = initval;
-    *p += 4;
-    size -= 4;
+    *p += 1;
+    size -= 1;
   }
 
   // Create a node containing the entire heap.
@@ -237,9 +246,9 @@ void dump_heap(void) {
   printf("Heap bytes: %zu\n", HEAP_BYTES);
   get_heap_info();
   printf("==== Heap\n");
-  printf("  Total nodes: %d\n", heap_info.total_nodes);
-  printf("   Free nodes: %d\n", heap_info.free_nodes);
-  printf("   Bytes used: %d\n", heap_info.bytes_used);
-  printf("   Bytes free: %d\n", heap_info.bytes_free);
+  printf("  Total nodes: %zu\n", heap_info.total_nodes);
+  printf("   Free nodes: %zu\n", heap_info.free_nodes);
+  printf("   Bytes used: %zu\n", heap_info.bytes_used);
+  printf("   Bytes free: %zu\n", heap_info.bytes_free);
 }
 

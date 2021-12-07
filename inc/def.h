@@ -1,6 +1,7 @@
 #ifndef __DEF_H
 #define __DEF_H
 
+#include <stdio.h>
 #include <stdint.h>
 
 #define True      1
@@ -234,7 +235,6 @@ static const char* type_names[TYPE_MAX] = {
 
 typedef uint8_t byte;
 typedef uint32_t boolean;
-typedef uint32_t dim_t;
 
 typedef struct TraceableObj {
   uint16_t type;
@@ -244,7 +244,7 @@ typedef struct TraceableObj {
 typedef struct __attribute__((__packed__)) {
   uint16_t type;
   uint16_t flags;
-  dim_t size;
+  size_t size;
   byte data[];
 } bytearray_t;
 

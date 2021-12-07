@@ -30,10 +30,10 @@ typedef struct HeapNode {
 #define HEAP_BYTES (ETHEL_HEAP_SIZE_BYTES - ETHEL_HEAP_SIZE_BYTES % sizeof(heap_node_t))
 
 typedef struct {
-  uint32_t total_nodes;
-  uint32_t free_nodes;
-  uint32_t bytes_used;
-  uint32_t bytes_free;
+  size_t total_nodes;
+  size_t free_nodes;
+  size_t bytes_used;
+  size_t bytes_free;
 } heap_info_t;
 
 /*
@@ -45,7 +45,7 @@ typedef struct {
  * on the heap should not be used again. Intended to be done once on first
  * execution. Exposed for testing.
  */
-void heap_init(uint32_t initval);
+void heap_init(unsigned char initval);
 
 /*
  * Try to allocate the given number of bytes. Allocations are always a multiple
@@ -57,7 +57,7 @@ void heap_init(uint32_t initval);
  *
  * Return NULL if memory could not be allocated.
  */
-void *ealloc(uint32_t bytes);
+void *ealloc(size_t bytes);
 
 /*
  * The erealloc() function tries to change the size of the allocation pointed
@@ -77,7 +77,7 @@ void *ealloc(uint32_t bytes);
  *
  * ealloc() does not guarantee that newly-allocated memory is zero-filled.
  */
-void *erealloc(void* data_ptr, uint32_t size);
+void *erealloc(void* data_ptr, size_t size);
 
 /*
  * Free the nodes associated with the data_ptr. The given data_ptr must be an

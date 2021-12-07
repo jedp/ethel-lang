@@ -46,7 +46,7 @@ obj_t *error_obj(error_t errval) {
   return obj;
 }
 
-obj_t *bytearray_obj(dim_t size, uint8_t *data) {
+obj_t *bytearray_obj(size_t size, uint8_t *data) {
   obj_t *obj = obj_of(TYPE_BYTEARRAY);
   bytearray_t *a = mem_alloc(size + 4);
   a->size = size;

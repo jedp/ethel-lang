@@ -8,7 +8,7 @@
 static boolean _eq(bytearray_t *a, bytearray_t *b) {
   if (a->size != b->size) return False;
 
-  for (dim_t i = 0; i < a->size; i++) {
+  for (size_t i = 0; i < a->size; i++) {
     if (a->data[i] != b->data[i]) {
       return False;
     }
@@ -27,7 +27,7 @@ static obj_t *_arr_slice(obj_t *obj, int start, int end) {
     return bytearray_obj(0, NULL);
   }
 
-  dim_t len = end - start;
+  size_t len = end - start;
   obj_t *new = bytearray_obj(len, NULL);
   for (int i = 0; i < len; i++) {
     new->bytearray->data[i] = obj->bytearray->data[start+i];
@@ -63,7 +63,7 @@ obj_t *arr_hash(obj_t *obj, obj_method_args_t /* Ignored */ *args) {
    * for 32-bit hashes returning a 32-bit integer.
    */
   temp = FNV32Basis;
-  dim_t i = 0;
+  size_t i = 0;
   while (i < obj->bytearray->size) {
     b = obj->bytearray->data[i];
     temp = FNV32Prime * (temp ^ b);
@@ -125,7 +125,7 @@ obj_t *arr_set(obj_t *obj, obj_method_args_t *args) {
     printf("Null arg for value.\n");
     return nil_obj();
   }
- 
+
   byte val = obj_to_byte(b);
   obj->bytearray->data[i] = val;
   return byte_obj(val);
@@ -158,7 +158,7 @@ obj_t *arr_contains(obj_t *obj, obj_method_args_t *args) {
     return nil_obj();
   }
 
-  for (dim_t i = 0; i < obj->bytearray->size; i++) {
+  for (size_t i = 0; i < obj->bytearray->size; i++) {
     if (obj->bytearray->data[i] == b) {
       return boolean_obj(True);
     }

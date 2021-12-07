@@ -207,7 +207,7 @@ obj_t *error_obj(error_t errval);
 obj_t *int_obj(int);
 obj_t *float_obj(float);
 obj_t *byte_obj(byte);
-obj_t *bytearray_obj(dim_t size, uint8_t *data);
+obj_t *bytearray_obj(size_t size, uint8_t *data);
 obj_t *string_obj(bytearray_t *src);
 obj_t *boolean_obj(boolean);
 obj_t *range_obj(int from_inclusive, int to_inclusive);

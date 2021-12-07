@@ -35,7 +35,7 @@ static obj_t *_str_slice(obj_t *obj, int start, int end) {
     return string_obj(bytearray_alloc(0));
   }
 
-  dim_t len = end - start;
+  size_t len = end - start;
   bytearray_t *ba = bytearray_alloc(len);
   for (int i = 0; i < end; i++) {
     ba->data[i] = obj->bytearray->data[start+i];
@@ -65,8 +65,8 @@ obj_t *str_get(obj_t *obj, obj_method_args_t *args) {
   return arr_get(obj, args);
 }
 
-dim_t c_str_len(const char* s) {
-  dim_t size = 0;
+size_t c_str_len(const char* s) {
+  size_t size = 0;
   const unsigned char *p = (const unsigned char *) s;
 
   while (*p++ != 0) size++;
@@ -90,7 +90,7 @@ void c_str_cp(char* dst, const char* src) {
   while((*p1++ = *p2++) != 0);
 }
 
-void c_str_ncp(char* dst, const char* src, dim_t n) {
+void c_str_ncp(char* dst, const char* src, size_t n) {
   unsigned char *p1 = (unsigned char *) dst;
   const unsigned char *p2 = (const unsigned char *) src;
 
@@ -99,7 +99,7 @@ void c_str_ncp(char* dst, const char* src, dim_t n) {
   if (*p1 != 0) *p1 = 0;
 }
 
-char* c_str_ncat(char *a, const char *b, dim_t n) {
+char* c_str_ncat(char *a, const char *b, size_t n) {
   char* s = a;
 
   c_str_ncp(a + c_str_len(a), b, n);
@@ -266,7 +266,7 @@ bytearray_t *int_to_hex(unsigned int n) {
   return a;
 }
 
-bytearray_t *bytearray_alloc(dim_t size) {
+bytearray_t *bytearray_alloc(size_t size) {
   bytearray_t *a = mem_alloc(size + 4);
   a->size = size;
   mem_set(a->data, '\0', size);
@@ -275,7 +275,7 @@ bytearray_t *bytearray_alloc(dim_t size) {
 
 bytearray_t *bytearray_clone(bytearray_t *src) {
   bytearray_t *dst = bytearray_alloc(src->size);
-  dim_t i = 0;
+  size_t i = 0;
   while (i < src->size) {
     dst->data[i] = src->data[i];
     i++;
@@ -311,7 +311,7 @@ char* bytearray_to_c_str(bytearray_t *a) {
 }
 
 bytearray_t *c_str_to_bytearray(const char* s) {
-  dim_t size = c_str_len(s);
+  size_t size = c_str_len(s);
   bytearray_t *a = bytearray_alloc(size);
   mem_cp(a->data, (uint8_t*) s, size);
   return a;
@@ -378,11 +378,11 @@ obj_t *str_add(obj_t *obj, obj_method_args_t *args) {
     printf("Couldn't allocate new string!\n");
     return obj;
   }
-  for (dim_t i = 0; i < obj->bytearray->size; i++) {
+  for (size_t i = 0; i < obj->bytearray->size; i++) {
     new->data[i] = obj->bytearray->data[i];
   }
-  dim_t offset = obj->bytearray->size;
-  for (dim_t i = 0; i < arg->bytearray->size; i++) {
+  size_t offset = obj->bytearray->size;
+  for (size_t i = 0; i < arg->bytearray->size; i++) {
     new->data[offset + i] = arg->bytearray->data[i];
   }
 
@@ -501,15 +501,15 @@ obj_t *arr_dump(obj_t *arr_obj) {
   // 0        10                                                60               77
   //
   // We we need 79 bytes to store the representation for 16 bytes.
-  dim_t byte_rows = (arr_obj->bytearray->size / 16) + ((arr_obj->bytearray->size % 16) ? 1 : 0);
-  dim_t size = byte_rows * 79;
+  size_t byte_rows = (arr_obj->bytearray->size / 16) + ((arr_obj->bytearray->size % 16) ? 1 : 0);
+  size_t size = byte_rows * 79;
   bytearray_t *ba = bytearray_alloc(size - 1);
 
-  dim_t row = 0;
-  for (dim_t i = 0; i < arr_obj->bytearray->size; i+=16) {
+  size_t row = 0;
+  for (size_t i = 0; i < arr_obj->bytearray->size; i+=16) {
     // Source offset. 16 bytes per row.
     int place = 8;
-    dim_t offset = i;
+    size_t offset = i;
     while (place > 0) {
       byte hex = hex_char(offset & 0x0f);
       ba->data[row * 79 + place - 1] = hex;

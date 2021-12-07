@@ -76,7 +76,7 @@ static void print_result(obj_t *obj) {
 
 int main(int argc, char** argv) {
   // Init ethel memory management.
-  mem_init(0xDEADBEEF);
+  mem_init('x');
 
   mem_set(input, 0, MAX_INPUT);
 

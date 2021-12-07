@@ -46,7 +46,7 @@ int run(char* fname) {
     return errno;
   }
 
-  dim_t bufsize = ftell(fp);
+  size_t bufsize = ftell(fp);
   if (bufsize == -1) {
     fputs("File error", stderr);
     return errno;
@@ -60,7 +60,7 @@ int run(char* fname) {
     return errno;
   }
 
-  dim_t f_len = fread(program, sizeof(char), bufsize, fp);
+  size_t f_len = fread(program, sizeof(char), bufsize, fp);
   if (f_len == 0) {
     fputs("Zero bytes read\n", stderr);
     return 0;
@@ -83,7 +83,7 @@ int main(int argc, char** argv) {
    * Init the ethel memory manager. This file hackily uses both stdlib's
    * heap and the heap in ethel. TODO: Fix.
    */
-  mem_init(0xDEADBEEF);
+  mem_init('x');
 
   if (argc != 2) {
     fputs("Usage: run <file.e>\n", stderr);

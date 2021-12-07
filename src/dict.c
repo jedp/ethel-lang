@@ -49,7 +49,7 @@ error_t _dict_put(obj_dict_t *dict, obj_t *k, obj_t *v) {
       // There's an existing node for this key; update the value.
       node->v = v;
       return ERR_NO_ERROR;
-    }  
+    }
     node = node->next;
   }
 
@@ -71,7 +71,7 @@ error_t _dict_put(obj_dict_t *dict, obj_t *k, obj_t *v) {
 
 static error_t dict_resize(obj_t *orig_obj) {
   // Might want to be bigger or smaller.
-  dim_t new_buckets =
+  size_t new_buckets =
     DICT_INIT_BUCKETS +
     (orig_obj->dict->nelems / DICT_INIT_BUCKETS) * DICT_INIT_BUCKETS;
 
@@ -90,7 +90,7 @@ static error_t dict_resize(obj_t *orig_obj) {
   }
 
   // Put all of orig's items in the new dict.
-  for (dim_t i = 0; i < orig_obj->dict->buckets; i++) {
+  for (size_t i = 0; i < orig_obj->dict->buckets; i++) {
     dict_node_t *kv = orig_obj->dict->nodes[i];
     while(kv != NULL) {
       _dict_put(new_dict, kv->k, kv->v);
@@ -212,7 +212,7 @@ obj_t *dict_remove(obj_t *obj, obj_t *k) {
     prev = node;
     node = node->next;
   }
-  
+
   return nil_obj();
 }
 
@@ -290,7 +290,7 @@ obj_t *dict_obj_len(obj_t *obj, obj_method_args_t *args) {
 
 obj_t *dict_obj_keys(obj_t *obj, obj_method_args_t *args) {
   obj_t *list = list_obj(NULL);
-  for (dim_t i = 0; i < obj->dict->buckets; i++) {
+  for (size_t i = 0; i < obj->dict->buckets; i++) {
     dict_node_t *kv = obj->dict->nodes[i];
     while (kv != NULL) {
       list_append(list, wrap_varargs(1, kv->k));

@@ -2,8 +2,8 @@
 #include "test_heap.h"
 #include "../inc/heap.h"
 
-#define BLOCK_SIZE ((uint32_t) sizeof(heap_node_t))
-#define HEAP_MAX ((uint32_t) HEAP_BYTES - BLOCK_SIZE)
+#define BLOCK_SIZE ((size_t) sizeof(heap_node_t))
+#define HEAP_MAX ((size_t) HEAP_BYTES - BLOCK_SIZE)
 
 void test_heap_init(void) {
   heap_info_t *heap = get_heap_info();
@@ -57,7 +57,7 @@ void test_heap_free_then_fill_hole(void) {
   ealloc(BLOCK_SIZE);
 
   heap_info_t *heap = get_heap_info();
-  uint32_t size = heap->bytes_free;
+  size_t size = heap->bytes_free;
   TEST_ASSERT_EQUAL(4, heap->total_nodes);
   TEST_ASSERT_EQUAL(1, heap->free_nodes);
 
@@ -104,7 +104,7 @@ void test_heap_free_and_coalesce_left(void) {
 
   heap_info_t *heap = get_heap_info();
   TEST_ASSERT_EQUAL(5, heap->total_nodes);
-  uint32_t size = heap->bytes_free;
+  size_t size = heap->bytes_free;
 
   // Free the node on the left.
   // Freeing the node on the right will coalesce the free spaces.
@@ -125,7 +125,7 @@ void test_heap_free_and_coalesce_right(void) {
 
   heap_info_t *heap = get_heap_info();
   TEST_ASSERT_EQUAL(5, heap->total_nodes);
-  uint32_t size = heap->bytes_free;
+  size_t size = heap->bytes_free;
 
   // Free the node on the right.
   // Freeing the node on the left will coalesce the free spaces.
@@ -147,7 +147,7 @@ void test_heap_free_and_coalesce_three(void) {
 
   heap_info_t *heap = get_heap_info();
   TEST_ASSERT_EQUAL(6, heap->total_nodes);
-  uint32_t size = heap->bytes_free;
+  size_t size = heap->bytes_free;
 
   // Free the nodes on the right and left.
   // Freeing the node in the center will coalesce the free spaces.
@@ -185,7 +185,7 @@ void test_heap_free_and_coalesce_everything(void) {
 
 void test_heap_realloc_null_and_zero(void) {
   heap_info_t *heap = get_heap_info();
-  uint32_t size = heap->bytes_free;
+  size_t size = heap->bytes_free;
 
   // Allocates a minimum-size object.
   void *p = erealloc(NULL, 0);
@@ -199,7 +199,7 @@ void test_heap_realloc_null_and_zero(void) {
 
 void test_heap_realloc_null(void) {
   heap_info_t *heap = get_heap_info();
-  uint32_t size = heap->bytes_free;
+  size_t size = heap->bytes_free;
 
   // Equivalent to ealloc().
   void *p = erealloc(NULL, BLOCK_SIZE + 1);
