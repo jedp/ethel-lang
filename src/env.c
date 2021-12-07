@@ -9,10 +9,9 @@ env_sym_t *new_sym(obj_t *name_obj, obj_t *obj, uint16_t flags) {
   env_sym_t *sym = mem_alloc(sizeof(env_sym_t));
   sym->name_obj = name_obj;
   sym->flags = flags;
-  sym->refcount = 1;
   sym->obj = obj;
   sym->prev = NULL;
-  sym->next = NULL; 
+  sym->next = NULL;
 
   return sym;
 }
@@ -24,7 +23,6 @@ error_t push_scope(env_t *env, env_sym_t *scope) {
   }
 
   env->symbols[env->top] = scope;
-  if (scope != NULL) scope->refcount += 1;
   return ERR_NO_ERROR;
 }
 
@@ -33,22 +31,6 @@ error_t enter_scope(env_t *env) {
 }
 
 error_t leave_scope(env_t *env) {
-  env_sym_t *node = env->symbols[env->top];
-  // TODO buggy
-  // Decrement refcount when popping scope.
-  // Once refcount is 0, we know it's not under something else's scope.
-  if (node != NULL && --node->refcount < 1) {
-    // Delete any symbols at this level.
-    // Don't delete the root node.
-    while (node != NULL) {
-      env_sym_t *temp = node;
-      node = node->next;
-      mem_free(temp->name_obj);
-      temp->name_obj = NULL;
-      mem_free(temp);
-      temp = NULL;
-    }
-  }
   env->symbols[env->top] = NULL;
   env->top -= 1;
 

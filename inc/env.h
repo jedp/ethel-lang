@@ -9,9 +9,6 @@
 typedef struct __attribute__((__packed__)) Symbol {
     obj_t *name_obj;
     uint16_t flags;
-    /* Used to track how many times this scope is on the stack. */
-    /* When refcount is 0, all symbols in the scope can be deleted. */
-    uint16_t refcount;
     struct Obj *obj;
     struct Symbol *prev;
     struct Symbol *next;
