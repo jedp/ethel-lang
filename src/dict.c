@@ -1,4 +1,5 @@
 #include <stdio.h>
+#include "../inc/type.h"
 #include "../inc/def.h"
 #include "../inc/ptr.h"
 #include "../inc/mem.h"
@@ -24,27 +25,27 @@ error_t dict_init(obj_t *obj, uint32_t buckets) {
 }
 
 error_t _dict_put(obj_dict_t *dict, obj_t *k, obj_t *v) {
-  obj_t *hash_obj = get_static_method(k->type, METHOD_HASH)(k, NULL);
-  if (hash_obj->type == TYPE_NIL) {
-    printf("Disaster! No hash method for %s\n", type_names[k->type]);
+  obj_t *hash_obj = get_static_method(TYPEOF(k), METHOD_HASH)(k, NULL);
+  if (TYPEOF(hash_obj) == TYPE_NIL) {
+    printf("Disaster! No hash method for %s\n", type_names[TYPEOF(k)]);
     return ERR_NO_SUCH_METHOD;
   }
   uint32_t hv = hash_obj->intval;
   uint32_t bucket_index = hv % dict->buckets;
 
-  obj_t *k_copy = get_static_method(k->type, METHOD_COPY)(k, NULL);
-  if (k_copy->type != k->type) {
+  obj_t *k_copy = get_static_method(TYPEOF(k), METHOD_COPY)(k, NULL);
+  if (TYPEOF(k_copy) != TYPEOF(k)) {
     printf("Failed to copy key.\n");
     return ERR_EVAL_UNHANDLED_OBJECT;
   }
 
   dict_node_t *node = dict->nodes[bucket_index];
-  static_method eq = get_static_method(k->type, METHOD_EQ);
+  static_method eq = get_static_method(TYPEOF(k), METHOD_EQ);
 
   // See if this key is already in the dictionary.
   while (node != NULL) {
     if (node->hash_val == hv &&
-        node->k->type == k->type &&
+        TYPEOF(node->k) == TYPEOF(k) &&
         eq(node->k, wrap_varargs(1, k))) {
       // There's an existing node for this key; update the value.
       node->v = v;
@@ -55,7 +56,7 @@ error_t _dict_put(obj_dict_t *dict, obj_t *k, obj_t *v) {
 
   // Create a new node and put it in the bucket.
   dict_node_t *new_node = mem_alloc(sizeof(dict_node_t));
-  mark_traceable(new_node, TYPE_DICT_DATA);
+  mark_traceable(new_node, TYPE_DICT_DATA, F_NONE);
   if (!new_node) return ERR_OUT_OF_MEMORY;
 
   new_node->hash_val = hv;
@@ -81,7 +82,7 @@ static error_t dict_resize(obj_t *orig_obj) {
 
   error_t err;
   obj_dict_t *new_dict = mem_alloc(sizeof(obj_dict_t));
-  mark_traceable(new_dict, TYPE_DICT);
+  mark_traceable(new_dict, TYPE_DICT, F_NONE);
 
   if ((err = _dict_init(new_dict, new_buckets)) != ERR_NO_ERROR) {
     mem_free(new_dict);
@@ -112,11 +113,11 @@ static error_t dict_resize(obj_t *orig_obj) {
 }
 
 error_t dict_put(obj_t *obj, obj_t *k, obj_t *v) {
-  if (k->type != TYPE_INT &&
-      k->type != TYPE_FLOAT &&
-      k->type != TYPE_STRING &&
-      k->type != TYPE_BYTE &&
-      k->type != TYPE_BOOLEAN) {
+  if (TYPEOF(k) != TYPE_INT &&
+      TYPEOF(k) != TYPE_FLOAT &&
+      TYPEOF(k) != TYPE_STRING &&
+      TYPEOF(k) != TYPE_BYTE &&
+      TYPEOF(k) != TYPE_BOOLEAN) {
     return ERR_TYPE_UNUSABLE_AS_KEY;
   }
 
@@ -133,28 +134,28 @@ error_t dict_put(obj_t *obj, obj_t *k, obj_t *v) {
 }
 
 boolean dict_contains(obj_t *dict_obj, obj_t *k) {
-  if (k->type != TYPE_INT &&
-      k->type != TYPE_FLOAT &&
-      k->type != TYPE_STRING &&
-      k->type != TYPE_BYTE &&
-      k->type != TYPE_BOOLEAN) {
+  if (TYPEOF(k) != TYPE_INT &&
+      TYPEOF(k) != TYPE_FLOAT &&
+      TYPEOF(k) != TYPE_STRING &&
+      TYPEOF(k) != TYPE_BYTE &&
+      TYPEOF(k) != TYPE_BOOLEAN) {
     return False;
   }
 
   obj_dict_t *dict = dict_obj->dict;
-  obj_t *hash_obj = get_static_method(k->type, METHOD_HASH)(k, NULL);
-  if (hash_obj->type == TYPE_NIL) {
-    printf("Disaster! No hash method for %s\n", type_names[k->type]);
+  obj_t *hash_obj = get_static_method(TYPEOF(k), METHOD_HASH)(k, NULL);
+  if (TYPEOF(hash_obj) == TYPE_NIL) {
+    printf("Disaster! No hash method for %s\n", type_names[TYPEOF(k)]);
     return ERR_NO_SUCH_METHOD;
   }
   uint32_t hv = hash_obj->intval;
   uint32_t bucket_index = hv % dict->buckets;
 
   dict_node_t *node = dict->nodes[bucket_index];
-  static_method eq = get_static_method(k->type, METHOD_EQ);
+  static_method eq = get_static_method(TYPEOF(k), METHOD_EQ);
   while (node != NULL) {
     if (node->hash_val == hv &&
-        node->k->type == k->type &&
+        TYPEOF(node->k) == TYPEOF(k) &&
         eq(node->k, wrap_varargs(1, k))) {
       return True;
     }
@@ -165,30 +166,30 @@ boolean dict_contains(obj_t *dict_obj, obj_t *k) {
 }
 
 obj_t *dict_remove(obj_t *obj, obj_t *k) {
-  if (k->type != TYPE_INT &&
-      k->type != TYPE_FLOAT &&
-      k->type != TYPE_STRING &&
-      k->type != TYPE_BYTE &&
-      k->type != TYPE_BOOLEAN) {
+  if (TYPEOF(k) != TYPE_INT &&
+      TYPEOF(k) != TYPE_FLOAT &&
+      TYPEOF(k) != TYPE_STRING &&
+      TYPEOF(k) != TYPE_BYTE &&
+      TYPEOF(k) != TYPE_BOOLEAN) {
     return nil_obj();
   }
 
   obj_dict_t *dict = obj->dict;
-  obj_t *hash_obj = get_static_method(k->type, METHOD_HASH)(k, NULL);
-  if (hash_obj->type == TYPE_NIL) {
-    printf("Disaster! No hash method for %s\n", type_names[k->type]);
+  obj_t *hash_obj = get_static_method(TYPEOF(k), METHOD_HASH)(k, NULL);
+  if (TYPEOF(hash_obj) == TYPE_NIL) {
+    printf("Disaster! No hash method for %s\n", type_names[TYPEOF(k)]);
     return nil_obj();
   }
   uint32_t hv = hash_obj->intval;
   uint32_t bucket_index = hv % dict->buckets;
-  static_method eq = get_static_method(k->type, METHOD_EQ);
+  static_method eq = get_static_method(TYPEOF(k), METHOD_EQ);
 
   dict_node_t *prev = NULL;
   dict_node_t *node = dict->nodes[bucket_index];
   while (node != NULL) {
     // Remove this node and splice the list together.
     if (node->hash_val == hv &&
-        node->k->type == k->type &&
+        TYPEOF(node->k) == TYPEOF(k) &&
         eq(node->k, wrap_varargs(1, k))) {
 
       // Remove the node from the linked list.
@@ -217,28 +218,28 @@ obj_t *dict_remove(obj_t *obj, obj_t *k) {
 }
 
 obj_t *dict_get(obj_t *obj, obj_t *k) {
-  if (k->type != TYPE_INT &&
-      k->type != TYPE_FLOAT &&
-      k->type != TYPE_STRING &&
-      k->type != TYPE_BYTE &&
-      k->type != TYPE_BOOLEAN) {
+  if (TYPEOF(k) != TYPE_INT &&
+      TYPEOF(k) != TYPE_FLOAT &&
+      TYPEOF(k) != TYPE_STRING &&
+      TYPEOF(k) != TYPE_BYTE &&
+      TYPEOF(k) != TYPE_BOOLEAN) {
     return nil_obj();
   }
 
   obj_dict_t *dict = obj->dict;
-  obj_t *hash_obj = get_static_method(k->type, METHOD_HASH)(k, NULL);
-  if (hash_obj->type == TYPE_NIL) {
-    printf("Disaster! No hash method for %s\n", type_names[k->type]);
+  obj_t *hash_obj = get_static_method(TYPEOF(k), METHOD_HASH)(k, NULL);
+  if (TYPEOF(hash_obj) == TYPE_NIL) {
+    printf("Disaster! No hash method for %s\n", type_names[TYPEOF(k)]);
     return nil_obj();
   }
   uint32_t hv = hash_obj->intval;
   uint32_t bucket_index = hv % dict->buckets;
 
   dict_node_t *node = dict->nodes[bucket_index];
-  static_method eq = get_static_method(k->type, METHOD_EQ);
+  static_method eq = get_static_method(TYPEOF(k), METHOD_EQ);
   while (node != NULL) {
     if (node->hash_val == hv &&
-        k->type == node->k->type &&
+        TYPEOF(k) == TYPEOF(node->k) &&
         eq(k, wrap_varargs(1, node->k))) {
       return node->v;
     }
@@ -320,7 +321,7 @@ static obj_t *iter_next(obj_iter_t *iterable) {
 
     case ITER_ITERATING: {
       obj_t *elem = list_remove_first(iterable->state_obj, NULL);
-      if (elem->type == TYPE_NIL) {
+      if (TYPEOF(elem) == TYPE_NIL) {
         iterable->state = ITER_STOPPED;
         return nil_obj();
       }

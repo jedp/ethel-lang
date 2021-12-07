@@ -3,12 +3,17 @@
 
 #include <stdio.h>
 #include <stdint.h>
+#include <limits.h>
+
+#if (__WORDSIZE == 64)
+#define BUILD64 1
+#endif
 
 #define True      1
 #define False     0
 #define Null      0
 
-#define ETHEL_HEAP_SIZE_BYTES 16000000
+#define ETHEL_HEAP_SIZE_BYTES 16000000L
 #define DICT_INIT_BUCKETS 16
 
 // FNV (Fowlwer, Noll, Vo) FNV-1a 32-bit hash constants.
@@ -17,9 +22,10 @@
 
 enum flags {
   F_NONE           = 0x00,
-  F_ASSIGNABLE     = 0x01,
-  F_OVERWRITE      = 0x10,
-  F_VAR            = 0x80,
+  F_GC_FREE        = (1 << 1),
+  F_ENV_ASSIGNABLE = (1 << 2),
+  F_ENV_OVERWRITE  = (1 << 3),
+  F_ENV_VAR        = (1 << 4),
 };
 
 enum every_type {
@@ -125,6 +131,7 @@ enum every_type {
   TYPE_ITERATOR_DATA,
   TYPE_BREAK,
   TYPE_CONTINUE,
+  ENV_SYM,
   TYPE_MAX,
 };
 
@@ -231,19 +238,26 @@ static const char* type_names[TYPE_MAX] = {
   "Iterator Data",
   "Break",
   "Continue",
+  "Environment Symbol",
 };
 
 typedef uint8_t byte;
 typedef uint32_t boolean;
+typedef uint8_t flags_t;
+typedef uint8_t type_t;
 
-typedef struct TraceableObj {
-  uint16_t type;
-  uint16_t flags;
-} traceable_obj_t;
+typedef struct {
+#ifdef BUILD64
+  uint64_t type : 52;
+#else
+  int type : 20;
+#endif
+  int flags : 8;
+  int children : 4;
+} gc_header_t;
 
-typedef struct __attribute__((__packed__)) {
-  uint16_t type;
-  uint16_t flags;
+typedef struct {
+  gc_header_t hdr;
   size_t size;
   byte data[];
 } bytearray_t;

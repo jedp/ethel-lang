@@ -5,8 +5,6 @@
 #include "err.h"
 #include "def.h"
 
-typedef uint8_t obj_type_t;
-
 enum iter_state {
   ITER_NOT_STARTED,
   ITER_ITERATING,
@@ -16,15 +14,13 @@ enum iter_state {
 typedef struct Obj obj_t;
 
 typedef struct MethodArg {
-  uint16_t type;  // Traceable obj header
-  uint16_t flags;
+  gc_header_t hdr;
   obj_t *arg;
   struct MethodArg *next;
 } obj_method_args_t;
 
 typedef struct Method {
-  uint16_t type;  // Traceable obj header
-  uint16_t flags;
+  gc_header_t hdr;
   bytearray_t *name;
   struct Obj *(*callable)(struct Obj *obj, struct MethodArg *args);
   struct Method *next;
@@ -37,38 +33,33 @@ typedef struct Range {
 } range_t;
 
 typedef struct ObjListElem {
-  uint16_t type;  // Traceable obj header
-  uint16_t flags;
+  gc_header_t hdr;
   obj_t *node;
   struct ObjListElem *next;
 } obj_list_element_t;
 
 typedef struct ObjList {
-  uint16_t type;  // Traceable obj header
-  uint16_t flags;
+  gc_header_t hdr;
   obj_list_element_t *elems;
 } obj_list_t;
 
 typedef struct ObjDictKvNode {
-  uint16_t type;  // Traceable obj header
-  uint16_t flags;
-  uint32_t hash_val;
+  gc_header_t hdr;
   obj_t *k;
   obj_t *v;
   struct ObjDictKvNode *next;
+  uint32_t hash_val;
 } dict_node_t;
 
 typedef struct ObjDictElem {
-  uint16_t type;  // Traceable obj header
-  uint16_t flags;
+  gc_header_t hdr;
+  dict_node_t **nodes;
   uint32_t buckets;
   uint32_t nelems;
-  dict_node_t **nodes;
 } obj_dict_t;
 
 typedef struct ObjFuncDef {
-  uint16_t type;  // Traceable obj header
-  uint16_t flags;
+  gc_header_t hdr;
   /* Pointer to the ast_func_def_t to execute. */
   void* code;
   /* Pointer to the env_sym_t scope the function was declared in. */
@@ -76,17 +67,15 @@ typedef struct ObjFuncDef {
 } obj_func_def_t;
 
 typedef struct ObjIterator {
-  uint16_t type;  // Traceable obj header
-  uint16_t flags;
-  int state;
+  gc_header_t hdr;
   obj_t *obj;
   obj_t *state_obj;
   struct Obj *(*next)(struct ObjIterator *iterable);
+  int state;
 } obj_iter_t;
 
 typedef struct Obj {
-  uint16_t type;  // Traceable obj header
-  uint16_t flags;
+  gc_header_t hdr;
   union {
     error_t errval;
     int intval;

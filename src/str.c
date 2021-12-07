@@ -1,6 +1,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <limits.h>
+#include "../inc/type.h"
 #include "../inc/ptr.h"
 #include "../inc/mem.h"
 #include "../inc/obj.h"
@@ -267,7 +268,7 @@ bytearray_t *int_to_hex(unsigned int n) {
 }
 
 bytearray_t *bytearray_alloc(size_t size) {
-  bytearray_t *a = mem_alloc(size + 4);
+  bytearray_t *a = mem_alloc(size + sizeof(size_t) + sizeof(gc_header_t));
   a->size = size;
   mem_set(a->data, '\0', size);
   return a;
@@ -333,14 +334,14 @@ obj_t *str_as(obj_t *obj, obj_method_args_t *args) {
   if (args == NULL || args->arg == NULL) return boolean_obj(False);
   obj_t *type_arg = args->arg;
 
-  switch (type_arg->type) {
+  switch (TYPEOF(type_arg)) {
     case TYPE_STRING: return obj;
     case TYPE_INT: return str_to_int(obj, NULL);
     case TYPE_FLOAT: return str_to_float(obj, NULL);
     case TYPE_BOOLEAN: return boolean_obj(obj->bytearray->size ? True : False);
     default:
       printf("Cannot cast %s to type %s.\n",
-             type_names[obj->type], type_names[type_arg->type]);
+             type_names[TYPEOF(obj)], type_names[TYPEOF(type_arg)]);
       return boolean_obj(False);
   }
 }
@@ -352,10 +353,10 @@ obj_t *str_substring(obj_t *obj, obj_method_args_t *args) {
   }
 
   obj_t *start_arg = args->arg;
-  if (start_arg->type != TYPE_INT) return nil_obj();
+  if (TYPEOF(start_arg) != TYPE_INT) return nil_obj();
 
   obj_t *end_arg = args->next->arg;
-  if (end_arg->type != TYPE_INT)  return nil_obj();
+  if (TYPEOF(end_arg) != TYPE_INT)  return nil_obj();
 
   return _str_slice(obj, start_arg->intval, end_arg->intval);
 }
@@ -367,9 +368,9 @@ obj_t *str_add(obj_t *obj, obj_method_args_t *args) {
   }
 
   obj_t *arg = args->arg;
-  if (arg->type != TYPE_STRING) {
+  if (TYPEOF(arg) != TYPE_STRING) {
     printf("Cannot add %s to %s.\n",
-           type_names[arg->type], type_names[obj->type]);
+           type_names[TYPEOF(arg)], type_names[TYPEOF(obj)]);
     return obj;
   }
 
@@ -400,7 +401,9 @@ obj_t *str_random_choice(obj_t *obj, obj_method_args_t *args) {
 
 obj_t *byte_dump(obj_t *byte_obj) {
   // 'x' -> "120  0x78  11111111"
+  printf("-- byte_dump %s %d\n", __FILE__,  __LINE__);
   bytearray_t *a = bytearray_alloc(19);
+
 
   // Three-digit decimal representation.
   // Do not print leading zeroes, because that looks octal.
@@ -433,6 +436,7 @@ obj_t *byte_dump(obj_t *byte_obj) {
     a->data[11 + i] = b;
   }
 
+  printf("-- byte_dump %s %d\n", __FILE__,  __LINE__);
   return string_obj(a);
 }
 

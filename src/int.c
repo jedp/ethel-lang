@@ -1,4 +1,5 @@
 #include <stdio.h>
+#include "../inc/type.h"
 #include "../inc/mem.h"
 #include "../inc/math.h"
 #include "../inc/float.h"
@@ -61,7 +62,7 @@ obj_t *int_eq(obj_t *obj, obj_method_args_t *args) {
   if (args == NULL || args->arg == NULL) return boolean_obj(False);
   obj_t *arg = args->arg;
 
-  switch(arg->type) {
+  switch(TYPEOF(arg)) {
     case TYPE_INT:
       return boolean_obj((obj->intval == arg->intval) ? True : False);
     case TYPE_FLOAT:
@@ -70,7 +71,7 @@ obj_t *int_eq(obj_t *obj, obj_method_args_t *args) {
       return boolean_obj((obj->intval == (int) arg->byteval) ? True : False);
     default:
       printf("Cannot compare for equality between %s and %s.\n",
-              type_names[obj->type], type_names[arg->type]);
+              type_names[TYPEOF(obj)], type_names[TYPEOF(arg)]);
       return boolean_obj(False);
   }
 }
@@ -78,11 +79,11 @@ obj_t *int_eq(obj_t *obj, obj_method_args_t *args) {
 obj_t *int_ne(obj_t *obj, obj_method_args_t *args) {
   if (args == NULL || args->arg == NULL) return boolean_obj(False);
   obj_t *arg = args->arg;
-  if (arg->type != TYPE_INT &&
-      arg->type != TYPE_FLOAT &&
-      arg->type != TYPE_BYTE) {
+  if (TYPEOF(arg) != TYPE_INT &&
+      TYPEOF(arg) != TYPE_FLOAT &&
+      TYPEOF(arg) != TYPE_BYTE) {
     printf("Cannot compare for equality between %s and %s.\n",
-            type_names[obj->type], type_names[arg->type]);
+            type_names[TYPEOF(obj)], type_names[TYPEOF(arg)]);
     return boolean_obj(False);
   }
 
@@ -94,7 +95,7 @@ obj_t *int_lt(obj_t *obj, obj_method_args_t *args) {
   if (args == NULL || args->arg == NULL) return boolean_obj(False);
   obj_t *arg = args->arg;
 
-  switch(arg->type) {
+  switch(TYPEOF(arg)) {
     case TYPE_INT:
       return boolean_obj((obj->intval < arg->intval) ? True : False);
     case TYPE_FLOAT:
@@ -104,7 +105,7 @@ obj_t *int_lt(obj_t *obj, obj_method_args_t *args) {
           ((uint32_t) obj->intval < (uint32_t) arg->byteval) ? True : False);
     default:
       printf("Cannot compare %s and %s.\n",
-             type_names[obj->type], type_names[arg->type]);
+             type_names[TYPEOF(obj)], type_names[TYPEOF(arg)]);
       return boolean_obj(False);
   }
 }
@@ -113,7 +114,7 @@ obj_t *int_gt(obj_t *obj, obj_method_args_t *args) {
   if (args == NULL || args->arg == NULL) return boolean_obj(False);
   obj_t *arg = args->arg;
 
-  switch(arg->type) {
+  switch(TYPEOF(arg)) {
     case TYPE_INT:
       return boolean_obj((obj->intval > arg->intval) ? True : False);
     case TYPE_FLOAT:
@@ -123,7 +124,7 @@ obj_t *int_gt(obj_t *obj, obj_method_args_t *args) {
           ((uint32_t) obj->intval > (uint32_t) arg->byteval) ? True : False);
     default:
       printf("Cannot compare %s and %s.\n",
-             type_names[obj->type], type_names[arg->type]);
+             type_names[TYPEOF(obj)], type_names[TYPEOF(arg)]);
       return boolean_obj(False);
   }
 }
@@ -131,11 +132,11 @@ obj_t *int_gt(obj_t *obj, obj_method_args_t *args) {
 obj_t *int_le(obj_t *obj, obj_method_args_t *args) {
   if (args == NULL || args->arg == NULL) return boolean_obj(False);
   obj_t *arg = args->arg;
-  if (arg->type != TYPE_INT &&
-      arg->type != TYPE_FLOAT &&
-      arg->type != TYPE_BYTE) {
+  if (TYPEOF(arg) != TYPE_INT &&
+      TYPEOF(arg) != TYPE_FLOAT &&
+      TYPEOF(arg) != TYPE_BYTE) {
     printf("Cannot compare for equality between %s and %s.\n",
-            type_names[obj->type], type_names[arg->type]);
+            type_names[TYPEOF(obj)], type_names[TYPEOF(arg)]);
     return boolean_obj(False);
   }
 
@@ -146,11 +147,11 @@ obj_t *int_le(obj_t *obj, obj_method_args_t *args) {
 obj_t *int_ge(obj_t *obj, obj_method_args_t *args) {
   if (args == NULL || args->arg == NULL) return boolean_obj(False);
   obj_t *arg = args->arg;
-  if (arg->type != TYPE_INT &&
-      arg->type != TYPE_FLOAT &&
-      arg->type != TYPE_BYTE) {
+  if (TYPEOF(arg) != TYPE_INT &&
+      TYPEOF(arg) != TYPE_FLOAT &&
+      TYPEOF(arg) != TYPE_BYTE) {
     printf("Cannot compare for equality between %s and %s.\n",
-            type_names[obj->type], type_names[arg->type]);
+            type_names[TYPEOF(obj)], type_names[TYPEOF(arg)]);
     return boolean_obj(False);
   }
 
@@ -163,15 +164,15 @@ obj_t *int_math(obj_t *obj,
                 static_method_ident_t method_id) {
   if (args == NULL || args->arg == NULL) return obj;
   obj_t *arg = args->arg;
-  static_method m_cast = get_static_method(arg->type, METHOD_TO_INT);
+  static_method m_cast = get_static_method(TYPEOF(arg), METHOD_TO_INT);
   if (m_cast == NULL) {
     printf("Cannot do math with %s and %s",
-        type_names[arg->type], type_names[obj->type]);
+        type_names[TYPEOF(arg)], type_names[TYPEOF(obj)]);
     return obj;
   }
 
   // Convert to float if other arg is a float.
-  if (arg->type == TYPE_FLOAT) {
+  if (TYPEOF(arg) == TYPE_FLOAT) {
     return float_math(float_obj((float) obj->intval), args, method_id);
   }
 
@@ -226,7 +227,7 @@ obj_t *int_as(obj_t *obj, obj_method_args_t *args) {
   if (args == NULL || args->arg == NULL) return boolean_obj(False);
   obj_t *type_arg = args->arg;
 
-  switch (type_arg->type) {
+  switch (TYPEOF(type_arg)) {
     case TYPE_INT: return obj;
     case TYPE_FLOAT: return float_obj((float) obj->intval);
     case TYPE_BYTE: return byte_obj((uint32_t) obj->intval & 0xff);
@@ -234,7 +235,7 @@ obj_t *int_as(obj_t *obj, obj_method_args_t *args) {
     case TYPE_BOOLEAN: return boolean_obj((obj->intval != 0) ? True : False);
     default:
       printf("Cannot cast %s to type %s.\n",
-             type_names[obj->type], type_names[type_arg->type]);
+             type_names[TYPEOF(obj)], type_names[TYPEOF(type_arg)]);
       return boolean_obj(False);
   }
 }
@@ -251,12 +252,12 @@ obj_t *int_bitwise_and(obj_t *obj, obj_method_args_t *args) {
   if (args == NULL || args->arg == NULL) return obj;
   obj_t *arg = args->arg;
 
-  switch(arg->type) {
+  switch(TYPEOF(arg)) {
     case TYPE_INT: return int_obj(obj->intval & arg->intval);
     case TYPE_BYTE: return int_obj(obj->intval & (unsigned char) arg->byteval);
     default:
       printf("Cannot perform bitwise and with %s and %s.\n",
-             type_names[obj->type], type_names[arg->type]);
+             type_names[TYPEOF(obj)], type_names[TYPEOF(arg)]);
       return nil_obj();
   }
 }
@@ -265,12 +266,12 @@ obj_t *int_bitwise_or(obj_t *obj, obj_method_args_t *args) {
   if (args == NULL || args->arg == NULL) return obj;
   obj_t *arg = args->arg;
 
-  switch(arg->type) {
+  switch(TYPEOF(arg)) {
     case TYPE_INT: return int_obj(obj->intval | arg->intval);
     case TYPE_BYTE: return int_obj(obj->intval | (unsigned char) arg->byteval);
     default:
       printf("Cannot perform bitwise or with %s and %s.\n",
-             type_names[obj->type], type_names[arg->type]);
+             type_names[TYPEOF(obj)], type_names[TYPEOF(arg)]);
       return nil_obj();
   }
 }
@@ -279,12 +280,12 @@ obj_t *int_bitwise_xor(obj_t *obj, obj_method_args_t *args) {
   if (args == NULL || args->arg == NULL) return obj;
   obj_t *arg = args->arg;
 
-  switch(arg->type) {
+  switch(TYPEOF(arg)) {
     case TYPE_INT: return int_obj(obj->intval ^ arg->intval);
     case TYPE_BYTE: return int_obj(obj->intval ^ (unsigned char) arg->byteval);
     default:
       printf("Cannot perform bitwise xor with %s and %s.\n",
-             type_names[obj->type], type_names[arg->type]);
+             type_names[TYPEOF(obj)], type_names[TYPEOF(arg)]);
       return nil_obj();
   }
 }
@@ -297,12 +298,12 @@ obj_t *int_bitwise_shl(obj_t *obj, obj_method_args_t *args) {
   if (args == NULL || args->arg == NULL) return obj;
   obj_t *arg = args->arg;
 
-  switch(arg->type) {
+  switch(TYPEOF(arg)) {
     case TYPE_INT: return int_obj(obj->intval << (unsigned int) arg->intval);
     case TYPE_BYTE: return int_obj(obj->intval << (unsigned char) arg->byteval);
     default:
       printf("Cannot perform bitwise and with %s and %s.\n",
-             type_names[obj->type], type_names[arg->type]);
+             type_names[TYPEOF(obj)], type_names[TYPEOF(arg)]);
       return nil_obj();
   }
 }
@@ -311,12 +312,12 @@ obj_t *int_bitwise_shr(obj_t *obj, obj_method_args_t *args) {
   if (args == NULL || args->arg == NULL) return obj;
   obj_t *arg = args->arg;
 
-  switch(arg->type) {
+  switch(TYPEOF(arg)) {
     case TYPE_INT: return int_obj(obj->intval >> (unsigned int) arg->intval);
     case TYPE_BYTE: return int_obj(obj->intval >> (unsigned char) arg->byteval);
     default:
       printf("Cannot perform bitwise and with %s and %s.\n",
-             type_names[obj->type], type_names[arg->type]);
+             type_names[TYPEOF(obj)], type_names[TYPEOF(arg)]);
       return nil_obj();
   }
 }

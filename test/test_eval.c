@@ -2,6 +2,7 @@
 #include "util.h"
 #include "unity/unity.h"
 #include "test_eval.h"
+#include "../inc/type.h"
 #include "../inc/str.h"
 #include "../inc/env.h"
 #include "../inc/eval.h"
@@ -38,7 +39,7 @@ void test_eval_preced_cast(void) {
   TEST_ASSERT_EQUAL(ERR_NO_ERROR, result->err);
 
   obj_t *obj = result->obj;
-  TEST_ASSERT_EQUAL(TYPE_INT, obj->type);
+  TEST_ASSERT_EQUAL(TYPE_INT, TYPEOF(obj));
   TEST_ASSERT_EQUAL(2, obj->intval);
 }
 
@@ -146,7 +147,7 @@ void test_eval_for_loop_range(void) {
   TEST_ASSERT_EQUAL(ERR_NO_ERROR, result->err);
 
   obj_t *obj = result->obj;
-  TEST_ASSERT_EQUAL(TYPE_INT, obj->type);
+  TEST_ASSERT_EQUAL(TYPE_INT, TYPEOF(obj));
   TEST_ASSERT_EQUAL(10, obj->intval);
 }
 
@@ -162,7 +163,7 @@ void test_eval_for_loop_range_step(void) {
   TEST_ASSERT_EQUAL(ERR_NO_ERROR, result->err);
 
   obj_t *obj = result->obj;
-  TEST_ASSERT_EQUAL(TYPE_INT, obj->type);
+  TEST_ASSERT_EQUAL(TYPE_INT, TYPEOF(obj));
   TEST_ASSERT_EQUAL(15, obj->intval);
 }
 
@@ -176,7 +177,7 @@ void test_eval_for_loop_list(void) {
   TEST_ASSERT_EQUAL(ERR_NO_ERROR, result->err);
 
   obj_t *obj = result->obj;
-  TEST_ASSERT_EQUAL(TYPE_INT, obj->type);
+  TEST_ASSERT_EQUAL(TYPE_INT, TYPEOF(obj));
   TEST_ASSERT_EQUAL(9, obj->intval);
 }
 
@@ -190,7 +191,7 @@ void test_eval_for_loop_dict(void) {
   TEST_ASSERT_EQUAL(ERR_NO_ERROR, result->err);
 
   obj_t *obj = result->obj;
-  TEST_ASSERT_EQUAL(TYPE_INT, obj->type);
+  TEST_ASSERT_EQUAL(TYPE_INT, TYPEOF(obj));
   TEST_ASSERT_EQUAL(4, obj->intval);
 }
 
@@ -207,7 +208,7 @@ void test_eval_for_loop_arr(void) {
   TEST_ASSERT_EQUAL(ERR_NO_ERROR, result->err);
 
   obj_t *obj = result->obj;
-  TEST_ASSERT_EQUAL(TYPE_INT, obj->type);
+  TEST_ASSERT_EQUAL(TYPE_INT, TYPEOF(obj));
   TEST_ASSERT_EQUAL(54, obj->intval);
 }
 
@@ -221,7 +222,7 @@ void test_eval_for_loop_str(void) {
   TEST_ASSERT_EQUAL(ERR_NO_ERROR, result->err);
 
   obj_t *obj = result->obj;
-  TEST_ASSERT_EQUAL(TYPE_INT, obj->type);
+  TEST_ASSERT_EQUAL(TYPE_INT, TYPEOF(obj));
   TEST_ASSERT_EQUAL(97 + 98 + 99, obj->intval);
 }
 
@@ -236,7 +237,7 @@ void test_eval_do_while_loop(void) {
   TEST_ASSERT_EQUAL(ERR_NO_ERROR, result->err);
 
   obj_t *obj = result->obj;
-  TEST_ASSERT_EQUAL(TYPE_INT, obj->type);
+  TEST_ASSERT_EQUAL(TYPE_INT, TYPEOF(obj));
   TEST_ASSERT_EQUAL(0, obj->intval);
 }
 
@@ -249,7 +250,7 @@ void test_eval_while_loop(void) {
   TEST_ASSERT_EQUAL(ERR_NO_ERROR, result->err);
 
   obj_t *obj = result->obj;
-  TEST_ASSERT_EQUAL(TYPE_INT, obj->type);
+  TEST_ASSERT_EQUAL(TYPE_INT, TYPEOF(obj));
   TEST_ASSERT_EQUAL(0, obj->intval);
 }
 
@@ -266,7 +267,7 @@ void test_eval_for_loop_break(void) {
   TEST_ASSERT_EQUAL(ERR_NO_ERROR, result->err);
 
   obj_t *obj = result->obj;
-  TEST_ASSERT_EQUAL(TYPE_INT, obj->type);
+  TEST_ASSERT_EQUAL(TYPE_INT, TYPEOF(obj));
   TEST_ASSERT_EQUAL(97 + 98, obj->intval);
 }
 
@@ -282,7 +283,7 @@ void test_eval_while_loop_break(void) {
   TEST_ASSERT_EQUAL(ERR_NO_ERROR, result->err);
 
   obj_t *obj = result->obj;
-  TEST_ASSERT_EQUAL(TYPE_INT, obj->type);
+  TEST_ASSERT_EQUAL(TYPE_INT, TYPEOF(obj));
   TEST_ASSERT_EQUAL(3, obj->intval);
 }
 
@@ -298,7 +299,7 @@ void test_eval_do_while_loop_break(void) {
   TEST_ASSERT_EQUAL(ERR_NO_ERROR, result->err);
 
   obj_t *obj = result->obj;
-  TEST_ASSERT_EQUAL(TYPE_INT, obj->type);
+  TEST_ASSERT_EQUAL(TYPE_INT, TYPEOF(obj));
   TEST_ASSERT_EQUAL(3, obj->intval);
 }
 
@@ -315,7 +316,7 @@ void test_eval_for_loop_continue(void) {
   TEST_ASSERT_EQUAL(ERR_NO_ERROR, result->err);
 
   obj_t *obj = result->obj;
-  TEST_ASSERT_EQUAL(TYPE_INT, obj->type);
+  TEST_ASSERT_EQUAL(TYPE_INT, TYPEOF(obj));
   TEST_ASSERT_EQUAL(97 + 99, obj->intval);
 }
 
@@ -333,7 +334,7 @@ void test_eval_while_loop_continue(void) {
   TEST_ASSERT_EQUAL(ERR_NO_ERROR, result->err);
 
   obj_t *obj = result->obj;
-  TEST_ASSERT_EQUAL(TYPE_INT, obj->type);
+  TEST_ASSERT_EQUAL(TYPE_INT, TYPEOF(obj));
   TEST_ASSERT_EQUAL(5, obj->intval);
 }
 
@@ -351,7 +352,7 @@ void test_eval_do_while_loop_continue(void) {
   TEST_ASSERT_EQUAL(ERR_NO_ERROR, result->err);
 
   obj_t *obj = result->obj;
-  TEST_ASSERT_EQUAL(TYPE_INT, obj->type);
+  TEST_ASSERT_EQUAL(TYPE_INT, TYPEOF(obj));
   TEST_ASSERT_EQUAL(5, obj->intval);
 }
 
@@ -361,7 +362,7 @@ void test_eval_if_else(void) {
   TEST_ASSERT_EQUAL(ERR_NO_ERROR, result->err);
 
   obj_t *obj = result->obj;
-  TEST_ASSERT_EQUAL(TYPE_INT, obj->type);
+  TEST_ASSERT_EQUAL(TYPE_INT, TYPEOF(obj));
   TEST_ASSERT_EQUAL(5, obj->intval);
 }
 
@@ -371,7 +372,7 @@ void test_eval_if_else_nil(void) {
   TEST_ASSERT_EQUAL(ERR_NO_ERROR, result->err);
 
   obj_t *obj = result->obj;
-  TEST_ASSERT_EQUAL(TYPE_NIL, obj->type);
+  TEST_ASSERT_EQUAL(TYPE_NIL, TYPEOF(obj));
 }
 
 void test_eval_if_else_assign(void) {
@@ -422,7 +423,7 @@ void test_eval_logical_not(void) {
 }
 
 void test_eval_truthiness(void) {
-  char *program = "val x = (\"glug\" or 0) and (4.3 or 0) and (0 or 'c')"; 
+  char *program = "val x = (\"glug\" or 0) and (4.3 or 0) and (0 or 'c')";
   eval_result_t *result = eval_program(program);
   TEST_ASSERT_EQUAL(ERR_NO_ERROR, result->err);
 
@@ -451,66 +452,66 @@ void test_eval_char_comparison(void) {
 }
 
 void test_eval_cast_int(void) {
-  obj_t *obj; 
+  obj_t *obj;
 
   obj = eval_program("-99 as int")->obj;
-  TEST_ASSERT_EQUAL(TYPE_INT, obj->type);
+  TEST_ASSERT_EQUAL(TYPE_INT, TYPEOF(obj));
   TEST_ASSERT_EQUAL(-99, obj->intval);
 
   obj = eval_program("-99 as float")->obj;
-  TEST_ASSERT_EQUAL(TYPE_FLOAT, obj->type);
+  TEST_ASSERT_EQUAL(TYPE_FLOAT, TYPEOF(obj));
   TEST_ASSERT_EQUAL(-99.0, obj->floatval);
 
   obj = eval_program("-99 as string")->obj;
-  TEST_ASSERT_EQUAL(TYPE_STRING, obj->type);
+  TEST_ASSERT_EQUAL(TYPE_STRING, TYPEOF(obj));
   TEST_ASSERT_EQUAL_STRING("-99", bytearray_to_c_str(obj->bytearray));
 
   obj = eval_program("99 as byte")->obj;
-  TEST_ASSERT_EQUAL(TYPE_BYTE, obj->type);
+  TEST_ASSERT_EQUAL(TYPE_BYTE, TYPEOF(obj));
   TEST_ASSERT_EQUAL('c', obj->byteval);
 
   obj = eval_program("-99 as boolean")->obj;
-  TEST_ASSERT_EQUAL(TYPE_BOOLEAN, obj->type);
+  TEST_ASSERT_EQUAL(TYPE_BOOLEAN, TYPEOF(obj));
   TEST_ASSERT_EQUAL(1, obj->boolval);
 }
 
 void test_eval_cast_float(void) {
-  obj_t *obj; 
+  obj_t *obj;
 
   obj = eval_program("-42.99 as int")->obj;
-  TEST_ASSERT_EQUAL(TYPE_INT, obj->type);
+  TEST_ASSERT_EQUAL(TYPE_INT, TYPEOF(obj));
   TEST_ASSERT_EQUAL(-42, obj->intval);
 
   obj = eval_program("-42.99 as float")->obj;
-  TEST_ASSERT_EQUAL(TYPE_FLOAT, obj->type);
+  TEST_ASSERT_EQUAL(TYPE_FLOAT, TYPEOF(obj));
   TEST_ASSERT_EQUAL(-42.99, obj->floatval);
 
   obj = eval_program("-42.02 as string")->obj;
-  TEST_ASSERT_EQUAL(TYPE_STRING, obj->type);
+  TEST_ASSERT_EQUAL(TYPE_STRING, TYPEOF(obj));
   TEST_ASSERT_EQUAL_STRING("-42.020000", bytearray_to_c_str(obj->bytearray));
 
   obj = eval_program("-42.99 as boolean")->obj;
-  TEST_ASSERT_EQUAL(TYPE_BOOLEAN, obj->type);
+  TEST_ASSERT_EQUAL(TYPE_BOOLEAN, TYPEOF(obj));
   TEST_ASSERT_EQUAL(1, obj->intval);
 }
 
 void test_eval_cast_string(void) {
-  obj_t *obj; 
+  obj_t *obj;
 
   obj = eval_program("\"-12.44\" as int")->obj;
-  TEST_ASSERT_EQUAL(TYPE_INT, obj->type);
+  TEST_ASSERT_EQUAL(TYPE_INT, TYPEOF(obj));
   TEST_ASSERT_EQUAL(-12, obj->intval);
 
   obj = eval_program("\"-42.99\" as float")->obj;
-  TEST_ASSERT_EQUAL(TYPE_FLOAT, obj->type);
+  TEST_ASSERT_EQUAL(TYPE_FLOAT, TYPEOF(obj));
   TEST_ASSERT_EQUAL(-42.99, obj->floatval);
 
   obj = eval_program("\"-42.1\" as string")->obj;
-  TEST_ASSERT_EQUAL(TYPE_STRING, obj->type);
+  TEST_ASSERT_EQUAL(TYPE_STRING, TYPEOF(obj));
   TEST_ASSERT_EQUAL_STRING("-42.1", bytearray_to_c_str(obj->bytearray));
 
   obj = eval_program("\"-42.99\" as boolean")->obj;
-  TEST_ASSERT_EQUAL(TYPE_BOOLEAN, obj->type);
+  TEST_ASSERT_EQUAL(TYPE_BOOLEAN, TYPEOF(obj));
   TEST_ASSERT_EQUAL(1, obj->intval);
 }
 
@@ -518,15 +519,15 @@ void test_eval_cast_char(void) {
   obj_t *obj;
 
   obj = eval_program("'c' as int")->obj;
-  TEST_ASSERT_EQUAL(TYPE_INT, obj->type);
+  TEST_ASSERT_EQUAL(TYPE_INT, TYPEOF(obj));
   TEST_ASSERT_EQUAL(99, obj->intval);
 
   obj = eval_program("'c' as string")->obj;
-  TEST_ASSERT_EQUAL(TYPE_STRING, obj->type);
+  TEST_ASSERT_EQUAL(TYPE_STRING, TYPEOF(obj));
   TEST_ASSERT_EQUAL_STRING("c", bytearray_to_c_str(obj->bytearray));
 
   obj = eval_program("'t' as boolean")->obj;
-  TEST_ASSERT_EQUAL(TYPE_BOOLEAN, obj->type);
+  TEST_ASSERT_EQUAL(TYPE_BOOLEAN, TYPEOF(obj));
   TEST_ASSERT_EQUAL(1, obj->intval);
 }
 
@@ -534,24 +535,24 @@ void test_eval_cast_boolean(void) {
   obj_t *obj;
 
   obj = eval_program("true as int")->obj;
-  TEST_ASSERT_EQUAL(TYPE_INT, obj->type);
+  TEST_ASSERT_EQUAL(TYPE_INT, TYPEOF(obj));
   TEST_ASSERT_EQUAL(1, obj->intval);
   obj = eval_program("false as int")->obj;
-  TEST_ASSERT_EQUAL(TYPE_INT, obj->type);
+  TEST_ASSERT_EQUAL(TYPE_INT, TYPEOF(obj));
   TEST_ASSERT_EQUAL(0, obj->intval);
 
   obj = eval_program("true as string")->obj;
-  TEST_ASSERT_EQUAL(TYPE_STRING, obj->type);
+  TEST_ASSERT_EQUAL(TYPE_STRING, TYPEOF(obj));
   TEST_ASSERT_EQUAL_STRING("true", bytearray_to_c_str(obj->bytearray));
   obj = eval_program("false as string")->obj;
-  TEST_ASSERT_EQUAL(TYPE_STRING, obj->type);
+  TEST_ASSERT_EQUAL(TYPE_STRING, TYPEOF(obj));
   TEST_ASSERT_EQUAL_STRING("false", bytearray_to_c_str(obj->bytearray));
 
   obj = eval_program("true as byte")->obj;
-  TEST_ASSERT_EQUAL(TYPE_BYTE, obj->type);
+  TEST_ASSERT_EQUAL(TYPE_BYTE, TYPEOF(obj));
   TEST_ASSERT_EQUAL('t', obj->byteval);
   obj = eval_program("false as byte")->obj;
-  TEST_ASSERT_EQUAL(TYPE_BYTE, obj->type);
+  TEST_ASSERT_EQUAL(TYPE_BYTE, TYPEOF(obj));
   TEST_ASSERT_EQUAL('f', obj->byteval);
 }
 
@@ -615,7 +616,7 @@ void test_eval_callable_hex(void) {
   TEST_ASSERT_EQUAL(ERR_NO_ERROR, result->err);
 
   obj_t *obj = result->obj;
-  TEST_ASSERT_EQUAL(TYPE_STRING, obj->type);
+  TEST_ASSERT_EQUAL(TYPE_STRING, TYPEOF(obj));
   TEST_ASSERT_EQUAL_STRING("0xffffff39", bytearray_to_c_str(obj->bytearray));
 }
 
@@ -625,7 +626,7 @@ void test_eval_callable_bin(void) {
   TEST_ASSERT_EQUAL(ERR_NO_ERROR, result->err);
 
   obj_t *obj = result->obj;
-  TEST_ASSERT_EQUAL(TYPE_STRING, obj->type);
+  TEST_ASSERT_EQUAL(TYPE_STRING, TYPEOF(obj));
   TEST_ASSERT_EQUAL_STRING("0b10110001", bytearray_to_c_str(obj->bytearray));
 }
 
@@ -723,25 +724,25 @@ void test_eval_list_val_get(void) {
                    "  l.get(0) }";
   eval_result_t *result6 = eval_program(program6);
   TEST_ASSERT_EQUAL(ERR_NO_ERROR, result6->err);
-  TEST_ASSERT_EQUAL(TYPE_NIL, result6->obj->type);
+  TEST_ASSERT_EQUAL(TYPE_NIL, TYPEOF(result6->obj));
 
   char *program7 = "{ val l = list \n"
                    "  l.get(-1) }";
   eval_result_t *result7 = eval_program(program7);
   TEST_ASSERT_EQUAL(ERR_NO_ERROR, result7->err);
-  TEST_ASSERT_EQUAL(TYPE_NIL, result7->obj->type);
+  TEST_ASSERT_EQUAL(TYPE_NIL, TYPEOF(result7->obj));
 
   char *program8 = "{ val l = list { 1, 2.3, 'c' }\n"
                    "  l.get(14) }";
   eval_result_t *result8 = eval_program(program8);
   TEST_ASSERT_EQUAL(ERR_NO_ERROR, result8->err);
-  TEST_ASSERT_EQUAL(TYPE_NIL, result8->obj->type);
+  TEST_ASSERT_EQUAL(TYPE_NIL, TYPEOF(result8->obj));
 
   char *program9 = "{ val l = list { 1, 2.3, 'c' }\n"
                    "  l.get(-5) }";
   eval_result_t *result9 = eval_program(program9);
   TEST_ASSERT_EQUAL(ERR_NO_ERROR, result9->err);
-  TEST_ASSERT_EQUAL(TYPE_NIL, result9->obj->type);
+  TEST_ASSERT_EQUAL(TYPE_NIL, TYPEOF(result9->obj));
 }
 
 void test_eval_list_val_head(void) {
@@ -828,7 +829,7 @@ void test_eval_list_val_remove_first(void) {
                    "  l.removeFirst() }";
   eval_result_t *result2 = eval_program(program2);
   TEST_ASSERT_EQUAL(ERR_NO_ERROR, result2->err);
-  TEST_ASSERT_EQUAL(TYPE_NIL, result2->obj->type);
+  TEST_ASSERT_EQUAL(TYPE_NIL, TYPEOF(result2->obj));
 }
 
 void test_eval_list_val_remove_last(void) {
@@ -843,7 +844,7 @@ void test_eval_list_val_remove_last(void) {
                    "  l.removeLast() }";
   eval_result_t *result2 = eval_program(program2);
   TEST_ASSERT_EQUAL(ERR_NO_ERROR, result2->err);
-  TEST_ASSERT_EQUAL(TYPE_NIL, result2->obj->type);
+  TEST_ASSERT_EQUAL(TYPE_NIL, TYPEOF(result2->obj));
 }
 
 void test_eval_list_val_remove_at(void) {
@@ -894,25 +895,25 @@ void test_eval_list_val_remove_at(void) {
                    "  l.removeAt(0) }";
   eval_result_t *result6 = eval_program(program6);
   TEST_ASSERT_EQUAL(ERR_NO_ERROR, result6->err);
-  TEST_ASSERT_EQUAL(TYPE_NIL, result6->obj->type);
+  TEST_ASSERT_EQUAL(TYPE_NIL, TYPEOF(result6->obj));
 
   char *program7 = "{ val l = list \n"
                    "  l.removeAt(-1) }";
   eval_result_t *result7 = eval_program(program7);
   TEST_ASSERT_EQUAL(ERR_NO_ERROR, result7->err);
-  TEST_ASSERT_EQUAL(TYPE_NIL, result7->obj->type);
+  TEST_ASSERT_EQUAL(TYPE_NIL, TYPEOF(result7->obj));
 
   char *program8 = "{ val l = list { 1, 2, 3 }\n"
                    "  l.removeAt(14) }";
   eval_result_t *result8 = eval_program(program8);
   TEST_ASSERT_EQUAL(ERR_NO_ERROR, result8->err);
-  TEST_ASSERT_EQUAL(TYPE_NIL, result8->obj->type);
+  TEST_ASSERT_EQUAL(TYPE_NIL, TYPEOF(result8->obj));
 
   char *program9 = "{ val l = list { 1, 2, 3 }\n"
                    "  l.removeAt(-5) }";
   eval_result_t *result9 = eval_program(program9);
   TEST_ASSERT_EQUAL(ERR_NO_ERROR, result9->err);
-  TEST_ASSERT_EQUAL(TYPE_NIL, result9->obj->type);
+  TEST_ASSERT_EQUAL(TYPE_NIL, TYPEOF(result9->obj));
 }
 
 void test_eval_list_in(void) {
@@ -936,7 +937,7 @@ void test_eval_arr_decl(void) {
   eval_result_t *result2= eval_program(program2);
 
   TEST_ASSERT_EQUAL(ERR_NO_ERROR, result2->err);
-  TEST_ASSERT_EQUAL(TYPE_BYTE, result2->obj->type);
+  TEST_ASSERT_EQUAL(TYPE_BYTE, TYPEOF(result2->obj));
   TEST_ASSERT_EQUAL('\0', result2->obj->byteval);
 }
 
@@ -957,7 +958,7 @@ void test_eval_arr_assign(void) {
   eval_result_t *result2= eval_program(program2);
 
   TEST_ASSERT_EQUAL(ERR_NO_ERROR, result2->err);
-  TEST_ASSERT_EQUAL(TYPE_BYTE, result2->obj->type);
+  TEST_ASSERT_EQUAL(TYPE_BYTE, TYPEOF(result2->obj));
   TEST_ASSERT_EQUAL('x', result2->obj->byteval);
 }
 
@@ -1009,7 +1010,7 @@ void test_eval_function(void) {
   eval_result_t *result = eval_program(program);
 
   TEST_ASSERT_EQUAL(ERR_NO_ERROR, result->err);
-  TEST_ASSERT_EQUAL(TYPE_INT, result->obj->type);
+  TEST_ASSERT_EQUAL(TYPE_INT, TYPEOF(result->obj));
   TEST_ASSERT_EQUAL(2, result->obj->intval);
 }
 
@@ -1018,7 +1019,7 @@ void test_eval_function_undef(void) {
   eval_result_t *result = eval_program(program);
 
   TEST_ASSERT_EQUAL(ERR_FUNCTION_UNDEFINED, result->err);
-  TEST_ASSERT_EQUAL(TYPE_NIL, result->obj->type);
+  TEST_ASSERT_EQUAL(TYPE_NIL, TYPEOF(result->obj));
 }
 
 void test_eval_function_wrong_args(void) {
@@ -1208,7 +1209,7 @@ void test_eval_arr_subscript_assign_int(void) {
   eval_result_t *result = eval_program(program);
   TEST_ASSERT_EQUAL(ERR_NO_ERROR, result->err);
   TEST_ASSERT_EQUAL_STRING("U Like potatoes", bytearray_to_c_str(result->obj->bytearray));
-} 
+}
 
 void test_eval_lhs_not_assignable(void) {
   TEST_ASSERT_EQUAL(ERR_LHS_NOT_ASSIGNABLE, eval_program("2 = 3")->err);

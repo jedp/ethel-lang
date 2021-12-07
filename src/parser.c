@@ -1,4 +1,5 @@
 #include <stdio.h>
+#include "../inc/type.h"
 #include "../inc/def.h"
 #include "../inc/ptr.h"
 #include "../inc/mem.h"
@@ -190,7 +191,7 @@ static ast_expr_list_t *parse_expr_list(lexer_t *lexer) {
 
   ast_expr_t *e = parse_expr(lexer);
   node->root = e;
-  
+
   while (lexer->token.tag == TAG_COMMA) {
     advance(lexer);
     ast_expr_list_t *next = mem_alloc(sizeof(ast_expr_list_t));
@@ -211,13 +212,13 @@ static ast_expr_list_t *parse_list_expr_list(lexer_t *lexer) {
   node->root = NULL;
 
   ast_expr_t *e = parse_expr(lexer);
-  if (e->type > AST_EMPTY) node->root = e;
+  if (TYPEOF(e) > AST_EMPTY) node->root = e;
 
   while (lexer->token.tag == TAG_COMMA || lexer->token.tag == TAG_EOL) {
     advance(lexer);
     ast_expr_list_t *next = mem_alloc(sizeof(ast_expr_list_t));
     e = parse_expr(lexer);
-    if (e->type > AST_EMPTY) {
+    if (TYPEOF(e) > AST_EMPTY) {
 
       // This is ghastly.
       if (node->root == NULL) {
@@ -240,7 +241,7 @@ static ast_expr_kv_list_t *parse_expr_kv_list(lexer_t *lexer) {
   ast_expr_kv_list_t *root = node;
 
   ast_expr_t *e = parse_expr(lexer);
-  if (e->type != AST_MAPS_TO) {
+  if (TYPEOF(e) != AST_MAPS_TO) {
     printf("Syntax error.");
     return empty_expr_kv_list();
   }
@@ -254,8 +255,8 @@ static ast_expr_kv_list_t *parse_expr_kv_list(lexer_t *lexer) {
     ast_expr_kv_list_t *next = mem_alloc(sizeof(ast_expr_kv_list_t));
     e = parse_expr(lexer);
 
-    if (e->type != AST_MAPS_TO) {
-      printf("Syntax error. got %s\n.", type_names[e->type]);
+    if (TYPEOF(e) != AST_MAPS_TO) {
+      printf("Syntax error. got %s\n.", type_names[TYPEOF(e)]);
       return empty_expr_kv_list();
     }
 
@@ -422,29 +423,29 @@ static ast_expr_t *parse_expr(lexer_t *lexer) {
     case TAG_DO: {
       advance(lexer);
       ast_expr_t *pred = parse_expr(lexer);
-      if (pred->type == AST_EMPTY) goto error;
+      if (TYPEOF(pred) == AST_EMPTY) goto error;
       if (!eat(lexer, TAG_WHILE)) goto error;
       ast_expr_t *cond = parse_expr(lexer);
-      if (cond->type == AST_EMPTY) goto error;
+      if (TYPEOF(cond) == AST_EMPTY) goto error;
       return ast_do_while_loop(pred, cond);
     }
     case TAG_WHILE: {
       advance(lexer);
       ast_expr_t *cond = parse_expr(lexer);
-      if (cond->type == AST_EMPTY) goto error;
+      if (TYPEOF(cond) == AST_EMPTY) goto error;
       ast_expr_t *pred = parse_expr(lexer);
-      if (pred->type == AST_EMPTY) goto error;
+      if (TYPEOF(pred) == AST_EMPTY) goto error;
       return ast_while_loop(cond, pred);
     }
     case TAG_FOR: {
       advance(lexer);
       // Be sure not to interpret the 'in' as part of a binop.
       ast_expr_t *elem = parse_atom(lexer);
-      if (elem->type != AST_IDENT) goto error;
+      if (TYPEOF(elem) != AST_IDENT) goto error;
       if (!eat(lexer, TAG_IN)) goto error;
       ast_expr_t *iterable = parse_expr(lexer);
       ast_expr_t *pred = parse_expr(lexer);
-      if (pred->type == AST_EMPTY) goto error;
+      if (TYPEOF(pred) == AST_EMPTY) goto error;
       return ast_for_loop(elem, iterable, pred);
     }
     case TAG_LIST: {
@@ -594,7 +595,7 @@ static ast_expr_t *parse_atom(lexer_t *lexer) {
     case TAG_VARIABLE: {
       advance(lexer);
       if (!eat(lexer, TAG_IDENT)) goto error;
-      return ast_ident_decl(c_str_to_bytearray(lexer->token.string), F_VAR);
+      return ast_ident_decl(c_str_to_bytearray(lexer->token.string), F_ENV_VAR);
     }
     case TAG_IDENT: {
       ast_expr_t *id = ast_ident(c_str_to_bytearray(lexer->token.string));
@@ -662,13 +663,13 @@ static ast_expr_t *parse_atom(lexer_t *lexer) {
     case TAG_IS:
     case TAG_TYPEOF:
     case TAG_RAND:
-    case TAG_ABS: 
-    case TAG_SIN: 
-    case TAG_COS: 
-    case TAG_TAN: 
-    case TAG_SQRT: 
-    case TAG_EXP: 
-    case TAG_LN: 
+    case TAG_ABS:
+    case TAG_SIN:
+    case TAG_COS:
+    case TAG_TAN:
+    case TAG_SQRT:
+    case TAG_EXP:
+    case TAG_LN:
     case TAG_LOG:
     case TAG_TO_HEX:
     case TAG_TO_BIN:

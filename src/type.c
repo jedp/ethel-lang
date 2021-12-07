@@ -12,7 +12,7 @@
 #include "../inc/range.h"
 #include "../inc/fn.h"
 
-static_method get_static_method(obj_type_t obj_type,
+static_method get_static_method(type_t obj_type,
                                 static_method_ident_t method_id) {
   switch (obj_type) {
     case TYPE_BYTE:      return get_byte_static_method(method_id);

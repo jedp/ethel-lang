@@ -1,6 +1,7 @@
 #include <stdio.h>
 #include "unity/unity.h"
 #include "test_examples.h"
+#include "../inc/type.h"
 #include "../inc/str.h"
 #include "../inc/env.h"
 #include "../inc/eval.h"
@@ -113,7 +114,7 @@ void test_100_doors(void) {
   eval_result_t *result = eval_program(program);
 
   TEST_ASSERT_EQUAL(ERR_NO_ERROR, result->err);
-  TEST_ASSERT_EQUAL(TYPE_INT, result->obj->type);
+  TEST_ASSERT_EQUAL(TYPE_INT, TYPEOF(result->obj));
   TEST_ASSERT_EQUAL(285, result->obj->intval);
 }
 

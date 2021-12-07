@@ -1,10 +1,11 @@
 #include <stdio.h>
+#include "../inc/type.h"
 #include "../inc/mem.h"
 #include "../inc/str.h"
 #include "../inc/def.h"
 #include "../inc/ast.h"
 
-ast_expr_t *ast_node(ast_type_t type) {
+ast_expr_t *ast_node(type_t type) {
   ast_expr_t *node = mem_alloc(sizeof(ast_expr_t));
 
   switch(type) {
@@ -21,8 +22,7 @@ ast_expr_t *ast_node(ast_type_t type) {
     default: break;
   }
 
-  node->type = type;
-  node->flags = F_NONE;
+  mark_traceable(node, type, F_NONE);
   return node;
 }
 
@@ -31,13 +31,13 @@ ast_expr_t *ast_empty(void) {
   return node;
 }
 
-ast_expr_t *ast_unary(ast_type_t type, ast_expr_t *a) {
+ast_expr_t *ast_unary(type_t type, ast_expr_t *a) {
   ast_expr_t *node = ast_node(type);
   switch(type) {
     case AST_NEGATE:
     case AST_NOT:
     case AST_BITWISE_NOT:
-      node->type = type;
+      // Familiar.
       break;
     default:
       printf("Unary type %d unfamiliar\n", type);
@@ -47,11 +47,12 @@ ast_expr_t *ast_unary(ast_type_t type, ast_expr_t *a) {
   }
 
   node->unary_arg = mem_alloc(sizeof(ast_unary_arg_t));
+
   node->unary_arg->a = a;
   return node;
 }
 
-ast_expr_t *ast_op(ast_type_t type, ast_expr_t *a, ast_expr_t *b) {
+ast_expr_t *ast_op(type_t type, ast_expr_t *a, ast_expr_t *b) {
   ast_expr_t *node = ast_node(type);
   switch(type) {
     case AST_ADD:
@@ -78,7 +79,7 @@ ast_expr_t *ast_op(ast_type_t type, ast_expr_t *a, ast_expr_t *b) {
     case AST_SUBSCRIPT:
     case AST_MAPS_TO:
     case AST_ASSIGN:
-      node->type = type;
+      // Familiar.
       break;
     default:
       printf("Op %s unfamiliar\n", type_names[type]);
@@ -107,7 +108,8 @@ ast_expr_t *ast_nil(void) {
 
 ast_expr_t *ast_list(ast_expr_list_t *nullable_init_es) {
   ast_expr_t *node = ast_node(AST_LIST);
-  node->flags |= F_ASSIGNABLE;
+  gc_header_t *hdr = (gc_header_t*) node;
+  hdr->flags |= F_ENV_ASSIGNABLE;
   node->list = mem_alloc(sizeof(ast_list_t));
   if (nullable_init_es != NULL) {
     node->list->es = nullable_init_es;
@@ -119,7 +121,8 @@ ast_expr_t *ast_list(ast_expr_list_t *nullable_init_es) {
 
 ast_expr_t *ast_dict(ast_expr_kv_list_t *nullable_kvs) {
   ast_expr_t *node = ast_node(AST_DICT);
-  node->flags |= F_ASSIGNABLE;
+  gc_header_t *hdr = (gc_header_t*) node;
+  hdr->flags |= F_ENV_ASSIGNABLE;
   node->dict = mem_alloc(sizeof(ast_dict_t));
   node->dict->kv = mem_alloc(sizeof(ast_expr_kv_list_t));
   if (nullable_kvs != NULL) {
@@ -158,6 +161,7 @@ ast_expr_t *ast_array_decl(ast_expr_t *size) {
 ast_expr_t *ast_string(bytearray_t *s) {
   ast_expr_t *node = ast_node(AST_STRING);
   node->bytearray = bytearray_clone(s);
+  mark_traceable(node->bytearray, TYPE_BYTEARRAY, F_NONE);
   return node;
 }
 
@@ -167,21 +171,24 @@ ast_expr_t *ast_boolean(boolean t) {
   return node;
 }
 
-ast_expr_t *ast_type(ast_type_t type) {
+ast_expr_t *ast_type(type_t type) {
   ast_expr_t *node = ast_node(type);
   return node;
 }
 
 ast_expr_t *ast_ident(bytearray_t *name) {
   ast_expr_t *node = ast_node(AST_IDENT);
-  node->flags |= F_ASSIGNABLE;
+  gc_header_t *hdr = (gc_header_t*) node;
+  hdr->flags |= F_ENV_ASSIGNABLE;
   node->bytearray = name;
+  mark_traceable(node->bytearray, TYPE_BYTEARRAY, F_NONE);
   return node;
 }
 
-ast_expr_t *ast_ident_decl(bytearray_t *name, uint16_t flags) {
+ast_expr_t *ast_ident_decl(bytearray_t *name, flags_t flags) {
   ast_expr_t *node = ast_ident(name);
-  node->flags = flags | F_ASSIGNABLE;
+  gc_header_t *hdr = (gc_header_t*) node;
+  hdr->flags = flags | F_ENV_ASSIGNABLE;
   return node;
 }
 
@@ -217,7 +224,7 @@ ast_expr_t *ast_range(ast_expr_t *from, ast_expr_t *to) {
 }
 
 ast_expr_t *ast_range_step(ast_expr_t *expr, ast_expr_t *step) {
-  if (expr->type != AST_RANGE) {
+  if (TYPEOF(expr) != AST_RANGE) {
     printf("left operand to step not a range\n");
     return ast_nil();
   }
@@ -234,8 +241,8 @@ ast_expr_t *ast_method_call(bytearray_t *name, ast_expr_list_t *args) {
 }
 
 ast_expr_t *ast_access(ast_expr_t *object, ast_expr_t *member) {
-  if (member->type != AST_METHOD_CALL) {
-    printf("Method access only. Not allowed: '%s'\n", type_names[member->type]);
+  if (TYPEOF(member) != AST_METHOD_CALL) {
+    printf("Method access only. Not allowed: '%s'\n", type_names[TYPEOF(member)]);
     return ast_empty();
   }
 
@@ -344,8 +351,8 @@ void _pretty_print(ast_expr_t *expr, int indent) {
     printf(" ");
   }
 
-  printf("(%s", type_names[expr->type]);
-  switch(expr->type) {
+  printf("(%s", type_names[TYPEOF(expr)]);
+  switch(TYPEOF(expr)) {
     case AST_INT:
       printf(" %d", expr->intval);
       break;
@@ -364,7 +371,7 @@ void _pretty_print(ast_expr_t *expr, int indent) {
       }
       break;
     default:
-      printf(" <%s> ", type_names[expr->type]);
+      printf(" <%s> ", type_names[TYPEOF(expr)]);
       break;
   }
 

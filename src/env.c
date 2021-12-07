@@ -1,14 +1,15 @@
 #include <assert.h>
 #include <stdio.h>
+#include "../inc/type.h"
 #include "../inc/mem.h"
 #include "../inc/def.h"
 #include "../inc/str.h"
 #include "../inc/env.h"
 
-env_sym_t *new_sym(obj_t *name_obj, obj_t *obj, uint16_t flags) {
+env_sym_t *new_sym(obj_t *name_obj, obj_t *obj, flags_t flags) {
   env_sym_t *sym = mem_alloc(sizeof(env_sym_t));
+  mark_traceable(sym, ENV_SYM, flags);
   sym->name_obj = name_obj;
-  sym->flags = flags;
   sym->obj = obj;
   sym->prev = NULL;
   sym->next = NULL;
@@ -73,7 +74,7 @@ error_t _put_env(env_t *env,
   env_sym_t *found = find_sym(env, name_obj, !can_shadow);
   // Already exists in scopes we can access.
   if (found != NULL) {
-    if (!(flags & F_OVERWRITE) && !(found->flags & F_VAR)) {
+    if (!(flags & F_ENV_OVERWRITE) && !(FLAGS(found) & F_ENV_VAR)) {
       return ERR_ENV_SYMBOL_REDEFINED;
     }
 
@@ -100,11 +101,11 @@ error_t _put_env(env_t *env,
   return ERR_NO_ERROR;
 }
 
-error_t put_env(env_t *env, obj_t *name_string_obj, const obj_t *obj, const uint16_t flags) {
+error_t put_env(env_t *env, obj_t *name_string_obj, const obj_t *obj, const flags_t flags) {
   return _put_env(env, name_string_obj, obj, flags, False);
 }
 
-error_t put_env_shadow(env_t *env, obj_t *name_string_obj, const obj_t *obj, const uint16_t flags) {
+error_t put_env_shadow(env_t *env, obj_t *name_string_obj, const obj_t *obj, const flags_t flags) {
   return _put_env(env, name_string_obj, obj, flags, True);
 }
 

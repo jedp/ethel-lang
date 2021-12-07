@@ -1,6 +1,7 @@
 #include <stdio.h>
 #include <stdarg.h>
 #include <stdint.h>
+#include "../inc/type.h"
 #include "../inc/ptr.h"
 #include "../inc/mem.h"
 #include "../inc/err.h"
@@ -21,9 +22,9 @@ obj_t *arg_at(obj_method_args_t *args, int index) {
   return nil_obj();
 }
 
-obj_t *obj_of(obj_type_t type) {
+obj_t *obj_of(type_t type) {
   obj_t *obj = mem_alloc(sizeof(obj_t));
-  mark_traceable(obj, type);
+  mark_traceable(obj, type, F_NONE);
 
   return obj;
 }
@@ -56,7 +57,7 @@ obj_t *bytearray_obj(size_t size, uint8_t *data) {
     mem_set(a->data, '\0', size);
   }
   obj->bytearray = a;
-  mark_traceable(obj->bytearray, TYPE_BYTEARRAY_DATA);
+  mark_traceable(obj->bytearray, TYPE_BYTEARRAY_DATA, F_NONE);
   return obj;
 }
 
@@ -74,11 +75,11 @@ obj_t *float_obj(float f) {
 
 obj_t *string_obj(bytearray_t *src) {
   obj_t *obj = obj_of(TYPE_STRING);
-  bytearray_t *a = mem_alloc(src->size + 4);
-  a->size = src->size;
-  mem_cp(a->data, src->data, src->size);
-  obj->bytearray = a;
-  mark_traceable(obj->bytearray, TYPE_BYTEARRAY_DATA);
+  obj->bytearray = mem_alloc(src->size + sizeof(size_t) + sizeof(gc_header_t));
+  obj->bytearray->size = src->size;
+
+  mem_cp(obj->bytearray->data, src->data, src->size);
+  mark_traceable(obj->bytearray, TYPE_BYTEARRAY_DATA, F_NONE);
   return obj;
 }
 
@@ -111,11 +112,11 @@ obj_t *range_step_obj(int from, int to, int step) {
 }
 
 obj_t *list_obj(obj_list_element_t *elems) {
-  if (elems != NULL) mark_traceable(elems, TYPE_LIST_ELEM_DATA);
+  if (elems != NULL) mark_traceable(elems, TYPE_LIST_ELEM_DATA, F_NONE);
 
   obj_t *obj = obj_of(TYPE_LIST);
   obj_list_t *list = mem_alloc(sizeof(obj_list_t));
-  mark_traceable(list, TYPE_LIST_DATA);
+  mark_traceable(list, TYPE_LIST_DATA, F_NONE);
 
   list->elems = elems;
 
@@ -126,7 +127,7 @@ obj_t *list_obj(obj_list_element_t *elems) {
 obj_t *dict_obj(void) {
   obj_t *obj = obj_of(TYPE_DICT);
   obj_dict_t *dict = mem_alloc(sizeof(obj_dict_t));
-  mark_traceable(dict, TYPE_DICT_DATA);
+  mark_traceable(dict, TYPE_DICT_DATA, F_NONE);
   obj->dict = dict;
   if (obj->dict == NULL ||
       dict_init(obj, DICT_INIT_BUCKETS) != ERR_NO_ERROR) {
@@ -143,7 +144,7 @@ obj_t *func_obj(void* code, void* scope) {
   obj->func_def->code = code;
   obj->func_def->scope = scope;
 
-  mark_traceable(obj->func_def, TYPE_FUNCTION_PTR_DATA);
+  mark_traceable(obj->func_def, TYPE_FUNCTION_PTR_DATA, F_NONE);
   return obj;
 }
 
@@ -157,7 +158,7 @@ obj_t *iterator_obj(obj_t *obj, obj_t *state_obj, obj_t *(*next)(obj_iter_t *ite
   iter->iterator->state_obj = state_obj;
   iter->iterator->next = next;
 
-  mark_traceable(iter->iterator, TYPE_ITERATOR_DATA);
+  mark_traceable(iter->iterator, TYPE_ITERATOR_DATA, F_NONE);
   return iter;
 }
 
@@ -181,7 +182,7 @@ obj_method_args_t *wrap_varargs(int n_args, ...) {
 
   obj_method_args_t *args = mem_alloc(sizeof(obj_method_args_t));
   obj_method_args_t *root = args;
-  mark_traceable(root, TYPE_VARIABLE_ARGS);
+  mark_traceable(root, TYPE_VARIABLE_ARGS, F_NONE);
 
   for (int i = 0; i < n_args; i++) {
     obj_t *val = va_arg(vargs, obj_t*);
@@ -189,7 +190,7 @@ obj_method_args_t *wrap_varargs(int n_args, ...) {
 
     if (i < n_args - 1) {
       args->next = mem_alloc(sizeof(obj_method_args_t));
-      mark_traceable(args->next, TYPE_VARIABLE_ARGS);
+      mark_traceable(args->next, TYPE_VARIABLE_ARGS, F_NONE);
     } else {
       args->next = NULL;
     }
@@ -201,9 +202,9 @@ obj_method_args_t *wrap_varargs(int n_args, ...) {
 }
 
 boolean obj_prim_eq(obj_t *a, obj_t *b) {
-  if (a->type != b->type) return False;
+  if (TYPEOF(a) != TYPEOF(b)) return False;
 
-  switch (a->type) {
+  switch (TYPEOF(a)) {
     case TYPE_BOOLEAN:
       return a->boolval == b->boolval;
     case TYPE_INT:

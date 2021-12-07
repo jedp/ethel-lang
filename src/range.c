@@ -1,5 +1,6 @@
 #include <stdio.h>
 #include <limits.h>
+#include "../inc/type.h"
 #include "../inc/range.h"
 #include "../inc/rand.h"
 #include "../inc/math.h"
@@ -52,7 +53,7 @@ obj_t *range_contains(obj_t *obj, obj_method_args_t *args) {
   }
 
   obj_t *arg = args->arg;
-  if (arg->type != TYPE_INT) {
+  if (TYPEOF(arg) != TYPE_INT) {
     return boolean_obj(False);
   }
 
@@ -70,7 +71,7 @@ obj_t *range_get(obj_t *obj, obj_method_args_t *args) {
   }
 
   obj_t *arg = args->arg;
-  if (arg->type != TYPE_INT) {
+  if (TYPEOF(arg) != TYPE_INT) {
     printf("Int subscript required.\n");
     return nil_obj();
   }

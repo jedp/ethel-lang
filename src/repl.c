@@ -21,11 +21,11 @@
 char input[MAX_INPUT] = "";
 
 static void print_value(obj_t *obj) {
-  static_method to_string = get_static_method(obj->type, METHOD_TO_STRING);
+  static_method to_string = get_static_method(TYPEOF(obj), METHOD_TO_STRING);
   if (to_string != NULL) {
     printf("%s", bytearray_to_c_str(to_string(obj, NULL)->bytearray));
   } else {
-    printf("<%s>", type_names[obj->type]);
+    printf("<%s>", type_names[TYPEOF(obj)]);
   }
 }
 
@@ -64,9 +64,9 @@ static void print_dict(obj_t *dict_obj) {
 }
 
 static void print_result(obj_t *obj) {
-  if (obj->type == TYPE_LIST) {
+  if (TYPEOF(obj) == TYPE_LIST) {
     print_list(obj);
-  } else if (obj->type == TYPE_DICT) {
+  } else if (TYPEOF(obj) == TYPE_DICT) {
     print_dict(obj);
   } else {
     print_value(obj);
@@ -113,7 +113,7 @@ int main(int argc, char** argv) {
       program[0] = 0;
       indent = 0;
 
-      if (result->err == ERR_NO_ERROR && obj->type != TYPE_NOTHING) {
+      if (result->err == ERR_NO_ERROR && TYPEOF(obj) != TYPE_NOTHING) {
         print_result(obj);
       } else {
         printf("%s\n", err_names[result->err]);

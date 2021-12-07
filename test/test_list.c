@@ -3,6 +3,7 @@
 #include "util.h"
 #include "unity/unity.h"
 #include "test_list.h"
+#include "../inc/type.h"
 #include "../inc/mem.h"
 #include "../inc/str.h"
 #include "../inc/list.h"
@@ -18,7 +19,7 @@ void test_list_len(void) {
 
 void test_list_get(void) {
   obj_t *list = make_list(0);
-  TEST_ASSERT_EQUAL(TYPE_NIL, list_get(list, n_args(1, 0))->type);
+  TEST_ASSERT_EQUAL(TYPE_NIL, TYPEOF(list_get(list, n_args(1, 0))));
 
   list = make_list(3, 1, 2, 3);
   TEST_ASSERT_EQUAL(3, list_get(list, n_args(1, 2))->intval);
@@ -46,7 +47,7 @@ void test_list_contains(void) {
 
 void test_list_head(void) {
   obj_t *list = make_list(0);
-  TEST_ASSERT_EQUAL(TYPE_NIL, list_head(list, NULL)->type);
+  TEST_ASSERT_EQUAL(TYPE_NIL, TYPEOF(list_head(list, NULL)));
 
   list = make_list(3, 1, 2, 3);
   TEST_ASSERT_EQUAL(1, list_head(list, NULL)->intval);
@@ -88,7 +89,7 @@ void test_list_append(void) {
 
 void test_list_remove_first(void) {
   obj_t *list = make_list(0);
-  TEST_ASSERT_EQUAL(TYPE_NIL, list_remove_first(list, NULL)->type);
+  TEST_ASSERT_EQUAL(TYPE_NIL, TYPEOF(list_remove_first(list, NULL)));
 
   list = make_list(3, 1, 2, 3);
   TEST_ASSERT_EQUAL(3, list_len(list, NULL)->intval);
@@ -98,7 +99,7 @@ void test_list_remove_first(void) {
 
 void test_list_remove_last(void) {
   obj_t *list = make_list(0);
-  TEST_ASSERT_EQUAL(TYPE_NIL, list_remove_last(list, NULL)->type);
+  TEST_ASSERT_EQUAL(TYPE_NIL, TYPEOF(list_remove_last(list, NULL)));
 
   list = make_list(3, 1, 2, 3);
   TEST_ASSERT_EQUAL(3, list_len(list, NULL)->intval);
@@ -108,7 +109,7 @@ void test_list_remove_last(void) {
 
 void test_list_remove_at(void) {
   obj_t *list = make_list(0);
-  TEST_ASSERT_EQUAL(TYPE_NIL, list_remove_at(list, n_args(1, 1))->type);
+  TEST_ASSERT_EQUAL(TYPE_NIL, TYPEOF(list_remove_at(list, n_args(1, 1))));
 
   list = make_list(3, 1, 2, 3);
   TEST_ASSERT_EQUAL(3, list_len(list, NULL)->intval);

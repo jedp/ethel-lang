@@ -22,7 +22,7 @@ void mem_free(void *b);
 void mem_init(unsigned char initval);
 
 /* Tag the object so it can be traced in GC. */
-void mark_traceable(void* obj, uint16_t type);
+void mark_traceable(void* obj, type_t type, flags_t flags);
 
 #endif
 

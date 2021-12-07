@@ -1,4 +1,5 @@
 #include<stdio.h>
+#include "../inc/type.h"
 #include "../inc/bool.h"
 #include "../inc/str.h"
 #include "../inc/obj.h"
@@ -21,7 +22,7 @@ obj_t *bool_eq(obj_t *obj, obj_method_args_t *args) {
   if (args == NULL || args->arg == NULL) return boolean_obj(False);
   obj_t *arg = args->arg;
 
-  if (arg->type != TYPE_BOOLEAN) return boolean_obj(False);
+  if (TYPEOF(arg) != TYPE_BOOLEAN) return boolean_obj(False);
   return boolean_obj(obj->boolval == arg->boolval);
 }
 
@@ -33,7 +34,7 @@ obj_t *bool_as(obj_t *obj, obj_method_args_t *args) {
   if (args == NULL || args->arg == NULL) return boolean_obj(False);
   obj_t *type_arg = args->arg;
 
-  switch (type_arg->type) {
+  switch (TYPEOF(type_arg)) {
     case TYPE_BOOLEAN: return obj;
     case TYPE_INT: return int_obj((obj->boolval == True) ? 1 : 0);
     case TYPE_BYTE: return byte_obj((obj->boolval == True) ? 't' : 'f');
@@ -41,7 +42,7 @@ obj_t *bool_as(obj_t *obj, obj_method_args_t *args) {
                             (obj->boolval == True) ? "true":  "false"));
     default:
       printf("Cannot cast %s to type %s.\n",
-             type_names[TYPE_BOOLEAN], type_names[type_arg->type]);
+             type_names[TYPE_BOOLEAN], type_names[TYPEOF(type_arg)]);
       return boolean_obj(False);
   }
 }

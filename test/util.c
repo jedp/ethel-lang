@@ -43,7 +43,7 @@ obj_t *make_list(int n_elems, ...) {
   va_start(vargs, n_elems);
 
   for (int i = 0; i < n_elems; i++) {
-    mark_traceable(elem, TYPE_LIST_ELEM_DATA);
+    mark_traceable(elem, TYPE_LIST_ELEM_DATA, F_NONE);
     int val = va_arg(vargs, int);
     elem->node = int_obj(val);
     if (i < n_elems - 1) {

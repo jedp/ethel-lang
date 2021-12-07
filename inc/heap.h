@@ -1,11 +1,9 @@
 #ifndef __HEAP_H
 #define __HEAP_H
 
+#include <stdio.h>
 #include <stdint.h>
 #include "../inc/def.h"
-
-// Node flags.
-#define F_FREE (1 << 0)  // Node is on the free list.
 
 /*
  * The heap is a simple doubly-linked list of nodes.
@@ -22,7 +20,7 @@
 typedef struct HeapNode {
   struct HeapNode *prev;
   struct HeapNode *next;
-  uint32_t flags;
+  flags_t flags;
 } heap_node_t;
 
 // Heap size must be a multiple of heap_node_t size.

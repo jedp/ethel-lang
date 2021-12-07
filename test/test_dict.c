@@ -1,5 +1,6 @@
 #include "unity/unity.h"
 #include "test_dict.h"
+#include "../inc/type.h"
 #include "../inc/def.h"
 #include "../inc/dict.h"
 #include "../inc/str.h"
@@ -41,14 +42,14 @@ void test_dict_put_collision(void) {
   TEST_ASSERT_EQUAL(3, d->dict->nelems);
 
   // The implementation puts the new nodes at the head of the list.
-  TEST_ASSERT_EQUAL(TYPE_INT, d->dict->nodes[1]->k->type);
+  TEST_ASSERT_EQUAL(TYPE_INT, TYPEOF(d->dict->nodes[1]->k));
   TEST_ASSERT_EQUAL(97, d->dict->nodes[1]->k->intval);
   TEST_ASSERT_EQUAL(43, d->dict->nodes[1]->v->intval);
-  TEST_ASSERT_EQUAL(TYPE_BYTE, d->dict->nodes[1]->next->k->type);
+  TEST_ASSERT_EQUAL(TYPE_BYTE, TYPEOF(d->dict->nodes[1]->next->k));
   TEST_ASSERT_EQUAL('a', d->dict->nodes[1]->next->k->byteval);
   TEST_ASSERT_EQUAL(42, d->dict->nodes[1]->next->v->intval);
   // And the 'b' key. 'b' hashes to 98, which is bucket 2 of 16.
-  TEST_ASSERT_EQUAL(TYPE_BYTE, d->dict->nodes[2]->k->type);
+  TEST_ASSERT_EQUAL(TYPE_BYTE, TYPEOF(d->dict->nodes[2]->k));
   TEST_ASSERT_EQUAL('b', d->dict->nodes[2]->k->byteval);
   TEST_ASSERT_EQUAL(44, d->dict->nodes[2]->v->intval);
 }
@@ -89,11 +90,11 @@ void test_dict_get(void) {
   TEST_ASSERT_EQUAL(6, dict_get(d, int_obj(1))->intval);
 
   // Values not present.
-  TEST_ASSERT_EQUAL(TYPE_NIL, dict_get(d, byte_obj('x'))->type);
-  TEST_ASSERT_EQUAL(TYPE_NIL, dict_get(d, int_obj(-123))->type);
-  TEST_ASSERT_EQUAL(TYPE_NIL, dict_get(d, string_obj(c_str_to_bytearray("bar")))->type);
-  TEST_ASSERT_EQUAL(TYPE_NIL, dict_get(d, float_obj(6.18))->type);
-  TEST_ASSERT_EQUAL(TYPE_NIL, dict_get(d, boolean_obj(False))->type);
+  TEST_ASSERT_EQUAL(TYPE_NIL, TYPEOF(dict_get(d, byte_obj('x'))));
+  TEST_ASSERT_EQUAL(TYPE_NIL, TYPEOF(dict_get(d, int_obj(-123))));
+  TEST_ASSERT_EQUAL(TYPE_NIL, TYPEOF(dict_get(d, string_obj(c_str_to_bytearray("bar")))));
+  TEST_ASSERT_EQUAL(TYPE_NIL, TYPEOF(dict_get(d, float_obj(6.18))));
+  TEST_ASSERT_EQUAL(TYPE_NIL, TYPEOF(dict_get(d, boolean_obj(False))));
 }
 
 void test_dict_keys_are_copied_on_put(void) {
@@ -106,7 +107,7 @@ void test_dict_keys_are_copied_on_put(void) {
 
   TEST_ASSERT_EQUAL_STRING("mop", bytearray_to_c_str(k->bytearray));
   TEST_ASSERT_EQUAL(42, dict_get(d, string_obj(c_str_to_bytearray("moo")))->intval);
-  TEST_ASSERT_EQUAL(TYPE_NIL, dict_get(d, string_obj(c_str_to_bytearray("mop")))->type);
+  TEST_ASSERT_EQUAL(TYPE_NIL, TYPEOF(dict_get(d, string_obj(c_str_to_bytearray("mop")))));
 }
 
 void test_dict_replace_val(void) {
@@ -136,21 +137,21 @@ void test_dict_remove(void) {
   TEST_ASSERT_EQUAL(10, dict_get(d, int_obj(97))->intval);
 
   obj_t *o1 = dict_remove(d, byte_obj('a'));
-  TEST_ASSERT_EQUAL(TYPE_INT, o1->type);
+  TEST_ASSERT_EQUAL(TYPE_INT, TYPEOF(o1));
   TEST_ASSERT_EQUAL(3, o1->intval);
   TEST_ASSERT_FALSE(dict_contains(d, byte_obj('a')));
   TEST_ASSERT_TRUE(dict_contains(d, int_obj(97)));
-  TEST_ASSERT_EQUAL(TYPE_NIL, dict_get(d, byte_obj('a'))->type);
+  TEST_ASSERT_EQUAL(TYPE_NIL, TYPEOF(dict_get(d, byte_obj('a'))));
   TEST_ASSERT_EQUAL(10, dict_get(d, int_obj(97))->intval);
   TEST_ASSERT_EQUAL(1, d->dict->nelems);
 
   obj_t *o2 = dict_remove(d, int_obj(97));
-  TEST_ASSERT_EQUAL(TYPE_INT, o2->type);
+  TEST_ASSERT_EQUAL(TYPE_INT, TYPEOF(o2));
   TEST_ASSERT_EQUAL(10, o2->intval);
   TEST_ASSERT_FALSE(dict_contains(d, byte_obj('a')));
   TEST_ASSERT_FALSE(dict_contains(d, int_obj(97)));
-  TEST_ASSERT_EQUAL(TYPE_NIL, dict_get(d, byte_obj('a'))->type);
-  TEST_ASSERT_EQUAL(TYPE_NIL, dict_get(d, int_obj(97))->type);
+  TEST_ASSERT_EQUAL(TYPE_NIL, TYPEOF(dict_get(d, byte_obj('a'))));
+  TEST_ASSERT_EQUAL(TYPE_NIL, TYPEOF(dict_get(d, int_obj(97))));
   TEST_ASSERT_EQUAL(0, d->dict->nelems);
 
   // Linked list not broken.

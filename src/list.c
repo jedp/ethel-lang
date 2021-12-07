@@ -1,4 +1,5 @@
 #include <stdio.h>
+#include "../inc/type.h"
 #include "../inc/def.h"
 #include "../inc/math.h"
 #include "../inc/mem.h"
@@ -9,8 +10,9 @@
 
 static obj_t *_empty_list() {
   obj_t *obj = mem_alloc(sizeof(obj_t));
-  obj->type = TYPE_LIST;
-  obj->flags = F_ASSIGNABLE;
+  gc_header_t *hdr = (gc_header_t*) obj;
+  hdr->type = TYPE_LIST;
+  hdr->flags = F_ENV_ASSIGNABLE;
 
   obj_list_t *list = mem_alloc(sizeof(obj_list_t));
   list->elems = NULL;
@@ -91,8 +93,7 @@ obj_t *_list_slice(obj_t *obj, int start, int end) {
 
   // Allocate a new list to return.
   obj_t *slice = mem_alloc(sizeof(obj_t));
-  slice->type = TYPE_LIST;
-  slice->flags = F_NONE;
+  mark_traceable(slice, TYPE_LIST, F_NONE);
   slice->list = mem_alloc(sizeof(obj_list_t));
 
   slice->list->elems = mem_alloc(sizeof(obj_list_t));
@@ -139,8 +140,7 @@ obj_t *list_hash(obj_t *obj, obj_method_args_t /* Ignored */ *args) {
 
   for (size_t i = 0; i < _list_len(obj); i++) {
     obj_t *val = _list_get(obj, i);
-    obj_type_t t = val->type;
-    uint32_t h = get_static_method(t, METHOD_HASH)(val, NULL)->intval;
+    uint32_t h = get_static_method(TYPEOF(val), METHOD_HASH)(val, NULL)->intval;
     temp = FNV32Prime * (temp ^ h);
   }
 
@@ -151,14 +151,14 @@ obj_t *list_eq(obj_t *obj, obj_method_args_t *args) {
   if (args == NULL || args->arg == NULL) return boolean_obj(False);
   obj_t *arg = args->arg;
 
-  if (arg->type != TYPE_LIST) return boolean_obj(False);
+  if (TYPEOF(arg) != TYPE_LIST) return boolean_obj(False);
 
   if (_list_len(obj) != _list_len(arg)) return boolean_obj(False);
 
   obj_list_element_t *root = obj->list->elems;
   obj_list_element_t *other_root = arg->list->elems;
   while(root != NULL) {
-    static_method ne = get_static_method(root->node->type, METHOD_NE);
+    static_method ne = get_static_method(TYPEOF(root->node), METHOD_NE);
     // TODO is loosey-goosey equality correct? (int 0 eq byte 0, etc.)
     if (ne(root->node, wrap_varargs(1, other_root->node))->boolval == True) {
       printf("not equal!\n");
@@ -185,7 +185,7 @@ obj_t *list_get(obj_t *obj, obj_method_args_t *args) {
   }
   // Get first arg as int offset.
   obj_t *arg = args->arg;
-  if (arg->type != TYPE_INT) {
+  if (TYPEOF(arg) != TYPE_INT) {
     return nil_obj();
   }
   int offset = arg->intval;
@@ -199,7 +199,7 @@ obj_t *list_set(obj_t *obj, obj_method_args_t *args) {
   }
   // Get first arg as int offset.
   obj_t *a = args->arg;
-  if (a->type != TYPE_INT) {
+  if (TYPEOF(a) != TYPE_INT) {
     printf("Int offset required.\n");
     return nil_obj();
   }
@@ -233,12 +233,12 @@ obj_t *list_slice(obj_t *obj, obj_method_args_t *args) {
   }
 
   obj_t *start_arg = args->arg;
-  if (start_arg->type != TYPE_INT) {
+  if (TYPEOF(start_arg) != TYPE_INT) {
     return nil_obj();
   }
 
   obj_t *end_arg = args->next->arg;
-  if (end_arg->type != TYPE_INT) {
+  if (TYPEOF(end_arg) != TYPE_INT) {
     return nil_obj();
   }
 
@@ -338,7 +338,7 @@ obj_t *list_remove_at(obj_t *obj, obj_method_args_t *args) {
   }
   // Get first arg as int offset.
   obj_t *arg = args->arg;
-  if (arg->type != TYPE_INT) {
+  if (TYPEOF(arg) != TYPE_INT) {
     return nil_obj();
   }
 
@@ -391,7 +391,7 @@ static obj_t *iter_next(obj_iter_t *iterable) {
     case ITER_ITERATING:
       current_index = iterable->state_obj->intval;
       obj_t *next_val = _list_get(iterable->obj, current_index);
-      if (next_val->type == TYPE_NIL) {
+      if (TYPEOF(next_val) == TYPE_NIL) {
         iterable->state = ITER_STOPPED;
         return next_val;
       }

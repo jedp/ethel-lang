@@ -1,4 +1,5 @@
 #include <stdio.h>
+#include "../inc/type.h"
 #include "../inc/math.h"
 #include "../inc/mem.h"
 #include "../inc/rand.h"
@@ -29,7 +30,7 @@ static obj_t *_arr_slice(obj_t *obj, int start, int end) {
 
   size_t len = end - start;
   obj_t *new = bytearray_obj(len, NULL);
-  for (int i = 0; i < len; i++) {
+  for (size_t i = 0; i < len; i++) {
     new->bytearray->data[i] = obj->bytearray->data[start+i];
   }
 
@@ -37,7 +38,7 @@ static obj_t *_arr_slice(obj_t *obj, int start, int end) {
 }
 
 static byte obj_to_byte(obj_t *obj) {
-  switch(obj->type) {
+  switch(TYPEOF(obj)) {
     case TYPE_BYTE:
       return obj->byteval;
     case TYPE_INT: {
@@ -45,7 +46,7 @@ static byte obj_to_byte(obj_t *obj) {
       return (byte) obj->intval;
     }
     default:
-      printf("Don't know how to convert %s to byte.\n", type_names[obj->type]);
+      printf("Don't know how to convert %s to byte.\n", type_names[TYPEOF(obj)]);
       return 0x0;
   }
 }
@@ -96,7 +97,7 @@ obj_t *arr_get(obj_t *obj, obj_method_args_t *args) {
   }
   // Get first arg as int offset.
   obj_t *arg = args->arg;
-  if (arg->type != TYPE_INT) {
+  if (TYPEOF(arg) != TYPE_INT) {
     return nil_obj();
   }
   return _arr_get(obj, arg->intval);
@@ -109,7 +110,7 @@ obj_t *arr_set(obj_t *obj, obj_method_args_t *args) {
   }
   // Get first arg as int offset.
   obj_t *a = args->arg;
-  if (a->type != TYPE_INT) {
+  if (TYPEOF(a) != TYPE_INT) {
     printf("Int offset required.\n");
     return nil_obj();
   }
@@ -138,20 +139,20 @@ obj_t *arr_contains(obj_t *obj, obj_method_args_t *args) {
   }
 
   obj_t *arg = args->arg;
-  if (arg->type != TYPE_INT &&
-      arg->type != TYPE_BYTE) {
+  if (TYPEOF(arg) != TYPE_INT &&
+      TYPEOF(arg) != TYPE_BYTE) {
     return nil_obj();
   }
 
-  if (arg->type == TYPE_INT && arg->intval > 255) {
+  if (TYPEOF(arg) == TYPE_INT && arg->intval > 255) {
     printf("Integer too large for byte");
     return nil_obj();
   }
 
   byte b;
-  if (arg->type == TYPE_BYTE) {
+  if (TYPEOF(arg) == TYPE_BYTE) {
     b = arg->byteval;
-  } else if (arg->type == TYPE_INT) {
+  } else if (TYPEOF(arg) == TYPE_INT) {
     b = (byte) arg->intval & 0xff;
   } else {
     printf("This can't happen");
@@ -174,8 +175,8 @@ obj_t *arr_eq(obj_t *obj, obj_method_args_t *args) {
   }
 
   obj_t *other = args->arg;
-  if (other->type != TYPE_STRING &&
-      other->type != TYPE_BYTEARRAY) {
+  if (TYPEOF(other) != TYPE_STRING &&
+      TYPEOF(other) != TYPE_BYTEARRAY) {
     return nil_obj();
   }
 
@@ -189,8 +190,8 @@ obj_t *arr_ne(obj_t *obj, obj_method_args_t *args) {
   }
 
   obj_t *other = args->arg;
-  if (other->type != TYPE_STRING &&
-      other->type != TYPE_BYTEARRAY) {
+  if (TYPEOF(other) != TYPE_STRING &&
+      TYPEOF(other) != TYPE_BYTEARRAY) {
     return nil_obj();
   }
 
@@ -204,16 +205,16 @@ obj_t *arr_slice(obj_t *obj, obj_method_args_t *args) {
   }
 
   obj_t *start_arg = args->arg;
-  if (start_arg->type != TYPE_INT) return nil_obj();
+  if (TYPEOF(start_arg) != TYPE_INT) return nil_obj();
 
   obj_t *end_arg = args->next->arg;
-  if (end_arg->type != TYPE_INT)  return nil_obj();
+  if (TYPEOF(end_arg) != TYPE_INT)  return nil_obj();
 
   return _arr_slice(obj, start_arg->intval, end_arg->intval);
 }
 
 obj_t *arr_random_choice(obj_t *obj, obj_method_args_t *args) {
-  uint32_t len = obj->bytearray->size;
+  size_t len = obj->bytearray->size;
   if (len < 1) {
     printf("Empty string.\n");
     return nil_obj();
@@ -222,7 +223,7 @@ obj_t *arr_random_choice(obj_t *obj, obj_method_args_t *args) {
 }
 
 static obj_t *iter_next(obj_iter_t *iterable) {
-  int i;
+  size_t i;
 
   switch(iterable->state) {
     case ITER_NOT_STARTED:

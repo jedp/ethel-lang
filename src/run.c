@@ -1,5 +1,6 @@
 #include <stdio.h>
 #include <sys/errno.h>
+#include "../inc/type.h"
 #include "../inc/err.h"
 #include "../inc/mem.h"
 #include "../inc/env.h"
@@ -22,10 +23,10 @@ static int _eval(char* program) {
   }
 
   obj_t *obj = (obj_t*) result->obj;
-  static_method to_string = get_static_method(obj->type, METHOD_TO_STRING);
+  static_method to_string = get_static_method(TYPEOF(obj), METHOD_TO_STRING);
   if (to_string != NULL) {
     printf("=> [%s] %s\n",
-      type_names[obj->type],
+      type_names[TYPEOF(obj)],
       bytearray_to_c_str(to_string(obj, NULL)->bytearray));
   }
 

@@ -1,4 +1,5 @@
 #include <stdio.h>
+#include "../inc/type.h"
 #include "../inc/arr.h"
 #include "../inc/byte.h"
 #include "../inc/obj.h"
@@ -47,10 +48,10 @@ obj_t *byte_to_byte(obj_t *obj, obj_method_args_t *args) {
 obj_t *byte_math(obj_t *obj, obj_method_args_t *args, static_method_ident_t method_id) {
   if (args == NULL || args->arg == NULL) return obj;
   obj_t *arg = args->arg;
-  static_method m_cast = get_static_method(arg->type, METHOD_TO_BYTE);
+  static_method m_cast = get_static_method(TYPEOF(arg), METHOD_TO_BYTE);
   if (m_cast == NULL) {
     printf("Cannot do math with %s and %s",
-        type_names[arg->type], type_names[obj->type]);
+        type_names[TYPEOF(arg)], type_names[TYPEOF(obj)]);
     return obj;
   }
 
@@ -106,7 +107,7 @@ obj_t *byte_eq(obj_t *obj, obj_method_args_t *args) {
   if (args == NULL || args->arg == NULL) return boolean_obj(False);
   obj_t *arg = args->arg;
 
-  switch(arg->type) {
+  switch(TYPEOF(arg)) {
     case TYPE_BYTE:
       return boolean_obj((obj->byteval == arg->byteval) ? True : False);
     case TYPE_INT:
@@ -114,7 +115,7 @@ obj_t *byte_eq(obj_t *obj, obj_method_args_t *args) {
           ((uint8_t) obj->byteval == (uint32_t) arg->intval) ? True : False);
     default:
       printf("Cannot compare for equality between %s and %s.\n",
-            type_names[TYPE_BYTE], type_names[arg->type]);
+            type_names[TYPE_BYTE], type_names[TYPEOF(arg)]);
       return boolean_obj(False);
   }
 }
@@ -122,9 +123,9 @@ obj_t *byte_eq(obj_t *obj, obj_method_args_t *args) {
 obj_t *byte_ne(obj_t *obj, obj_method_args_t *args) {
   if (args == NULL || args->arg == NULL) return boolean_obj(False);
   obj_t *arg = args->arg;
-  if (arg->type != TYPE_BYTE && arg->type != TYPE_INT) {
+  if (TYPEOF(arg) != TYPE_BYTE && TYPEOF(arg) != TYPE_INT) {
     printf("Cannot compare for equality between %s and %s.\n",
-           type_names[obj->type], type_names[arg->type]);
+           type_names[TYPEOF(obj)], type_names[TYPEOF(arg)]);
     return boolean_obj(False);
   }
 
@@ -136,7 +137,7 @@ obj_t *byte_lt(obj_t *obj, obj_method_args_t *args) {
   if (args == NULL || args->arg == NULL) return boolean_obj(False);
   obj_t *arg = args->arg;
 
-  switch(arg->type) {
+  switch(TYPEOF(arg)) {
     case TYPE_BYTE:
       return boolean_obj((obj->byteval < arg->byteval) ? True : False);
     case TYPE_INT:
@@ -144,7 +145,7 @@ obj_t *byte_lt(obj_t *obj, obj_method_args_t *args) {
           ((uint8_t) obj->byteval < (uint32_t) arg->intval) ? True : False);
     default:
       printf("Cannot compare for equality between %s and %s.\n",
-            type_names[obj->type], type_names[arg->type]);
+            type_names[TYPEOF(obj)], type_names[TYPEOF(arg)]);
       return boolean_obj(False);
   }
 }
@@ -153,7 +154,7 @@ obj_t *byte_gt(obj_t *obj, obj_method_args_t *args) {
   if (args == NULL || args->arg == NULL) return boolean_obj(False);
   obj_t *arg = args->arg;
 
-  switch(arg->type) {
+  switch(TYPEOF(arg)) {
     case TYPE_BYTE:
       return boolean_obj((obj->byteval > arg->byteval) ? True : False);
     case TYPE_INT:
@@ -161,7 +162,7 @@ obj_t *byte_gt(obj_t *obj, obj_method_args_t *args) {
           ((uint8_t) obj->byteval > (uint32_t) arg->intval) ? True : False);
     default:
       printf("Cannot compare for equality between %s and %s.\n",
-            type_names[obj->type], type_names[arg->type]);
+            type_names[TYPEOF(obj)], type_names[TYPEOF(arg)]);
       return boolean_obj(False);
   }
 }
@@ -169,9 +170,9 @@ obj_t *byte_gt(obj_t *obj, obj_method_args_t *args) {
 obj_t *byte_ge(obj_t *obj, obj_method_args_t *args) {
   if (args == NULL || args->arg == NULL) return boolean_obj(False);
   obj_t *arg = args->arg;
-  if (arg->type != TYPE_BYTE && arg->type != TYPE_INT) {
+  if (TYPEOF(arg) != TYPE_BYTE && TYPEOF(arg) != TYPE_INT) {
     printf("Cannot compare for equality between %s and %s.\n",
-           type_names[obj->type], type_names[arg->type]);
+           type_names[TYPEOF(obj)], type_names[TYPEOF(arg)]);
     return boolean_obj(False);
   }
 
@@ -182,9 +183,9 @@ obj_t *byte_ge(obj_t *obj, obj_method_args_t *args) {
 obj_t *byte_le(obj_t *obj, obj_method_args_t *args) {
   if (args == NULL || args->arg == NULL) return boolean_obj(False);
   obj_t *arg = args->arg;
-  if (arg->type != TYPE_BYTE && arg->type != TYPE_INT) {
+  if (TYPEOF(arg) != TYPE_BYTE && TYPEOF(arg) != TYPE_INT) {
     printf("Cannot compare for equality between %s and %s.\n",
-           type_names[obj->type], type_names[arg->type]);
+           type_names[TYPEOF(obj)], type_names[TYPEOF(arg)]);
     return boolean_obj(False);
   }
 
@@ -196,7 +197,7 @@ obj_t *byte_as(obj_t *obj, obj_method_args_t *args) {
   if (args == NULL || args->arg == NULL) return boolean_obj(False);
   obj_t *type_arg = args->arg;
 
-  switch (type_arg->type) {
+  switch (TYPEOF(type_arg)) {
     case TYPE_BYTE: return obj;
     case TYPE_INT: return int_obj((unsigned int) obj->byteval);
     case TYPE_BOOLEAN: return boolean_obj((obj->byteval == 't') ? 1 : 0);
@@ -208,7 +209,7 @@ obj_t *byte_as(obj_t *obj, obj_method_args_t *args) {
   }
 
   printf("Cannot cast %s to %s.\n",
-          type_names[obj->type], type_names[type_arg->type]);
+          type_names[TYPEOF(obj)], type_names[TYPEOF(type_arg)]);
   return nil_obj();
 
 }
@@ -217,12 +218,12 @@ obj_t *byte_bitwise_and(obj_t *obj, obj_method_args_t *args) {
   if (args == NULL || args->arg == NULL) return obj;
   obj_t *arg = args->arg;
 
-  switch(arg->type) {
+  switch(TYPEOF(arg)) {
     case TYPE_INT: return byte_obj((unsigned char) obj->byteval & arg->intval);
     case TYPE_BYTE: return byte_obj(obj->byteval & arg->byteval);
     default:
       printf("Cannot perform bitwise and with %s and %s.\n",
-             type_names[obj->type], type_names[arg->type]);
+             type_names[TYPEOF(obj)], type_names[TYPEOF(arg)]);
       return nil_obj();
   }
 }
@@ -231,12 +232,12 @@ obj_t *byte_bitwise_or(obj_t *obj, obj_method_args_t *args) {
   if (args == NULL || args->arg == NULL) return obj;
   obj_t *arg = args->arg;
 
-  switch(arg->type) {
+  switch(TYPEOF(arg)) {
     case TYPE_INT: return byte_obj((unsigned char) obj->byteval | arg->intval);
     case TYPE_BYTE: return byte_obj(obj->byteval | arg->byteval);
     default:
       printf("Cannot perform bitwise or with %s and %s.\n",
-             type_names[obj->type], type_names[arg->type]);
+             type_names[TYPEOF(obj)], type_names[TYPEOF(arg)]);
       return nil_obj();
   }
 }
@@ -245,12 +246,12 @@ obj_t *byte_bitwise_xor(obj_t *obj, obj_method_args_t *args) {
   if (args == NULL || args->arg == NULL) return obj;
   obj_t *arg = args->arg;
 
-  switch(arg->type) {
+  switch(TYPEOF(arg)) {
     case TYPE_INT: return byte_obj((unsigned char) obj->byteval ^ arg->intval);
     case TYPE_BYTE: return byte_obj(obj->byteval ^ arg->byteval);
     default:
       printf("Cannot perform bitwise xor with %s and %s.\n",
-             type_names[obj->type], type_names[arg->type]);
+             type_names[TYPEOF(obj)], type_names[TYPEOF(arg)]);
       return nil_obj();
   }
 }
@@ -263,12 +264,12 @@ obj_t *byte_bitwise_shl(obj_t *obj, obj_method_args_t *args) {
   if (args == NULL || args->arg == NULL) return obj;
   obj_t *arg = args->arg;
 
-  switch(arg->type) {
+  switch(TYPEOF(arg)) {
     case TYPE_INT: return byte_obj((unsigned char) obj->byteval << (unsigned int) arg->intval);
     case TYPE_BYTE: return byte_obj(obj->byteval << arg->byteval);
     default:
       printf("Cannot perform bitwise and with %s and %s.\n",
-             type_names[obj->type], type_names[arg->type]);
+             type_names[TYPEOF(obj)], type_names[TYPEOF(arg)]);
       return nil_obj();
   }
 }
@@ -277,12 +278,12 @@ obj_t *byte_bitwise_shr(obj_t *obj, obj_method_args_t *args) {
   if (args == NULL || args->arg == NULL) return obj;
   obj_t *arg = args->arg;
 
-  switch(arg->type) {
+  switch(TYPEOF(arg)) {
     case TYPE_INT: return byte_obj((unsigned char) obj->byteval >> (unsigned int) arg->intval);
     case TYPE_BYTE: return byte_obj(obj->byteval >> arg->byteval);
     default:
       printf("Cannot perform bitwise and with %s and %s.\n",
-             type_names[obj->type], type_names[arg->type]);
+             type_names[TYPEOF(obj)], type_names[TYPEOF(arg)]);
       return nil_obj();
   }
 }

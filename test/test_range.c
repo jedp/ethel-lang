@@ -2,6 +2,7 @@
 #include <stdarg.h>
 #include "unity/unity.h"
 #include "test_range.h"
+#include "../inc/type.h"
 #include "../inc/range.h"
 #include "../inc/obj.h"
 
@@ -9,8 +10,8 @@ void test_minimal_range(void) {
   obj_t *obj = range_obj(1, 1);
   TEST_ASSERT_EQUAL(1, range_get(obj, wrap_varargs(1, int_obj(0)))->intval);
   TEST_ASSERT_EQUAL(1, range_length(obj, NULL)->intval);
-  TEST_ASSERT_EQUAL(TYPE_NIL, range_get(obj, wrap_varargs(1, int_obj(4)))->type);
-  TEST_ASSERT_EQUAL(TYPE_NIL, range_get(obj, wrap_varargs(1, int_obj(4)))->type);
+  TEST_ASSERT_EQUAL(TYPE_NIL, TYPEOF(range_get(obj, wrap_varargs(1, int_obj(4)))));
+  TEST_ASSERT_EQUAL(TYPE_NIL, TYPEOF(range_get(obj, wrap_varargs(1, int_obj(4)))));
 }
 
 void test_range_get(void) {

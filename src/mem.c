@@ -17,8 +17,13 @@ void mem_init(unsigned char initval) {
   heap_init(initval);
 }
 
-void mark_traceable(void *obj, uint16_t type) {
-  ((traceable_obj_t*) obj)->type = type;
-  ((traceable_obj_t*) obj)->flags = F_NONE;
+void mark_traceable(void *obj, type_t type, flags_t flags) {
+  gc_header_t *hdr = (gc_header_t*) obj;
+
+  hdr->type = type;
+  hdr->flags = flags;
+
+  // TODO mark and sweep
+  hdr->children = 0;
 }
 

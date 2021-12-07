@@ -17,7 +17,7 @@ static size_t heap[HEAP_BYTES] = { 0 };
 heap_node_t node_template = {
   .prev = NULL,
   .next = NULL,
-  .flags = 19191919   // Weird flags as an error marker.
+  .flags = 91   // Weird flags as an error marker.
 };
 
 // Heap info is statically allocated so it won't interfere with the heap.
@@ -28,11 +28,13 @@ heap_info_t heap_info = {
 };
 
 static size_t node_size(heap_node_t *node) {
+  // Last node in the heap?
   if (node->next == NULL) {
-    return (size_t) (HEAP_DATA_END - (size_t) node) - sizeof(heap_node_t);
+    return (size_t) heap + HEAP_BYTES - (size_t) node - sizeof(heap_node_t);
   }
 
-  return (size_t) ((size_t) node->next - (size_t) node) - sizeof(heap_node_t);
+  assert(node->next > node);
+  return (size_t) node->next - (size_t) node - sizeof(heap_node_t);
 }
 
 /*
@@ -63,7 +65,7 @@ static void fracture_node(heap_node_t *node, size_t new_size) {
   // Create new node.
   node_template.prev = NULL;
   node_template.next = NULL;
-  node_template.flags = F_FREE; // New node is by definition unused.
+  node_template.flags = F_GC_FREE; // New node is by definition unused.
 
   // Jam it into memory and get a pointer to it.
   size_t new_location = (size_t) node + new_size + sizeof(heap_node_t);
@@ -73,15 +75,15 @@ static void fracture_node(heap_node_t *node, size_t new_size) {
   // Re-wire everything.
   new_node->prev = node;
   new_node->next = node->next;
-  if (node->next != NULL) {
+  if (new_node->next != NULL) {
     node->next->prev = new_node;
   }
   node->next = new_node;
 
   assert((size_t) node >= (size_t) heap);
-  assert((size_t) new_node >= (size_t) node);
-  assert((size_t) new_node <= (size_t) heap + HEAP_BYTES - sizeof(heap_node_t));
-  assert((size_t) node <= (size_t) new_node - sizeof(heap_node_t));
+  assert((size_t) node <= (size_t) node->next - sizeof(heap_node_t));
+  assert((size_t) node->next >= (size_t) node);
+  assert((size_t) node->next <= (size_t) heap + HEAP_BYTES - sizeof(heap_node_t));
 }
 
 /*
@@ -91,7 +93,9 @@ static void fracture_node(heap_node_t *node, size_t new_size) {
 static void coalesce_nodes(heap_node_t *left,
                            heap_node_t *right) {
   if (left == NULL || right == NULL) return;
-  if (!((left->flags & right->flags) & F_FREE)) return;
+  if (!((left->flags & right->flags) & F_GC_FREE)) {
+    return;
+  }
 
   // Combine sizes and absorb the header bytes.
   left->next = right->next;
@@ -102,7 +106,7 @@ static void coalesce_nodes(heap_node_t *left,
   // Null out the original right-side node for safety.
   right->prev = NULL;
   right->next = NULL;
-  right->flags = 18181818;
+  right->flags = 255;
 }
 
 void *ealloc(size_t bytes) {
@@ -116,10 +120,9 @@ void *ealloc(size_t bytes) {
   // Find the first free node of sufficient size.
   heap_node_t *node = (heap_node_t*) heap;
   while(node != NULL) {
-    if (bytes <= node_size(node) && (node->flags & F_FREE)) break;
+    if (bytes <= node_size(node) && (node->flags & F_GC_FREE)) break;
     node = node->next;
   }
-
   if (node == NULL) {
     printf("Out of heap space!\n");
     dump_heap();
@@ -127,7 +130,7 @@ void *ealloc(size_t bytes) {
   }
 
   // Out of memory :(
-  if (node_size(node) < bytes || !(node->flags & F_FREE)) {
+  if (node_size(node) < bytes || !(node->flags & F_GC_FREE)) {
     printf("No nodes with sufficient capacity. Out of memory!\n");
     dump_heap();
     return NULL;
@@ -135,12 +138,17 @@ void *ealloc(size_t bytes) {
 
   // Update header on this node. This is what we will return.
   fracture_node(node, bytes);
-  node->flags &= ~F_FREE;
+  node->flags &= ~F_GC_FREE;
 
   assert((size_t) node >= (size_t) heap);
-  assert((size_t) node <= (size_t) heap + HEAP_BYTES - sizeof(heap_node_t));
+  if (node->next == NULL) {
+    assert((size_t) node <= (size_t) heap + HEAP_BYTES - sizeof(heap_node_t));
+  } else {
+    assert((size_t) node->next >= (size_t) node);
+    assert((size_t) node <= (size_t) node->next - sizeof(heap_node_t));
+    assert((size_t) node->next <= (size_t) heap + HEAP_BYTES - sizeof(heap_node_t));
+  }
 
-  // Return pointer to the data buffer.
   return DATA_FOR_NODE(node);
 }
 
@@ -171,9 +179,17 @@ void *erealloc(void* data_ptr, size_t size) {
 
   // Move the flags from src to dst.
   new_node->flags = node->flags;
-  node->flags = F_FREE;
+  node->flags = F_GC_FREE;
 
-  // TODO: NULL out data_ptr or not?
+  assert((size_t) node >= (size_t) heap);
+  if (node->next == NULL) {
+    assert((size_t) node <= (size_t) heap + HEAP_BYTES - sizeof(heap_node_t));
+  } else {
+    assert((size_t) node->next >= (size_t) node);
+    assert((size_t) node <= (size_t) node->next - sizeof(heap_node_t));
+    assert((size_t) node->next <= (size_t) heap + HEAP_BYTES - sizeof(heap_node_t));
+  }
+
   return new_ptr;
 }
 
@@ -187,13 +203,20 @@ void efree(void *data_ptr) {
   assert(((size_t) node - (size_t) heap) % sizeof(heap_node_t) == 0);
 
   // Mark as free.
-  node->flags |= F_FREE;
+  node->flags |= F_GC_FREE;
 
   // Merge adjacent free nodes. The order matters.
   coalesce_nodes(node, node->next);
   coalesce_nodes(node->prev, node);
 
-  data_ptr = NULL;
+  assert((size_t) node >= (size_t) heap);
+  if (node->next == NULL) {
+    assert((size_t) node <= (size_t) heap + HEAP_BYTES - sizeof(heap_node_t));
+  } else {
+    assert((size_t) node->next >= (size_t) node);
+    assert((size_t) node <= (size_t) node->next - sizeof(heap_node_t));
+    assert((size_t) node->next <= (size_t) heap + HEAP_BYTES - sizeof(heap_node_t));
+  }
 }
 
 /*
@@ -214,7 +237,7 @@ void heap_init(unsigned char initval) {
   // Create a node containing the entire heap.
   node_template.prev = NULL;
   node_template.next = NULL;
-  node_template.flags = F_FREE;
+  node_template.flags = F_GC_FREE;
   mem_cp(heap, &node_template, sizeof(heap_node_t));
 }
 
@@ -228,7 +251,7 @@ heap_info_t *get_heap_info() {
 
   while (node != NULL) {
     heap_info.total_nodes++;
-    if (node->flags & F_FREE) {
+    if (node->flags & F_GC_FREE) {
       heap_info.free_nodes++;
       heap_info.bytes_free += node_size(node);
     } else {
