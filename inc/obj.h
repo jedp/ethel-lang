@@ -13,18 +13,11 @@ enum iter_state {
 
 typedef struct Obj obj_t;
 
-typedef struct MethodArg {
+typedef struct VariableArg {
   gc_header_t hdr;
   obj_t *arg;
-  struct MethodArg *next;
+  struct VariableArg *next;
 } obj_method_args_t;
-
-typedef struct Method {
-  gc_header_t hdr;
-  bytearray_t *name;
-  struct Obj *(*callable)(struct Obj *obj, struct MethodArg *args);
-  struct Method *next;
-} obj_method_t;
 
 typedef struct Range {
   int from;
@@ -70,6 +63,7 @@ typedef struct ObjIterator {
   gc_header_t hdr;
   obj_t *obj;
   obj_t *state_obj;
+  // Don't link to 'next' for GC; It's a pointer to native code.
   struct Obj *(*next)(struct ObjIterator *iterable);
   int state;
 } obj_iter_t;

@@ -1,3 +1,4 @@
+#include <assert.h>
 #include <stdio.h>
 #include <stdarg.h>
 #include <stdint.h>
@@ -23,6 +24,7 @@ obj_t *arg_at(obj_method_args_t *args, int index) {
 }
 
 obj_t *obj_of(type_t type) {
+  assert(type > TYPE_ERR_DO_NOT_USE);
   obj_t *obj = mem_alloc(sizeof(obj_t));
   mark_traceable(obj, type, F_NONE);
 

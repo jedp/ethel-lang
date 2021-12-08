@@ -1,3 +1,4 @@
+#include <assert.h>
 #include <stdio.h>
 #include "../inc/type.h"
 #include "../inc/mem.h"
@@ -6,6 +7,7 @@
 #include "../inc/ast.h"
 
 ast_expr_t *ast_node(type_t type) {
+  assert(type > TYPE_ERR_DO_NOT_USE);
   ast_expr_t *node = mem_alloc(sizeof(ast_expr_t));
 
   switch(type) {

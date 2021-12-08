@@ -126,6 +126,7 @@ enum every_type {
   TYPE_LIST_ELEM_DATA,
   TYPE_DICT,
   TYPE_DICT_DATA,
+  TYPE_DICT_KV_DATA,
   TYPE_IDENT,
   TYPE_ITERATOR,
   TYPE_ITERATOR_DATA,
@@ -233,6 +234,7 @@ static const char* type_names[TYPE_MAX] = {
   "List Element Data",
   "Dict",
   "Dict Data",
+  "Dict KV Data Node"
   "Identifier",
   "Iterator",
   "Iterator Data",
