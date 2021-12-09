@@ -9,6 +9,7 @@
 env_sym_t *new_sym(obj_t *name_obj, obj_t *obj, flags_t flags) {
   env_sym_t *sym = mem_alloc(sizeof(env_sym_t));
   mark_traceable(sym, ENV_SYM, flags);
+  mark_traceable(obj, TYPEOF(obj), flags);
   sym->name_obj = name_obj;
   sym->obj = obj;
   sym->prev = NULL;

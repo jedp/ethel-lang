@@ -99,12 +99,6 @@ typedef struct AstForLoop {
   ast_expr_t *pred;
 } ast_for_loop_t;
 
-typedef struct AstVarNameMap {
-  gc_header_t hdr;
-  bytearray_t *name;
-  ast_expr_t *value;
-} ast_var_name_map_t;
-
 typedef struct AstFnArgDecl {
   gc_header_t hdr;
   bytearray_t *name;
@@ -134,10 +128,6 @@ typedef struct AstAssignElem {
   ast_expr_t *offset;
   ast_expr_t *value;
 } ast_assign_elem_t;
-
-typedef struct AstField {
-  bytearray_t *name;
-} ast_field_t;
 
 typedef struct AstMethod {
   gc_header_t hdr;

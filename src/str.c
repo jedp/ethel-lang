@@ -401,9 +401,7 @@ obj_t *str_random_choice(obj_t *obj, obj_method_args_t *args) {
 
 obj_t *byte_dump(obj_t *byte_obj) {
   // 'x' -> "120  0x78  11111111"
-  printf("-- byte_dump %s %d\n", __FILE__,  __LINE__);
   bytearray_t *a = bytearray_alloc(19);
-
 
   // Three-digit decimal representation.
   // Do not print leading zeroes, because that looks octal.
@@ -436,7 +434,6 @@ obj_t *byte_dump(obj_t *byte_obj) {
     a->data[11 + i] = b;
   }
 
-  printf("-- byte_dump %s %d\n", __FILE__,  __LINE__);
   return string_obj(a);
 }
 

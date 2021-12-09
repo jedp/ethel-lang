@@ -182,8 +182,6 @@ static void eval_dict_expr(ast_dict_t *expr, eval_result_t *result, env_t *env) 
     obj_t *v = r->obj;
 
     if ((result->err = dict_put(dict, k, v)) != ERR_NO_ERROR) {
-      mem_free(dict);
-      dict = NULL;
       printf("Failed to put kv in dict!\n");
       return;
     }
@@ -731,8 +729,6 @@ static void readln_input(eval_result_t *result) {
   while (end >= 0 && s[end] == '\n') s[end--] = '\0';
 
   result->obj = string_obj(c_str_to_bytearray(s));
-  mem_free(s);
-  s = NULL;
 }
 
 static void resolve_callable_expr(ast_expr_t *expr, env_t *env, eval_result_t *result) {
@@ -908,15 +904,11 @@ static void eval_for_loop(ast_expr_t *expr, env_t *env, eval_result_t *result) {
 done:
   result->obj = r->obj;
   leave_scope(env);
-  mem_free(r);
-  r = NULL;
   return;
 
 error:
-  printf("leaving scope on error\n");
+  printf("leaving scope on error %d\n", result->err);
   leave_scope(env);
-  mem_free(r);
-  r = NULL;
   result->obj = undef_obj();
 }
 
@@ -1297,8 +1289,6 @@ eval_result_t *eval(env_t *env, char *input) {
     pretty_print(ast);
 #endif
 
-  mem_free(r);
-  r = NULL;
   return eval_expr(ast, env);
 }
 

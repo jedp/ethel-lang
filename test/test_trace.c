@@ -75,7 +75,7 @@ void test_traceable_dict(void) {
   gc_header_t *hdr = (gc_header_t*) obj;
   TEST_ASSERT_EQUAL(ERR_NO_ERROR, result->err);
   TEST_ASSERT_EQUAL(TYPE_DICT, hdr->type);
-  TEST_ASSERT_EQUAL(F_NONE, hdr->flags);
+  TEST_ASSERT_EQUAL(F_ENV_ASSIGNABLE, hdr->flags);
   TEST_ASSERT_EQUAL(1, hdr->children);
 
   void* child = (obj_t*) get_child(obj, 0);

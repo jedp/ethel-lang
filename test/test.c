@@ -40,7 +40,7 @@ int main(int argc, char** argv) {
   test_env();
   test_eval();
   test_rand();
-  test_examples();
+//  test_examples();
 
   UNITY_END();
 }
