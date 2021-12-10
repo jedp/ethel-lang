@@ -20,10 +20,11 @@ typedef struct VariableArg {
 } obj_method_args_t;
 
 typedef struct Range {
+  gc_header_t hdr;
   int from;
   int to;
   int step;
-} range_t;
+} obj_range_t;
 
 typedef struct ObjListElem {
   gc_header_t hdr;
@@ -76,7 +77,7 @@ typedef struct Obj {
     int boolval;
     float floatval;
     byte byteval;
-    range_t range;
+    obj_range_t *range;
     obj_list_t *list;
     obj_dict_t *dict;
     bytearray_t *bytearray;

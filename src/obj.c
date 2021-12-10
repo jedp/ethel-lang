@@ -99,7 +99,11 @@ obj_t *boolean_obj(boolean t) {
 
 obj_t *range_obj(int from, int to) {
   obj_t *obj = obj_of(TYPE_RANGE);
-  obj->range = (range_t) { from, to, 1 };
+  obj->range = mem_alloc(sizeof(obj_range_t));
+  mark_traceable(obj->range, TYPE_RANGE_DATA, F_NONE);
+  obj->range->from = from;
+  obj->range->to = to;
+  obj->range->step = 1;
   return obj;
 }
 
@@ -109,7 +113,11 @@ obj_t *range_step_obj(int from, int to, int step) {
     return nil_obj();
   }
   obj_t *obj = obj_of(TYPE_RANGE);
-  obj->range = (range_t) { from, to, step };
+  obj->range = mem_alloc(sizeof(obj_range_t));
+  mark_traceable(obj->range, TYPE_RANGE_DATA, F_NONE);
+  obj->range->from = from;
+  obj->range->to = to;
+  obj->range->step = step;
   return obj;
 }
 

@@ -103,7 +103,10 @@ void test_traceable_iterator(void) {
   TEST_ASSERT_EQUAL(ERR_NO_ERROR, result->err);
   TEST_ASSERT_EQUAL(TYPE_RANGE, hdr->type);
   TEST_ASSERT_EQUAL(F_NONE, hdr->flags);
-  TEST_ASSERT_EQUAL(0, hdr->children);
+  TEST_ASSERT_EQUAL(1, hdr->children);
+
+  void* child = (obj_t*) get_child(obj, 0);
+  TEST_ASSERT_EQUAL(TYPE_RANGE_DATA, TYPEOF((obj_t*) child));
 }
 
 void test_traceable_varargs(void) {

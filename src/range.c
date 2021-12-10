@@ -10,18 +10,18 @@
 
 /* Return 1 for upto ranges, -1 for downto. */
 static int incr(obj_t *obj) {
-  if (obj->range.from < obj->range.to) {
+  if (obj->range->from < obj->range->to) {
     return 1;
   }
   return -1;
 }
 
 static int _range_length(obj_t *obj) {
-  return abs(obj->range.from - obj->range.to) + 1;
+  return abs(obj->range->from - obj->range->to) + 1;
 }
 
 static int _range_get(obj_t *obj, int i, error_t *err) {
-  int start = obj->range.from;
+  int start = obj->range->from;
   int len = _range_length(obj);
 
   if (i < 0 || i > len - 1) {
@@ -35,9 +35,9 @@ static int _range_get(obj_t *obj, int i, error_t *err) {
 obj_t *range_to_string(obj_t *obj, obj_method_args_t *args) {
   // Don't look.
   obj_t *a = string_obj(c_str_to_bytearray("<Range "));
-  obj_t *b = str_add(a, wrap_varargs(1, int_to_string(int_obj(obj->range.from), NULL)));
+  obj_t *b = str_add(a, wrap_varargs(1, int_to_string(int_obj(obj->range->from), NULL)));
   obj_t *c = str_add(b, wrap_varargs(1, string_obj(c_str_to_bytearray(".."))));
-  obj_t *d = str_add(c, wrap_varargs(1, int_to_string(int_obj(obj->range.to), NULL)));
+  obj_t *d = str_add(c, wrap_varargs(1, int_to_string(int_obj(obj->range->to), NULL)));
   obj_t *e = str_add(d, wrap_varargs(1, string_obj(c_str_to_bytearray(">"))));
   return e;
 }
@@ -59,9 +59,9 @@ obj_t *range_contains(obj_t *obj, obj_method_args_t *args) {
 
   int val = arg->intval;
   if (incr(obj) == 1) {
-    return boolean_obj(val >= obj->range.from && val <= obj->range.to);
+    return boolean_obj(val >= obj->range->from && val <= obj->range->to);
   }
-  return boolean_obj(val <= obj->range.from && val >= obj->range.to);
+  return boolean_obj(val <= obj->range->from && val >= obj->range->to);
 }
 
 obj_t *range_get(obj_t *obj, obj_method_args_t *args) {
@@ -87,9 +87,9 @@ obj_t *range_get(obj_t *obj, obj_method_args_t *args) {
 }
 
 obj_t *range_random_choice(obj_t *obj, obj_method_args_t *args) {
-  uint32_t max = obj->range.to - obj->range.from;
+  uint32_t max = obj->range->to - obj->range->from;
   // Overflow much?
-  return int_obj((rand32() % max) + obj->range.from);
+  return int_obj((rand32() % max) + obj->range->from);
 }
 
 static obj_t *iter_next(obj_iter_t *iterable) {
@@ -115,7 +115,7 @@ static obj_t *iter_next(obj_iter_t *iterable) {
         iterable->state = ITER_STOPPED;
         return nil_obj();
       }
-      iterable->state_obj->intval += iterable->obj->range.step;
+      iterable->state_obj->intval += iterable->obj->range->step;
       return int_obj(next_val);
 
     // Having iterated over all the elements, return Nil as a sentinel.

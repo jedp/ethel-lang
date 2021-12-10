@@ -37,7 +37,6 @@ void mark_traceable(void *obj, type_t type, flags_t flags) {
     case TYPE_FLOAT:
     case TYPE_BYTE:
     case TYPE_BOOLEAN:
-    case TYPE_RANGE:
     case TYPE_BREAK:
     case TYPE_CONTINUE:
       hdr->children = 0;
@@ -49,12 +48,14 @@ void mark_traceable(void *obj, type_t type, flags_t flags) {
     case TYPE_BYTEARRAY:
     case TYPE_STRING:
     case TYPE_FUNCTION:
+    case TYPE_RANGE:
     case TYPE_ITERATOR:
       hdr->children = 1;
       break;
 
     // Various child data structures.
     case TYPE_BYTEARRAY_DATA: hdr->children = 0; break;
+    case TYPE_RANGE_DATA: hdr->children = 0; break;
     case TYPE_VARIABLE_ARGS: hdr->children = 2; break;
     case TYPE_LIST_DATA: hdr->children = 1; break;
     case TYPE_LIST_ELEM_DATA: hdr->children = 2; break;
