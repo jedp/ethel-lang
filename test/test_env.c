@@ -2,10 +2,16 @@
 #include "unity/unity.h"
 #include "test_env.h"
 #include "../inc/type.h"
+#include "../inc/mem.h"
 #include "../inc/str.h"
 #include "../inc/env.h"
 
 #define NAME(x) (c_str_to_bytearray(x))
+
+typedef struct {
+  gc_header_t hdr;
+  int etc;
+} fake_ast_block_t;
 
 void test_env_init() {
   env_t env;
@@ -160,10 +166,48 @@ void test_env_redefinition_error(void) {
   TEST_ASSERT_EQUAL(ERR_ENV_SYMBOL_REDEFINED, put_env(&env, NAME("thing"), float_obj(1.2), F_NONE));
 }
 
+void test_plant_gc_root(void) {
+  env_t env;
+  env_init(&env);
+  enter_scope(&env);
+  int error;
+
+  obj_t *obj1 = int_obj(42);
+  error = put_env(&env, NAME("ethel-int"), obj1, F_NONE);
+  TEST_ASSERT_EQUAL(ERR_NO_ERROR, error);
+
+  fake_ast_block_t *thing = mem_alloc(sizeof(fake_ast_block_t));
+  mark_traceable(thing, AST_BLOCK, F_NONE);
+  error = put_env_gc_root(&env, (gc_header_t*) thing);
+  TEST_ASSERT_EQUAL(ERR_NO_ERROR, error);
+
+  // Put another object to make sure finding names works
+  // now that there are null names for gc roots.
+  obj_t *obj2 = float_obj(4.2);
+  error = put_env(&env, NAME("ethel-float"), obj2, F_NONE);
+  TEST_ASSERT_EQUAL(ERR_NO_ERROR, error);
+
+  TEST_ASSERT_EQUAL(42, get_env(&env, NAME("ethel-int"))->intval);
+  TEST_ASSERT_EQUAL(4.2, get_env(&env, NAME("ethel-float"))->floatval);
+
+  // Confirm "thing" is in the scope.
+  env_sym_t *node = env.symbols[env.top];
+  while(node != NULL) {
+    if (node->obj->type == AST_BLOCK) break;
+    node = node->next;
+  }
+
+  // We should have found the right thing.
+  // As a GC root, its name is null.
+  TEST_ASSERT_NULL(node->name_obj);
+  TEST_ASSERT_EQUAL(AST_BLOCK, node->obj->type);
+}
+
 void test_env(void) {
   RUN_TEST(test_env_init);
   RUN_TEST(test_env_put_get);
   RUN_TEST(test_env_put_del_get);
   RUN_TEST(test_env_scopes);
   RUN_TEST(test_env_redefinition_error);
+  RUN_TEST(test_plant_gc_root);
 }

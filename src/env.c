@@ -6,12 +6,13 @@
 #include "../inc/str.h"
 #include "../inc/env.h"
 
-env_sym_t *new_sym(bytearray_t *name_obj, obj_t *obj, flags_t flags) {
+env_sym_t *new_sym(bytearray_t *name_obj, gc_header_t *hdr, flags_t flags) {
   env_sym_t *sym = mem_alloc(sizeof(env_sym_t));
   mark_traceable(sym, ENV_SYM, flags);
-  mark_traceable(obj, TYPEOF(obj), flags);
+  mark_traceable(hdr, TYPEOF(hdr), flags);
+  if (name_obj != NULL) mark_traceable(name_obj, TYPE_BYTEARRAY_DATA, F_NONE);
   sym->name_obj = name_obj;
-  sym->obj = obj;
+  sym->obj = hdr;
   sym->prev = NULL;
   sym->next = NULL;
 
@@ -40,17 +41,17 @@ error_t leave_scope(env_t *env) {
 }
 
 static env_sym_t *find_sym(env_t *env, bytearray_t *sym_name, boolean recursive) {
-  if (env->top < 0) {
-    return NULL;
-  }
+  if (env->top < 0) return NULL;
+
+  // NULL is a valid name for planting gc roots.
+  if (sym_name == NULL) return NULL;
 
   bytearray_t *name = sym_name;
-  assert(name != NULL);
   // Search back through the scopes to find the name.
   for (int i = env->top; i >= 0; --i) {
     // Start at the node the root points to.
     env_sym_t *node = env->symbols[i];
-    while (node != NULL) {
+    while (node != NULL && node->name_obj != NULL) {
       if (bytearray_eq(name, node->name_obj)) {
         return node;
       }
@@ -65,8 +66,8 @@ static env_sym_t *find_sym(env_t *env, bytearray_t *sym_name, boolean recursive)
 
 error_t _put_env(env_t *env,
                  bytearray_t *name_obj,
-                 const obj_t *obj,
-                 const uint16_t flags,
+                 const gc_header_t *obj,
+                 const flags_t flags,
                  boolean can_shadow) {
   assert(env->top >= 0);
 
@@ -77,14 +78,13 @@ error_t _put_env(env_t *env,
       return ERR_ENV_SYMBOL_REDEFINED;
     }
 
-    // Preserve flags, copying new object.
-    found->obj = (obj_t *) obj;
+    found->obj = (gc_header_t*) obj;
     return ERR_NO_ERROR;
   }
 
   // Not found. Put it in the current scope.
   env_sym_t *top = env->symbols[env->top];
-  env_sym_t *new = new_sym(name_obj, (obj_t *) obj, flags);
+  env_sym_t *new = new_sym(name_obj, (gc_header_t*) obj, flags);
 
   // First thing in this scope?
   if (top == NULL) {
@@ -101,11 +101,15 @@ error_t _put_env(env_t *env,
 }
 
 error_t put_env(env_t *env, bytearray_t *name_obj, const obj_t *obj, const flags_t flags) {
-  return _put_env(env, name_obj, obj, flags, False);
+  return _put_env(env, name_obj, (gc_header_t*) obj, flags, False);
 }
 
 error_t put_env_shadow(env_t *env, bytearray_t *name_obj, const obj_t *obj, const flags_t flags) {
-  return _put_env(env, name_obj, obj, flags, True);
+  return _put_env(env, name_obj, (gc_header_t*) obj, flags, True);
+}
+
+error_t put_env_gc_root(env_t *env, const gc_header_t *hdr) {
+  return _put_env(env, NULL, hdr, F_NONE, False);
 }
 
 error_t del_env(env_t *env, bytearray_t *name_obj) {
@@ -130,7 +134,7 @@ obj_t *get_env(env_t *env, bytearray_t *name_obj) {
   env_sym_t *sym = find_sym(env, name_obj, True);
   if (sym == NULL) return undef_obj();
 
-  return sym->obj;
+  return (obj_t*) sym->obj;
 }
 
 error_t env_init(env_t *env) {
