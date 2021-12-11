@@ -267,25 +267,29 @@ bytearray_t *int_to_hex(unsigned int n) {
   return a;
 }
 
-bytearray_t *bytearray_alloc_with_data(size_t size, uint8_t *data) {
+static bytearray_t *_bytearray_alloc(size_t size) {
   bytearray_t *a = mem_alloc(size + sizeof(size_t) + sizeof(gc_header_t));
-  mark_traceable(a, TYPE_BYTEARRAY_DATA, F_NONE);
-
+  ((gc_header_t*) a)->type = TYPE_BYTEARRAY_DATA;
+  ((gc_header_t*) a)->flags = F_NONE;
+  ((gc_header_t*) a)->children = 0;
   a->size = size;
+  return a;
+}
+
+bytearray_t *bytearray_alloc_with_data(size_t size, uint8_t *data) {
+  bytearray_t *a = _bytearray_alloc(size);
   mem_cp(a->data, data, size);
   return a;
 }
 
 bytearray_t *bytearray_alloc(size_t size) {
-  bytearray_t *a = mem_alloc(size + sizeof(size_t) + sizeof(gc_header_t));
-  mark_traceable(a, TYPE_BYTEARRAY_DATA, F_NONE);
-
-  a->size = size;
+  bytearray_t *a = _bytearray_alloc(size);
   mem_set(a->data, '\0', size);
   return a;
 }
 
 bytearray_t *bytearray_clone(bytearray_t *src) {
+  if (src == NULL) return NULL;
   bytearray_t *dst = bytearray_alloc(src->size);
   size_t i = 0;
   while (i < src->size) {

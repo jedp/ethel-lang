@@ -7,11 +7,8 @@
 #include "../inc/env.h"
 
 env_sym_t *new_sym(bytearray_t *name_obj, gc_header_t *hdr, flags_t flags) {
-  env_sym_t *sym = mem_alloc(sizeof(env_sym_t));
-  mark_traceable(sym, ENV_SYM, flags);
-  mark_traceable(hdr, TYPEOF(hdr), flags);
-  if (name_obj != NULL) mark_traceable(name_obj, TYPE_BYTEARRAY_DATA, F_NONE);
-  sym->name_obj = name_obj;
+  env_sym_t *sym = (env_sym_t*) alloc_type(ENV_SYM, flags);
+  sym->name_obj = bytearray_clone(name_obj);
   sym->obj = hdr;
   sym->prev = NULL;
   sym->next = NULL;

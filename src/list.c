@@ -92,8 +92,7 @@ obj_t *_list_slice(obj_t *obj, int start, int end) {
   }
 
   // Allocate a new list to return.
-  obj_t *slice = mem_alloc(sizeof(obj_t));
-  mark_traceable(slice, TYPE_LIST, F_NONE);
+  obj_t *slice = (obj_t*) alloc_type(TYPE_LIST, F_NONE);
   slice->list = mem_alloc(sizeof(obj_list_t));
 
   slice->list->elems = mem_alloc(sizeof(obj_list_t));

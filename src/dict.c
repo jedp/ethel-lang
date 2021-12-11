@@ -9,14 +9,17 @@
 #include "../inc/obj.h"
 
 error_t _dict_init(obj_dict_t *dict, uint32_t buckets) {
-  dict_node_t **nodes = mem_alloc(sizeof(dict_node_t*) * buckets);
+  dict_node_t **nodes = mem_alloc(sizeof(dict_node_t*) * buckets + sizeof(gc_header_t));
+
   if (nodes == NULL) return ERR_OUT_OF_MEMORY;
 
-  // Null out the allocated area. Nothing for GC to trace yet.
-  mem_set(nodes, 0, sizeof(dict_node_t*) * buckets);
   dict->buckets = buckets;
   dict->nelems = 0;
   dict->nodes = nodes;
+
+  // Null everything out.
+  mem_set(nodes, 0, sizeof(dict_node_t*) * buckets);
+
   return ERR_NO_ERROR;
 }
 
@@ -55,8 +58,7 @@ error_t _dict_put(obj_dict_t *dict, obj_t *k, obj_t *v) {
   }
 
   // Create a new node and put it in the bucket.
-  dict_node_t *new_node = mem_alloc(sizeof(dict_node_t));
-  mark_traceable(new_node, TYPE_DICT_DATA, F_NONE);
+  dict_node_t *new_node = (dict_node_t*) alloc_type(TYPE_DICT_KV_DATA, F_ENV_ASSIGNABLE);
   if (!new_node) return ERR_OUT_OF_MEMORY;
 
   new_node->hash_val = hv;
@@ -81,8 +83,7 @@ static error_t dict_resize(obj_t *orig_obj) {
   }
 
   error_t err;
-  obj_dict_t *new_dict = mem_alloc(sizeof(obj_dict_t));
-  mark_traceable(new_dict, TYPE_DICT, F_NONE);
+  obj_dict_t *new_dict = (obj_dict_t*) alloc_type(TYPE_DICT, F_ENV_ASSIGNABLE);
 
   if ((err = _dict_init(new_dict, new_buckets)) != ERR_NO_ERROR) {
     mem_free(new_dict);

@@ -226,3 +226,4 @@ void test_dict(void) {
   RUN_TEST(test_dict_contains);
   RUN_TEST(test_dict_resize);
 }
+

@@ -48,6 +48,7 @@ TESTOBJS = test/unity/unity.o \
 					 test/test.o
 
 CFLAGS = -std=gnu11 -g3 -Os -I inc
+CFLAGS_TEST = -std=gnu11 -g3 -I inc
 EXTRA_CFLAGS = \
  -Wall \
  -Wformat \
@@ -83,7 +84,7 @@ run: $(RUNOBJS) $(COMPOBJS)
 	$(CC) $(CFLAGS) $(EXTRA_CFLAGS) -o $@ $^ $(LDFLAGS)
 
 test: $(COMPOBJS) $(TESTOBJS)
-	$(CC) $(CFLAGS) $(TESTFLAGS) -o $@/test $^ $(LDFLAGS)
+	$(CC) $(CFLAGS_TEST) $(TESTFLAGS) -o $@/test $^ $(LDFLAGS)
 	./test/test
 
 wc:

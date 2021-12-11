@@ -176,8 +176,7 @@ void test_plant_gc_root(void) {
   error = put_env(&env, NAME("ethel-int"), obj1, F_NONE);
   TEST_ASSERT_EQUAL(ERR_NO_ERROR, error);
 
-  fake_ast_block_t *thing = mem_alloc(sizeof(fake_ast_block_t));
-  mark_traceable(thing, AST_BLOCK, F_NONE);
+  fake_ast_block_t *thing = (fake_ast_block_t*) alloc_type(AST_BLOCK, F_NONE);
   error = put_env_gc_root(&env, (gc_header_t*) thing);
   TEST_ASSERT_EQUAL(ERR_NO_ERROR, error);
 

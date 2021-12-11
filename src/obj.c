@@ -24,11 +24,7 @@ obj_t *arg_at(obj_method_args_t *args, int index) {
 }
 
 obj_t *obj_of(type_t type) {
-  assert(type > TYPE_ERR_DO_NOT_USE);
-  obj_t *obj = mem_alloc(sizeof(obj_t));
-  mark_traceable(obj, type, F_NONE);
-
-  return obj;
+  return (obj_t*) alloc_type(type, F_NONE);
 }
 
 obj_t *undef_obj(void) {
@@ -91,8 +87,7 @@ obj_t *boolean_obj(boolean t) {
 
 obj_t *range_obj(int from, int to) {
   obj_t *obj = obj_of(TYPE_RANGE);
-  obj->range = mem_alloc(sizeof(obj_range_t));
-  mark_traceable(obj->range, TYPE_RANGE_DATA, F_NONE);
+  obj->range = (obj_range_t*) alloc_type(TYPE_RANGE_DATA, F_NONE);
   obj->range->from = from;
   obj->range->to = to;
   obj->range->step = 1;
@@ -105,8 +100,7 @@ obj_t *range_step_obj(int from, int to, int step) {
     return nil_obj();
   }
   obj_t *obj = obj_of(TYPE_RANGE);
-  obj->range = mem_alloc(sizeof(obj_range_t));
-  mark_traceable(obj->range, TYPE_RANGE_DATA, F_NONE);
+  obj->range = (obj_range_t*) alloc_type(TYPE_RANGE_DATA, F_NONE);
   obj->range->from = from;
   obj->range->to = to;
   obj->range->step = step;
@@ -114,11 +108,8 @@ obj_t *range_step_obj(int from, int to, int step) {
 }
 
 obj_t *list_obj(obj_list_element_t *elems) {
-  if (elems != NULL) mark_traceable(elems, TYPE_LIST_ELEM_DATA, F_NONE);
-
   obj_t *obj = obj_of(TYPE_LIST);
-  obj_list_t *list = mem_alloc(sizeof(obj_list_t));
-  mark_traceable(list, TYPE_LIST_DATA, F_NONE);
+  obj_list_t *list = (obj_list_t*) alloc_type(TYPE_LIST_DATA, F_NONE);
 
   list->elems = elems;
 
@@ -128,9 +119,8 @@ obj_t *list_obj(obj_list_element_t *elems) {
 
 obj_t *dict_obj(void) {
   obj_t *obj = obj_of(TYPE_DICT);
-  obj_dict_t *dict = mem_alloc(sizeof(obj_dict_t));
-  mark_traceable(dict, TYPE_DICT_DATA, F_NONE);
-  obj->dict = dict;
+  ((gc_header_t*) obj)->flags = F_ENV_ASSIGNABLE;
+  obj->dict = (obj_dict_t*) alloc_type(TYPE_DICT_DATA, F_NONE);
   if (obj->dict == NULL ||
       dict_init(obj, DICT_INIT_BUCKETS) != ERR_NO_ERROR) {
     mem_free(obj);
@@ -142,25 +132,23 @@ obj_t *dict_obj(void) {
 
 obj_t *func_obj(void* code, void* scope) {
   obj_t *obj = obj_of(TYPE_FUNCTION);
-  obj->func_def = mem_alloc(sizeof(obj_func_def_t));
+  obj->func_def = (obj_func_def_t*) alloc_type(TYPE_FUNCTION_PTR_DATA, F_NONE);
   obj->func_def->code = code;
   obj->func_def->scope = scope;
 
-  mark_traceable(obj->func_def, TYPE_FUNCTION_PTR_DATA, F_NONE);
   return obj;
 }
 
 obj_t *iterator_obj(obj_t *obj, obj_t *state_obj, obj_t *(*next)(obj_iter_t *iterable)) {
   obj_t *iter = obj_of(TYPE_ITERATOR);
   // Assume the caller has marked obj and state_obj as traceble.
-  iter->iterator = mem_alloc(sizeof(obj_iter_t));
+  iter->iterator = (obj_iter_t*) alloc_type(TYPE_ITERATOR_DATA, F_NONE);
 
   iter->iterator->state = ITER_NOT_STARTED;
   iter->iterator->obj = obj;
   iter->iterator->state_obj = state_obj;
   iter->iterator->next = next;
 
-  mark_traceable(iter->iterator, TYPE_ITERATOR_DATA, F_NONE);
   return iter;
 }
 
@@ -182,17 +170,16 @@ obj_method_args_t *wrap_varargs(int n_args, ...) {
   va_list vargs;
   va_start(vargs, n_args);
 
-  obj_method_args_t *args = mem_alloc(sizeof(obj_method_args_t));
+  obj_method_args_t *args = (obj_method_args_t*) alloc_type(
+      TYPE_VARIABLE_ARGS, F_NONE);
   obj_method_args_t *root = args;
-  mark_traceable(root, TYPE_VARIABLE_ARGS, F_NONE);
 
   for (int i = 0; i < n_args; i++) {
     obj_t *val = va_arg(vargs, obj_t*);
     args->arg = val;
 
     if (i < n_args - 1) {
-      args->next = mem_alloc(sizeof(obj_method_args_t));
-      mark_traceable(args->next, TYPE_VARIABLE_ARGS, F_NONE);
+      args->next = (obj_method_args_t*) alloc_type(TYPE_VARIABLE_ARGS, F_NONE);
     } else {
       args->next = NULL;
     }

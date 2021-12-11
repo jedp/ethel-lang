@@ -8,7 +8,7 @@
 
 ast_expr_t *ast_node(type_t type) {
   assert(type > TYPE_ERR_DO_NOT_USE);
-  ast_expr_t *node = mem_alloc(sizeof(ast_expr_t));
+  ast_expr_t *node = (ast_expr_t*) alloc_type(type, F_NONE);
 
   switch(type) {
     case AST_INT:     node->intval = 0;      break;
@@ -24,7 +24,6 @@ ast_expr_t *ast_node(type_t type) {
     default: break;
   }
 
-  mark_traceable(node, type, F_NONE);
   return node;
 }
 
@@ -48,8 +47,7 @@ ast_expr_t *ast_unary(type_t type, ast_expr_t *a) {
       return ast_empty();
   }
 
-  node->unary_arg = mem_alloc(sizeof(ast_unary_arg_t));
-  mark_traceable(node->unary_arg, AST_UNARY_ARG, F_NONE);
+  node->unary_arg = (ast_unary_arg_t*) alloc_type(AST_UNARY_ARG, F_NONE);
 
   node->unary_arg->a = a;
   return node;
@@ -90,8 +88,7 @@ ast_expr_t *ast_op(type_t type, ast_expr_t *a, ast_expr_t *b) {
       return ast_empty();
   }
 
-  node->op_args = mem_alloc(sizeof(ast_op_args_t));
-  mark_traceable(node->op_args, AST_BINOP_ARGS, F_NONE);
+  node->op_args = (ast_op_args_t*) alloc_type(AST_BINOP_ARGS, F_NONE);
 
   node->op_args->a = a;
   node->op_args->b = b;
@@ -100,8 +97,7 @@ ast_expr_t *ast_op(type_t type, ast_expr_t *a, ast_expr_t *b) {
 
 ast_expr_t *ast_cast(ast_expr_t *a, ast_expr_t *b) {
   ast_expr_t *node = ast_node(AST_CAST);
-  node->cast_args = mem_alloc(sizeof(ast_cast_args_t));
-  mark_traceable(node->cast_args, AST_CAST_ARGS, F_NONE);
+  node->cast_args = (ast_cast_args_t*) alloc_type(AST_CAST_ARGS, F_NONE);
 
   node->cast_args->a = a;
   node->cast_args->b = b;
@@ -116,8 +112,7 @@ ast_expr_t *ast_list(ast_expr_list_t *nullable_init_es) {
   ast_expr_t *node = ast_node(AST_LIST);
   gc_header_t *hdr = (gc_header_t*) node;
   hdr->flags |= F_ENV_ASSIGNABLE;
-  node->list = mem_alloc(sizeof(ast_list_t));
-  mark_traceable(node->list, AST_LIST_ELEMS, F_NONE);
+  node->list = (ast_list_t*) alloc_type(AST_LIST_ELEMS, F_NONE);
 
   if (nullable_init_es != NULL) {
     node->list->es = nullable_init_es;
@@ -132,11 +127,8 @@ ast_expr_t *ast_dict(ast_expr_kv_list_t *nullable_kvs) {
   gc_header_t *hdr = (gc_header_t*) node;
   hdr->flags |= F_ENV_ASSIGNABLE;
 
-  node->dict = mem_alloc(sizeof(ast_dict_t));
-  mark_traceable(node->dict, AST_DICT_KVS, F_NONE);
-
-  node->dict->kv = mem_alloc(sizeof(ast_expr_kv_list_t));
-  mark_traceable(node->dict->kv, AST_DICT_KV, F_NONE);
+  node->dict = (ast_dict_t*) alloc_type(AST_DICT_KVS, F_NONE);
+  node->dict->kv = (ast_expr_kv_list_t*) alloc_type(AST_DICT_KV, F_NONE);
 
   if (nullable_kvs != NULL) {
     node->dict->kv = nullable_kvs;
@@ -166,8 +158,7 @@ ast_expr_t *ast_byte(byte b) {
 
 ast_expr_t *ast_array_decl(ast_expr_t *size) {
   ast_expr_t *node = ast_node(AST_BYTEARRAY_DECL);
-  node->array_decl = mem_alloc(sizeof(ast_array_decl_t));
-  mark_traceable(node->array_decl, AST_BYTEARRAY_DECL_DATA, F_NONE);
+  node->array_decl = (ast_array_decl_t*) alloc_type(AST_BYTEARRAY_DECL_DATA, F_NONE);
   node->array_decl->size = size;
   return node;
 }
@@ -175,7 +166,6 @@ ast_expr_t *ast_array_decl(ast_expr_t *size) {
 ast_expr_t *ast_string(bytearray_t *s) {
   ast_expr_t *node = ast_node(AST_STRING);
   node->bytearray = bytearray_clone(s);
-  mark_traceable(node->bytearray, TYPE_BYTEARRAY, F_NONE);
   return node;
 }
 
@@ -194,8 +184,7 @@ ast_expr_t *ast_ident(bytearray_t *name) {
   ast_expr_t *node = ast_node(AST_IDENT);
   gc_header_t *hdr = (gc_header_t*) node;
   hdr->flags |= F_ENV_ASSIGNABLE;
-  node->bytearray = name;
-  mark_traceable(node->bytearray, TYPE_BYTEARRAY, F_NONE);
+  node->bytearray = bytearray_clone(name);
   return node;
 }
 
@@ -211,14 +200,11 @@ ast_expr_t *ast_member_access(ast_expr_t *expr,
                               ast_expr_list_t *args) {
   ast_expr_t *node = ast_node(AST_APPLY);
 
-  node->application = mem_alloc(sizeof(ast_apply_t));
-  mark_traceable(node->application, AST_APPLY_DATA, F_NONE);
+  node->application = (ast_apply_t*) alloc_type(AST_APPLY_DATA, F_NONE);
   node->application->receiver = expr;
-
   node->application->member_name = bytearray_clone(member_name);
 
-  node->application->args = mem_alloc(sizeof(ast_expr_list_t));
-  mark_traceable(node->application->args, AST_EXPR_LIST, F_NONE);
+  node->application->args = (ast_expr_list_t*) alloc_type(AST_EXPR_LIST, F_NONE);
   node->application->args = args;
 
   return node;
@@ -232,8 +218,7 @@ ast_expr_t *ast_type_name(bytearray_t *name) {
 
 ast_expr_t *ast_range(ast_expr_t *from, ast_expr_t *to) {
   ast_expr_t *node = ast_node(AST_RANGE);
-  node->range = mem_alloc(sizeof(ast_range_args_t));
-  mark_traceable(node->range, AST_RANGE_ARGS, F_NONE);
+  node->range = (ast_range_args_t*) alloc_type(AST_RANGE_ARGS, F_NONE);
   node->range->from = from;
   node->range->to = to;
   node->range->step = NULL;
@@ -251,8 +236,7 @@ ast_expr_t *ast_range_step(ast_expr_t *expr, ast_expr_t *step) {
 
 ast_expr_t *ast_method_call(bytearray_t *name, ast_expr_list_t *args) {
   ast_expr_t *node = ast_node(AST_METHOD_CALL);
-  node->method_call = mem_alloc(sizeof(ast_method_t));
-  mark_traceable(node->method_call, AST_METHOD_CALL_DATA, F_NONE);
+  node->method_call = (ast_method_t*) alloc_type(AST_METHOD_CALL_DATA, F_NONE);
   node->method_call->name = bytearray_clone(name);
   node->method_call->args = args;
   return node;
@@ -269,8 +253,7 @@ ast_expr_t *ast_access(ast_expr_t *object, ast_expr_t *member) {
 
 ast_expr_t *ast_block(ast_expr_list_t *es) {
   ast_expr_t *node = ast_node(AST_BLOCK);
-  node->block_exprs = mem_alloc(sizeof(ast_expr_list_t));
-  mark_traceable(node->block_exprs, AST_EXPR_LIST, F_NONE);
+  node->block_exprs = (ast_expr_list_t*) alloc_type(AST_EXPR_LIST, F_NONE);
   node->block_exprs = es;
   return node;
 }
@@ -278,8 +261,7 @@ ast_expr_t *ast_block(ast_expr_list_t *es) {
 ast_expr_t *ast_func_def(ast_fn_arg_decl_t *argnames,
                        ast_expr_list_t *es) {
   ast_expr_t *node = ast_node(AST_FUNCTION_DEF);
-  node->func_def = mem_alloc(sizeof(ast_func_def_t));
-  mark_traceable(node->func_def, AST_FUNCTION_DEF_DATA, F_NONE);
+  node->func_def = (ast_func_def_t*) alloc_type(AST_FUNCTION_DEF_DATA, F_NONE);
   node->func_def->argnames = argnames;
   node->func_def->block_exprs = es;
   return node;
@@ -287,8 +269,7 @@ ast_expr_t *ast_func_def(ast_fn_arg_decl_t *argnames,
 
 ast_expr_t *ast_func_call(ast_expr_t *expr, ast_expr_list_t *args) {
   ast_expr_t *node = ast_node(AST_FUNCTION_CALL);
-  node->func_call = mem_alloc(sizeof(ast_func_call_t));
-  mark_traceable(node->func_call, AST_FUNCTION_CALL_DATA, F_NONE);
+  node->func_call = (ast_func_call_t*) alloc_type(AST_FUNCTION_CALL_DATA, F_NONE);
   node->func_call->expr = expr;
   node->func_call->args = args;
   return node;
@@ -302,11 +283,12 @@ ast_expr_t *ast_func_return(ast_expr_list_t *es) {
 
 ast_expr_t *ast_reserved_callable(ast_reserved_callable_type_t type, ast_expr_list_t *es) {
   ast_expr_t *node = ast_node(AST_RESERVED_CALLABLE);
-  node->reserved_callable = mem_alloc(sizeof(ast_reserved_callable_t));
-  mark_traceable(node->reserved_callable, AST_RESERVED_CALLABLE_DATA, F_NONE);
+  node->reserved_callable = (ast_reserved_callable_t*) alloc_type(
+      AST_RESERVED_CALLABLE_DATA, F_NONE);
   node->reserved_callable->type = type;
-  node->reserved_callable->es = mem_alloc(sizeof(ast_expr_list_t));
-  mark_traceable(node->reserved_callable->es, AST_EXPR_LIST, F_NONE);
+
+  node->reserved_callable->es = (ast_expr_list_t*) alloc_type(
+      AST_EXPR_LIST, F_NONE);
   node->reserved_callable->es = es;
   return node;
 }
@@ -319,8 +301,8 @@ ast_expr_t *ast_delete(ast_expr_t *ident) {
 
 ast_expr_t *ast_if_then(ast_expr_t *if_clause, ast_expr_t *then_clause) {
   ast_expr_t *node = ast_node(AST_IF_THEN);
-  node->if_then_args = mem_alloc(sizeof(ast_if_then_args_t));
-  mark_traceable(node->if_then_args, AST_IF_THEN_DATA, F_NONE);
+  node->if_then_args = (ast_if_then_args_t*) alloc_type(
+      AST_IF_THEN_DATA, F_NONE);
   node->if_then_args->cond = if_clause;
   node->if_then_args->pred = then_clause;
   return node;
@@ -328,8 +310,8 @@ ast_expr_t *ast_if_then(ast_expr_t *if_clause, ast_expr_t *then_clause) {
 
 ast_expr_t *ast_if_then_else(ast_expr_t *if_clause, ast_expr_t *then_clause, ast_expr_t *else_clause) {
   ast_expr_t *node = ast_node(AST_IF_THEN_ELSE);
-  node->if_then_else_args = mem_alloc(sizeof(ast_if_then_else_args_t));
-  mark_traceable(node->if_then_else_args, AST_IF_THEN_ELSE_DATA, F_NONE);
+  node->if_then_else_args = (ast_if_then_else_args_t*) alloc_type(
+      AST_IF_THEN_ELSE_DATA, F_NONE);
   node->if_then_else_args->cond = if_clause;
   node->if_then_else_args->pred = then_clause;
   node->if_then_else_args->else_pred = else_clause;
@@ -338,8 +320,8 @@ ast_expr_t *ast_if_then_else(ast_expr_t *if_clause, ast_expr_t *then_clause, ast
 
 ast_expr_t *ast_do_while_loop(ast_expr_t *pred, ast_expr_t *cond) {
   ast_expr_t *node = ast_node(AST_DO_WHILE_LOOP);
-  node->do_while_loop = mem_alloc(sizeof(ast_do_while_loop_t));
-  mark_traceable(node->do_while_loop, AST_DO_WHILE_LOOP_DATA, F_NONE);
+  node->do_while_loop = (ast_do_while_loop_t*) alloc_type(
+      AST_DO_WHILE_LOOP_DATA, F_NONE);
   node->do_while_loop->pred = pred;
   node->do_while_loop->cond = cond;
   return node;
@@ -347,8 +329,7 @@ ast_expr_t *ast_do_while_loop(ast_expr_t *pred, ast_expr_t *cond) {
 
 ast_expr_t *ast_while_loop(ast_expr_t *cond, ast_expr_t *pred) {
   ast_expr_t *node = ast_node(AST_WHILE_LOOP);
-  node->while_loop = mem_alloc(sizeof(ast_while_loop_t));
-  mark_traceable(node->while_loop, AST_WHILE_LOOP_DATA, F_NONE);
+  node->while_loop = (ast_while_loop_t*) alloc_type(AST_WHILE_LOOP_DATA, F_NONE);
   node->while_loop->cond = cond;
   node->while_loop->pred = pred;
   return node;
@@ -358,8 +339,7 @@ ast_expr_t *ast_for_loop(ast_expr_t *elem,
                          ast_expr_t *iterable,
                          ast_expr_t *pred) {
   ast_expr_t *node = ast_node(AST_FOR_LOOP);
-  node->for_loop = mem_alloc(sizeof(ast_for_loop_t));
-  mark_traceable(node->for_loop, AST_FOR_LOOP_DATA, F_NONE);
+  node->for_loop = (ast_for_loop_t*) alloc_type(AST_FOR_LOOP_DATA, F_NONE);
   node->for_loop->elem = elem;
   node->for_loop->iterable = iterable;
   node->for_loop->pred = pred;
