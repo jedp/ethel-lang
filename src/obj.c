@@ -51,15 +51,11 @@ obj_t *error_obj(error_t errval) {
 
 obj_t *bytearray_obj(size_t size, uint8_t *data) {
   obj_t *obj = obj_of(TYPE_BYTEARRAY);
-  bytearray_t *a = mem_alloc(size + 4);
-  a->size = size;
   if (data) {
-    mem_cp(a->data, data, size);
+    obj->bytearray = bytearray_alloc_with_data(size, data);
   } else {
-    mem_set(a->data, '\0', size);
+    obj->bytearray = bytearray_alloc(size);
   }
-  obj->bytearray = a;
-  mark_traceable(obj->bytearray, TYPE_BYTEARRAY_DATA, F_NONE);
   return obj;
 }
 
@@ -77,11 +73,7 @@ obj_t *float_obj(float f) {
 
 obj_t *string_obj(bytearray_t *src) {
   obj_t *obj = obj_of(TYPE_STRING);
-  obj->bytearray = mem_alloc(src->size + sizeof(size_t) + sizeof(gc_header_t));
-  obj->bytearray->size = src->size;
-
-  mem_cp(obj->bytearray->data, src->data, src->size);
-  mark_traceable(obj->bytearray, TYPE_BYTEARRAY_DATA, F_NONE);
+  obj->bytearray = bytearray_clone(src);
   return obj;
 }
 

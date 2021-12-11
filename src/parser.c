@@ -166,8 +166,7 @@ static ast_fn_arg_decl_t *parse_fn_arg_decl(lexer_t *lexer) {
 
   if (lexer->token.tag != TAG_IDENT) return NULL;
 
-  node->name = mem_alloc(sizeof(bytearray_t));
-  node->name = c_str_to_bytearray(lexer->token.string);
+  node->name = bytearray_clone(c_str_to_bytearray(lexer->token.string));
   advance(lexer);
 
   while (lexer->token.tag == TAG_COMMA) {
@@ -176,8 +175,7 @@ static ast_fn_arg_decl_t *parse_fn_arg_decl(lexer_t *lexer) {
     node->next = mem_alloc(sizeof(ast_fn_arg_decl_t));
     node = node->next;
 
-    node->name = mem_alloc(sizeof(bytearray_t));
-    node->name = c_str_to_bytearray(lexer->token.string);
+    node->name = bytearray_clone(c_str_to_bytearray(lexer->token.string));
     advance(lexer);
   }
 

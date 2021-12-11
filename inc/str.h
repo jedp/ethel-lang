@@ -56,6 +56,8 @@ obj_t *int32_dump(obj_t *int_obj);
 /* Return a binary dump of the float as a string. */
 obj_t *float32_dump(obj_t *float_obj);
 
+bytearray_t *bytearray_alloc_with_data(size_t size, uint8_t *data);
+
 bytearray_t *bytearray_alloc(size_t size);
 
 /* Return a new bytearray that is a bytewise copy of the original. */

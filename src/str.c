@@ -267,8 +267,19 @@ bytearray_t *int_to_hex(unsigned int n) {
   return a;
 }
 
+bytearray_t *bytearray_alloc_with_data(size_t size, uint8_t *data) {
+  bytearray_t *a = mem_alloc(size + sizeof(size_t) + sizeof(gc_header_t));
+  mark_traceable(a, TYPE_BYTEARRAY_DATA, F_NONE);
+
+  a->size = size;
+  mem_cp(a->data, data, size);
+  return a;
+}
+
 bytearray_t *bytearray_alloc(size_t size) {
   bytearray_t *a = mem_alloc(size + sizeof(size_t) + sizeof(gc_header_t));
+  mark_traceable(a, TYPE_BYTEARRAY_DATA, F_NONE);
+
   a->size = size;
   mem_set(a->data, '\0', size);
   return a;
