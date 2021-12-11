@@ -106,8 +106,8 @@ true
 ```
 > val d = dict { 'x': 42, "incr": fn(x) { x + 1 }, 3.14: "pi, roughly" }
 { 3.140000: "pi, roughly"
-  "foo": 19
-  'x': 42 }
+  'x': 42
+  "incr": <Function> }
 > d['x']
 42
 > d["incr"](9)
