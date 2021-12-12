@@ -9,12 +9,8 @@
 #include "../inc/rand.h"
 
 static obj_t *_empty_list() {
-  obj_t *obj = mem_alloc(sizeof(obj_t));
-  gc_header_t *hdr = (gc_header_t*) obj;
-  hdr->type = TYPE_LIST;
-  hdr->flags = F_ENV_ASSIGNABLE;
-
-  obj_list_t *list = mem_alloc(sizeof(obj_list_t));
+  obj_t *obj = (obj_t*) alloc_type(TYPE_LIST, F_ENV_ASSIGNABLE);
+  obj_list_t *list = (obj_list_t*) alloc_type(TYPE_LIST_DATA, F_NONE);
   list->elems = NULL;
   obj->list = list;
   return obj;
@@ -94,7 +90,6 @@ obj_t *_list_slice(obj_t *obj, int start, int end) {
   // Allocate a new list to return.
   obj_t *slice = (obj_t*) alloc_type(TYPE_LIST, F_NONE);
   slice->list = mem_alloc(sizeof(obj_list_t));
-
   slice->list->elems = mem_alloc(sizeof(obj_list_t));
 
   obj_list_element_t *curr = slice->list->elems;
