@@ -253,13 +253,12 @@ ast_expr_t *ast_access(ast_expr_t *object, ast_expr_t *member) {
 
 ast_expr_t *ast_block(ast_expr_list_t *es) {
   ast_expr_t *node = ast_node(AST_BLOCK);
-  node->block_exprs = (ast_expr_list_t*) alloc_type(AST_EXPR_LIST, F_NONE);
   node->block_exprs = es;
   return node;
 }
 
 ast_expr_t *ast_func_def(ast_fn_arg_decl_t *argnames,
-                       ast_expr_list_t *es) {
+                         ast_expr_list_t *es) {
   ast_expr_t *node = ast_node(AST_FUNCTION_DEF);
   node->func_def = (ast_func_def_t*) alloc_type(AST_FUNCTION_DEF_DATA, F_NONE);
   node->func_def->argnames = argnames;
@@ -359,31 +358,26 @@ void _pretty_print(ast_expr_t *expr, int indent) {
     printf(" ");
   }
 
+  int children = ((gc_header_t*) expr)->children;
+
   printf("(%s", type_names[TYPEOF(expr)]);
-  switch(TYPEOF(expr)) {
-    case AST_INT:
-      printf(" %d", expr->intval);
-      break;
-    case AST_FLOAT:
-      printf(" %f", (double) expr->floatval);
-      break;
-    case AST_ADD:
-    case AST_SUB:
-    case AST_MUL:
-    case AST_DIV:
-      printf("\n");
-      _pretty_print(expr->op_args->a, indent + 1);
-      _pretty_print(expr->op_args->b, indent + 1);
-      for (int i = 0; i < indent * 2; i++) {
-        printf(" ");
-      }
-      break;
-    default:
-      printf(" <%s> ", type_names[TYPEOF(expr)]);
-      break;
+
+  switch (TYPEOF(expr)) {
+    case AST_INT:     printf(" %d)\n", expr->intval);               break;
+    case AST_FLOAT:   printf(" %f)\n", expr->floatval);             break;
+    case AST_BYTE:    printf(" '%c')\n", expr->byteval);            break;
+    case AST_BOOLEAN: printf(" %c)\n", expr->boolval ? 'T' : 'F');  break;
+    case TYPE_BYTEARRAY_DATA:
+        printf(" \"%s\")\n", bytearray_to_c_str((bytearray_t*) expr));
+        break;
+    default:          printf(")\n");                                break;
   }
 
-  printf(")\n");
+  for (int i = 0; i < children; ++i) {
+    size_t offset = sizeof(gc_header_t) + (i * sizeof(void*));
+    void **child = (void*) (expr) + offset;
+    if (*child != NULL) _pretty_print((ast_expr_t*) *child, indent + 1);
+  }
 }
 
 void pretty_print(ast_expr_t *expr) {

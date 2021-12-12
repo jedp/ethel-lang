@@ -144,14 +144,14 @@ static ast_expr_t *parse_start(lexer_t *lexer) {
 }
 
 static ast_expr_list_t *empty_expr_list(void) {
-  ast_expr_list_t *node = mem_alloc(sizeof(ast_expr_list_t));
+  ast_expr_list_t *node = (ast_expr_list_t*) alloc_type(AST_EXPR_LIST, F_NONE);
   node->root = ast_empty();
   node->next = NULL;
   return node;
 }
 
 static ast_expr_kv_list_t *empty_expr_kv_list(void) {
-  ast_expr_kv_list_t *node = mem_alloc(sizeof(ast_expr_kv_list_t));
+  ast_expr_kv_list_t *node = (ast_expr_kv_list_t*) alloc_type(AST_DICT_KV, F_NONE);
   node->k = ast_empty();
   node->v = ast_empty();
   node->next = NULL;
@@ -159,7 +159,8 @@ static ast_expr_kv_list_t *empty_expr_kv_list(void) {
 }
 
 static ast_fn_arg_decl_t *parse_fn_arg_decl(lexer_t *lexer) {
-  ast_fn_arg_decl_t *node = mem_alloc(sizeof(ast_fn_arg_decl_t));
+  ast_fn_arg_decl_t *node = (ast_fn_arg_decl_t*) alloc_type(
+      AST_FUNCTION_DEF_ARGS, F_NONE);
   ast_fn_arg_decl_t *root = node;
   node->name = NULL;
   node->next = NULL;
@@ -172,7 +173,7 @@ static ast_fn_arg_decl_t *parse_fn_arg_decl(lexer_t *lexer) {
   while (lexer->token.tag == TAG_COMMA) {
     advance(lexer);
 
-    node->next = mem_alloc(sizeof(ast_fn_arg_decl_t));
+    node->next = (ast_fn_arg_decl_t*) alloc_type(AST_FUNCTION_DEF_ARGS, F_NONE);
     node = node->next;
 
     node->name = bytearray_clone(c_str_to_bytearray(lexer->token.string));
@@ -192,7 +193,7 @@ static ast_expr_list_t *parse_expr_list(lexer_t *lexer) {
 
   while (lexer->token.tag == TAG_COMMA) {
     advance(lexer);
-    ast_expr_list_t *next = mem_alloc(sizeof(ast_expr_list_t));
+    ast_expr_list_t *next = (ast_expr_list_t*) alloc_type(AST_EXPR_LIST, F_NONE);
     e = parse_expr(lexer);
     next->root = e;
     next->next = NULL;
@@ -214,7 +215,7 @@ static ast_expr_list_t *parse_list_expr_list(lexer_t *lexer) {
 
   while (lexer->token.tag == TAG_COMMA || lexer->token.tag == TAG_EOL) {
     advance(lexer);
-    ast_expr_list_t *next = mem_alloc(sizeof(ast_expr_list_t));
+    ast_expr_list_t *next = (ast_expr_list_t*) alloc_type(AST_EXPR_LIST, F_NONE);
     e = parse_expr(lexer);
     if (TYPEOF(e) > AST_EMPTY) {
 
@@ -250,7 +251,7 @@ static ast_expr_kv_list_t *parse_expr_kv_list(lexer_t *lexer) {
 
   while (lexer->token.tag == TAG_COMMA) {
     advance(lexer);
-    ast_expr_kv_list_t *next = mem_alloc(sizeof(ast_expr_kv_list_t));
+    ast_expr_kv_list_t *next = (ast_expr_kv_list_t*) alloc_type(AST_DICT_KV, F_NONE);
     e = parse_expr(lexer);
 
     if (TYPEOF(e) != AST_MAPS_TO) {
@@ -278,7 +279,7 @@ static ast_expr_list_t *parse_block(lexer_t *lexer) {
 
   while (lexer->token.tag == TAG_EOL) {
     advance(lexer);
-    ast_expr_list_t *next = mem_alloc(sizeof(ast_expr_list_t));
+    ast_expr_list_t *next = (ast_expr_list_t*) alloc_type(AST_EXPR_LIST, F_NONE);
     e = parse_expr(lexer);
     next->root = e;
 
