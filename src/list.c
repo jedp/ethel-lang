@@ -89,8 +89,8 @@ obj_t *_list_slice(obj_t *obj, int start, int end) {
 
   // Allocate a new list to return.
   obj_t *slice = (obj_t*) alloc_type(TYPE_LIST, F_NONE);
-  slice->list = mem_alloc(sizeof(obj_list_t));
-  slice->list->elems = mem_alloc(sizeof(obj_list_t));
+  slice->list = (obj_list_t*) alloc_type(TYPE_LIST_DATA, F_NONE);
+  slice->list->elems = (obj_list_element_t*) alloc_type(TYPE_LIST_ELEM_DATA, F_NONE);
 
   obj_list_element_t *curr = slice->list->elems;
   curr->node = root->node;
@@ -98,7 +98,7 @@ obj_t *_list_slice(obj_t *obj, int start, int end) {
   // Up to but not including end.
   i++;
   while (root->next != NULL && i != end) {
-    obj_list_element_t *list_next = mem_alloc(sizeof(obj_list_element_t));
+    obj_list_element_t *list_next = (obj_list_element_t*) alloc_type(TYPE_LIST_ELEM_DATA, F_NONE);
     list_next->node = root->next->node;
     curr->next = list_next;
     curr = list_next;
@@ -257,7 +257,7 @@ obj_t *list_prepend(obj_t *obj, obj_method_args_t *args) {
   }
 
   obj_list_element_t *head = _get_elem(obj, 0);
-  obj_list_element_t *new_elem = mem_alloc(sizeof(obj_list_element_t));
+  obj_list_element_t *new_elem = (obj_list_element_t*) alloc_type(TYPE_LIST_ELEM_DATA, F_NONE);
   new_elem->node = args->arg;
   new_elem->next = head;
   obj->list->elems = new_elem;
@@ -273,7 +273,7 @@ obj_t *list_append(obj_t *obj, obj_method_args_t *args) {
 
   int len = _list_len(obj);
   obj_list_element_t *last = _get_elem(obj, len - 1);
-  obj_list_element_t *new_elem = mem_alloc(sizeof(obj_list_element_t));
+  obj_list_element_t *new_elem = (obj_list_element_t*) alloc_type(TYPE_LIST_ELEM_DATA, F_NONE);
   new_elem->node = args->arg;
   new_elem->next = NULL;
 

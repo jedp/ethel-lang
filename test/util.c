@@ -8,7 +8,7 @@
   va_list vargs;
   va_start(vargs, n);
 
-  obj_method_args_t *args = mem_alloc(sizeof(obj_method_args_t));
+  obj_method_args_t *args = (obj_method_args_t*) alloc_type(TYPE_VARIABLE_ARGS, F_NONE);
   obj_method_args_t *root = args;
 
   for (int i = 0; i < n; i++) {
@@ -16,7 +16,7 @@
     args->arg = int_obj(val);
 
     if (i < n - 1) {
-      args->next = mem_alloc(sizeof(obj_method_args_t));
+      args->next = (obj_method_args_t*) alloc_type(TYPE_VARIABLE_ARGS, F_NONE);
     } else {
       args->next = NULL;
     }
@@ -33,7 +33,7 @@ obj_t *make_list(int n_elems, ...) {
     return list_obj(NULL);
   }
 
-  obj_list_element_t *elem = mem_alloc(sizeof(obj_list_element_t));
+  obj_list_element_t *elem = (obj_list_element_t*) alloc_type(TYPE_LIST_ELEM_DATA, F_NONE);
   obj_list_element_t *root_elem = elem;
 
   elem->node = NULL;
