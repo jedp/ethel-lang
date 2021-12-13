@@ -48,8 +48,8 @@ static env_sym_t *find_sym(env_t *env, bytearray_t *sym_name, boolean recursive)
   for (int i = env->top; i >= 0; --i) {
     // Start at the node the root points to.
     env_sym_t *node = env->symbols[i];
-    while (node != NULL && node->name_obj != NULL) {
-      if (bytearray_eq(name, node->name_obj)) {
+    while (node != NULL) {
+      if (node->name_obj != NULL && bytearray_eq(name, node->name_obj)) {
         return node;
       }
       node = node->next;
@@ -89,6 +89,8 @@ error_t _put_env(env_t *env,
     return ERR_NO_ERROR;
   }
 
+  // Insert into list of other things at this scope.
+  assert(top->prev == NULL);
   new->next = top->next;
   if (top->next != NULL) top->next->prev = new;
   new->prev = top;
