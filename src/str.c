@@ -45,24 +45,24 @@ static obj_t *_str_slice(obj_t *obj, int start, int end) {
   return string_obj(ba);
 }
 
-obj_t *str_hash(obj_t *obj, obj_method_args_t /* Ignored */ *args) {
+obj_t *str_hash(obj_t *obj, obj_varargs_t /* Ignored */ *args) {
   return arr_hash(obj, args);
 }
 
-obj_t *str_copy(obj_t *obj, obj_method_args_t /* Ignored */ *args) {
+obj_t *str_copy(obj_t *obj, obj_varargs_t /* Ignored */ *args) {
   // string_obj copies the contents of the source.
   return string_obj(obj->bytearray);
 }
 
-obj_t *str_to_string(obj_t *obj, obj_method_args_t /* Ignored */ *args) {
+obj_t *str_to_string(obj_t *obj, obj_varargs_t /* Ignored */ *args) {
   return obj;
 }
 
-obj_t *str_contains(obj_t *obj, obj_method_args_t *args) {
+obj_t *str_contains(obj_t *obj, obj_varargs_t *args) {
   return arr_contains(obj, args);
 }
 
-obj_t *str_get(obj_t *obj, obj_method_args_t *args) {
+obj_t *str_get(obj_t *obj, obj_varargs_t *args) {
   return arr_get(obj, args);
 }
 
@@ -196,7 +196,7 @@ bytearray_t *int_to_bin(unsigned int n) {
   return a;
 }
 
-obj_t *str_to_int(obj_t *obj, obj_method_args_t *args) {
+obj_t *str_to_int(obj_t *obj, obj_varargs_t *args) {
   char *end = NULL;
   char *input = mem_alloc(obj->bytearray->size + 1);
   c_str_cp(input, bytearray_to_c_str(obj->bytearray));
@@ -216,7 +216,7 @@ obj_t *str_to_int(obj_t *obj, obj_method_args_t *args) {
   return int_obj((int) l);
 }
 
-obj_t *str_to_byte(obj_t *obj, obj_method_args_t *args) {
+obj_t *str_to_byte(obj_t *obj, obj_varargs_t *args) {
   char *end = NULL;
   char *input = mem_alloc(obj->bytearray->size + 1);
   c_str_cp(input, bytearray_to_c_str(obj->bytearray));
@@ -234,7 +234,7 @@ obj_t *str_to_byte(obj_t *obj, obj_method_args_t *args) {
   return byte_obj(l & 0xff);
 }
 
-obj_t *str_to_float(obj_t *obj, obj_method_args_t *args) {
+obj_t *str_to_float(obj_t *obj, obj_varargs_t *args) {
   char *end = NULL;
   char *input = mem_alloc(obj->bytearray->size + 1);
   c_str_cp(input, bytearray_to_c_str(obj->bytearray));
@@ -333,19 +333,19 @@ bytearray_t *c_str_to_bytearray(const char* s) {
   return a;
 }
 
-obj_t *str_len(obj_t *obj, obj_method_args_t *args) {
+obj_t *str_len(obj_t *obj, obj_varargs_t *args) {
   return int_obj(obj->bytearray->size);
 }
 
-obj_t *str_eq(obj_t *obj, obj_method_args_t *args) {
+obj_t *str_eq(obj_t *obj, obj_varargs_t *args) {
   return arr_eq(obj, args);
 }
 
-obj_t *str_ne(obj_t *obj, obj_method_args_t *args) {
+obj_t *str_ne(obj_t *obj, obj_varargs_t *args) {
   return arr_ne(obj, args);
 }
 
-obj_t *str_as(obj_t *obj, obj_method_args_t *args) {
+obj_t *str_as(obj_t *obj, obj_varargs_t *args) {
   if (args == NULL || args->arg == NULL) return boolean_obj(False);
   obj_t *type_arg = args->arg;
 
@@ -361,7 +361,7 @@ obj_t *str_as(obj_t *obj, obj_method_args_t *args) {
   }
 }
 
-obj_t *str_substring(obj_t *obj, obj_method_args_t *args) {
+obj_t *str_substring(obj_t *obj, obj_varargs_t *args) {
   if (args == NULL || args->arg == NULL) {
     printf("Null arg to substring()\n");
     return nil_obj();
@@ -376,7 +376,7 @@ obj_t *str_substring(obj_t *obj, obj_method_args_t *args) {
   return _str_slice(obj, start_arg->intval, end_arg->intval);
 }
 
-obj_t *str_add(obj_t *obj, obj_method_args_t *args) {
+obj_t *str_add(obj_t *obj, obj_varargs_t *args) {
   if (args == NULL || args->arg == NULL) {
     printf("Null arg to add()\n");
     return obj;
@@ -410,7 +410,7 @@ obj_t *str_add(obj_t *obj, obj_method_args_t *args) {
   return obj;
 }
 
-obj_t *str_random_choice(obj_t *obj, obj_method_args_t *args) {
+obj_t *str_random_choice(obj_t *obj, obj_varargs_t *args) {
   return arr_random_choice(obj, args);
 }
 

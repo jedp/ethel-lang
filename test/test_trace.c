@@ -110,7 +110,7 @@ void test_traceable_iterator(void) {
 }
 
 void test_traceable_varargs(void) {
-  obj_method_args_t *args = wrap_varargs(2,
+  obj_varargs_t *args = wrap_varargs(2,
                                          float_obj(42.0),
                                          int_obj(19));
   gc_header_t *hdr = (gc_header_t*) args;

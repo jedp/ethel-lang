@@ -4,19 +4,19 @@
 #include "../inc/mem.h"
 #include "../inc/eval.h"
 
- obj_method_args_t *n_args(int n, ...) {
+ obj_varargs_t *n_args(int n, ...) {
   va_list vargs;
   va_start(vargs, n);
 
-  obj_method_args_t *args = (obj_method_args_t*) alloc_type(TYPE_VARIABLE_ARGS, F_NONE);
-  obj_method_args_t *root = args;
+  obj_varargs_t *args = (obj_varargs_t*) alloc_type(TYPE_VARIABLE_ARGS, F_NONE);
+  obj_varargs_t *root = args;
 
   for (int i = 0; i < n; i++) {
     int val = va_arg(vargs, int);
     args->arg = int_obj(val);
 
     if (i < n - 1) {
-      args->next = (obj_method_args_t*) alloc_type(TYPE_VARIABLE_ARGS, F_NONE);
+      args->next = (obj_varargs_t*) alloc_type(TYPE_VARIABLE_ARGS, F_NONE);
     } else {
       args->next = NULL;
     }

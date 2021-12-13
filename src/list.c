@@ -112,7 +112,7 @@ obj_t *_list_slice(obj_t *obj, int start, int end) {
   return slice;
 }
 
-obj_t *list_contains(obj_t *obj, obj_method_args_t *args) {
+obj_t *list_contains(obj_t *obj, obj_varargs_t *args) {
   if (args == NULL || args->arg == NULL) {
     printf("Null arg to contains()\n");
     return nil_obj();
@@ -129,7 +129,7 @@ obj_t *list_contains(obj_t *obj, obj_method_args_t *args) {
   return boolean_obj(False);
 }
 
-obj_t *list_hash(obj_t *obj, obj_method_args_t /* Ignored */ *args) {
+obj_t *list_hash(obj_t *obj, obj_varargs_t /* Ignored */ *args) {
   uint32_t temp = FNV32Basis;
 
   for (size_t i = 0; i < _list_len(obj); i++) {
@@ -141,7 +141,7 @@ obj_t *list_hash(obj_t *obj, obj_method_args_t /* Ignored */ *args) {
   return int_obj(temp);
 }
 
-obj_t *list_eq(obj_t *obj, obj_method_args_t *args) {
+obj_t *list_eq(obj_t *obj, obj_varargs_t *args) {
   if (args == NULL || args->arg == NULL) return boolean_obj(False);
   obj_t *arg = args->arg;
 
@@ -164,15 +164,15 @@ obj_t *list_eq(obj_t *obj, obj_method_args_t *args) {
   return boolean_obj(True);
 }
 
-obj_t *list_ne(obj_t *obj, obj_method_args_t *args) {
+obj_t *list_ne(obj_t *obj, obj_varargs_t *args) {
   return boolean_obj(list_eq(obj, args)->boolval == True ? False : True);
 }
 
-obj_t *list_len(obj_t *obj, obj_method_args_t /* ignored */ *args) {
+obj_t *list_len(obj_t *obj, obj_varargs_t /* ignored */ *args) {
   return int_obj(_list_len(obj));
 }
 
-obj_t *list_get(obj_t *obj, obj_method_args_t *args) {
+obj_t *list_get(obj_t *obj, obj_varargs_t *args) {
   if (args == NULL || args->arg == NULL) {
     printf("Null arg to get()\n");
     return nil_obj();
@@ -186,7 +186,7 @@ obj_t *list_get(obj_t *obj, obj_method_args_t *args) {
   return _list_get(obj, offset);
 }
 
-obj_t *list_set(obj_t *obj, obj_method_args_t *args) {
+obj_t *list_set(obj_t *obj, obj_varargs_t *args) {
   if (args == NULL || args->arg == NULL) {
     printf("Null arg to set()\n");
     return nil_obj();
@@ -220,7 +220,7 @@ obj_t *list_set(obj_t *obj, obj_method_args_t *args) {
   return elem->node;
 }
 
-obj_t *list_slice(obj_t *obj, obj_method_args_t *args) {
+obj_t *list_slice(obj_t *obj, obj_varargs_t *args) {
   if (args == NULL || args->arg == NULL) {
     printf("Null arg to slice()\n");
     return nil_obj();
@@ -239,18 +239,18 @@ obj_t *list_slice(obj_t *obj, obj_method_args_t *args) {
   return _list_slice(obj, start_arg->intval, end_arg->intval);
 }
 
-obj_t *list_head(obj_t *obj, obj_method_args_t *args) {
+obj_t *list_head(obj_t *obj, obj_varargs_t *args) {
   return _list_get(obj, 0);
 }
 
-obj_t *list_tail(obj_t *obj, obj_method_args_t *args){
+obj_t *list_tail(obj_t *obj, obj_varargs_t *args){
   if (_list_len(obj) == 1) {
     return _empty_list();
   }
   return _list_slice(obj, 1, -1);
 }
 
-obj_t *list_prepend(obj_t *obj, obj_method_args_t *args) {
+obj_t *list_prepend(obj_t *obj, obj_varargs_t *args) {
   if (args == NULL || args->arg == NULL) {
     printf("Argument missing\n");
     return nil_obj();
@@ -265,7 +265,7 @@ obj_t *list_prepend(obj_t *obj, obj_method_args_t *args) {
   return obj;
 }
 
-obj_t *list_append(obj_t *obj, obj_method_args_t *args) {
+obj_t *list_append(obj_t *obj, obj_varargs_t *args) {
   if (args == NULL || args->arg == NULL) {
     printf("Argument missing\n");
     return nil_obj();
@@ -286,7 +286,7 @@ obj_t *list_append(obj_t *obj, obj_method_args_t *args) {
   return obj;
 }
 
-obj_t *list_remove_first(obj_t *obj, obj_method_args_t *args) {
+obj_t *list_remove_first(obj_t *obj, obj_varargs_t *args) {
   obj_list_element_t *head = _get_elem(obj, 0);
 
   if (head != NULL) {
@@ -297,7 +297,7 @@ obj_t *list_remove_first(obj_t *obj, obj_method_args_t *args) {
   return nil_obj();
 }
 
-obj_t *list_remove_last(obj_t *obj, obj_method_args_t *args) {
+obj_t *list_remove_last(obj_t *obj, obj_varargs_t *args) {
   obj_list_element_t *first = _get_elem(obj, 0);
   if (first == NULL) {
     return nil_obj();
@@ -325,7 +325,7 @@ obj_t *list_remove_last(obj_t *obj, obj_method_args_t *args) {
   return result;
 }
 
-obj_t *list_remove_at(obj_t *obj, obj_method_args_t *args) {
+obj_t *list_remove_at(obj_t *obj, obj_varargs_t *args) {
   if (args == NULL || args->arg == NULL) {
     printf("Null arg to get()\n");
     return nil_obj();
@@ -364,7 +364,7 @@ obj_t *list_remove_at(obj_t *obj, obj_method_args_t *args) {
   return r;
 }
 
-obj_t *list_random_choice(obj_t *obj, obj_method_args_t *args) {
+obj_t *list_random_choice(obj_t *obj, obj_varargs_t *args) {
   size_t len = _list_len(obj);
   if (len < 1) {
     return nil_obj();
@@ -401,7 +401,7 @@ static obj_t *iter_next(obj_iter_t *iterable) {
   }
 }
 
-obj_t *list_iterator(obj_t *obj, obj_method_args_t *args) {
+obj_t *list_iterator(obj_t *obj, obj_varargs_t *args) {
   obj_t *start_state = int_obj(0);
   return iterator_obj(obj, start_state, iter_next);
 }

@@ -87,21 +87,21 @@ bytearray_t *c_str_to_bytearray(const char* s);
  * This is a function of the contents, so if the contents change,
  * so will the hash.
  */
-obj_t *str_hash(obj_t *obj, obj_method_args_t *args);
-obj_t *str_copy(obj_t *obj, obj_method_args_t *args);
-obj_t *str_to_int(obj_t *obj, obj_method_args_t *args);
-obj_t *str_to_string(obj_t *obj, obj_method_args_t *args);
-obj_t *str_to_float(obj_t *obj, obj_method_args_t *args);
-obj_t *str_to_byte(obj_t *obj, obj_method_args_t *args);
-obj_t *str_add(obj_t *obj, obj_method_args_t *args);
-obj_t *str_get(obj_t *obj, obj_method_args_t *args);
-obj_t *str_contains(obj_t *obj, obj_method_args_t *args);
-obj_t *str_len(obj_t *obj, obj_method_args_t *args);
-obj_t *str_eq(obj_t *obj, obj_method_args_t *args);
-obj_t *str_ne(obj_t *obj, obj_method_args_t *args);
-obj_t *str_substring(obj_t *obj, obj_method_args_t *args);
-obj_t *str_random_choice(obj_t *obj, obj_method_args_t *args);
-obj_t *str_iterator(obj_t *obj, obj_method_args_t *args);
+obj_t *str_hash(obj_t *obj, obj_varargs_t *args);
+obj_t *str_copy(obj_t *obj, obj_varargs_t *args);
+obj_t *str_to_int(obj_t *obj, obj_varargs_t *args);
+obj_t *str_to_string(obj_t *obj, obj_varargs_t *args);
+obj_t *str_to_float(obj_t *obj, obj_varargs_t *args);
+obj_t *str_to_byte(obj_t *obj, obj_varargs_t *args);
+obj_t *str_add(obj_t *obj, obj_varargs_t *args);
+obj_t *str_get(obj_t *obj, obj_varargs_t *args);
+obj_t *str_contains(obj_t *obj, obj_varargs_t *args);
+obj_t *str_len(obj_t *obj, obj_varargs_t *args);
+obj_t *str_eq(obj_t *obj, obj_varargs_t *args);
+obj_t *str_ne(obj_t *obj, obj_varargs_t *args);
+obj_t *str_substring(obj_t *obj, obj_varargs_t *args);
+obj_t *str_random_choice(obj_t *obj, obj_varargs_t *args);
+obj_t *str_iterator(obj_t *obj, obj_varargs_t *args);
 
 static_method get_str_static_method(static_method_ident_t method_id);
 

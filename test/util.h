@@ -4,7 +4,7 @@
 #include "../inc/obj.h"
 #include "../inc/eval.h"
 
-obj_method_args_t *n_args(int n, ...);
+obj_varargs_t *n_args(int n, ...);
 
 obj_t *make_list(int n_elems, ...);
 

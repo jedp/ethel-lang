@@ -603,8 +603,8 @@ found:
   } else {
     // Args to eval.
     ast_expr_list_t *args = expr->application->args;
-    obj_method_args_t *method_args = (obj_method_args_t*) alloc_type(TYPE_VARIABLE_ARGS, F_NONE);
-    obj_method_args_t *method_args_root = method_args;
+    obj_varargs_t *method_args = (obj_varargs_t*) alloc_type(TYPE_VARIABLE_ARGS, F_NONE);
+    obj_varargs_t *method_args_root = method_args;
 
     while(args != NULL) {
       eval_result_t *r = eval_expr(args->root, env);
@@ -614,7 +614,7 @@ found:
       args = args->next;
 
       if (args != NULL) {
-        obj_method_args_t *next_method_args = (obj_method_args_t*) alloc_type(TYPE_VARIABLE_ARGS, F_NONE);
+        obj_varargs_t *next_method_args = (obj_varargs_t*) alloc_type(TYPE_VARIABLE_ARGS, F_NONE);
         method_args->next = next_method_args;
         method_args = next_method_args;
       }

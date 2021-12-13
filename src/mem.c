@@ -62,7 +62,7 @@ gc_header_t *alloc_type(type_t type, flags_t flags) {
     // Various child data structures.
     // TYPE_BYTEARRAY_DATA gets special handling in str.c.
     case TYPE_RANGE_DATA:        HDR_ALLOC(obj_range_t, type, 0);        break;
-    case TYPE_VARIABLE_ARGS:     HDR_ALLOC(obj_method_args_t, type, 2);  break;
+    case TYPE_VARIABLE_ARGS:     HDR_ALLOC(obj_varargs_t, type, 2);      break;
     case TYPE_LIST_DATA:         HDR_ALLOC(obj_list_t, type, 1);         break;
     case TYPE_LIST_ELEM_DATA:    HDR_ALLOC(obj_list_element_t, type, 2); break;
     case TYPE_DICT_DATA:         HDR_ALLOC(obj_dict_t, type, 1);         break;

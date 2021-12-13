@@ -11,9 +11,9 @@
 #include "../inc/dict.h"
 #include "../inc/str.h"
 
-obj_t *arg_at(obj_method_args_t *args, int index) {
+obj_t *arg_at(obj_varargs_t *args, int index) {
   int i = 0;
-  obj_method_args_t *head = args;
+  obj_varargs_t *head = args;
   while(head->arg != NULL) {
     if (i++ == index) return head->arg;
 
@@ -166,20 +166,20 @@ obj_t *continue_obj(void) {
   return obj_of(TYPE_CONTINUE);
 }
 
-obj_method_args_t *wrap_varargs(int n_args, ...) {
+obj_varargs_t *wrap_varargs(int n_args, ...) {
   va_list vargs;
   va_start(vargs, n_args);
 
-  obj_method_args_t *args = (obj_method_args_t*) alloc_type(
+  obj_varargs_t *args = (obj_varargs_t*) alloc_type(
       TYPE_VARIABLE_ARGS, F_NONE);
-  obj_method_args_t *root = args;
+  obj_varargs_t *root = args;
 
   for (int i = 0; i < n_args; i++) {
     obj_t *val = va_arg(vargs, obj_t*);
     args->arg = val;
 
     if (i < n_args - 1) {
-      args->next = (obj_method_args_t*) alloc_type(TYPE_VARIABLE_ARGS, F_NONE);
+      args->next = (obj_varargs_t*) alloc_type(TYPE_VARIABLE_ARGS, F_NONE);
     } else {
       args->next = NULL;
     }

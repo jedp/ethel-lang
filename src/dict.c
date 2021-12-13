@@ -251,7 +251,7 @@ obj_t *dict_get(obj_t *obj, obj_t *k) {
   return nil_obj();
 }
 
-obj_t *dict_obj_get(obj_t *obj, obj_method_args_t *args) {
+obj_t *dict_obj_get(obj_t *obj, obj_varargs_t *args) {
   if (args == NULL || args->arg == NULL) {
     printf("Null arg to get()\n");
     return nil_obj();
@@ -260,7 +260,7 @@ obj_t *dict_obj_get(obj_t *obj, obj_method_args_t *args) {
   return dict_get(obj, k);
 }
 
-obj_t *dict_obj_put(obj_t *obj, obj_method_args_t *args) {
+obj_t *dict_obj_put(obj_t *obj, obj_varargs_t *args) {
   if (args == NULL || args->arg == NULL) {
     printf("Null arg to put()\n");
     return nil_obj();
@@ -277,7 +277,7 @@ obj_t *dict_obj_put(obj_t *obj, obj_method_args_t *args) {
   return v;
 }
 
-obj_t *dict_obj_in(obj_t *obj, obj_method_args_t *args) {
+obj_t *dict_obj_in(obj_t *obj, obj_varargs_t *args) {
   if (args == NULL || args->arg == NULL) {
     printf("Null arg to contains()\n");
     return nil_obj();
@@ -286,11 +286,11 @@ obj_t *dict_obj_in(obj_t *obj, obj_method_args_t *args) {
   return boolean_obj(dict_contains(obj, k));
 }
 
-obj_t *dict_obj_len(obj_t *obj, obj_method_args_t *args) {
+obj_t *dict_obj_len(obj_t *obj, obj_varargs_t *args) {
   return int_obj(obj->dict->nelems);
 }
 
-obj_t *dict_obj_keys(obj_t *obj, obj_method_args_t *args) {
+obj_t *dict_obj_keys(obj_t *obj, obj_varargs_t *args) {
   obj_t *list = list_obj(NULL);
   for (size_t i = 0; i < obj->dict->buckets; i++) {
     dict_node_t *kv = obj->dict->nodes[i];
@@ -302,7 +302,7 @@ obj_t *dict_obj_keys(obj_t *obj, obj_method_args_t *args) {
   return list;
 }
 
-obj_t *dict_obj_remove(obj_t *obj, obj_method_args_t *args) {
+obj_t *dict_obj_remove(obj_t *obj, obj_varargs_t *args) {
   if (args == NULL || args->arg == NULL) {
     printf("Null arg to contains()\n");
     return nil_obj();
@@ -338,7 +338,7 @@ static obj_t *iter_next(obj_iter_t *iterable) {
   }
 }
 
-obj_t *dict_obj_iterator(obj_t *obj, obj_method_args_t *args) {
+obj_t *dict_obj_iterator(obj_t *obj, obj_varargs_t *args) {
   obj_t *start_state = list_obj(NULL);
   return iterator_obj(obj, start_state, iter_next);
 }

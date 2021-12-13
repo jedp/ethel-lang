@@ -17,7 +17,7 @@ typedef struct VariableArg {
   gc_header_t hdr;
   obj_t *arg;
   struct VariableArg *next;
-} obj_method_args_t;
+} obj_varargs_t;
 
 typedef struct Range {
   gc_header_t hdr;
@@ -87,11 +87,11 @@ typedef struct Obj {
   };
 } obj_t;
 
-typedef obj_t* (*static_method)(obj_t *obj, obj_method_args_t *args);
+typedef obj_t* (*static_method)(obj_t *obj, obj_varargs_t *args);
 typedef obj_t* (*binop_method)(obj_t *obj, obj_t *other);
 typedef obj_t* (*iterator_next)(obj_t *obj);
 
-obj_t *arg_at(obj_method_args_t *args, int index);
+obj_t *arg_at(obj_varargs_t *args, int index);
 
 typedef uint8_t static_method_ident_t;
 enum static_method_ident_enum {
@@ -203,7 +203,7 @@ obj_t *iterator_obj(obj_t *obj, obj_t *state_obj, obj_t *(*next)(obj_iter_t *ite
 obj_t *return_val(obj_t *val);
 obj_t *break_obj(void);
 obj_t *continue_obj(void);
-obj_method_args_t *wrap_varargs(int n_args, ...);
+obj_varargs_t *wrap_varargs(int n_args, ...);
 boolean obj_prim_eq(obj_t *a, obj_t *b);
 
 #endif
