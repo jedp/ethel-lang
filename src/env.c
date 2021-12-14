@@ -91,10 +91,10 @@ error_t _put_env(env_t *env,
 
   // Insert into list of other things at this scope.
   assert(top->prev == NULL);
-  new->next = top->next;
-  if (top->next != NULL) top->next->prev = new;
-  new->prev = top;
-  top->next = new;
+  new->prev = NULL;
+  new->next = top;
+  top->prev = new;
+  env->symbols[env->top] = new;
 
   return ERR_NO_ERROR;
 }
