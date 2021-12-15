@@ -1,3 +1,4 @@
+#include <assert.h>
 #include <stdio.h>
 #include "../inc/err.h"
 #include "../inc/mem.h"
@@ -817,42 +818,53 @@ static void eval_do_while_loop(ast_expr_t *expr, env_t *env, eval_result_t *resu
 }
 
 static void eval_while_loop(ast_expr_t *expr, env_t *env, eval_result_t *result) {
-  eval_result_t *cond;
+  eval_result_t *cond_r;
   eval_result_t *r;
   result->obj = nil_obj();
   result->err = ERR_NO_ERROR;
 
+  ast_expr_t *cond = expr->while_loop->cond;
+  ast_expr_t *pred = expr->while_loop->pred;
+
+  enter_scope(env);
+
   for(;;) {
-    cond = eval_expr(expr->while_loop->cond, env);
-    if (cond->err != ERR_NO_ERROR) {
-      result->err = cond->err;
+    cond_r = eval_expr(cond, env);
+    pretty_print(cond);
+    if (cond_r->err != ERR_NO_ERROR) {
+      result->err = cond_r->err;
       result->obj = undef_obj();
-      return;
+      goto done;
     }
 
-    if (!truthy(cond->obj)) return;
+    if (!truthy(cond_r->obj)) goto done;
 
-    r = eval_expr(expr->while_loop->pred, env);
+    r = eval_expr(pred, env);
     if (r->err != ERR_NO_ERROR) {
       result->err = r->err;
       result->obj = undef_obj();
-      return;
+      goto done;
     }
 
     if (TYPEOF(r->obj) == TYPE_BREAK) {
       result->obj = nil_obj();
-      return;
+      goto done;
     } else if (TYPEOF(r->obj) == TYPE_CONTINUE) {
       result->obj = nil_obj();
     } else {
       result->obj = r->obj;
     }
   }
+
+done:
+  leave_scope(env);
 }
 
 static void eval_for_loop(ast_expr_t *expr, env_t *env, eval_result_t *result) {
-  eval_result_t *r = mem_alloc(sizeof(eval_result_t));
+  eval_result_t *r = (eval_result_t*) alloc_type(EVAL_RESULT, F_NONE); //mem_alloc(sizeof(eval_result_t));
   r->obj = undef_obj();
+
+  size_t orig_expr = (size_t) expr;
 
   // Local name for the variable holding each element.
   // This is what gets updated as we iterate.
@@ -881,6 +893,7 @@ static void eval_for_loop(ast_expr_t *expr, env_t *env, eval_result_t *result) {
   // The actual iteration. Done when we encounter Nil as a sentinel.
   while(TYPEOF(next_elem) != TYPE_NIL) {
     // Not mutable in user code.
+    assert(orig_expr == (size_t) expr);
     put_env(env, elem_name, next_elem, F_ENV_OVERWRITE);
 
     r = eval_expr(expr->for_loop->pred, env);
@@ -906,7 +919,7 @@ done:
   return;
 
 error:
-  printf("leaving scope on error %d\n", result->err);
+  printf("Leaving scope on error %d\n", result->err);
   leave_scope(env);
   result->obj = undef_obj();
 }
@@ -1275,7 +1288,7 @@ eval_result_t *eval(env_t *env, char *input) {
   parse_result_t *parse_result = mem_alloc(sizeof(parse_result_t));
   parse_program(input, ast, parse_result);
 
-  eval_result_t *r = mem_alloc(sizeof(eval_result_t));
+  eval_result_t *r = (eval_result_t*) alloc_type(EVAL_RESULT, F_NONE);
   r->err = parse_result->err;
   r->depth = parse_result->depth;
 
@@ -1285,7 +1298,7 @@ eval_result_t *eval(env_t *env, char *input) {
   }
 
 #ifdef DEBUG
-    pretty_print(ast);
+  pretty_print(ast);
 #endif
 
   return eval_expr(ast, env);

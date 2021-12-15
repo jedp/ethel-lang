@@ -155,6 +155,7 @@ enum every_type {
   TYPE_ITERATOR_DATA,
   TYPE_BREAK,
   TYPE_CONTINUE,
+  EVAL_RESULT,
   ENV_SYM,
   TYPE_MAX,
 };
@@ -284,6 +285,7 @@ static const char* type_names[TYPE_MAX] = {
   "Iterator Data",
   "Break",
   "Continue",
+  "<Eval Result>",
   "<Env Symbol>",
 };
 

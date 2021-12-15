@@ -1,6 +1,7 @@
 #include <assert.h>
 #include "../inc/ast.h"
 #include "../inc/obj.h"
+#include "../inc/eval.h"
 #include "../inc/env.h"
 #include "../inc/type.h"
 #include "../inc/mem.h"
@@ -73,6 +74,9 @@ gc_header_t *alloc_type(type_t type, flags_t flags) {
 
     // Environment.
     case ENV_SYM:                HDR_ALLOC(env_sym_t, type, 4);          break;
+
+    // Eval Result
+    case EVAL_RESULT:            HDR_ALLOC(eval_result_t, type, 1);      break;
 
     // AST.
     // Basic types and control words.

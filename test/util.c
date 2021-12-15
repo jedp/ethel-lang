@@ -1,10 +1,11 @@
 #include <stdarg.h>
 #include <stdio.h>
 #include "util.h"
+#include "../inc/str.h"
 #include "../inc/mem.h"
 #include "../inc/eval.h"
 
- obj_varargs_t *n_args(int n, ...) {
+obj_varargs_t *n_args(int n, ...) {
   va_list vargs;
   va_start(vargs, n);
 
@@ -62,11 +63,8 @@ obj_t *make_list(int n_elems, ...) {
 eval_result_t *eval_program(char* program) {
   env_t env;
   env_init(&env);
-
   enter_scope(&env);
 
   return eval(&env, program);
-
-  leave_scope(&env);
 }
 

@@ -153,7 +153,5 @@ void gc(env_t *env) {
   coalesce_free_nodes();
 
   heap_info_t *after = get_heap_info();
-  printf("GC freed %zu bytes. Bytes avail: %zu.\n",
-      used_before - after->bytes_used,
-      after->bytes_free);
+  printf("GC freed %zu bytes. Bytes avail: %zu.\n", used_before - after->bytes_used, after->bytes_free);
 }

@@ -64,5 +64,7 @@ error_t del_env(env_t *env, bytearray_t *name_obj);
  */
 obj_t *get_env(env_t *env, bytearray_t *name_obj);
 
+void dump_env(env_t *env);
+
 #endif
 
