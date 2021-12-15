@@ -22,14 +22,12 @@
 
 enum all_flags {
   F_NONE           = 0,
-  F_ENV_TYPE_OBJ   = (1 << 1),
-  F_ENV_TYPE_VOID  = (1 << 2),
-  F_ENV_ASSIGNABLE = (1 << 3),
-  F_ENV_OVERWRITE  = (1 << 4),
-  F_ENV_VAR        = (1 << 5),
-  F_GC_FREE        = (1 << 8),  // Node is on the free list.
-  F_GC_UNREACHED   = (1 << 9),
-  F_GC_UNSCANNED   = (1 << 10),
+  F_ENV_ASSIGNABLE = (1 << 1),
+  F_ENV_OVERWRITE  = (1 << 2),
+  F_ENV_VAR        = (1 << 3),
+  F_GC_FREE        = (1 << 5),  // Node is on the free list.
+  F_GC_UNREACHED   = (1 << 6),
+  F_GC_UNSCANNED   = (1 << 7),
 };
 
 enum every_type {
@@ -291,16 +289,16 @@ static const char* type_names[TYPE_MAX] = {
 
 typedef uint8_t byte;
 typedef uint32_t boolean;
-typedef uint16_t flags_t;
+typedef uint8_t flags_t;
 typedef uint8_t type_t;
 
 typedef struct {
 #ifdef BUILD64
-  uint64_t type : 44;
+  uint64_t type : 52;
 #else
-  int type : 12;
+  int type : 20;
 #endif
-  int flags : 16;
+  int flags : 8;
   int children : 4;
 } gc_header_t;
 
