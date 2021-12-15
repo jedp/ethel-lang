@@ -37,7 +37,7 @@
  * - Unreached = Scanned
  */
 
-#define F_GC_UNSET ~( F_GC_UNREACHED | F_GC_UNSCANNED | F_GC_SCANNED )
+#define F_GC_UNSET ~( F_GC_UNREACHED | F_GC_UNSCANNED )
 
 static void coalesce_free_nodes(void) {
   heap_node_t *heap_node = heap_head();
@@ -100,7 +100,6 @@ static int scan_unscanned_objects() {
   while (heap_node != NULL) {
     if (heap_node->flags & F_GC_UNSCANNED) {
       heap_node->flags &= ~F_GC_UNSCANNED;
-      heap_node->flags |= F_GC_SCANNED;
 
       unscanned += 1;
 
