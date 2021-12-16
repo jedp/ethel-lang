@@ -14,7 +14,9 @@ static int _eval(char* program) {
   env_init(&env);
   enter_scope(&env);
 
-  eval_result_t *result = eval(&env, program);
+  eval_result_t *result = mem_alloc(sizeof(eval_result_t));
+
+  eval(&env, program, result);
 
   if (result->err != ERR_NO_ERROR) {
     printf("%s\n", err_names[result->err]);

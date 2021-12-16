@@ -88,6 +88,8 @@ int main(int argc, char** argv) {
   env_init(&env);
   enter_scope(&env);
 
+  eval_result_t *result = mem_alloc(sizeof(eval_result_t));
+
   while (1) {
     if (indent) {
       for (int i = 0; i < indent; i++) {
@@ -104,7 +106,7 @@ int main(int argc, char** argv) {
     program = (char*) realloc(program, program_len);
     c_str_ncat(program, input, program_len);
 
-    eval_result_t *result = eval(&env, program);
+    eval(&env, program, result);
     obj_t *obj = (obj_t*)result->obj;
     indent = result->depth;
 

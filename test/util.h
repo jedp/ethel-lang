@@ -8,7 +8,7 @@ obj_varargs_t *n_args(int n, ...);
 
 obj_t *make_list(int n_elems, ...);
 
-eval_result_t *eval_program(char* program);
+void eval_program(const char* program, eval_result_t* result);
 
 #endif
 

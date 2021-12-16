@@ -8,12 +8,12 @@
 
 typedef struct Result {
   gc_header_t hdr;
-  struct Obj *obj;
+  obj_t* obj;
   uint16_t depth;
   uint16_t err;
 } eval_result_t;
 
-eval_result_t *eval(env_t *env, const char* input);
+void eval(env_t *env, const char* input, eval_result_t* result);
 
 #endif
 

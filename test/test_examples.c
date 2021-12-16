@@ -1,6 +1,8 @@
 #include <stdio.h>
+#include "util.h"
 #include "unity/unity.h"
 #include "test_examples.h"
+#include "../inc/mem.h"
 #include "../inc/type.h"
 #include "../inc/str.h"
 #include "../inc/env.h"
@@ -8,17 +10,6 @@
 #include "../inc/rand.h"
 
 #define BA(x) (c_str_to_bytearray(x))
-
-static eval_result_t *eval_program(char* program) {
-  env_t env;
-  env_init(&env);
-
-  enter_scope(&env);
-
-  return eval(&env, program);
-
-  leave_scope(&env);
-}
 
 void test_ex_fibonacci(void) {
   char *program = "{ val fib = fn(x) {          \n"
@@ -28,7 +19,8 @@ void test_ex_fibonacci(void) {
                   "  }                          \n"
                   "  fib(10)                    \n"
                   "}";
-  eval_result_t *result = eval_program(program);
+  eval_result_t* result = mem_alloc(sizeof(eval_result_t));
+  eval_program(program, result);
 
   TEST_ASSERT_EQUAL(ERR_NO_ERROR, result->err);
   TEST_ASSERT_EQUAL(55, result->obj->intval);
@@ -63,7 +55,8 @@ void test_ex_quicksort(void) {
                   "  quicksort(s, 0, s.length() - 1)  \n"
                   "  s                                \n"
                   "}";
-  eval_result_t *result = eval_program(program);
+  eval_result_t* result = mem_alloc(sizeof(eval_result_t));
+  eval_program(program, result);
 
   TEST_ASSERT_EQUAL(ERR_NO_ERROR, result->err);
   TEST_ASSERT_EQUAL_STRING("  !Ieeiiklp", bytearray_to_c_str(result->obj->bytearray));
@@ -90,7 +83,8 @@ void test_ex_shuffle(void) {
                   "  }                                                \n"
                   "  deck == expected                                 \n"
                   "}";
-  eval_result_t *result = eval_program(program);
+  eval_result_t* result = mem_alloc(sizeof(eval_result_t));
+  eval_program(program, result);
 
   TEST_ASSERT_EQUAL(ERR_NO_ERROR, result->err);
   TEST_ASSERT_EQUAL(True, result->obj->boolval);
@@ -111,7 +105,8 @@ void test_100_doors(void) {
                   "  }                               \n"
                   "  n                               \n"
                   "}";
-  eval_result_t *result = eval_program(program);
+  eval_result_t* result = mem_alloc(sizeof(eval_result_t));
+  eval_program(program, result);
 
   TEST_ASSERT_EQUAL(ERR_NO_ERROR, result->err);
   TEST_ASSERT_EQUAL(TYPE_INT, TYPEOF(result->obj));

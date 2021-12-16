@@ -2,6 +2,7 @@
 #include "unity/unity.h"
 #include "util.h"
 #include "test_trace.h"
+#include "../inc/mem.h"
 #include "../inc/type.h"
 #include "../inc/env.h"
 #include "../inc/eval.h"
@@ -48,7 +49,8 @@ void test_traceable_string(void) {
 
 void test_traceable_list(void) {
   // Use eval because lists are constructed dynamically.
-  eval_result_t *result = eval_program("list { 1, 'b', 4.4 }");
+  eval_result_t *result = (eval_result_t*) alloc_type(EVAL_RESULT, F_NONE);
+  eval_program("list { 1, 'b', 4.4 }", result);
   obj_t *obj = result->obj;
   gc_header_t *hdr = (gc_header_t*) obj;
   TEST_ASSERT_EQUAL(ERR_NO_ERROR, result->err);
@@ -67,10 +69,12 @@ void test_traceable_list(void) {
 
 void test_traceable_dict(void) {
   // Use eval because dicts are constructed dynamically.
-  eval_result_t *result = eval_program("{ val d = dict  \n"
-                                       "  d['x'] = 1.23 \n"
-                                       "  d             \n"
-                                       "}");
+  eval_result_t *result = (eval_result_t*) alloc_type(EVAL_RESULT, F_NONE);
+  char *program = "{ val d = dict  \n"
+                  "  d['x'] = 1.23 \n"
+                  "  d             \n"
+                  "}";
+  eval_program(program, result);
   obj_t *obj = result->obj;
   gc_header_t *hdr = (gc_header_t*) obj;
   TEST_ASSERT_EQUAL(ERR_NO_ERROR, result->err);
@@ -83,7 +87,8 @@ void test_traceable_dict(void) {
 }
 
 void test_traceable_function(void) {
-  eval_result_t *result = eval_program("fn(x) { x + 1 }");
+  eval_result_t *result = (eval_result_t*) alloc_type(EVAL_RESULT, F_NONE);
+  eval_program("fn(x) { x + 1 }", result);
   obj_t *obj = result->obj;
   gc_header_t *hdr = (gc_header_t*) obj;
   TEST_ASSERT_EQUAL(ERR_NO_ERROR, result->err);
@@ -96,8 +101,9 @@ void test_traceable_function(void) {
 }
 
 void test_traceable_iterator(void) {
+  eval_result_t *result = (eval_result_t*) alloc_type(EVAL_RESULT, F_NONE);
   // Return an iterable and extract its iterator.
-  eval_result_t *result = eval_program("1..10");
+  eval_program("1..10", result);
   obj_t *obj = result->obj;
   gc_header_t *hdr = (gc_header_t*) obj;
   TEST_ASSERT_EQUAL(ERR_NO_ERROR, result->err);

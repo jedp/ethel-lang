@@ -60,11 +60,14 @@ obj_t *make_list(int n_elems, ...) {
   return list_obj(root_elem);
 }
 
-eval_result_t *eval_program(char* program) {
+void eval_program(const char* program, eval_result_t* result) {
   env_t env;
   env_init(&env);
   enter_scope(&env);
+  put_env_gc_root(&env, (gc_header_t*) result);
+  enter_scope(&env);
 
-  return eval(&env, program);
+
+  eval(&env, program, result);
 }
 
