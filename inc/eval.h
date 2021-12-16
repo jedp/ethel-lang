@@ -13,7 +13,7 @@ typedef struct Result {
   uint16_t err;
 } eval_result_t;
 
-eval_result_t *eval(env_t *env, char* input);
+eval_result_t *eval(env_t *env, const char* input);
 
 #endif
 

@@ -709,7 +709,7 @@ error:
   return ast_empty();
 }
 
-void parse_program(char *input, ast_expr_t *ast, parse_result_t *parse_result) {
+void parse_program(const char *input, ast_expr_t *ast, parse_result_t *parse_result) {
   lexer_t lexer;
 
   lexer_init(&lexer, input, c_str_len(input));

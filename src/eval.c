@@ -196,9 +196,12 @@ static void _eval_block_expr_in_scope(ast_expr_list_t *block_exprs,
                                eval_result_t *result,
                                env_t *env) {
   ast_expr_list_t *node = block_exprs;
+  eval_result_t *r;
+
   result->obj = nil_obj();
+
   while (node != NULL) {
-    eval_result_t *r = eval_expr(node->root, env);
+    r = eval_expr(node->root, env);
     if ((result->err = r->err) != ERR_NO_ERROR) {
       return;
     }
@@ -276,11 +279,8 @@ static void eval_func_call(ast_func_call_t *func_call, eval_result_t *result, en
   /* ... and create a new scope for the function itself. */
   err = enter_scope(env);
   if ((result->err = err) != ERR_NO_ERROR) {
-    // Not a typo. There was a push_scope and an enter_scope.
-    leave_scope(env);
-    leave_scope(env);
     result->obj = nil_obj();
-    return;
+    goto done;
   }
 
   ast_fn_arg_decl_t *argnames = fn->argnames;
@@ -288,20 +288,14 @@ static void eval_func_call(ast_func_call_t *func_call, eval_result_t *result, en
   while (argnames != NULL) {
     if (callargs == NULL) {
       result->err = ERR_WRONG_ARG_COUNT;
-      // Not a typo. There was a push_scope and an enter_scope.
-      leave_scope(env);
-      leave_scope(env);
-      return;
+      goto done;
     }
     bytearray_t *name = argnames->name;
     eval_result_t *r = eval_expr(callargs->root, env);
     error_t err = put_env_shadow(env, name, r->obj, F_NONE);
     if (err != ERR_NO_ERROR) {
       result->err = err;
-      // Not a typo. There was a push_scope and an enter_scope.
-      leave_scope(env);
-      leave_scope(env);
-      return;
+      goto done;
     }
 
     argnames = argnames->next;
@@ -311,9 +305,9 @@ static void eval_func_call(ast_func_call_t *func_call, eval_result_t *result, en
   _eval_block_expr_in_scope(fn->block_exprs, result, env);
 
   // Not a typo. There was a push_scope and an enter_scope.
+done:
   leave_scope(env);
   leave_scope(env);
-  return;
 }
 
 static void eval_string_expr(ast_expr_t *expr, eval_result_t *result) {
@@ -427,6 +421,7 @@ static void assign(ast_expr_t *lhs,
         dict_subscript_assign(obj, lhs, rhs, result, env);
         return;
       default:
+        printf("can't assign to %s\n", type_names[TYPEOF(obj)]);
         result->err = ERR_AST_TYPE_UNHANDLED;
         return;
     }
@@ -779,8 +774,8 @@ static void resolve_callable_expr(ast_expr_t *expr, env_t *env, eval_result_t *r
   return;
 
 error:
-      result->err = ERR_AST_TYPE_UNHANDLED;
-      result->obj = undef_obj();
+  result->err = ERR_AST_TYPE_UNHANDLED;
+  result->obj = undef_obj();
 }
 
 static void eval_do_while_loop(ast_expr_t *expr, env_t *env, eval_result_t *result) {
@@ -1275,6 +1270,7 @@ eval_result_t *eval_expr(ast_expr_t *expr, env_t *env) {
           result->obj = continue_obj();
           break;
         default:
+          printf("Can't eval: %s\n", type_names[TYPEOF(expr)]);
           result->err = ERR_EVAL_UNHANDLED_OBJECT;
           break;
     }
@@ -1283,7 +1279,7 @@ error:
     return result;
 }
 
-eval_result_t *eval(env_t *env, char *input) {
+eval_result_t *eval(env_t *env, const char *input) {
   ast_expr_t *ast = ast_empty();
   parse_result_t *parse_result = mem_alloc(sizeof(parse_result_t));
   parse_program(input, ast, parse_result);
