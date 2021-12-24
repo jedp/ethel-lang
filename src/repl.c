@@ -89,6 +89,8 @@ int main(int argc, char** argv) {
   enter_scope(&env);
 
   eval_result_t *result = mem_alloc(sizeof(eval_result_t));
+  put_env_gc_root(&env, (gc_header_t*) result);
+  enter_scope(&env);
 
   while (1) {
     if (indent) {

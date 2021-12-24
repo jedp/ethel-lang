@@ -4,6 +4,7 @@
 #include "obj.h"
 
 #define TYPEOF(x) (((gc_header_t*) x)->type)
+#define NAMEOF(x) (type_names[TYPEOF(x)])
 #define FLAGS(x) (((gc_header_t*) x)->flags)
 
 static_method get_static_method(type_t obj_type,

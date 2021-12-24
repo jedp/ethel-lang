@@ -194,6 +194,8 @@ static void _eval_block_expr_in_scope(ast_expr_list_t *block_exprs,
   ast_expr_list_t *node = block_exprs;
   obj_t *last_obj = nil_obj();
 
+  put_env_gc_root(env, (gc_header_t*) node);
+
   while (node != NULL) {
     eval_expr(node->root, env, result);
     if (result->err != ERR_NO_ERROR)  return;
@@ -230,6 +232,7 @@ static void eval_return_expr(ast_expr_list_t *block_exprs, eval_result_t *result
   // Wrap the return obj.
   result->obj = return_val(result->obj);
   leave_scope(env);
+  //gc(env);
 }
 
 /* Wrap the function pointer in an obj. */
@@ -253,10 +256,15 @@ static void eval_func_call(ast_func_call_t *func_call, eval_result_t *result, en
   }
 
   ast_func_def_t *fn = (ast_func_def_t *) obj->func_def->code;
-  env_sym_t *scope = (env_sym_t *) obj->func_def->scope;
+
+  put_env_gc_root(env, (gc_header_t*) func_call);
+  put_env_gc_root(env, (gc_header_t*) fn);
+  put_env_gc_root(env, (gc_header_t*) obj);
 
   /* Push the scope the function was defined in ... */
+  env_sym_t *scope = (env_sym_t *) obj->func_def->scope;
   error_t err = push_scope(env, scope);
+
   if ((result->err = err) != ERR_NO_ERROR) {
     leave_scope(env);
     result->obj = nil_obj();
@@ -272,6 +280,7 @@ static void eval_func_call(ast_func_call_t *func_call, eval_result_t *result, en
 
   ast_fn_arg_decl_t *argnames = fn->argnames;
   ast_expr_list_t *callargs = func_call->args;
+
   while (argnames != NULL) {
     if (callargs == NULL) {
       result->err = ERR_WRONG_ARG_COUNT;
@@ -291,8 +300,8 @@ static void eval_func_call(ast_func_call_t *func_call, eval_result_t *result, en
 
   _eval_block_expr_in_scope(fn->block_exprs, result, env);
 
-  // Not a typo. There was a push_scope and an enter_scope.
 done:
+  // Not a typo. There was a push_scope and an enter_scope.
   leave_scope(env);
   leave_scope(env);
 }
@@ -760,11 +769,17 @@ static void eval_do_while_loop(ast_expr_t *expr, env_t *env, eval_result_t *resu
   eval_result_t *cond_r = (eval_result_t*) alloc_type(EVAL_RESULT, F_NONE);
   put_env_gc_root(env, (gc_header_t*) cond_r);
 
+  ast_expr_t *pred = expr->do_while_loop->pred;
+  ast_expr_t *cond = expr->do_while_loop->cond;
+
+  put_env_gc_root(env, (gc_header_t*) pred);
+  put_env_gc_root(env, (gc_header_t*) cond);
+
   result->obj = nil_obj();
   result->err = ERR_NO_ERROR;
 
   for(;;) {
-    eval_expr(expr->do_while_loop->pred, env, result);
+    eval_expr(pred, env, result);
     if (result->err != ERR_NO_ERROR) {
       result->obj = undef_obj();
       return;
@@ -777,7 +792,7 @@ static void eval_do_while_loop(ast_expr_t *expr, env_t *env, eval_result_t *resu
       result->obj = nil_obj();
     }
 
-    eval_expr(expr->do_while_loop->cond, env, cond_r);
+    eval_expr(cond, env, cond_r);
     if (cond_r->err != ERR_NO_ERROR) {
       result->err = cond_r->err;
       result->obj = undef_obj();
@@ -832,6 +847,9 @@ static void eval_for_loop(ast_expr_t *expr, env_t *env, eval_result_t *result) {
   obj_t *result_obj = undef_obj();
   result->obj = result_obj;
 
+  ast_expr_t *pred = expr->for_loop->pred;
+  put_env_gc_root(env, (gc_header_t*) pred);
+
   size_t orig_expr = (size_t) expr;
 
   // Local name for the variable holding each element.
@@ -872,7 +890,7 @@ static void eval_for_loop(ast_expr_t *expr, env_t *env, eval_result_t *result) {
     assert(orig_expr == (size_t) expr);
     put_env(env, elem_name, next_elem, F_ENV_OVERWRITE);
 
-    eval_expr(expr->for_loop->pred, env, result);
+    eval_expr(pred, env, result);
 
     if (result->err != ERR_NO_ERROR) goto error;
 

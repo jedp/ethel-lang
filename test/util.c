@@ -67,7 +67,6 @@ void eval_program(const char* program, eval_result_t* result) {
   put_env_gc_root(&env, (gc_header_t*) result);
   enter_scope(&env);
 
-
   eval(&env, program, result);
 }
 
