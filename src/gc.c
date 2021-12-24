@@ -60,6 +60,7 @@ static void move_unreached_to_free(void) {
   heap_node_t *heap_node = heap_head();
 
   while (heap_node != NULL) {
+    assert_valid_heap_node(heap_node);
     if (heap_node->flags & F_GC_UNREACHED) {
       // Mark as free, but don't use efree; we will coalesce nodes later.
       assert(!(heap_node->flags & F_GC_UNSCANNED));
@@ -70,6 +71,8 @@ static void move_unreached_to_free(void) {
 }
 
 static void move_unreached_to_unscanned(heap_node_t *heap_node) {
+  assert_valid_heap_node(heap_node);
+
   // Prevent cycles.
   if (!(heap_node->flags & F_GC_UNREACHED)) return;
 
@@ -98,6 +101,7 @@ static int scan_unscanned_objects() {
   int unscanned = 0;
 
   while (heap_node != NULL) {
+    assert_valid_heap_node(heap_node);
     if (heap_node->flags & F_GC_UNSCANNED) {
       heap_node->flags &= ~F_GC_UNSCANNED;
 

@@ -193,8 +193,7 @@ void *erealloc(void* data_ptr, size_t size) {
 
 void efree(void *data_ptr) {
   if (data_ptr == NULL) return;
-  assert((size_t) data_ptr >= HEAP_DATA_BEGIN);
-  assert((size_t) data_ptr <= HEAP_DATA_END);
+  assert_valid_data_ptr(data_ptr);
 
   // Pointer arithmetic to find metadata for node.
   heap_node_t *node = NODE_FOR_DATA(data_ptr);
@@ -275,3 +274,14 @@ void dump_heap(void) {
 heap_node_t *heap_head(void) {
   return (heap_node_t*) heap;
 }
+
+void assert_valid_heap_node(heap_node_t* node) {
+  assert((size_t) node >= (size_t) heap);
+  assert((size_t) node <= (size_t) heap + HEAP_BYTES - sizeof(heap_node_t));
+}
+
+void assert_valid_data_ptr(void* data_ptr) {
+  assert((size_t) data_ptr >= HEAP_DATA_BEGIN);
+  assert((size_t) data_ptr <= HEAP_DATA_END);
+}
+

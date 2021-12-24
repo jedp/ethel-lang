@@ -106,5 +106,9 @@ heap_info_t *get_heap_info(void);
 
 void dump_heap(void);
 
+void assert_valid_heap_node(heap_node_t* node);
+
+void assert_valid_data_ptr(void* data_ptr);
+
 #endif
 
