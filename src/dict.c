@@ -11,6 +11,8 @@
 error_t _dict_init(obj_dict_t *dict, uint32_t buckets) {
   dict_node_t **nodes = mem_alloc(sizeof(dict_node_t*) * buckets + sizeof(gc_header_t));
 
+  ((gc_header_t*) nodes)->type = TYPE_DICT_DATA;
+
   if (nodes == NULL) return ERR_OUT_OF_MEMORY;
 
   dict->buckets = buckets;

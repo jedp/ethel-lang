@@ -66,7 +66,7 @@ gc_header_t *alloc_type(type_t type, flags_t flags) {
     case TYPE_VARIABLE_ARGS:     HDR_ALLOC(obj_varargs_t, type, 2);      break;
     case TYPE_LIST_DATA:         HDR_ALLOC(obj_list_t, type, 1);         break;
     case TYPE_LIST_ELEM_DATA:    HDR_ALLOC(obj_list_element_t, type, 2); break;
-    case TYPE_DICT_DATA:         HDR_ALLOC(obj_dict_t, type, 1);         break;
+    case TYPE_DICT_DATA:         HDR_ALLOC(obj_dict_t, type, 0);         break;
     case TYPE_DICT_KV_DATA:      HDR_ALLOC(dict_node_t, type, 3);        break;
     case TYPE_FUNCTION_PTR_DATA: HDR_ALLOC(obj_func_def_t, type, 2);     break;
     case TYPE_RETURN_VAL:        HDR_ALLOC(obj_t, type, 1);              break;
