@@ -22,9 +22,9 @@
 
 enum all_flags {
   F_NONE           = 0,
-  F_ENV_ASSIGNABLE = (1 << 1),
-  F_ENV_OVERWRITE  = (1 << 2),
-  F_ENV_VAR        = (1 << 3),
+  F_ENV_ASSIGNABLE = (1 << 0),
+  F_ENV_OVERWRITE  = (1 << 1),
+  F_ENV_VAR        = (1 << 2),
   F_GC_FREE        = (1 << 5),  // Node is on the free list.
   F_GC_UNREACHED   = (1 << 6),
   F_GC_UNSCANNED   = (1 << 7),
@@ -279,7 +279,7 @@ static const char* type_names[TYPE_MAX] = {
   "List Element Data",
   "Dict",
   "Dict Data",
-  "Dict KV Data Node"
+  "Dict KV Data Node",
   "Identifier",
   "Iterator",
   "Iterator Data",
