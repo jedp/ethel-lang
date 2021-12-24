@@ -2,6 +2,7 @@
 #include <stdlib.h>
 #include <stdio.h>
 #include "../inc/type.h"
+#include "../inc/mem.h"
 #include "../inc/gc.h"
 #include "../inc/heap.h"
 #include "../inc/env.h"
@@ -83,6 +84,9 @@ static void move_unreached_to_unscanned(heap_node_t *heap_node) {
   // Find any child data nodes and and scan their respective heap nodes.
   void* data = DATA_FOR_NODE(heap_node);
   gc_header_t* data_hdr = (gc_header_t*) data;
+
+  assert_valid_typed_node(data_hdr);
+
   if (data_hdr->children == 0) return;
 
   for (int i = 0; i < data_hdr->children; ++i) {

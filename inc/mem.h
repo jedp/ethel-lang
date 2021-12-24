@@ -32,5 +32,7 @@ void mem_free(void *b);
 /* Initialize memory management. Initialize all words with initval. */
 void mem_init(unsigned char initval);
 
+void assert_valid_typed_node(gc_header_t* node);
+
 #endif
 

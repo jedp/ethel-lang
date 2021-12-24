@@ -191,3 +191,15 @@ gc_header_t *alloc_type(type_t type, flags_t flags) {
   return hdr;
 }
 
+void assert_valid_typed_node(gc_header_t* node) {
+  assert(node->type > TYPE_ERR_DO_NOT_USE && node->type < TYPE_MAX);
+  assert(node->children >= 0 && node->children <= 4);
+
+  // Verify child node pointers are sane.
+  for (int i = 0; i < node->children; ++i) {
+    size_t offset = sizeof(gc_header_t) + (i * sizeof(void*));
+    void **child = (void*) node + offset;
+    if (*child != NULL) assert_valid_data_ptr(*child);
+  }
+}
+
