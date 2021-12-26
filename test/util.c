@@ -64,7 +64,13 @@ void eval_program(const char* program, eval_result_t* result) {
   env_t env;
   env_init(&env);
   enter_scope(&env);
-  put_env_gc_root(&env, (gc_header_t*) result);
+
+  gc_header_t* hdr = (gc_header_t*) result;
+  hdr->type = EVAL_RESULT;
+  hdr->flags = F_NONE;
+  hdr->children = 1;
+  put_env_gc_root(&env, (gc_header_t*) hdr);
+
   enter_scope(&env);
 
   eval(&env, program, result);
