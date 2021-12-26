@@ -241,6 +241,7 @@ static void eval_func_def(ast_func_def_t *func_def, eval_result_t *result, env_t
 }
 
 static void eval_func_call(ast_func_call_t *func_call, eval_result_t *result, env_t *env) {
+  put_env_gc_root(env, (gc_header_t*) func_call);
   eval_expr(func_call->expr, env, result);
   if (result->err != ERR_NO_ERROR) {
     result->err = ERR_FUNCTION_UNDEFINED;
@@ -248,6 +249,7 @@ static void eval_func_call(ast_func_call_t *func_call, eval_result_t *result, en
     return;
   }
   obj_t *obj = result->obj;
+  put_env_gc_root(env, (gc_header_t*) obj);
 
   if (TYPEOF(obj) != TYPE_FUNCTION) {
     result->err = ERR_FUNCTION_UNDEFINED;
@@ -256,10 +258,6 @@ static void eval_func_call(ast_func_call_t *func_call, eval_result_t *result, en
   }
 
   ast_func_def_t *fn = (ast_func_def_t *) obj->func_def->code;
-
-  put_env_gc_root(env, (gc_header_t*) func_call);
-  put_env_gc_root(env, (gc_header_t*) fn);
-  put_env_gc_root(env, (gc_header_t*) obj);
 
   /* Push the scope the function was defined in ... */
   env_sym_t *scope = (env_sym_t *) obj->func_def->scope;
