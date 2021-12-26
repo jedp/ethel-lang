@@ -20,6 +20,7 @@
 typedef struct HeapNode {
   struct HeapNode *prev;
   struct HeapNode *next;
+  uint16_t magic;
   flags_t flags;
 } heap_node_t;
 

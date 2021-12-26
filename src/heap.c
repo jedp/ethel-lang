@@ -15,6 +15,7 @@ static size_t heap[HEAP_BYTES] = { 0 };
 heap_node_t node_template = {
   .prev = NULL,
   .next = NULL,
+  .magic = 0x4849,
   .flags = 91   // Weird flags as an error marker.
 };
 
@@ -276,6 +277,7 @@ heap_node_t *heap_head(void) {
 }
 
 void assert_valid_heap_node(heap_node_t* node) {
+  assert(node->magic == 0x4849);
   assert((size_t) node >= (size_t) heap);
   assert((size_t) node <= (size_t) heap + HEAP_BYTES - sizeof(heap_node_t));
 }
