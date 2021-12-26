@@ -80,10 +80,8 @@ static void fracture_node(heap_node_t *node, size_t new_size) {
   }
   node->next = new_node;
 
-  assert((size_t) node >= (size_t) heap);
-  assert((size_t) node <= (size_t) node->next - sizeof(heap_node_t));
-  assert((size_t) node->next >= (size_t) node);
-  assert((size_t) node->next <= (size_t) heap + HEAP_BYTES - sizeof(heap_node_t));
+  assert_valid_heap_node(node);
+  assert_valid_heap_node(new_node);
 }
 
 /*
@@ -105,7 +103,9 @@ static void coalesce_nodes(heap_node_t *left, heap_node_t *right) {
   // Null out the original right-side node for safety.
   right->prev = NULL;
   right->next = NULL;
-  right->flags = 0;
+  right->flags = F_NONE;
+
+  assert_valid_heap_node(left);
 }
 
 void *ealloc(size_t bytes) {
@@ -139,14 +139,7 @@ void *ealloc(size_t bytes) {
   fracture_node(node, bytes);
   node->flags &= ~F_GC_FREE;
 
-  assert((size_t) node >= (size_t) heap);
-  if (node->next == NULL) {
-    assert((size_t) node <= (size_t) heap + HEAP_BYTES - sizeof(heap_node_t));
-  } else {
-    assert((size_t) node->next >= (size_t) node);
-    assert((size_t) node <= (size_t) node->next - sizeof(heap_node_t));
-    assert((size_t) node->next <= (size_t) heap + HEAP_BYTES - sizeof(heap_node_t));
-  }
+  assert_valid_heap_node(node);
 
   return DATA_FOR_NODE(node);
 }
@@ -207,14 +200,8 @@ void efree(void *data_ptr) {
   coalesce_nodes(node, node->next);
   coalesce_nodes(node->prev, node);
 
-  assert((size_t) node >= (size_t) heap);
-  if (node->next == NULL) {
-    assert((size_t) node <= (size_t) heap + HEAP_BYTES - sizeof(heap_node_t));
-  } else {
-    assert((size_t) node->next >= (size_t) node);
-    assert((size_t) node <= (size_t) node->next - sizeof(heap_node_t));
-    assert((size_t) node->next <= (size_t) heap + HEAP_BYTES - sizeof(heap_node_t));
-  }
+  assert_valid_heap_node(node);
+  if (node->prev != NULL) assert_valid_heap_node(node->prev);
 }
 
 /*
@@ -280,6 +267,18 @@ void assert_valid_heap_node(heap_node_t* node) {
   assert(node->magic == 0x4849);
   assert((size_t) node >= (size_t) heap);
   assert((size_t) node <= (size_t) heap + HEAP_BYTES - sizeof(heap_node_t));
+
+  if (node->next != NULL) {
+    assert((size_t) node->next > (size_t) node);
+    assert((size_t) node->next >= (size_t) heap);
+    assert((size_t) node->next <= (size_t) heap + HEAP_BYTES - sizeof(heap_node_t));
+  }
+
+  if (node->prev != NULL) {
+    assert((size_t) node->prev < (size_t) node);
+    assert((size_t) node->prev >= (size_t) heap);
+    assert((size_t) node->prev <= (size_t) heap + HEAP_BYTES - sizeof(heap_node_t));
+  }
 }
 
 void assert_valid_data_ptr(void* data_ptr) {
