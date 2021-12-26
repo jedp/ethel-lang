@@ -26,8 +26,7 @@ static void eval_nil_expr(ast_expr_t *expr, eval_result_t *result) {
     result->err = ERR_EVAL_TYPE_ERROR;
     return;
   }
-  obj_t* obj = mem_alloc(sizeof(obj_t));
-  TYPEOF(obj) = TYPE_NIL;
+  obj_t* obj = (obj_t*) alloc_type(TYPE_NIL, F_NONE);
   result->obj = obj;
 }
 
