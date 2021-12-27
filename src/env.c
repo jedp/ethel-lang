@@ -125,17 +125,21 @@ error_t del_env(env_t *env, bytearray_t *name_obj) {
   if (prev == NULL) {
     // First element in list.
     env->symbols[env->top] = sym->next;
+    env->symbols[env->top]->prev = NULL;
+    sym = NULL;
     return ERR_NO_ERROR;
   }
 
   if (sym->next == NULL) {
     // Last element in list with preceding elements.
     prev->next = NULL;
+    sym = NULL;
     return ERR_NO_ERROR;
   }
 
   // Somewhere in the middle of the list.
   prev->next = sym->next;
+  sym = NULL;
   return ERR_NO_ERROR;
 }
 
@@ -158,21 +162,18 @@ error_t env_init(env_t *env) {
   return ERR_NO_ERROR;
 }
 
-void dump_env(env_t *env) {
-  printf("----\n");
-  for (int i = 0; i < env->top; ++i) {
-    printf("env %d\n", i);
-    env_sym_t *sym = env->symbols[env->top];
+void show_env(env_t *env) {
+  env_sym_t *sym;
+
+  printf("Env:\n");
+  for (int i = env->top; i >= 0; --i) {
+    printf("[Level %d]\n", i);
+    sym = env->symbols[i];
     while (sym != NULL) {
       if (sym->name_obj == NULL) {
-        printf("  [anon] %s\n", type_names[TYPEOF(sym->obj)]);
+        printf("  <hidden> %s\n", type_names[TYPEOF(sym->obj)]);
       } else {
-        printf("  '%s' %s", bytearray_to_c_str(sym->name_obj), type_names[TYPEOF(sym->obj)]);
-        if (TYPEOF(sym->obj) == TYPE_INT) {
-          printf(" %d\n", ((obj_t*) sym->obj)->intval);
-        } else {
-          printf("\n");
-        }
+        printf("  '%s' %s\n", bytearray_to_c_str(sym->name_obj), type_names[TYPEOF(sym->obj)]);
       }
       sym = sym->next;
     }

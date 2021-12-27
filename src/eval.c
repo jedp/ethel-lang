@@ -194,8 +194,6 @@ static void _eval_block_expr_in_scope(ast_expr_list_t *block_exprs,
   ast_expr_list_t *node = block_exprs;
   obj_t *last_obj = nil_obj();
 
-  put_env_gc_root(env, (gc_header_t*) node);
-
   while (node != NULL) {
     eval_expr(node->root, env, result);
     if (result->err != ERR_NO_ERROR)  return;
@@ -241,7 +239,6 @@ static void eval_func_def(ast_func_def_t *func_def, eval_result_t *result, env_t
 }
 
 static void eval_func_call(ast_func_call_t *func_call, eval_result_t *result, env_t *env) {
-  put_env_gc_root(env, (gc_header_t*) func_call);
   eval_expr(func_call->expr, env, result);
   if (result->err != ERR_NO_ERROR) {
     result->err = ERR_FUNCTION_UNDEFINED;
@@ -249,7 +246,6 @@ static void eval_func_call(ast_func_call_t *func_call, eval_result_t *result, en
     return;
   }
   obj_t *obj = result->obj;
-  put_env_gc_root(env, (gc_header_t*) obj);
 
   if (TYPEOF(obj) != TYPE_FUNCTION) {
     result->err = ERR_FUNCTION_UNDEFINED;
@@ -757,6 +753,9 @@ static void resolve_callable_expr(ast_expr_t *expr, env_t *env, eval_result_t *r
     case AST_CALL_MEM:
       show_heap();
       break;
+    case AST_CALL_ENV:
+      show_env(env);
+      break;
     default:
       goto error;
       break;
@@ -771,13 +770,9 @@ error:
 
 static void eval_do_while_loop(ast_expr_t *expr, env_t *env, eval_result_t *result) {
   eval_result_t *cond_r = (eval_result_t*) alloc_type(EVAL_RESULT, F_NONE);
-  put_env_gc_root(env, (gc_header_t*) cond_r);
 
   ast_expr_t *pred = expr->do_while_loop->pred;
   ast_expr_t *cond = expr->do_while_loop->cond;
-
-  put_env_gc_root(env, (gc_header_t*) pred);
-  put_env_gc_root(env, (gc_header_t*) cond);
 
   result->obj = nil_obj();
   result->err = ERR_NO_ERROR;
@@ -809,7 +804,6 @@ static void eval_do_while_loop(ast_expr_t *expr, env_t *env, eval_result_t *resu
 
 static void eval_while_loop(ast_expr_t *expr, env_t *env, eval_result_t *result) {
   eval_result_t *cond_r = (eval_result_t*) alloc_type(EVAL_RESULT, F_NONE);
-  put_env_gc_root(env, (gc_header_t*) cond_r);
 
   result->obj = nil_obj();
   result->err = ERR_NO_ERROR;
@@ -852,7 +846,6 @@ static void eval_for_loop(ast_expr_t *expr, env_t *env, eval_result_t *result) {
   result->obj = result_obj;
 
   ast_expr_t *pred = expr->for_loop->pred;
-  put_env_gc_root(env, (gc_header_t*) pred);
 
   size_t orig_expr = (size_t) expr;
 
@@ -863,7 +856,6 @@ static void eval_for_loop(ast_expr_t *expr, env_t *env, eval_result_t *result) {
   // The object whose elements we want to iterate over.
   // Evaluate the iterable expression to get it.
   eval_result_t *iter_r = (eval_result_t*) alloc_type(EVAL_RESULT, F_NONE);
-  put_env_gc_root(env, (gc_header_t*) iter_r);
 
   eval_expr(expr->for_loop->iterable, env, iter_r);
   if ((result->err = iter_r->err) != ERR_NO_ERROR) {
@@ -871,7 +863,6 @@ static void eval_for_loop(ast_expr_t *expr, env_t *env, eval_result_t *result) {
     goto error;
   }
   obj_t *iter_obj = iter_r->obj;
-  put_env_gc_root(env, (gc_header_t*) iter_obj);
 
   // An iterator object that points to said object and maintains
   // state as we iterate.
@@ -1304,5 +1295,7 @@ void eval(env_t *env, const char *input, eval_result_t *result) {
 #endif
 
   eval_expr(ast, env, result);
+
+  mem_free(ast);
 }
 

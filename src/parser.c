@@ -116,6 +116,7 @@ static ast_reserved_callable_type_t ast_callable_type_for_tag(tag_t tag) {
   switch (tag) {
     case TAG_GC: return AST_CALL_GC;
     case TAG_MEM: return AST_CALL_MEM;
+    case TAG_ENV: return AST_CALL_ENV;
     case TAG_TYPEOF: return AST_CALL_TYPE_OF;
     case TAG_TO_HEX: return AST_CALL_TO_HEX;
     case TAG_TO_BIN: return AST_CALL_TO_BIN;
@@ -663,6 +664,7 @@ static ast_expr_t *parse_atom(lexer_t *lexer) {
     }
     case TAG_GC:
     case TAG_MEM:
+    case TAG_ENV:
     case TAG_IS:
     case TAG_TYPEOF:
     case TAG_RAND:
