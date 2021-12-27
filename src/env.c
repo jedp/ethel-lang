@@ -37,7 +37,7 @@ error_t leave_scope(env_t *env) {
   return ERR_NO_ERROR;
 }
 
-static env_sym_t *find_sym(env_t *env, bytearray_t *sym_name, boolean recursive) {
+static env_sym_t *find_sym_by_name(env_t *env, bytearray_t *sym_name, boolean recursive) {
   if (env->top < 0) return NULL;
 
   // NULL is a valid name for planting gc roots.
@@ -68,7 +68,7 @@ error_t _put_env(env_t *env,
                  boolean can_shadow) {
   assert(env->top >= 0);
 
-  env_sym_t *found = find_sym(env, name_obj, !can_shadow);
+  env_sym_t* found = find_sym_by_name(env, name_obj, !can_shadow);
   // Already exists in scopes we can access.
   if (found != NULL) {
     if (!(flags & F_ENV_OVERWRITE) && !(FLAGS(found) & F_ENV_VAR)) {
@@ -112,7 +112,7 @@ error_t put_env_gc_root(env_t *env, const gc_header_t *hdr) {
 }
 
 error_t del_env(env_t *env, bytearray_t *name_obj) {
-  env_sym_t *sym = find_sym(env, name_obj, True);
+  env_sym_t *sym = find_sym_by_name(env, name_obj, True);
   if (sym == NULL) return ERR_ENV_SYMBOL_UNDEFINED;
 
   env_sym_t *prev = sym->prev;
@@ -144,7 +144,7 @@ error_t del_env(env_t *env, bytearray_t *name_obj) {
 }
 
 obj_t *get_env(env_t *env, bytearray_t *name_obj) {
-  env_sym_t *sym = find_sym(env, name_obj, True);
+  env_sym_t *sym = find_sym_by_name(env, name_obj, True);
   if (sym == NULL) return undef_obj();
 
   return (obj_t*) sym->obj;

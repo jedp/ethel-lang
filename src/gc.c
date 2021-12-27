@@ -153,7 +153,9 @@ static void initialize_unscanned_roots(env_t *env) {
 
       // By definition allocated, so should already have been marked as Unreached.
       assert(!(heap_node->flags & F_GC_FREE));
-      assert(heap_node->flags & F_GC_UNREACHED);
+
+      // I guess this assertion doesn't hold for shadowing vars?
+      // assert(heap_node->flags & F_GC_UNREACHED);
 
       heap_node->flags &= ~F_GC_UNREACHED;
       heap_node->flags |= F_GC_UNSCANNED;

@@ -1173,7 +1173,6 @@ static void eval_expr(ast_expr_t *expr, env_t *env, eval_result_t *result) {
     }
     case AST_BYTEARRAY_DECL: {
       if (TYPEOF((obj_t*)expr->range->from) != AST_INT) {
-        printf("argh!\n");
         result->err = ERR_TYPE_INT_REQUIRED;
         return;
       }
