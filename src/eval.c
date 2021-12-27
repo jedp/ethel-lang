@@ -2,6 +2,7 @@
 #include <stdio.h>
 #include "../inc/err.h"
 #include "../inc/mem.h"
+#include "../inc/heap.h"
 #include "../inc/gc.h"
 #include "../inc/range.h"
 #include "../inc/arr.h"
@@ -749,6 +750,12 @@ static void resolve_callable_expr(ast_expr_t *expr, env_t *env, eval_result_t *r
       break;
     case AST_CALL_ABS:
       eval_abs(args->root, result, env);
+      break;
+    case AST_CALL_GC:
+      gc(env);
+      break;
+    case AST_CALL_MEM:
+      show_heap();
       break;
     default:
       goto error;

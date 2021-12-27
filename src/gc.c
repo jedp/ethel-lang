@@ -162,4 +162,6 @@ void gc(env_t *env) {
 
   heap_info_t *after = get_heap_info();
   printf("GC freed %zu bytes. Bytes avail: %zu.\n", used_before - after->bytes_used, after->bytes_free);
+
+  show_heap();
 }

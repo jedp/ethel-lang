@@ -99,6 +99,8 @@ heap_info_t *get_heap_info(void);
 
 void dump_heap(void);
 
+void show_heap(void);
+
 size_t node_size(heap_node_t *node);
 
 heap_node_t *heap_head(void);

@@ -1,6 +1,7 @@
 #include <assert.h>
 #include <stdlib.h>
 #include <stdio.h>
+#include "../inc/type.h"
 #include "../inc/ptr.h"
 #include "../inc/heap.h"
 
@@ -245,6 +246,15 @@ heap_info_t *get_heap_info(void) {
   }
 
   return &heap_info;
+}
+
+void show_heap(void) {
+  heap_node_t* node = heap_head();
+
+  while(node != NULL) {
+    printf("%p %24s: %4zu bytes\n", node, (node->flags & F_GC_FREE) ? "Free!" : NAMEOF(DATA_FOR_NODE(node)), node_size(node));
+    node = node->next;
+  }
 }
 
 void dump_heap(void) {
