@@ -15,11 +15,13 @@ static int _eval(char* program) {
   enter_scope(&env);
 
   eval_result_t *result = (eval_result_t*) alloc_type(EVAL_RESULT, F_NONE);
+  put_env_gc_root(&env, (gc_header_t*) result);
+  enter_scope(&env);
 
   eval(&env, program, result);
 
   if (result->err != ERR_NO_ERROR) {
-    printf("%s\n", err_names[result->err]);
+    printf("Error: %s\n", err_names[result->err]);
     fputs("Execution error\n", stderr);
     return result->err;
   }

@@ -40,14 +40,20 @@
 
 #define F_GC_UNSET ~( F_GC_UNREACHED | F_GC_UNSCANNED | F_GC_SCANNED )
 
+/*
+ * Free = Free + Unreached
+ * Unreached = Scanned
+ */
 static void conclude_gc(void) {
   heap_node_t *heap_node = heap_head();
 
   while (heap_node != NULL) {
     if (heap_node->flags & F_GC_UNREACHED) {
-      printf("freeing one!\n");
       heap_node->flags &= ~F_GC_UNREACHED;
       heap_node->flags |= F_GC_FREE;
+    } else if(heap_node->flags & F_GC_SCANNED) {
+      heap_node->flags &= ~F_GC_SCANNED;
+      heap_node->flags |= F_GC_UNREACHED;
     } else {
       heap_node->flags &= F_GC_UNSET;
     }
