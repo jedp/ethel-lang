@@ -117,7 +117,9 @@ int main(int argc, char** argv) {
       program[0] = 0;
       indent = 0;
 
-      if (result->err == ERR_NO_ERROR && TYPEOF(obj) != TYPE_NOTHING) {
+      if (obj != NULL
+          && result->err == ERR_NO_ERROR
+          && TYPEOF(obj) != TYPE_NOTHING) {
         print_result(obj);
       } else {
         printf("%s\n", err_names[result->err]);

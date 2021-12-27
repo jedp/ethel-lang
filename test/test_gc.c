@@ -35,8 +35,8 @@ void gc_primitives(void) {
   gc(&env);
 
   int final_free = get_heap_info()->bytes_free;
-  TEST_ASSERT_GREATER_THAN(mid_free, final_free);
-  TEST_ASSERT_EQUAL(init_free, final_free);
+
+  // Object accessibility is correct.
   TEST_ASSERT_EQUAL(TYPE_UNDEF, TYPEOF(get_env(&env, NAME("cull-int"))));
   TEST_ASSERT_EQUAL(TYPE_UNDEF, TYPEOF(get_env(&env, NAME("cull-bool"))));
   TEST_ASSERT_EQUAL(TYPE_UNDEF, TYPEOF(get_env(&env, NAME("cull-float"))));
@@ -45,6 +45,10 @@ void gc_primitives(void) {
   TEST_ASSERT_EQUAL(TYPE_BOOLEAN, TYPEOF(get_env(&env, NAME("keep-bool"))));
   TEST_ASSERT_EQUAL(TYPE_FLOAT, TYPEOF(get_env(&env, NAME("keep-float"))));
   TEST_ASSERT_EQUAL(TYPE_BYTE, TYPEOF(get_env(&env, NAME("keep-byte"))));
+
+  // We actually cleaned garbage up.
+  TEST_ASSERT_GREATER_THAN(mid_free, final_free);
+  TEST_ASSERT_EQUAL(init_free, final_free);
 }
 
 void gc_bytearray(void) {
@@ -66,10 +70,14 @@ void gc_bytearray(void) {
   gc(&env);
 
   int final_free = get_heap_info()->bytes_free;
-  TEST_ASSERT_GREATER_THAN(mid_free, final_free);
-  TEST_ASSERT_EQUAL(init_free, final_free);
+
+  // Object accessibility is correct.
   TEST_ASSERT_EQUAL(TYPE_UNDEF, TYPEOF(get_env(&env, NAME("cull-bytearray"))));
   TEST_ASSERT_EQUAL(TYPE_BYTEARRAY, TYPEOF(get_env(&env, NAME("keep-bytearray"))));
+
+  // We actually cleaned garbage up.
+  TEST_ASSERT_GREATER_THAN(mid_free, final_free);
+  TEST_ASSERT_EQUAL(init_free, final_free);
 }
 
 void gc_string(void) {
@@ -91,10 +99,14 @@ void gc_string(void) {
   gc(&env);
 
   int final_free = get_heap_info()->bytes_free;
-  TEST_ASSERT_GREATER_THAN(mid_free, final_free);
-  TEST_ASSERT_EQUAL(init_free, final_free);
+
+  // Object accessibility is correct.
   TEST_ASSERT_EQUAL(TYPE_UNDEF, TYPEOF(get_env(&env, NAME("cull-string"))));
   TEST_ASSERT_EQUAL(TYPE_STRING, TYPEOF(get_env(&env, NAME("keep-string"))));
+
+  // We actually cleaned garbage up.
+  TEST_ASSERT_GREATER_THAN(mid_free, final_free);
+  TEST_ASSERT_EQUAL(init_free, final_free);
 }
 
 void test_gc(void) {
