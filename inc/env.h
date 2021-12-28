@@ -10,9 +10,14 @@ typedef struct Symbol {
   gc_header_t hdr;
   bytearray_t *name_obj;
   gc_header_t *obj;
-  struct Symbol *prev;
-  struct Symbol *next;
 } env_sym_t;
+
+typedef struct SymbolElem {
+  gc_header_t hdr;
+  env_sym_t* sym;
+  struct SymbolElem* prev;
+  struct SymbolElem* next;
+} env_sym_elem_t;
 
 /*
  * A stack of symbol tables in scope.
@@ -21,11 +26,11 @@ typedef struct Symbol {
  */
 typedef struct Env {
   int top;
-  env_sym_t *symbols[ENV_MAX_STACK_DEPTH];
+  env_sym_elem_t *symbols[ENV_MAX_STACK_DEPTH];
 } env_t;
 
 error_t env_init(env_t *env);
-error_t push_scope(env_t *env, env_sym_t *scope);
+error_t push_scope(env_t *env, env_sym_elem_t *scope);
 error_t enter_scope(env_t *env);
 error_t leave_scope(env_t *env);
 

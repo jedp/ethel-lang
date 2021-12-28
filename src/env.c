@@ -6,17 +6,24 @@
 #include "../inc/str.h"
 #include "../inc/env.h"
 
-env_sym_t *new_sym(bytearray_t *name_obj, gc_header_t *hdr, flags_t flags) {
+static env_sym_t *new_sym(bytearray_t *name_obj, gc_header_t *obj, flags_t flags) {
   env_sym_t *sym = (env_sym_t*) alloc_type(ENV_SYM, flags);
   sym->name_obj = bytearray_clone(name_obj);
-  sym->obj = hdr;
-  sym->prev = NULL;
-  sym->next = NULL;
+  sym->obj = obj;
 
   return sym;
 }
 
-error_t push_scope(env_t *env, env_sym_t *scope) {
+static env_sym_elem_t *new_sym_elem(env_sym_t* sym) {
+  env_sym_elem_t *elem = (env_sym_elem_t*) alloc_type(ENV_SYM_ELEM, F_NONE);
+  elem->sym = (env_sym_t*) sym;
+  elem->prev = NULL;
+  elem->next = NULL;
+
+  return elem;
+}
+
+error_t push_scope(env_t *env, env_sym_elem_t *scope) {
   env->top += 1;
   if (env->top == ENV_MAX_STACK_DEPTH) {
     return ERR_ENV_MAX_DEPTH_EXCEEDED;
@@ -31,7 +38,7 @@ error_t enter_scope(env_t *env) {
 }
 
 error_t leave_scope(env_t *env) {
-  env->symbols[env->top] = NULL;
+  env->symbols[env->top] = new_sym_elem(NULL);
   env->top -= 1;
 
   return ERR_NO_ERROR;
@@ -43,16 +50,17 @@ static env_sym_t *find_sym_by_name(env_t *env, bytearray_t *sym_name, boolean re
   // NULL is a valid name for planting gc roots.
   if (sym_name == NULL) return NULL;
 
-  bytearray_t *name = sym_name;
   // Search back through the scopes to find the name.
   for (int i = env->top; i >= 0; --i) {
     // Start at the node the root points to.
-    env_sym_t *node = env->symbols[i];
-    while (node != NULL) {
-      if (node->name_obj != NULL && bytearray_eq(name, node->name_obj)) {
-        return node;
+    env_sym_elem_t *elem = env->symbols[i];
+    while (elem != NULL) {
+      if (elem->sym != NULL
+          && elem->sym->name_obj != NULL
+          && bytearray_eq(sym_name, elem->sym->name_obj)) {
+        return elem->sym;
       }
-      node = node->next;
+      elem = elem->next;
     }
 
     if (!recursive) return NULL;
@@ -80,21 +88,23 @@ error_t _put_env(env_t *env,
   }
 
   // Not found. Put it in the current scope.
-  env_sym_t *top = env->symbols[env->top];
   env_sym_t *new = new_sym(name_obj, (gc_header_t*) obj, flags);
 
+  env_sym_elem_t *top_elem = env->symbols[env->top];
+  env_sym_elem_t *new_elem = new_sym_elem(new);
+
   // First thing in this scope?
-  if (top == NULL) {
-    env->symbols[env->top]= new;
+  if (top_elem == NULL) {
+    env->symbols[env->top] = new_elem;
     return ERR_NO_ERROR;
   }
 
   // Insert into list of other things at this scope.
-  assert(top->prev == NULL);
-  new->prev = NULL;
-  new->next = top;
-  top->prev = new;
-  env->symbols[env->top] = new;
+  assert(top_elem->prev == NULL);
+  new_elem->prev = NULL;
+  new_elem->next = top_elem;
+  top_elem->prev = new_elem;
+  env->symbols[env->top] = new_elem;
 
   return ERR_NO_ERROR;
 }
@@ -112,35 +122,24 @@ error_t put_env_gc_root(env_t *env, const gc_header_t *hdr) {
 }
 
 error_t del_env(env_t *env, bytearray_t *name_obj) {
-  env_sym_t *sym = find_sym_by_name(env, name_obj, True);
-  if (sym == NULL) return ERR_ENV_SYMBOL_UNDEFINED;
+  env_sym_elem_t *sym_elem = env->symbols[env->top];
 
-  env_sym_t *prev = sym->prev;
-  if (prev == NULL && sym->next == NULL) {
-    // Only element in list.
-    env->symbols[env->top] = NULL;
-    return ERR_NO_ERROR;
+  while (sym_elem != NULL) {
+    if (sym_elem->sym != NULL
+        && sym_elem->sym->name_obj != NULL
+        && bytearray_eq(name_obj, sym_elem->sym->name_obj)) {
+      sym_elem->sym = NULL;
+
+      if (sym_elem->prev != NULL) sym_elem->prev = sym_elem->next;
+      if (sym_elem->next != NULL) sym_elem->next = sym_elem->prev;
+      sym_elem = NULL;
+
+      return ERR_NO_ERROR;
+    }
+    sym_elem = sym_elem->next;
   }
 
-  if (prev == NULL) {
-    // First element in list.
-    env->symbols[env->top] = sym->next;
-    env->symbols[env->top]->prev = NULL;
-    sym = NULL;
-    return ERR_NO_ERROR;
-  }
-
-  if (sym->next == NULL) {
-    // Last element in list with preceding elements.
-    prev->next = NULL;
-    sym = NULL;
-    return ERR_NO_ERROR;
-  }
-
-  // Somewhere in the middle of the list.
-  prev->next = sym->next;
-  sym = NULL;
-  return ERR_NO_ERROR;
+  return ERR_ENV_SYMBOL_UNDEFINED;
 }
 
 obj_t *get_env(env_t *env, bytearray_t *name_obj) {
@@ -163,19 +162,21 @@ error_t env_init(env_t *env) {
 }
 
 void show_env(env_t *env) {
-  env_sym_t *sym;
+  env_sym_elem_t *sym_elem;
 
   printf("Env:\n");
   for (int i = env->top; i >= 0; --i) {
     printf("[Level %d]\n", i);
-    sym = env->symbols[i];
-    while (sym != NULL) {
-      if (sym->name_obj == NULL) {
-        printf("  <hidden> %s\n", type_names[TYPEOF(sym->obj)]);
-      } else {
-        printf("  '%s' %s\n", bytearray_to_c_str(sym->name_obj), type_names[TYPEOF(sym->obj)]);
+    sym_elem = env->symbols[i];
+    while (sym_elem != NULL) {
+      if (sym_elem->sym != NULL) {
+        if (sym_elem->sym->name_obj == NULL) {
+          printf("  <hidden> %s\n", type_names[TYPEOF(sym_elem->sym->obj)]);
+        } else {
+          printf("  '%s' %s\n", bytearray_to_c_str(sym_elem->sym->name_obj), type_names[TYPEOF(sym_elem->sym->obj)]);
+        }
       }
-      sym = sym->next;
+      sym_elem = sym_elem->next;
     }
   }
   printf("----\n");

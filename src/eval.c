@@ -256,7 +256,7 @@ static void eval_func_call(ast_func_call_t *func_call, eval_result_t *result, en
   ast_func_def_t *fn = (ast_func_def_t *) obj->func_def->code;
 
   /* Push the scope the function was defined in ... */
-  env_sym_t *scope = (env_sym_t *) obj->func_def->scope;
+  env_sym_elem_t *scope = (env_sym_elem_t *) obj->func_def->scope;
   error_t err = push_scope(env, scope);
 
   if ((result->err = err) != ERR_NO_ERROR) {

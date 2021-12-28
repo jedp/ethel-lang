@@ -162,6 +162,7 @@ enum every_type {
   TYPE_CONTINUE,
   EVAL_RESULT,
   ENV_SYM,
+  ENV_SYM_ELEM,
   TYPE_MAX,
 };
 
@@ -295,6 +296,7 @@ static const char* type_names[TYPE_MAX] = {
   "Continue",
   "<Eval Result>",
   "<Env Symbol>",
+  "<Env Symbol Container>",
 };
 
 typedef uint8_t byte;

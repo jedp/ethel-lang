@@ -73,7 +73,8 @@ gc_header_t *alloc_type(type_t type, flags_t flags) {
     case TYPE_ITERATOR_DATA:     HDR_ALLOC(obj_iter_t, type, 2);         break;
 
     // Environment.
-    case ENV_SYM:                HDR_ALLOC(env_sym_t, type, 4);          break;
+    case ENV_SYM:                HDR_ALLOC(env_sym_t, type, 2);          break;
+    case ENV_SYM_ELEM:           HDR_ALLOC(env_sym_elem_t, type, 3);     break;
 
     // Eval Result
     case EVAL_RESULT:            HDR_ALLOC(eval_result_t, type, 1);      break;

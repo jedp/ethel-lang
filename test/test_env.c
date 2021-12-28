@@ -190,16 +190,16 @@ void test_plant_gc_root(void) {
   TEST_ASSERT_EQUAL(4.2, get_env(&env, NAME("ethel-float"))->floatval);
 
   // Confirm "thing" is in the scope.
-  env_sym_t *node = env.symbols[env.top];
+  env_sym_elem_t *node = env.symbols[env.top];
   while(node != NULL) {
-    if (node->obj->type == AST_BLOCK) break;
+    if (node->sym->obj->type == AST_BLOCK) break;
     node = node->next;
   }
 
   // We should have found the right thing.
   // As a GC root, its name is null.
-  TEST_ASSERT_NULL(node->name_obj);
-  TEST_ASSERT_EQUAL(AST_BLOCK, node->obj->type);
+  TEST_ASSERT_NULL(node->sym->name_obj);
+  TEST_ASSERT_EQUAL(AST_BLOCK, node->sym->obj->type);
 }
 
 void test_env(void) {

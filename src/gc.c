@@ -147,9 +147,9 @@ static void initialize_unscanned_roots(env_t *env) {
 
   // Move objects referenced by the root set from Unreached to Unscanned.
   for (int i = env->top; i >= 0; --i) {
-    env_sym_t *env_node = env->symbols[i];
-    while (env_node != NULL) {
-      heap_node_t* heap_node = NODE_FOR_DATA(env_node);
+    env_sym_elem_t *env_elem = env->symbols[i];
+    while (env_elem != NULL) {
+      heap_node_t* heap_node = NODE_FOR_DATA(env_elem);
 
       // By definition allocated, so should already have been marked as Unreached.
       assert(!(heap_node->flags & F_GC_FREE));
@@ -160,7 +160,7 @@ static void initialize_unscanned_roots(env_t *env) {
       heap_node->flags &= ~F_GC_UNREACHED;
       heap_node->flags |= F_GC_UNSCANNED;
 
-      env_node = env_node->next;
+      env_elem = env_elem->next;
     }
   }
 }
