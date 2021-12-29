@@ -1294,7 +1294,5 @@ void eval(env_t *env, const char *input, eval_result_t *result) {
 #endif
 
   eval_expr(ast, env, result);
-
-  mem_free(ast);
 }
 

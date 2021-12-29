@@ -1,6 +1,7 @@
 #include <stdarg.h>
 #include <stdio.h>
 #include "util.h"
+#include "../inc/ptr.h"
 #include "../inc/str.h"
 #include "../inc/mem.h"
 #include "../inc/eval.h"
@@ -65,14 +66,18 @@ void eval_program(const char* program, eval_result_t* result) {
   env_init(&env);
   enter_scope(&env);
 
-  gc_header_t* hdr = (gc_header_t*) result;
-  hdr->type = EVAL_RESULT;
-  hdr->flags = F_NONE;
-  hdr->children = 1;
-  put_env_gc_root(&env, (gc_header_t*) hdr);
+  // Move input to ethel's memory.
+  size_t len = c_str_len(program) + 1;
+  char *buf = mem_alloc(len);
+  mem_cp(buf, (void*) program, len);
 
+  put_env_gc_root(&env, (gc_header_t*) result);
   enter_scope(&env);
 
   eval(&env, program, result);
+
+  if (result->err != ERR_NO_ERROR) {
+    printf("Error executing program: %s\n", err_names[result->err]);
+  }
 }
 
