@@ -24,15 +24,15 @@ Very much in progress and not useful yet.
 ```
 > val s = 101
 101
-> type(s)
+> typeof(s)
 Int
 > s is float
 false
 > s as float
 101.000000
-> type(s as float)
+> typeof(s as float)
 Float
-> type("moo".length())
+> typeof("moo".length())
 Int
 > "moo" + 2
 Type error

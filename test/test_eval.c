@@ -647,11 +647,11 @@ void test_eval_is_type(void) {
 }
 
 void test_eval_type_of(void) {
-  TEST_ASSERT_EQUAL_STRING("Int",        bytearray_to_c_str(evaluate("type(2)")->bytearray));
-  TEST_ASSERT_EQUAL_STRING("Float",      bytearray_to_c_str(evaluate("type(2.2)")->bytearray));
-  TEST_ASSERT_EQUAL_STRING("Bool",       bytearray_to_c_str(evaluate("type(true)")->bytearray));
-  TEST_ASSERT_EQUAL_STRING("Str",        bytearray_to_c_str(evaluate("type(\"2\")")->bytearray));
-  TEST_ASSERT_EQUAL_STRING("Byte Array", bytearray_to_c_str(evaluate("type(arr(2))")->bytearray));
+  TEST_ASSERT_EQUAL_STRING("Int",        bytearray_to_c_str(evaluate("typeof(2)")->bytearray));
+  TEST_ASSERT_EQUAL_STRING("Float",      bytearray_to_c_str(evaluate("typeof(2.2)")->bytearray));
+  TEST_ASSERT_EQUAL_STRING("Bool",       bytearray_to_c_str(evaluate("typeof(true)")->bytearray));
+  TEST_ASSERT_EQUAL_STRING("Str",        bytearray_to_c_str(evaluate("typeof(\"2\")")->bytearray));
+  TEST_ASSERT_EQUAL_STRING("Byte Array", bytearray_to_c_str(evaluate("typeof(arr(2))")->bytearray));
 }
 
 void test_eval_callable_abs(void) {
