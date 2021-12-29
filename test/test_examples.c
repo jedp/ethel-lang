@@ -19,7 +19,7 @@ void test_ex_fibonacci(void) {
                   "  }                          \n"
                   "  fib(10)                    \n"
                   "}";
-  eval_result_t* result = mem_alloc(sizeof(eval_result_t));
+  eval_result_t *result = (eval_result_t*) alloc_type(EVAL_RESULT, F_NONE);
   eval_program(program, result);
 
   TEST_ASSERT_EQUAL(ERR_NO_ERROR, result->err);
@@ -55,7 +55,7 @@ void test_ex_quicksort(void) {
                   "  quicksort(s, 0, s.length() - 1)  \n"
                   "  s                                \n"
                   "}";
-  eval_result_t* result = mem_alloc(sizeof(eval_result_t));
+  eval_result_t *result = (eval_result_t*) alloc_type(EVAL_RESULT, F_NONE);
   eval_program(program, result);
 
   TEST_ASSERT_EQUAL(ERR_NO_ERROR, result->err);
@@ -83,7 +83,7 @@ void test_ex_shuffle(void) {
                   "  }                                                \n"
                   "  deck == expected                                 \n"
                   "}";
-  eval_result_t* result = mem_alloc(sizeof(eval_result_t));
+  eval_result_t *result = (eval_result_t*) alloc_type(EVAL_RESULT, F_NONE);
   eval_program(program, result);
 
   TEST_ASSERT_EQUAL(ERR_NO_ERROR, result->err);
@@ -105,7 +105,7 @@ void test_100_doors(void) {
                   "  }                               \n"
                   "  n                               \n"
                   "}";
-  eval_result_t* result = mem_alloc(sizeof(eval_result_t));
+  eval_result_t *result = (eval_result_t*) alloc_type(EVAL_RESULT, F_NONE);
   eval_program(program, result);
 
   TEST_ASSERT_EQUAL(ERR_NO_ERROR, result->err);

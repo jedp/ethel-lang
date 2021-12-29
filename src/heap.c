@@ -225,6 +225,8 @@ void heap_init(unsigned char initval) {
   node_template.next = NULL;
   node_template.flags = F_GC_FREE;
   mem_cp(heap, &node_template, sizeof(heap_node_t));
+
+  printf("Initialized heap at %p, size %zu bytes\n", heap, HEAP_BYTES);
 }
 
 heap_info_t *get_heap_info(void) {

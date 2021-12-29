@@ -335,8 +335,8 @@ void test_eval_while_loop_break(void) {
 }
 
 void test_eval_do_while_loop_break(void) {
-  // TODO - this only passes if there are two newlines after the var declaration!?
-  char *program = "{ var x = 10                \n\n"
+  char *program = "{                           \n"
+                  "  var x = 10                \n"
                   "  do {                      \n"
                   "    x = x - 1               \n"
                   "    if x == 3 then break    \n"
