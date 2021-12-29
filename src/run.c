@@ -51,21 +51,28 @@ int run(char* fname) {
     return errno;
   }
 
-  size_t bufsize = ftell(fp);
+  // We're going to secretly wrap the entire program between curly braces,
+  // so add another two bytes to the size.
+  size_t bufsize = ftell(fp) + 2;
   if (bufsize == -1) {
     fputs("File error", stderr);
     return errno;
   }
 
-  program = mem_alloc(bufsize + 1);
+  // One for the null, two for the enclosing braces.
+  program = mem_alloc(bufsize + 3);
+  program[0] = '{';
+  program[bufsize - 1] = '}';
   program[bufsize] = '\0';
+
 
   if (fseek(fp, 0L, SEEK_SET) != 0) {
     fputs("Error rewinding file\n", stderr);
     return errno;
   }
 
-  size_t f_len = fread(program, sizeof(char), bufsize, fp);
+  // Start writing the source right after the first brace.
+  size_t f_len = fread(program + 1, sizeof(char), bufsize, fp);
   if (f_len == 0) {
     fputs("Zero bytes read\n", stderr);
     return 0;

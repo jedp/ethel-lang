@@ -1,12 +1,12 @@
-{
-  var x = 10
+; Test the do-while loop.
 
-  do {
-    x = x - 1
-    if x == 3 then break
-  } while (x > 0)
+var x = 10
 
-  print("Result should be 3")
+do {
+  x = x - 1
+  if x == 3 then break
+} while (x > 0)
 
-  x
-}
+print("Result should be 3")
+
+x
