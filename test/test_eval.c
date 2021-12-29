@@ -215,10 +215,10 @@ void test_eval_for_loop_list(void) {
 }
 
 void test_eval_for_loop_dict(void) {
-  char *program = "{ val d = dict { 'a': 1, 2: 3 } \n"
-                  "  var n = 0                     \n"
-                  "  for k in d { n = n + d[k] }   \n"
-                  "  n                             \n"
+  char *program = "{ val d = dict { 'a'=> 1, 2=> 3 } \n"
+                  "  var n = 0                       \n"
+                  "  for k in d { n = n + d[k] }     \n"
+                  "  n                               \n"
                   "}";
 
   eval_result_t* result = (eval_result_t*) alloc_type(EVAL_RESULT, F_NONE);
@@ -1424,7 +1424,7 @@ void test_eval_iterable_random_choice() {
   rand32_init();
   char *program = "{ var i = 0;                             \n"
                   "  val l = list {'a', 'b', 'c'}           \n"
-                  "  val d = dict { 1: 1, 2: 1, 3: 1}       \n"
+                  "  val d = dict { 1=>1, 2=>1, 3=>1}       \n"
                   "  val r = 1..10                          \n"
                   "  val s = \"I like pie\"                 \n"
                   "  if l.rand() == 'c'      then i = i + 1 \n"

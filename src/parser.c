@@ -44,7 +44,7 @@ static boolean is_op(token_t *token) {
       || token->tag == TAG_MEMBER_ACCESS
       || token->tag == TAG_LBRACKET  // Always subscript
       || token->tag == TAG_LPAREN
-      || token->tag == TAG_COLON  // Always dict kv association
+      || token->tag == TAG_MAPS_TO  // Always dict kv association
       || token->tag == TAG_ASSIGN
       ;
 }
@@ -97,7 +97,7 @@ static uint8_t op_preced(token_t *token) {
     case TAG_RANGE:
     case TAG_STEP:
       return PRECED_RANGE;
-    case TAG_COLON:
+    case TAG_MAPS_TO:
       return PRECED_MAPS_TO;
     case TAG_ASSIGN:
       return PRECED_ASSIGN;
@@ -370,7 +370,7 @@ static ast_expr_t *_parse_expr(lexer_t *lexer, int min_preced) {
       case TAG_IN:             lhs = ast_op(AST_IN,            lhs, _parse_expr(lexer, next_min_preced)); break;
       case TAG_LPAREN:         lhs = ast_func_call(            lhs, _parse_fn_args(lexer, next_min_preced)); break;
       case TAG_LBRACKET:       lhs = ast_op(AST_SUBSCRIPT,     lhs, _parse_subscript(lexer, next_min_preced)); break;
-      case TAG_COLON:          lhs = ast_op(AST_MAPS_TO,       lhs, _parse_expr(lexer, next_min_preced)); break;
+      case TAG_MAPS_TO:        lhs = ast_op(AST_MAPS_TO,       lhs, _parse_expr(lexer, next_min_preced)); break;
       case TAG_AS:             lhs = ast_cast(                 lhs, _parse_expr(lexer, next_min_preced)); break;
       case TAG_RANGE:          lhs = ast_range(                lhs, _parse_expr(lexer, next_min_preced)); break;
       case TAG_STEP:           lhs = ast_range_step(           lhs, _parse_expr(lexer, next_min_preced)); break;

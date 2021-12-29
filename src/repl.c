@@ -55,7 +55,7 @@ static void print_dict(obj_t *dict_obj) {
   obj_list_element_t *root = dict_obj_keys(dict_obj, NULL)->list->elems;
   while (root != NULL) {
     print_value(root->node);
-    printf(": ");
+    printf("=> ");
     print_value(dict_obj_get(dict_obj, wrap_varargs(1, root->node)));
     root = root->next;
     if (root != NULL) printf("\n  ");

@@ -50,7 +50,7 @@ Primitives:
 
 Compound:
 - List (`list { 1, 'x', "foo", fn(x) { x + 1 }, ... }`)
-- Dictionary (`dict { 'a': 1, 42: True, "up": fn(vec) { list { vec[0], vec[1] + 1 } }  ... }`)
+- Dictionary (`dict { 'a' => 1, 42 => True, "up" => fn(vec) { list { vec[0], vec[1] + 1 } }  ... }`)
 - Function (`fn(x) { x + 1 }`)
 
 Keys of dictionary can be any primitive type.
@@ -104,10 +104,10 @@ true
 #### Dictionaries
 
 ```
-> val d = dict { 'x': 42, "incr": fn(x) { x + 1 }, 3.14: "pi, roughly" }
-{ 3.140000: "pi, roughly"
-  'x': 42
-  "incr": <Function> }
+> val d = dict { 'x' => 42, "incr" => fn(x) { x + 1 }, 3.14 => "pi, roughly" }
+{ 3.140000 => "pi, roughly"
+  'x' => 42
+  "incr" => <Function> }
 > d['x']
 42
 > d["incr"](9)

@@ -337,6 +337,9 @@ static token_t *get_token(lexer_t *lexer) {
       if (lexer->nextch == '=') {
         return lex_op(lexer, TAG_EQ);
       }
+      else if (lexer->nextch == '>') {
+        return lex_op(lexer, TAG_MAPS_TO);
+      }
       return lex_op(lexer, TAG_ASSIGN);
     }
     case '!': {

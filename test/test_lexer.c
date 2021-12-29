@@ -408,16 +408,16 @@ void test_lex_dict_init(void) {
 }
 
 void test_lex_dict_with_kv_init(void) {
-  char *expr = "val d = dict { 'x': 12, \"foo\": 'c', 3: 0xff }";
+  char *expr = "val d = dict { 'x' => 12, \"foo\" => 'c', 3 => 0xff }";
   lexer_t lexer;
   lexer_init(&lexer, expr, c_str_len(expr));
 
   int expected[] = {
     TAG_INVARIABLE, TAG_IDENT, TAG_ASSIGN, TAG_DICT,
     TAG_BEGIN,
-    TAG_BYTE, TAG_COLON, TAG_INT, TAG_COMMA,
-    TAG_STRING, TAG_COLON, TAG_BYTE, TAG_COMMA,
-    TAG_INT, TAG_COLON, TAG_HEX,
+    TAG_BYTE, TAG_MAPS_TO, TAG_INT, TAG_COMMA,
+    TAG_STRING, TAG_MAPS_TO, TAG_BYTE, TAG_COMMA,
+    TAG_INT, TAG_MAPS_TO, TAG_HEX,
     TAG_END
   };
   for (int i = 0; i < sizeof(expected) / sizeof(expected[0]); i++) {
@@ -617,7 +617,6 @@ void test_lex_all_tokens(void) {
     (test_data_t) { .text = "continue", .expected_tag = TAG_CONTINUE },
     (test_data_t) { .text = "match", .expected_tag = TAG_MATCH },
     (test_data_t) { .text = "step", .expected_tag = TAG_STEP },
-    (test_data_t) { .text = "as", .expected_tag = TAG_AS },
     (test_data_t) { .text = "is", .expected_tag = TAG_IS },
     (test_data_t) { .text = "type", .expected_tag = TAG_TYPEOF },
     (test_data_t) { .text = "hex", .expected_tag = TAG_TO_HEX },

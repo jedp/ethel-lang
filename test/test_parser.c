@@ -86,7 +86,7 @@ void test_parse_assign(void) {
 }
 
 void test_parse_kv_assoc(void) {
-  char *program = "'t' : 2";
+  char *program = "'t' => 2";
   ast_expr_t *ast = mem_alloc(sizeof(ast_expr_t));
   parse_result_t *parse_result = mem_alloc(sizeof(parse_result_t));
   parse_program(program, ast, parse_result);
@@ -98,7 +98,7 @@ void test_parse_kv_assoc(void) {
 }
 
 void test_parse_kv_dict_init(void) {
-  char *program = "val d = dict { 'a': 1, \"foo\": 2.2 }";
+  char *program = "val d = dict { 'a'=> 1, \"foo\"=> 2.2 }";
   ast_expr_t *ast = mem_alloc(sizeof(ast_expr_t));
   parse_result_t *parse_result = mem_alloc(sizeof(parse_result_t));
   parse_program(program, ast, parse_result);
