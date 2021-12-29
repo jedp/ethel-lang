@@ -200,7 +200,6 @@ ast_expr_t *ast_method_call(bytearray_t *name, ast_expr_list_t *args);
 ast_expr_t *ast_member_access(ast_expr_t *receiver,
                               bytearray_t *meber_name,
                               ast_expr_list_t *args);
-ast_expr_t *ast_type_name(bytearray_t *name);
 ast_expr_t *ast_range(ast_expr_t *from, ast_expr_t *to);
 ast_expr_t *ast_range_step(ast_expr_t *range, ast_expr_t *step);
 ast_expr_t *ast_access(ast_expr_t *object, ast_expr_t *member);

@@ -181,13 +181,6 @@ static token_t *lex_word(lexer_t *lexer) {
   // Get the word.
   lex_word_raw(lexer);
 
-  // Is it a type declaration following the "of" keyword?
-  if (lexer->token.tag == TAG_OF) {
-    lexer->next_token.tag = TAG_TYPE_NAME;
-    lexer->next_token.string = next_word_buf;
-    return &lexer->next_token;
-  }
-
   // Is it a reserved word?
   for (int j = 0; j < sizeof(reserved) / sizeof(reserved[0]); j++) {
     if (c_str_eq(reserved[j].string, next_word_buf)) {

@@ -210,12 +210,6 @@ ast_expr_t *ast_member_access(ast_expr_t *expr,
   return node;
 }
 
-ast_expr_t *ast_type_name(bytearray_t *name) {
-  ast_expr_t *node = ast_node(AST_TYPE_NAME);
-  node->bytearray = name;
-  return node;
-}
-
 ast_expr_t *ast_range(ast_expr_t *from, ast_expr_t *to) {
   ast_expr_t *node = ast_node(AST_RANGE);
   node->range = (ast_range_args_t*) alloc_type(AST_RANGE_ARGS, F_NONE);

@@ -649,11 +649,6 @@ static ast_expr_t *parse_atom(lexer_t *lexer) {
       name = NULL;
       return id;
     }
-    case TAG_TYPE_NAME: {
-      ast_expr_t *type_name = ast_type_name(c_str_to_bytearray(lexer->token.string));
-      advance(lexer);
-      return type_name;
-    }
     case TAG_DEL: {
       advance(lexer);
       if (!eat(lexer, TAG_LPAREN)) goto error;
