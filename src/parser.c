@@ -1,3 +1,4 @@
+#include <assert.h>
 #include <stdio.h>
 #include "../inc/type.h"
 #include "../inc/def.h"
@@ -44,7 +45,9 @@ static boolean is_op(token_t *token) {
       || token->tag == TAG_MEMBER_ACCESS
       || token->tag == TAG_LBRACKET  // Always subscript
       || token->tag == TAG_LPAREN
+      || token->tag == TAG_COLON  // Always type association
       || token->tag == TAG_MAPS_TO  // Always dict kv association
+      || token->tag == TAG_TYPEDEF
       || token->tag == TAG_ASSIGN
       ;
 }
@@ -101,6 +104,10 @@ static uint8_t op_preced(token_t *token) {
       return PRECED_MAPS_TO;
     case TAG_ASSIGN:
       return PRECED_ASSIGN;
+    case TAG_COLON:
+      return PRECED_TYPED;
+    case TAG_TYPEDEF:
+      return PRECED_TYPEDEF;
     default:
       return PRECED_NONE;
       break;
@@ -348,6 +355,7 @@ static ast_expr_t *_parse_expr(lexer_t *lexer, int min_preced) {
 
     switch(tag) {
       case TAG_ASSIGN:         lhs = ast_op(AST_ASSIGN,        lhs, parse_expr(lexer)); break;
+      case TAG_TYPEDEF:        lhs = ast_op(AST_TYPEDEF,       lhs, _parse_expr(lexer, next_min_preced)); break;
       case TAG_PLUS:           lhs = ast_op(AST_ADD,           lhs, _parse_expr(lexer, next_min_preced)); break;
       case TAG_MINUS:          lhs = ast_op(AST_SUB,           lhs, _parse_expr(lexer, next_min_preced)); break;
       case TAG_TIMES:          lhs = ast_op(AST_MUL,           lhs, _parse_expr(lexer, next_min_preced)); break;
@@ -375,7 +383,10 @@ static ast_expr_t *_parse_expr(lexer_t *lexer, int min_preced) {
       case TAG_RANGE:          lhs = ast_range(                lhs, _parse_expr(lexer, next_min_preced)); break;
       case TAG_STEP:           lhs = ast_range_step(           lhs, _parse_expr(lexer, next_min_preced)); break;
       case TAG_MEMBER_ACCESS:  lhs = ast_access(               lhs, _parse_expr(lexer, next_min_preced)); break;
-
+      case TAG_COLON:
+        advance(lexer);
+        lhs = ast_typed(lhs, c_str_to_bytearray(lexer->token.string));
+        break;
       default:
         printf("what? why this %s?\n", tag_names[tag]);
         return lhs;
@@ -388,6 +399,15 @@ done:
 
 static ast_expr_t *parse_expr(lexer_t *lexer) {
   switch(lexer->token.tag) {
+    case TAG_TYPEDEF: {
+      advance(lexer);
+      if (!eat(lexer, TAG_IDENT)) goto error;
+      bytearray_t *name = c_str_to_bytearray(lexer->token.string);
+      if (!eat(lexer, TAG_ASSIGN)) goto error;
+      if (!eat(lexer, TAG_DATA)) goto error;
+      ast_expr_list_t *es = parse_block(lexer);
+      return ast_typedef(name, es);
+    }
     case TAG_BEGIN: {
       lexer->depth++;
       advance(lexer);

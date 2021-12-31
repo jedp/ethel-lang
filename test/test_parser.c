@@ -370,6 +370,20 @@ void test_parse_member_field_set(void) {
   TEST_ASSERT_EQUAL(AST_ASSIGN, TYPEOF(ast));
 }
 
+void test_parse_typedef(void) {
+  char *program = "type point = data { \n"
+                  "  val x: int        \n"
+                  "  val y: int        \n"
+                  "}";
+  ast_expr_t *ast = mem_alloc(sizeof(ast_expr_t));
+  parse_result_t *parse_result = mem_alloc(sizeof(parse_result_t));
+  parse_program(program, ast, parse_result);
+  pretty_print(ast);
+
+  TEST_ASSERT_EQUAL(ERR_NO_ERROR, parse_result->err);
+  TEST_ASSERT_EQUAL(AST_TYPEDEF, TYPEOF(ast));
+}
+
 void test_parser(void) {
   RUN_TEST(test_parse_empty);
   RUN_TEST(test_parse_add);
@@ -398,5 +412,6 @@ void test_parser(void) {
   RUN_TEST(test_parse_member_function_call);
   RUN_TEST(test_parse_member_field_get);
   RUN_TEST(test_parse_member_field_set);
+  RUN_TEST(test_parse_typedef);
 }
 

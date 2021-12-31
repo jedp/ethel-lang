@@ -74,6 +74,18 @@ typedef struct AstDict {
   ast_expr_kv_list_t *kv;
 } ast_dict_t;
 
+typedef struct AstDataType {
+  gc_header_t hdr;
+  bytearray_t *name;
+  ast_expr_list_t *members;
+} ast_data_type_t;
+
+typedef struct AstTypedExpr {
+  gc_header_t hdr;
+  ast_expr_t *expr;
+  bytearray_t *type_name;
+} ast_typed_expr_t;
+
 typedef struct AstReservedCallable {
   gc_header_t hdr;
   ast_expr_list_t *es;
@@ -156,6 +168,8 @@ typedef struct AstExpr {
     ast_expr_list_t *block_exprs;
     ast_list_t *list;
     ast_dict_t *dict;
+    ast_typed_expr_t *typed_expr;
+    ast_data_type_t *data_type_def;
     ast_unary_arg_t *unary_arg;
     ast_op_args_t *op_args;
     ast_range_args_t *range;
@@ -197,6 +211,8 @@ ast_expr_t *ast_array_decl(ast_expr_t *size);
 ast_expr_t *ast_assign_elem(ast_expr_t *seq, ast_expr_t *offset, ast_expr_t *value);
 ast_expr_t *ast_boolean(boolean t);
 ast_expr_t *ast_type(type_t type);
+ast_expr_t *ast_typedef(bytearray_t *name, ast_expr_list_t *fields);
+ast_expr_t *ast_typed(ast_expr_t *expr, bytearray_t *type_name);
 ast_expr_t *ast_ident(bytearray_t *name);
 ast_expr_t *ast_ident_decl(bytearray_t *name, flags_t flags);
 ast_expr_t *ast_field(bytearray_t *s);

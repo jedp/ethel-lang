@@ -11,6 +11,8 @@
 typedef enum {
   PRECED_NONE = 0, // Lowest precedence
   PRECED_CAST,
+  PRECED_TYPED,
+  PRECED_TYPEDEF,
   PRECED_ASSIGN,
   PRECED_COND,
   PRECED_MAPS_TO,

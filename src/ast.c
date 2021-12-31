@@ -79,6 +79,7 @@ ast_expr_t *ast_op(type_t type, ast_expr_t *a, ast_expr_t *b) {
     case AST_SUBSCRIPT:
     case AST_MAPS_TO:
     case AST_ASSIGN:
+    case AST_TYPEDEF:
       // Familiar.
       break;
     default:
@@ -95,6 +96,15 @@ ast_expr_t *ast_op(type_t type, ast_expr_t *a, ast_expr_t *b) {
   return node;
 }
 
+ast_expr_t *ast_typed(ast_expr_t *expr, bytearray_t *type_name) {
+  printf("ast_typed(%s)\n", bytearray_to_c_str(type_name));
+  ast_expr_t *node = ast_node(AST_TYPED);
+  node->typed_expr = (ast_typed_expr_t*) alloc_type(AST_TYPED_DATA, F_NONE);
+  node->typed_expr->expr = expr;
+  node->typed_expr->type_name = bytearray_clone(type_name);
+  return node;
+}
+
 ast_expr_t *ast_cast(ast_expr_t *a, ast_expr_t *b) {
   ast_expr_t *node = ast_node(AST_CAST);
   node->cast_args = (ast_cast_args_t*) alloc_type(AST_CAST_ARGS, F_NONE);
@@ -106,6 +116,14 @@ ast_expr_t *ast_cast(ast_expr_t *a, ast_expr_t *b) {
 
 ast_expr_t *ast_nil(void) {
   return ast_node(AST_NIL);
+}
+
+ast_expr_t *ast_typedef(bytearray_t *name, ast_expr_list_t *members) {
+  ast_expr_t *node = ast_node(AST_TYPEDEF);
+  node->data_type_def = (ast_data_type_t*) alloc_type(AST_TYPEDEF, F_NONE);
+  node->data_type_def->name = bytearray_clone(name);
+  node->data_type_def->members = members;
+  return node;
 }
 
 ast_expr_t *ast_list(ast_expr_list_t *nullable_init_es) {

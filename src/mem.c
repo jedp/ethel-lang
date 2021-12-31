@@ -154,6 +154,9 @@ gc_header_t *alloc_type(type_t type, flags_t flags) {
     case AST_DICT:               HDR_ALLOC(ast_expr_t, type, 1);         break;
     case AST_DICT_KVS:           HDR_ALLOC(ast_dict_t, type, 1);         break;
     case AST_DICT_KV:            HDR_ALLOC(ast_expr_kv_list_t, type, 3); break;
+    case AST_TYPED:              HDR_ALLOC(ast_expr_t, type, 1);         break;
+    case AST_TYPED_DATA:         HDR_ALLOC(ast_typed_expr_t, type, 2);   break;
+    case AST_TYPEDEF:            HDR_ALLOC(ast_data_type_t, type, 2);    break;
     case AST_BYTEARRAY_DECL:     HDR_ALLOC(ast_expr_t, type, 1);         break;
     case AST_BYTEARRAY_DECL_DATA:HDR_ALLOC(bytearray_t, type, 0);        break;
     case AST_APPLY:              HDR_ALLOC(ast_expr_t, type, 1);         break;
