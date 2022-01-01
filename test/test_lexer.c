@@ -444,7 +444,7 @@ void test_lex_member_of(void) {
 }
 
 void test_lex_field_access(void) {
-  char *expr = "val l = x.length";
+  char *expr = "val dx = point.x";
   lexer_t lexer;
   lexer_init(&lexer, expr, c_str_len(expr));
 
@@ -457,7 +457,7 @@ void test_lex_field_access(void) {
     TEST_ASSERT_EQUAL(expected[i], lexer.token.tag);
 
     if (lexer.token.tag == TAG_FIELD_NAME) {
-      TEST_ASSERT_EQUAL_STRING("length", lexer.token.string);
+      TEST_ASSERT_EQUAL_STRING("x", lexer.token.string);
     }
 
     advance(&lexer);

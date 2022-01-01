@@ -154,6 +154,7 @@ done:
 }
 
 static token_t *lex_field_or_method(lexer_t *lexer) {
+  readch(lexer);
   lex_word_raw(lexer);
 
   consume_ws(lexer);
@@ -301,6 +302,7 @@ static token_t *get_token(lexer_t *lexer) {
 
       // Otherwise start of a field or method access.
       // No unreadch of the '.'.
+      unreadch(lexer);
       return lex_member_access(lexer);
     }
     case '<': {
