@@ -195,18 +195,28 @@ ast_expr_t *ast_ident_decl(bytearray_t *name, flags_t flags) {
   return node;
 }
 
-ast_expr_t *ast_member_function_access(ast_expr_t *expr,
-                                       bytearray_t *member_name,
-                                       ast_expr_list_t *args) {
+ast_expr_t *ast_member_function_apply(ast_expr_t *expr,
+                                      bytearray_t *function_name,
+                                      ast_expr_list_t *args) {
   ast_expr_t *node = ast_node(AST_APPLY);
 
   node->application = (ast_apply_t*) alloc_type(AST_APPLY_DATA, F_NONE);
   node->application->receiver = expr;
-  node->application->member_name = bytearray_clone(member_name);
+  node->application->function_name = bytearray_clone(function_name);
 
   node->application->args = (ast_expr_list_t*) alloc_type(AST_EXPR_LIST, F_NONE);
   node->application->args = args;
 
+  return node;
+}
+
+ast_expr_t *ast_member_field_get(ast_expr_t *expr,
+                                 bytearray_t *field_name) {
+  ast_expr_t *node = ast_node(AST_FIELD);
+
+  node->field = (ast_field_t*) alloc_type(AST_FIELD_DATA, F_NONE);
+  node->field->receiver = expr;
+  node->field->name= bytearray_clone(field_name);
   return node;
 }
 
@@ -236,15 +246,21 @@ ast_expr_t *ast_method_call(bytearray_t *name, ast_expr_list_t *args) {
   return node;
 }
 
+ast_expr_t *ast_field(bytearray_t *name) {
+  ast_expr_t *node = ast_node(AST_FIELD_GET);
+  node->field = (ast_field_t*) alloc_type(AST_FIELD_GET_DATA, F_NONE);
+  node->field->name = bytearray_clone(name);
+  return node;
+}
+
 ast_expr_t *ast_access(ast_expr_t *object, ast_expr_t *member) {
-  if (TYPEOF(member) != AST_METHOD_CALL) {
-    printf("Method access only. Not allowed: '%s'\n", type_names[TYPEOF(member)]);
-    return ast_empty();
+  if (TYPEOF(member) == AST_METHOD_CALL) {
+    return ast_member_function_apply(object,
+                                     member->method_call->name,
+                                     member->method_call->args);
   }
 
-  return ast_member_function_access(object,
-                                    member->method_call->name,
-                                    member->method_call->args);
+  return ast_member_field_get(object, member->field->name);
 }
 
 ast_expr_t *ast_block(ast_expr_list_t *es) {

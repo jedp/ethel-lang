@@ -158,9 +158,13 @@ gc_header_t *alloc_type(type_t type, flags_t flags) {
     case AST_BYTEARRAY_DECL_DATA:HDR_ALLOC(bytearray_t, type, 0);        break;
     case AST_APPLY:              HDR_ALLOC(ast_expr_t, type, 1);         break;
     case AST_APPLY_DATA:         HDR_ALLOC(ast_apply_t, type, 3);        break;
+    case AST_FIELD:              HDR_ALLOC(ast_expr_t, type, 1);         break;
+    case AST_FIELD_DATA:         HDR_ALLOC(ast_field_t, type, 2);        break;
     case AST_EXPR_LIST:          HDR_ALLOC(ast_expr_list_t, type, 2);    break;
     case AST_METHOD_CALL:        HDR_ALLOC(ast_expr_t, type, 1);         break;
     case AST_METHOD_CALL_DATA:   HDR_ALLOC(ast_method_t, type, 2);       break;
+    case AST_FIELD_GET:          HDR_ALLOC(ast_expr_t, type, 1);         break;
+    case AST_FIELD_GET_DATA:     HDR_ALLOC(ast_method_t, type, 1);       break;
     case AST_FUNCTION_DEF:       HDR_ALLOC(ast_expr_t, type, 1);         break;
     case AST_FUNCTION_DEF_DATA:  HDR_ALLOC(ast_func_def_t, type, 2);     break;
     case AST_FUNCTION_DEF_ARGS:  HDR_ALLOC(ast_fn_arg_decl_t, type, 2);  break;

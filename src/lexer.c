@@ -166,7 +166,8 @@ static token_t *lex_field_or_method(lexer_t *lexer) {
     return &lexer->next_token;
   }
 
-  lexer->next_token.tag = TAG_FIELD_NAME;
+  unreadch(lexer);
+  lexer->next_token.tag = TAG_FIELD_ACCESS;
   lexer->next_token.string = next_word_buf;
   return &lexer->next_token;
 }
@@ -231,7 +232,7 @@ static token_t *lex_string(lexer_t *lexer) {
   while (lexer->nextch != '"') {
     next_word_buf[i++] = lexer->nextch;
     readch(lexer);
-  } 
+  }
   // Ate final quote.
 
   lexer->next_token.tag = TAG_STRING;
@@ -267,7 +268,7 @@ static token_t *get_token(lexer_t *lexer) {
   if ((ch >= 'a' && ch <= 'z') ||
       (ch >= 'A' && ch <= 'Z') ||
       (ch == '_')) return lex_word(lexer);
-       
+
   switch(ch) {
     case ';': return lex_comment(lexer);
     case '{': return lex_paren(lexer, TAG_BEGIN);

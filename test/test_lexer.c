@@ -351,7 +351,7 @@ void test_lex_begin_end(void) {
   lexer_t lexer;
   lexer_init(&lexer, expr, c_str_len(expr));
 
-  int expected[] = { 
+  int expected[] = {
     TAG_FOR, TAG_IDENT, TAG_IN, TAG_INT, TAG_RANGE, TAG_INT, TAG_BEGIN, TAG_EOL,
     TAG_PRINT, TAG_LPAREN, TAG_IDENT, TAG_RPAREN, TAG_EOL,
     TAG_END, TAG_EOF
@@ -443,6 +443,27 @@ void test_lex_member_of(void) {
   }
 }
 
+void test_lex_field_assign(void) {
+  char *expr = "point.t = x";
+  lexer_t lexer;
+  lexer_init(&lexer, expr, c_str_len(expr));
+
+  int expected[] = {
+    TAG_IDENT, TAG_MEMBER_ACCESS, TAG_FIELD_ACCESS,
+    TAG_ASSIGN, TAG_IDENT
+  };
+  for (int i = 0; i < sizeof(expected) / sizeof(expected[0]); i++) {
+    TEST_ASSERT_EQUAL(ERR_NO_ERROR, lexer.err);
+    TEST_ASSERT_EQUAL(expected[i], lexer.token.tag);
+
+    if (lexer.token.tag == TAG_FIELD_ACCESS) {
+      TEST_ASSERT_EQUAL_STRING("t", lexer.token.string);
+    }
+
+    advance(&lexer);
+  }
+}
+
 void test_lex_field_access(void) {
   char *expr = "val dx = point.x";
   lexer_t lexer;
@@ -450,13 +471,13 @@ void test_lex_field_access(void) {
 
   int expected[] = {
     TAG_INVARIABLE, TAG_IDENT, TAG_ASSIGN,
-    TAG_IDENT, TAG_MEMBER_ACCESS, TAG_FIELD_NAME
+    TAG_IDENT, TAG_MEMBER_ACCESS, TAG_FIELD_ACCESS
   };
   for (int i = 0; i < sizeof(expected) / sizeof(expected[0]); i++) {
     TEST_ASSERT_EQUAL(ERR_NO_ERROR, lexer.err);
     TEST_ASSERT_EQUAL(expected[i], lexer.token.tag);
 
-    if (lexer.token.tag == TAG_FIELD_NAME) {
+    if (lexer.token.tag == TAG_FIELD_ACCESS) {
       TEST_ASSERT_EQUAL_STRING("x", lexer.token.string);
     }
 
@@ -661,6 +682,7 @@ void test_lexer(void) {
   RUN_TEST(test_lex_dict_init);
   RUN_TEST(test_lex_dict_with_kv_init);
   RUN_TEST(test_lex_member_of);
+  RUN_TEST(test_lex_field_assign);
   RUN_TEST(test_lex_field_access);
   RUN_TEST(test_lex_method_access);
   RUN_TEST(test_lex_array_access);

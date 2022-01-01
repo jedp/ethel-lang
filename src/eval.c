@@ -554,9 +554,9 @@ static void apply(ast_expr_t *expr, eval_result_t *result, env_t *env) {
 
   // Look up the method identifier.
   static_method_ident_t method_id = METHOD_NONE;
-  bytearray_t *member_name = expr->application->member_name;
+  bytearray_t *function_name = expr->application->function_name;
   for (int i = 0; i < sizeof(static_method_names) / sizeof(static_method_names[0]); i++) {
-    if (c_str_eq_bytearray(static_method_names[i].name, member_name)) {
+    if (c_str_eq_bytearray(static_method_names[i].name, function_name)) {
       method_id = static_method_names[i].ident;
       goto found;
     }
