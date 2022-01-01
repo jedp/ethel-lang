@@ -328,6 +328,28 @@ void test_parse_func_call(void) {
   TEST_ASSERT_EQUAL(42, func_call->args->root->intval);
 }
 
+void test_parse_member_function_call(void) {
+  char *program = "val x = thing.function(42)";
+  ast_expr_t *ast = mem_alloc(sizeof(ast_expr_t));
+  parse_result_t *parse_result = mem_alloc(sizeof(parse_result_t));
+  parse_program(program, ast, parse_result);
+
+  TEST_ASSERT_EQUAL(ERR_NO_ERROR, parse_result->err);
+  TEST_ASSERT_EQUAL(AST_ASSIGN, TYPEOF(ast));
+  TEST_ASSERT_EQUAL(AST_IDENT, TYPEOF((ast_expr_t*) ast->assignment->ident));
+  TEST_ASSERT_EQUAL(AST_APPLY, TYPEOF((ast_expr_t*) ast->assignment->value));
+
+  ast_apply_t* application = ast->assignment->value->application;
+  TEST_ASSERT_EQUAL_STRING("function", bytearray_to_c_str(application->member_name));
+
+  ast_expr_t* receiver = application->receiver;
+  TEST_ASSERT_EQUAL_STRING("thing", bytearray_to_c_str(receiver->bytearray));
+
+  ast_expr_t* arg = application->args->root;
+  TEST_ASSERT_EQUAL(AST_INT, TYPEOF(arg));
+  TEST_ASSERT_EQUAL(42, arg->intval);
+}
+
 void test_parser(void) {
   RUN_TEST(test_parse_empty);
   RUN_TEST(test_parse_add);
@@ -353,5 +375,6 @@ void test_parser(void) {
   RUN_TEST(test_parse_empty_func);
   RUN_TEST(test_parse_func);
   RUN_TEST(test_parse_func_call);
+  RUN_TEST(test_parse_member_function_call);
 }
 

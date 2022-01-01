@@ -195,9 +195,9 @@ ast_expr_t *ast_ident_decl(bytearray_t *name, flags_t flags) {
   return node;
 }
 
-ast_expr_t *ast_member_access(ast_expr_t *expr,
-                              bytearray_t *member_name,
-                              ast_expr_list_t *args) {
+ast_expr_t *ast_member_function_access(ast_expr_t *expr,
+                                       bytearray_t *member_name,
+                                       ast_expr_list_t *args) {
   ast_expr_t *node = ast_node(AST_APPLY);
 
   node->application = (ast_apply_t*) alloc_type(AST_APPLY_DATA, F_NONE);
@@ -242,7 +242,9 @@ ast_expr_t *ast_access(ast_expr_t *object, ast_expr_t *member) {
     return ast_empty();
   }
 
-  return ast_member_access(object, member->method_call->name, member->method_call->args);
+  return ast_member_function_access(object,
+                                    member->method_call->name,
+                                    member->method_call->args);
 }
 
 ast_expr_t *ast_block(ast_expr_list_t *es) {

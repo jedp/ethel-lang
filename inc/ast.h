@@ -197,9 +197,9 @@ ast_expr_t *ast_func_def(ast_fn_arg_decl_t *args, ast_expr_list_t *es);
 ast_expr_t *ast_func_call(ast_expr_t *expr, ast_expr_list_t *args);
 ast_expr_t *ast_func_return(ast_expr_list_t *func_return_values);
 ast_expr_t *ast_method_call(bytearray_t *name, ast_expr_list_t *args);
-ast_expr_t *ast_member_access(ast_expr_t *receiver,
-                              bytearray_t *meber_name,
-                              ast_expr_list_t *args);
+ast_expr_t *ast_member_function_access(ast_expr_t *receiver,
+                                       bytearray_t *meber_name,
+                                       ast_expr_list_t *args);
 ast_expr_t *ast_range(ast_expr_t *from, ast_expr_t *to);
 ast_expr_t *ast_range_step(ast_expr_t *range, ast_expr_t *step);
 ast_expr_t *ast_access(ast_expr_t *object, ast_expr_t *member);
