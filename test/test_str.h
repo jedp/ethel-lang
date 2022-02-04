@@ -4,4 +4,3 @@
 void test_str(void);
 
 #endif
-

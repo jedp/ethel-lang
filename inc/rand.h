@@ -22,4 +22,3 @@ void rand32_seed(uint32_t seed);
 uint32_t rand32(void);
 
 #endif
-

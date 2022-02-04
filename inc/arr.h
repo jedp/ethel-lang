@@ -10,6 +10,7 @@
  * so will the hash.
  */
 obj_t *arr_hash(obj_t *obj, obj_varargs_t *args);
+
 obj_t *arr_copy(obj_t *obj, obj_varargs_t *args);
 
 /* Return the number of elements in the array object.  */
@@ -42,4 +43,3 @@ obj_t *arr_iterator(obj_t *obj, obj_varargs_t *args);
 static_method get_arr_static_method(static_method_ident_t method_id);
 
 #endif
-

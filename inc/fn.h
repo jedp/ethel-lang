@@ -8,4 +8,3 @@ obj_t *fn_to_string(obj_t *obj, obj_varargs_t *args);
 static_method get_fn_static_method(static_method_ident_t method_id);
 
 #endif
-

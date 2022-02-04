@@ -1,10 +1,7 @@
 #include <stdio.h>
 #include "../inc/type.h"
-#include "../inc/arr.h"
 #include "../inc/byte.h"
-#include "../inc/obj.h"
 #include "../inc/str.h"
-#include "../inc/type.h"
 
 obj_t *byte_hash(obj_t *obj, obj_varargs_t *args) {
   // 8-bit int is its own 32-bit hash.
@@ -317,4 +314,3 @@ static_method get_byte_static_method(static_method_ident_t method_id) {
     default: return NULL;
   }
 }
-

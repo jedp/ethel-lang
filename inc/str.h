@@ -5,19 +5,19 @@
 #include "obj.h"
 
 /* Return the length of a c string, not including the terminating null.  */
-size_t c_str_len(const char* s);
+size_t c_str_len(const char *s);
 
 /* Return true if the c strings are char-wise equal; false otherwise. */
-boolean c_str_eq(const char* a, const char* b);
+boolean c_str_eq(const char *a, const char *b);
 
 /* Copy c strings. Target string must already be allocated. */
-void c_str_cp(char* dst, const char* src);
+void c_str_cp(char *dst, const char *src);
 
 /*
  * Append a copy of null-terminated string b to null-terminated string a,
  * copying no more than n chars, then add the trailing null.
  */
-char* c_str_ncat(char *a, const char *b, size_t n);
+char *c_str_ncat(char *a, const char *b, size_t n);
 
 /* Convert the decimal value in 0..15 to a hex character. */
 byte hex_char(int n);
@@ -28,7 +28,7 @@ byte hex_char(int n);
  * Because this is going into an int32, we can only accommodate 8 chars (nybbles).
  * Extra leading digits will be ignored. Least signficant digits will be parsed.
  */
-int hex_to_int(char* s);
+int hex_to_int(char *s);
 
 /*
  * Convert a binary string to an int.
@@ -36,7 +36,7 @@ int hex_to_int(char* s);
  * Because this is going into an int32, we can only accommodate 32 chars.
  * Extra leading digits will be ignored. Least significant digits will be parsed.
  */
-int bin_to_int(char* s);
+int bin_to_int(char *s);
 
 /* Convert an int to a binary string. Uses the least number of digits possible. */
 bytearray_t *int_to_bin(unsigned int n);
@@ -77,9 +77,9 @@ boolean c_str_eq_bytearray(const char *s, bytearray_t *a);
  * function is really just for printing stuff in the repl or debugging.
  * This won't exist in the long run.
  */
-char* bytearray_to_c_str(bytearray_t *a);
+char *bytearray_to_c_str(bytearray_t *a);
 
-bytearray_t *c_str_to_bytearray(const char* s);
+bytearray_t *c_str_to_bytearray(const char *s);
 
 /*
  * Return the integer hash of the string object.
@@ -88,22 +88,35 @@ bytearray_t *c_str_to_bytearray(const char* s);
  * so will the hash.
  */
 obj_t *str_hash(obj_t *obj, obj_varargs_t *args);
+
 obj_t *str_copy(obj_t *obj, obj_varargs_t *args);
+
 obj_t *str_to_int(obj_t *obj, obj_varargs_t *args);
+
 obj_t *str_to_string(obj_t *obj, obj_varargs_t *args);
+
 obj_t *str_to_float(obj_t *obj, obj_varargs_t *args);
+
 obj_t *str_to_byte(obj_t *obj, obj_varargs_t *args);
+
 obj_t *str_add(obj_t *obj, obj_varargs_t *args);
+
 obj_t *str_get(obj_t *obj, obj_varargs_t *args);
+
 obj_t *str_contains(obj_t *obj, obj_varargs_t *args);
+
 obj_t *str_len(obj_t *obj, obj_varargs_t *args);
+
 obj_t *str_eq(obj_t *obj, obj_varargs_t *args);
+
 obj_t *str_ne(obj_t *obj, obj_varargs_t *args);
+
 obj_t *str_substring(obj_t *obj, obj_varargs_t *args);
+
 obj_t *str_random_choice(obj_t *obj, obj_varargs_t *args);
+
 obj_t *str_iterator(obj_t *obj, obj_varargs_t *args);
 
 static_method get_str_static_method(static_method_ident_t method_id);
 
 #endif
-

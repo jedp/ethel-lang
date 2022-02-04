@@ -177,4 +177,3 @@ void test_str(void) {
   RUN_TEST(test_str_ne);
   RUN_TEST(test_str_substr);
 }
-

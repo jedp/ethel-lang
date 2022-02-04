@@ -4,4 +4,3 @@
 void test_ptr(void);
 
 #endif
-

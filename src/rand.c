@@ -3,11 +3,11 @@
 static unsigned long y = 2463534242;
 
 void rand32_init(void) {
-  y = 2463534242;
+    y = 2463534242;
 }
 
 void rand32_seed(uint32_t seed) {
-  y = seed + ((uint64_t) seed << 32);
+    y = seed + ((uint64_t) seed << 32);
 }
 
 /*
@@ -24,10 +24,9 @@ void rand32_seed(uint32_t seed) {
  *   independent only some 30% of the time.)
  */
 uint32_t rand32(void) {
-  y ^= (y << 13);
-  y ^= (y >> 17);
-  y ^= (y << 5);
+    y ^= (y << 13);
+    y ^= (y >> 17);
+    y ^= (y << 5);
 
-  return (uint32_t) y & 0xffffffff;
+    return (uint32_t) y & 0xffffffff;
 }
-

@@ -1,12 +1,10 @@
 #include <stdio.h>
 #include <sys/errno.h>
 #include "../inc/type.h"
-#include "../inc/err.h"
 #include "../inc/mem.h"
 #include "../inc/env.h"
 #include "../inc/str.h"
 #include "../inc/eval.h"
-#include "../inc/type.h"
 #include "../inc/run.h"
 
 static int _eval(char* program) {
@@ -105,4 +103,3 @@ int main(int argc, char** argv) {
   char* fname = argv[1];
   return run(fname);
 }
-

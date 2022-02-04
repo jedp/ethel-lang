@@ -7,16 +7,16 @@
 #define ENV_MAX_STACK_DEPTH 50
 
 typedef struct Symbol {
-  gc_header_t hdr;
-  bytearray_t *name_obj;
-  gc_header_t *obj;
+    gc_header_t hdr;
+    bytearray_t *name_obj;
+    gc_header_t *obj;
 } env_sym_t;
 
 typedef struct SymbolElem {
-  gc_header_t hdr;
-  env_sym_t* sym;
-  struct SymbolElem* prev;
-  struct SymbolElem* next;
+    gc_header_t hdr;
+    env_sym_t *sym;
+    struct SymbolElem *prev;
+    struct SymbolElem *next;
 } env_sym_elem_t;
 
 /*
@@ -25,13 +25,16 @@ typedef struct SymbolElem {
  * This structure will be statically allocated.
  */
 typedef struct Env {
-  int top;
-  env_sym_elem_t *symbols[ENV_MAX_STACK_DEPTH];
+    int top;
+    env_sym_elem_t *symbols[ENV_MAX_STACK_DEPTH];
 } env_t;
 
 error_t env_init(env_t *env);
+
 error_t push_scope(env_t *env, env_sym_elem_t *scope);
+
 error_t enter_scope(env_t *env);
+
 error_t leave_scope(env_t *env);
 
 /*
@@ -72,4 +75,3 @@ obj_t *get_env(env_t *env, bytearray_t *name_obj);
 void show_env(env_t *env);
 
 #endif
-

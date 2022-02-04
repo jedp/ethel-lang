@@ -9,21 +9,20 @@
 #define LEXER_BUF_SIZE 64000
 
 typedef struct {
-  uint32_t pos;
-  uint32_t err_pos;
-  uint8_t depth; // Gross to have message-passing from the parser here :(
-  error_t err;
-  char nextch;
-  char buf[LEXER_BUF_SIZE];
-  token_t token;
-  token_t next_token;
+    uint32_t pos;
+    uint32_t err_pos;
+    uint8_t depth; // Gross to have message-passing from the parser here :(
+    error_t err;
+    char nextch;
+    char buf[LEXER_BUF_SIZE];
+    token_t token;
+    token_t next_token;
 } lexer_t;
 
-void lexer_init(lexer_t *lexer, const char input[], const uint32_t input_size);
+void lexer_init(lexer_t *lexer, const char input[], uint32_t input_size);
 
 void advance(lexer_t *lexer);
 
 boolean eat(lexer_t *lexer, tag_t t);
 
 #endif
-

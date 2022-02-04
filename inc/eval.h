@@ -7,13 +7,12 @@
 #include "env.h"
 
 typedef struct Result {
-  gc_header_t hdr;
-  obj_t* obj;
-  uint16_t depth;
-  uint16_t err;
+    gc_header_t hdr;
+    obj_t *obj;
+    uint16_t depth;
+    uint16_t err;
 } eval_result_t;
 
-void eval(env_t *env, const char* input, eval_result_t* result);
+void eval(env_t *env, const char *input, eval_result_t *result);
 
 #endif
-

@@ -12,4 +12,3 @@ static_method get_static_method(type_t obj_type,
                                 static_method_ident_t method_id);
 
 #endif
-

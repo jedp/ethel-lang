@@ -18,10 +18,10 @@
  * pointer to a heap_node_t, but to the first word after it.
  */
 typedef struct HeapNode {
-  struct HeapNode *prev;
-  struct HeapNode *next;
-  uint16_t magic;
-  flags_t flags;
+    struct HeapNode *prev;
+    struct HeapNode *next;
+    uint16_t magic;
+    flags_t flags;
 } heap_node_t;
 
 // Heap size must be a multiple of heap_node_t size.
@@ -32,10 +32,10 @@ typedef struct HeapNode {
 #define NODE_FOR_DATA(data_ptr) ((heap_node_t*) ((size_t) data_ptr - sizeof(heap_node_t)))
 
 typedef struct {
-  size_t total_nodes;
-  size_t free_nodes;
-  size_t bytes_used;
-  size_t bytes_free;
+    size_t total_nodes;
+    size_t free_nodes;
+    size_t bytes_used;
+    size_t bytes_free;
 } heap_info_t;
 
 /*
@@ -79,7 +79,7 @@ void *ealloc(size_t bytes);
  *
  * ealloc() does not guarantee that newly-allocated memory is zero-filled.
  */
-void *erealloc(void* data_ptr, size_t size);
+void *erealloc(void *data_ptr, size_t size);
 
 /*
  * Free the nodes associated with the data_ptr. The given data_ptr must be an
@@ -109,9 +109,8 @@ heap_info_t *get_heap_info(void);
 
 void dump_heap(void);
 
-void assert_valid_heap_node(heap_node_t* node);
+void assert_valid_heap_node(heap_node_t *node);
 
-void assert_valid_data_ptr(void* data_ptr);
+void assert_valid_data_ptr(void *data_ptr);
 
 #endif
-

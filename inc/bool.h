@@ -5,7 +5,9 @@
 
 /* Return the 32-bit hash of the boolean, which will just be 0 or 1. */
 obj_t *bool_hash(obj_t *obj, obj_varargs_t *args);
+
 obj_t *bool_copy(obj_t *obj, obj_varargs_t *args);
+
 obj_t *bool_to_string(obj_t *obj, obj_varargs_t *args);
 
 /* Return true if both objects are boolean true. False otherwise.  */
@@ -20,4 +22,3 @@ obj_t *bool_as(obj_t *obj, obj_varargs_t *args);
 static_method get_bool_static_method(static_method_ident_t method_id);
 
 #endif
-
