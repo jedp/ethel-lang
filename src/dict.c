@@ -288,10 +288,14 @@ obj_t *dict_obj_in(obj_t *obj, obj_varargs_t *args) {
 }
 
 obj_t *dict_obj_len(obj_t *obj, obj_varargs_t *args) {
+    (void) args;
+
     return int_obj(obj->dict->nelems);
 }
 
 obj_t *dict_obj_keys(obj_t *obj, obj_varargs_t *args) {
+    (void) args;
+
     obj_t *list = list_obj(NULL);
     for (size_t i = 0; i < obj->dict->buckets; i++) {
         dict_node_t *kv = obj->dict->nodes[i];
@@ -340,6 +344,8 @@ static obj_t *iter_next(obj_iter_t *iterable) {
 }
 
 obj_t *dict_obj_iterator(obj_t *obj, obj_varargs_t *args) {
+    (void) args;
+
     obj_t *start_state = list_obj(NULL);
     return iterator_obj(obj, start_state, iter_next);
 }

@@ -4,15 +4,21 @@
 #include "../inc/str.h"
 
 obj_t *bool_hash(obj_t *obj, obj_varargs_t *args) {
+    (void) args;
+
     // 32-bit int is its own 32-bit hash.
     return int_obj((uint32_t) obj->boolval);
 }
 
 obj_t *bool_copy(obj_t *obj, obj_varargs_t *args) {
+    (void) args;
+
     return boolean_obj(obj->boolval);
 }
 
 obj_t *bool_to_string(obj_t *obj, obj_varargs_t *args) {
+    (void) args;
+
     return string_obj(c_str_to_bytearray(
             (obj->boolval == True) ? "true" : "false"));
 }

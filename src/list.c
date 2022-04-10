@@ -5,7 +5,7 @@
 #include "../inc/list.h"
 #include "../inc/rand.h"
 
-static obj_t *_empty_list() {
+static obj_t *new_empty_list() {
     obj_t *obj = (obj_t *) alloc_type(TYPE_LIST, F_ENV_ASSIGNABLE);
     obj_list_t *list = (obj_list_t *) alloc_type(TYPE_LIST_DATA, F_NONE);
     list->elems = NULL;
@@ -13,7 +13,7 @@ static obj_t *_empty_list() {
     return obj;
 }
 
-static obj_list_element_t *_get_elem(obj_t *obj, int offset) {
+static obj_list_element_t *list_get_elem(obj_t *obj, int offset) {
     int i = 0;
     obj_list_element_t *root = obj->list->elems;
 
@@ -34,7 +34,7 @@ static obj_list_element_t *_get_elem(obj_t *obj, int offset) {
     return NULL;
 }
 
-static int _list_len(obj_t *obj) {
+static int list_len_internal(obj_t *obj) {
     int len = 0;
     obj_list_element_t *root = obj->list->elems;
 
@@ -45,30 +45,30 @@ static int _list_len(obj_t *obj) {
     return len;
 }
 
-static obj_t *_list_get(obj_t *obj, int offset) {
+static obj_t *list_get_at(obj_t *obj, int offset) {
     if (offset < 0) {
-        int len = _list_len(obj);
+        int len = list_len_internal(obj);
         offset = offset + len;
     }
 
     if (offset < 0) return nil_obj();
 
-    obj_list_element_t *elem = _get_elem(obj, offset);
+    obj_list_element_t *elem = list_get_elem(obj, offset);
 
     if (elem == NULL) return nil_obj();
 
     return elem->node;
 }
 
-obj_t *_list_slice(obj_t *obj, int start, int end) {
+obj_t *list_slice_internal(obj_t *obj, int start, int end) {
     if (end != -1 && end <= start) {
         printf("Bad range for slice\n");
         return nil_obj();
     }
 
-    size_t len = _list_len(obj);
+    size_t len = list_len_internal(obj);
     if (abs(start) > len || abs(end) > len) {
-        return _empty_list();
+        return new_empty_list();
     }
 
     int i = 0;
@@ -76,7 +76,7 @@ obj_t *_list_slice(obj_t *obj, int start, int end) {
 
     while (i != start) {
         if (root == NULL && i != start) {
-            return _empty_list();
+            return new_empty_list();
         }
 
         // Advance to the start item.
@@ -127,10 +127,12 @@ obj_t *list_contains(obj_t *obj, obj_varargs_t *args) {
 }
 
 obj_t *list_hash(obj_t *obj, obj_varargs_t /* Ignored */ *args) {
+    (void) args;
+
     uint32_t temp = FNV32Basis;
 
-    for (size_t i = 0; i < _list_len(obj); i++) {
-        obj_t *val = _list_get(obj, i);
+    for (size_t i = 0; i < list_len_internal(obj); i++) {
+        obj_t *val = list_get_at(obj, i);
         uint32_t h = get_static_method(TYPEOF(val), METHOD_HASH)(val, NULL)->intval;
         temp = FNV32Prime * (temp ^ h);
     }
@@ -144,7 +146,7 @@ obj_t *list_eq(obj_t *obj, obj_varargs_t *args) {
 
     if (TYPEOF(arg) != TYPE_LIST) return boolean_obj(False);
 
-    if (_list_len(obj) != _list_len(arg)) return boolean_obj(False);
+    if (list_len_internal(obj) != list_len_internal(arg)) return boolean_obj(False);
 
     obj_list_element_t *root = obj->list->elems;
     obj_list_element_t *other_root = arg->list->elems;
@@ -166,7 +168,9 @@ obj_t *list_ne(obj_t *obj, obj_varargs_t *args) {
 }
 
 obj_t *list_len(obj_t *obj, obj_varargs_t /* ignored */ *args) {
-    return int_obj(_list_len(obj));
+    (void) args;
+
+    return int_obj(list_len_internal(obj));
 }
 
 obj_t *list_get(obj_t *obj, obj_varargs_t *args) {
@@ -180,7 +184,7 @@ obj_t *list_get(obj_t *obj, obj_varargs_t *args) {
         return nil_obj();
     }
     int offset = arg->intval;
-    return _list_get(obj, offset);
+    return list_get_at(obj, offset);
 }
 
 obj_t *list_set(obj_t *obj, obj_varargs_t *args) {
@@ -196,7 +200,7 @@ obj_t *list_set(obj_t *obj, obj_varargs_t *args) {
     }
     // Check offset is valid.
     int offset = a->intval;
-    if (offset < 0 || offset > _list_len(obj) - 1) {
+    if (offset < 0 || offset > list_len_internal(obj) - 1) {
         printf("Out of bounds\n");
         return nil_obj();
     }
@@ -233,18 +237,22 @@ obj_t *list_slice(obj_t *obj, obj_varargs_t *args) {
         return nil_obj();
     }
 
-    return _list_slice(obj, start_arg->intval, end_arg->intval);
+    return list_slice_internal(obj, start_arg->intval, end_arg->intval);
 }
 
 obj_t *list_head(obj_t *obj, obj_varargs_t *args) {
-    return _list_get(obj, 0);
+    (void) args;
+
+    return list_get_at(obj, 0);
 }
 
 obj_t *list_tail(obj_t *obj, obj_varargs_t *args) {
-    if (_list_len(obj) == 1) {
-        return _empty_list();
+    (void) args;
+
+    if (list_len_internal(obj) == 1) {
+        return new_empty_list();
     }
-    return _list_slice(obj, 1, -1);
+    return list_slice_internal(obj, 1, -1);
 }
 
 obj_t *list_prepend(obj_t *obj, obj_varargs_t *args) {
@@ -253,7 +261,7 @@ obj_t *list_prepend(obj_t *obj, obj_varargs_t *args) {
         return nil_obj();
     }
 
-    obj_list_element_t *head = _get_elem(obj, 0);
+    obj_list_element_t *head = list_get_elem(obj, 0);
     obj_list_element_t *new_elem = (obj_list_element_t *) alloc_type(TYPE_LIST_ELEM_DATA, F_NONE);
     new_elem->node = args->arg;
     new_elem->next = head;
@@ -268,8 +276,8 @@ obj_t *list_append(obj_t *obj, obj_varargs_t *args) {
         return nil_obj();
     }
 
-    int len = _list_len(obj);
-    obj_list_element_t *last = _get_elem(obj, len - 1);
+    int len = list_len_internal(obj);
+    obj_list_element_t *last = list_get_elem(obj, len - 1);
     obj_list_element_t *new_elem = (obj_list_element_t *) alloc_type(TYPE_LIST_ELEM_DATA, F_NONE);
     new_elem->node = args->arg;
     new_elem->next = NULL;
@@ -284,7 +292,9 @@ obj_t *list_append(obj_t *obj, obj_varargs_t *args) {
 }
 
 obj_t *list_remove_first(obj_t *obj, obj_varargs_t *args) {
-    obj_list_element_t *head = _get_elem(obj, 0);
+    (void) args;
+
+    obj_list_element_t *head = list_get_elem(obj, 0);
 
     if (head != NULL) {
         obj_list_element_t *new_head = head->next;
@@ -295,13 +305,15 @@ obj_t *list_remove_first(obj_t *obj, obj_varargs_t *args) {
 }
 
 obj_t *list_remove_last(obj_t *obj, obj_varargs_t *args) {
-    obj_list_element_t *first = _get_elem(obj, 0);
+    (void) args;
+
+    obj_list_element_t *first = list_get_elem(obj, 0);
     if (first == NULL) {
         return nil_obj();
     }
 
-    int len = _list_len(obj);
-    obj_list_element_t *last = _get_elem(obj, len - 1);
+    int len = list_len_internal(obj);
+    obj_list_element_t *last = list_get_elem(obj, len - 1);
     if (first == last) {
         obj_t *obj = first->node;
         obj->list->elems = NULL;
@@ -312,7 +324,7 @@ obj_t *list_remove_last(obj_t *obj, obj_varargs_t *args) {
         return obj;
     }
 
-    obj_list_element_t *new_last = _get_elem(obj, len - 2);
+    obj_list_element_t *new_last = list_get_elem(obj, len - 2);
     new_last->next = NULL;
     obj_t *result = last->node;
     last->node = NULL;
@@ -334,7 +346,7 @@ obj_t *list_remove_at(obj_t *obj, obj_varargs_t *args) {
     }
 
     int offset = arg->intval;
-    int len = _list_len(obj);
+    int len = list_len_internal(obj);
 
     // Convert negative offset.
     if (offset < 0) offset = len + offset;
@@ -347,7 +359,7 @@ obj_t *list_remove_at(obj_t *obj, obj_varargs_t *args) {
     if (offset == len - 1) return list_remove_last(obj, NULL);
 
     // If it's not one of those, we can get the previous element and stitch from there.
-    obj_list_element_t *prev = _get_elem(obj, offset - 1);
+    obj_list_element_t *prev = list_get_elem(obj, offset - 1);
     obj_list_element_t *target = prev->next;
     obj_list_element_t *subseq = target->next;
     prev->next = subseq;
@@ -362,11 +374,13 @@ obj_t *list_remove_at(obj_t *obj, obj_varargs_t *args) {
 }
 
 obj_t *list_random_choice(obj_t *obj, obj_varargs_t *args) {
-    size_t len = _list_len(obj);
+    (void) args;
+
+    size_t len = list_len_internal(obj);
     if (len < 1) {
         return nil_obj();
     }
-    return _get_elem(obj, rand32() % len)->node;
+    return list_get_elem(obj, rand32() % len)->node;
 }
 
 static obj_t *iter_next(obj_iter_t *iterable) {
@@ -381,7 +395,7 @@ static obj_t *iter_next(obj_iter_t *iterable) {
 
         case ITER_ITERATING:
             current_index = iterable->state_obj->intval;
-            obj_t *next_val = _list_get(iterable->obj, current_index);
+            obj_t *next_val = list_get_at(iterable->obj, current_index);
             if (TYPEOF(next_val) == TYPE_NIL) {
                 iterable->state = ITER_STOPPED;
                 return next_val;
@@ -399,6 +413,8 @@ static obj_t *iter_next(obj_iter_t *iterable) {
 }
 
 obj_t *list_iterator(obj_t *obj, obj_varargs_t *args) {
+    (void) args;
+
     obj_t *start_state = int_obj(0);
     return iterator_obj(obj, start_state, iter_next);
 }

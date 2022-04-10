@@ -1,4 +1,3 @@
-#include <assert.h>
 #include <stdio.h>
 #include <stdarg.h>
 #include <stdint.h>
@@ -78,7 +77,7 @@ obj_t *byte_obj(byte b) {
 
 obj_t *boolean_obj(boolean t) {
     obj_t *obj = obj_of(TYPE_BOOLEAN);
-    obj->boolval = t;
+    obj->boolval = t ? True : False;
     return obj;
 }
 

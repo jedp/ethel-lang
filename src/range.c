@@ -15,13 +15,13 @@ static int incr(obj_t *obj) {
     return -1;
 }
 
-static int _range_length(obj_t *obj) {
+static int range_length_internal(obj_t *obj) {
     return abs(obj->range->from - obj->range->to) + 1;
 }
 
-static int _range_get(obj_t *obj, int i, error_t *err) {
+static int range_get_internal(obj_t *obj, int i, error_t *err) {
     int start = obj->range->from;
-    int len = _range_length(obj);
+    int len = range_length_internal(obj);
 
     if (i < 0 || i > len - 1) {
         *err = ERR_RANGE_ERROR;
@@ -32,6 +32,8 @@ static int _range_get(obj_t *obj, int i, error_t *err) {
 }
 
 obj_t *range_to_string(obj_t *obj, obj_varargs_t *args) {
+    (void) args;
+
     // Don't look.
     obj_t *a = string_obj(c_str_to_bytearray("<Range "));
     obj_t *b = str_add(a, wrap_varargs(1, int_to_string(int_obj(obj->range->from), NULL)));
@@ -42,7 +44,9 @@ obj_t *range_to_string(obj_t *obj, obj_varargs_t *args) {
 }
 
 obj_t *range_length(obj_t *obj, obj_varargs_t *args) {
-    return int_obj(_range_length(obj));
+    (void) args;
+
+    return int_obj(range_length_internal(obj));
 }
 
 obj_t *range_contains(obj_t *obj, obj_varargs_t *args) {
@@ -76,7 +80,7 @@ obj_t *range_get(obj_t *obj, obj_varargs_t *args) {
     }
 
     error_t err = ERR_NO_ERROR;
-    int n = _range_get(obj, arg->intval, &err);
+    int n = range_get_internal(obj, arg->intval, &err);
 
     if (err != ERR_NO_ERROR) {
         return nil_obj();
@@ -86,6 +90,8 @@ obj_t *range_get(obj_t *obj, obj_varargs_t *args) {
 }
 
 obj_t *range_random_choice(obj_t *obj, obj_varargs_t *args) {
+    (void) args;
+
     uint32_t max = obj->range->to - obj->range->from;
     // Overflow much?
     return int_obj((rand32() % max) + obj->range->from);
@@ -109,7 +115,7 @@ static obj_t *iter_next(obj_iter_t *iterable) {
             // Update the offset for the next iteration and return the value.
         case ITER_ITERATING:
             current_val = iterable->state_obj->intval;
-            int next_val = _range_get(iterable->obj, current_val, &error);
+            int next_val = range_get_internal(iterable->obj, current_val, &error);
             if (error != ERR_NO_ERROR) {
                 iterable->state = ITER_STOPPED;
                 return nil_obj();
@@ -127,6 +133,8 @@ static obj_t *iter_next(obj_iter_t *iterable) {
 }
 
 obj_t *range_iterator(obj_t *obj, obj_varargs_t *args) {
+    (void) args;
+
     obj_t *start_state = int_obj(0);
     return iterator_obj(obj, start_state, iter_next);
 }

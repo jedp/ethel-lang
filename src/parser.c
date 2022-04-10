@@ -1,3 +1,7 @@
+#pragma clang diagnostic push
+#pragma clang diagnostic ignored "-Wunknown-pragmas"
+#pragma ide diagnostic ignored "misc-no-recursion"
+
 #include <stdio.h>
 #include "../inc/type.h"
 #include "../inc/ptr.h"
@@ -15,9 +19,9 @@ static ast_expr_t *parse_expr(lexer_t *lexer);
 
 static ast_expr_t *parse_atom(lexer_t *lexer);
 
-static ast_expr_t *_parse_expr(lexer_t *lexer, int min_preced);
+static ast_expr_t *parse_expr_internal(lexer_t *lexer, int min_preced);
 
-static ast_expr_t *_parse_subscript(lexer_t *lexer, int min_preced);
+static ast_expr_t *parse_subscript_internal(lexer_t *lexer, int min_preced);
 
 static boolean is_op(token_t *token) {
     return token->tag == TAG_AS
@@ -111,11 +115,11 @@ static uint8_t op_preced(token_t *token) {
             return PRECED_TYPEDEF;
         default:
             return PRECED_NONE;
-            break;
     }
 }
 
 static int op_preced_inc(token_t *token) {
+    (void) *token;
     // Return -1 for right-associative ops
     return 1;
 }
@@ -324,7 +328,9 @@ static ast_expr_list_t *parse_block(lexer_t *lexer) {
     return root;
 }
 
-ast_expr_t *_parse_subscript(lexer_t *lexer, int min_preced) {
+ast_expr_t *parse_subscript_internal(lexer_t *lexer, int min_preced) {
+    (void) min_preced;
+
     ast_expr_t *expr = parse_expr(lexer);
 
     if (!eat(lexer, TAG_RBRACKET)) {
@@ -336,7 +342,9 @@ ast_expr_t *_parse_subscript(lexer_t *lexer, int min_preced) {
     return expr;
 }
 
-static ast_expr_list_t *_parse_fn_args(lexer_t *lexer, int min_preced) {
+static ast_expr_list_t *parse_fn_args(lexer_t *lexer, int min_preced) {
+    (void) min_preced;
+
     // Emtpy arglist?
     if (lexer->token.tag == TAG_RPAREN) {
         eat(lexer, TAG_RPAREN);
@@ -353,7 +361,7 @@ static ast_expr_list_t *_parse_fn_args(lexer_t *lexer, int min_preced) {
     return args;
 }
 
-static ast_expr_t *_parse_expr(lexer_t *lexer, int min_preced) {
+static ast_expr_t *parse_expr_internal(lexer_t *lexer, int min_preced) {
     ast_expr_t *lhs = parse_atom(lexer);
 
     // The recursively recursive precedence-climbing algorithm.
@@ -379,88 +387,88 @@ static ast_expr_t *_parse_expr(lexer_t *lexer, int min_preced) {
                 lhs = ast_op(AST_ASSIGN, lhs, parse_expr(lexer));
                 break;
             case TAG_TYPEDEF:
-                lhs = ast_op(AST_TYPEDEF, lhs, _parse_expr(lexer, next_min_preced));
+                lhs = ast_op(AST_TYPEDEF, lhs, parse_expr_internal(lexer, next_min_preced));
                 break;
             case TAG_PLUS:
-                lhs = ast_op(AST_ADD, lhs, _parse_expr(lexer, next_min_preced));
+                lhs = ast_op(AST_ADD, lhs, parse_expr_internal(lexer, next_min_preced));
                 break;
             case TAG_MINUS:
-                lhs = ast_op(AST_SUB, lhs, _parse_expr(lexer, next_min_preced));
+                lhs = ast_op(AST_SUB, lhs, parse_expr_internal(lexer, next_min_preced));
                 break;
             case TAG_TIMES:
-                lhs = ast_op(AST_MUL, lhs, _parse_expr(lexer, next_min_preced));
+                lhs = ast_op(AST_MUL, lhs, parse_expr_internal(lexer, next_min_preced));
                 break;
             case TAG_DIVIDE:
-                lhs = ast_op(AST_DIV, lhs, _parse_expr(lexer, next_min_preced));
+                lhs = ast_op(AST_DIV, lhs, parse_expr_internal(lexer, next_min_preced));
                 break;
             case TAG_MOD:
-                lhs = ast_op(AST_MOD, lhs, _parse_expr(lexer, next_min_preced));
+                lhs = ast_op(AST_MOD, lhs, parse_expr_internal(lexer, next_min_preced));
                 break;
             case TAG_BITWISE_OR:
-                lhs = ast_op(AST_BITWISE_OR, lhs, _parse_expr(lexer, next_min_preced));
+                lhs = ast_op(AST_BITWISE_OR, lhs, parse_expr_internal(lexer, next_min_preced));
                 break;
             case TAG_BITWISE_XOR:
-                lhs = ast_op(AST_BITWISE_XOR, lhs, _parse_expr(lexer, next_min_preced));
+                lhs = ast_op(AST_BITWISE_XOR, lhs, parse_expr_internal(lexer, next_min_preced));
                 break;
             case TAG_BITWISE_AND:
-                lhs = ast_op(AST_BITWISE_AND, lhs, _parse_expr(lexer, next_min_preced));
+                lhs = ast_op(AST_BITWISE_AND, lhs, parse_expr_internal(lexer, next_min_preced));
                 break;
             case TAG_BITWISE_SHL:
-                lhs = ast_op(AST_BITWISE_SHL, lhs, _parse_expr(lexer, next_min_preced));
+                lhs = ast_op(AST_BITWISE_SHL, lhs, parse_expr_internal(lexer, next_min_preced));
                 break;
             case TAG_BITWISE_SHR:
-                lhs = ast_op(AST_BITWISE_SHR, lhs, _parse_expr(lexer, next_min_preced));
+                lhs = ast_op(AST_BITWISE_SHR, lhs, parse_expr_internal(lexer, next_min_preced));
                 break;
             case TAG_AND:
-                lhs = ast_op(AST_AND, lhs, _parse_expr(lexer, next_min_preced));
+                lhs = ast_op(AST_AND, lhs, parse_expr_internal(lexer, next_min_preced));
                 break;
             case TAG_OR:
-                lhs = ast_op(AST_OR, lhs, _parse_expr(lexer, next_min_preced));
+                lhs = ast_op(AST_OR, lhs, parse_expr_internal(lexer, next_min_preced));
                 break;
             case TAG_GT:
-                lhs = ast_op(AST_GT, lhs, _parse_expr(lexer, next_min_preced));
+                lhs = ast_op(AST_GT, lhs, parse_expr_internal(lexer, next_min_preced));
                 break;
             case TAG_GE:
-                lhs = ast_op(AST_GE, lhs, _parse_expr(lexer, next_min_preced));
+                lhs = ast_op(AST_GE, lhs, parse_expr_internal(lexer, next_min_preced));
                 break;
             case TAG_LT:
-                lhs = ast_op(AST_LT, lhs, _parse_expr(lexer, next_min_preced));
+                lhs = ast_op(AST_LT, lhs, parse_expr_internal(lexer, next_min_preced));
                 break;
             case TAG_LE:
-                lhs = ast_op(AST_LE, lhs, _parse_expr(lexer, next_min_preced));
+                lhs = ast_op(AST_LE, lhs, parse_expr_internal(lexer, next_min_preced));
                 break;
             case TAG_EQ:
-                lhs = ast_op(AST_EQ, lhs, _parse_expr(lexer, next_min_preced));
+                lhs = ast_op(AST_EQ, lhs, parse_expr_internal(lexer, next_min_preced));
                 break;
             case TAG_NE:
-                lhs = ast_op(AST_NE, lhs, _parse_expr(lexer, next_min_preced));
+                lhs = ast_op(AST_NE, lhs, parse_expr_internal(lexer, next_min_preced));
                 break;
             case TAG_IS:
-                lhs = ast_op(AST_IS, lhs, _parse_expr(lexer, next_min_preced));
+                lhs = ast_op(AST_IS, lhs, parse_expr_internal(lexer, next_min_preced));
                 break;
             case TAG_IN:
-                lhs = ast_op(AST_IN, lhs, _parse_expr(lexer, next_min_preced));
+                lhs = ast_op(AST_IN, lhs, parse_expr_internal(lexer, next_min_preced));
                 break;
             case TAG_LPAREN:
-                lhs = ast_func_call(lhs, _parse_fn_args(lexer, next_min_preced));
+                lhs = ast_func_call(lhs, parse_fn_args(lexer, next_min_preced));
                 break;
             case TAG_LBRACKET:
-                lhs = ast_op(AST_SUBSCRIPT, lhs, _parse_subscript(lexer, next_min_preced));
+                lhs = ast_op(AST_SUBSCRIPT, lhs, parse_subscript_internal(lexer, next_min_preced));
                 break;
             case TAG_MAPS_TO:
-                lhs = ast_op(AST_MAPS_TO, lhs, _parse_expr(lexer, next_min_preced));
+                lhs = ast_op(AST_MAPS_TO, lhs, parse_expr_internal(lexer, next_min_preced));
                 break;
             case TAG_AS:
-                lhs = ast_cast(lhs, _parse_expr(lexer, next_min_preced));
+                lhs = ast_cast(lhs, parse_expr_internal(lexer, next_min_preced));
                 break;
             case TAG_RANGE:
-                lhs = ast_range(lhs, _parse_expr(lexer, next_min_preced));
+                lhs = ast_range(lhs, parse_expr_internal(lexer, next_min_preced));
                 break;
             case TAG_STEP:
-                lhs = ast_range_step(lhs, _parse_expr(lexer, next_min_preced));
+                lhs = ast_range_step(lhs, parse_expr_internal(lexer, next_min_preced));
                 break;
             case TAG_MEMBER_ACCESS:
-                lhs = ast_access(lhs, _parse_expr(lexer, next_min_preced));
+                lhs = ast_access(lhs, parse_expr_internal(lexer, next_min_preced));
                 break;
             case TAG_COLON:
                 advance(lexer);
@@ -581,7 +589,7 @@ static ast_expr_t *parse_expr(lexer_t *lexer) {
         }
     }
 
-    return _parse_expr(lexer, PRECED_NONE);
+    return parse_expr_internal(lexer, PRECED_NONE);
 
     error:
     lexer->err_pos = (int) lexer->pos;
@@ -866,3 +874,5 @@ void parse_program(const char *input, ast_expr_t *ast, parse_result_t *parse_res
     mem_free(p);
     p = NULL;
 }
+
+#pragma clang diagnostic pop

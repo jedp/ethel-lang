@@ -1,12 +1,10 @@
 #include <stdio.h>
 #include "../inc/type.h"
-#include "../inc/math.h"
 #include "../inc/mem.h"
 #include "../inc/rand.h"
-#include "../inc/obj.h"
 #include "../inc/arr.h"
 
-static boolean _eq(bytearray_t *a, bytearray_t *b) {
+static boolean bytesarrays_eq(bytearray_t *a, bytearray_t *b) {
     if (a->size != b->size) return False;
 
     for (size_t i = 0; i < a->size; i++) {
@@ -18,7 +16,7 @@ static boolean _eq(bytearray_t *a, bytearray_t *b) {
     return True;
 }
 
-static obj_t *_arr_slice(obj_t *obj, int start, int end) {
+static obj_t *bytearray_slice(obj_t *obj, int start, int end) {
     if (end > obj->bytearray->size) end = obj->bytearray->size;
 
     if (end < 0 ||
@@ -52,6 +50,8 @@ static byte obj_to_byte(obj_t *obj) {
 }
 
 obj_t *arr_hash(obj_t *obj, obj_varargs_t /* Ignored */ *args) {
+    (void) *args;
+
     uint32_t temp;
     byte b;
 
@@ -71,18 +71,22 @@ obj_t *arr_hash(obj_t *obj, obj_varargs_t /* Ignored */ *args) {
         i++;
     }
 
-    return int_obj(temp);
+    return int_obj((int) temp);
 }
 
 obj_t *arr_size(obj_t *obj, obj_varargs_t /* Ignored */ *args) {
+    (void) *args;
+
     return int_obj(obj->bytearray->size);
 }
 
 obj_t *arr_copy(obj_t *obj, obj_varargs_t *args) {
+    (void) *args;
+
     return bytearray_obj(obj->bytearray->size, obj->bytearray->data);
 }
 
-obj_t *_arr_get(obj_t *obj, int i) {
+obj_t *arr_get_at(obj_t *obj, int i) {
     if (i < 0 || i >= obj->bytearray->size) {
         return nil_obj();
     }
@@ -100,7 +104,7 @@ obj_t *arr_get(obj_t *obj, obj_varargs_t *args) {
     if (TYPEOF(arg) != TYPE_INT) {
         return nil_obj();
     }
-    return _arr_get(obj, arg->intval);
+    return arr_get_at(obj, arg->intval);
 }
 
 obj_t *arr_set(obj_t *obj, obj_varargs_t *args) {
@@ -180,7 +184,7 @@ obj_t *arr_eq(obj_t *obj, obj_varargs_t *args) {
         return nil_obj();
     }
 
-    return boolean_obj(_eq(obj->bytearray, other->bytearray));
+    return boolean_obj(bytesarrays_eq(obj->bytearray, other->bytearray));
 }
 
 obj_t *arr_ne(obj_t *obj, obj_varargs_t *args) {
@@ -195,7 +199,7 @@ obj_t *arr_ne(obj_t *obj, obj_varargs_t *args) {
         return nil_obj();
     }
 
-    return boolean_obj(!_eq(obj->bytearray, other->bytearray));
+    return boolean_obj(!bytesarrays_eq(obj->bytearray, other->bytearray));
 }
 
 obj_t *arr_slice(obj_t *obj, obj_varargs_t *args) {
@@ -210,7 +214,7 @@ obj_t *arr_slice(obj_t *obj, obj_varargs_t *args) {
     obj_t *end_arg = args->next->arg;
     if (TYPEOF(end_arg) != TYPE_INT) return nil_obj();
 
-    return _arr_slice(obj, start_arg->intval, end_arg->intval);
+    return bytearray_slice(obj, start_arg->intval, end_arg->intval);
 }
 
 obj_t *arr_random_choice(obj_t *obj, obj_varargs_t *args) {
@@ -234,7 +238,7 @@ static obj_t *iter_next(obj_iter_t *iterable) {
 
         case ITER_ITERATING:
             i = iterable->state_obj->intval;
-            obj_t *next_val = _arr_get(iterable->obj, i);
+            obj_t *next_val = arr_get_at(iterable->obj, i);
             if (i >= iterable->obj->bytearray->size) {
                 iterable->state = ITER_STOPPED;
                 return nil_obj();
@@ -252,6 +256,8 @@ static obj_t *iter_next(obj_iter_t *iterable) {
 }
 
 obj_t *arr_iterator(obj_t *obj, obj_varargs_t *args) {
+    (void) *args;
+
     obj_t *state = int_obj(0);
     return iterator_obj(obj, state, iter_next);
 }

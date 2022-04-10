@@ -7,19 +7,27 @@
 #include "../inc/str.h"
 
 obj_t *int_hash(obj_t *obj, obj_varargs_t *args) {
+    (void) args;
+
     // 32-bit int is its own 32-bit hash.
     return int_obj(obj->intval);
 }
 
 obj_t *int_copy(obj_t *obj, obj_varargs_t *args) {
+    (void) args;
+
     return int_obj(obj->intval);
 }
 
 obj_t *int_to_int(obj_t *obj, obj_varargs_t *args) {
+    (void) args;
+
     return obj;
 }
 
 obj_t *int_to_string(obj_t *obj, obj_varargs_t *args) {
+    (void) args;
+
     int n = obj->intval;
     int digits = 0;
     if (n < 0) digits++; // Sign.
@@ -49,10 +57,14 @@ obj_t *int_to_string(obj_t *obj, obj_varargs_t *args) {
 }
 
 obj_t *int_to_float(obj_t *obj, obj_varargs_t *args) {
+    (void) args;
+
     return float_obj((float) obj->intval);
 }
 
 obj_t *int_to_byte(obj_t *obj, obj_varargs_t *args) {
+    (void) args;
+
     return byte_obj((byte) obj->intval & 0xff);
 }
 

@@ -11,7 +11,11 @@ char next_word_buf[MAX_WORD];
 static void unreadch(lexer_t *lexer) {
     lexer->pos--;
     lexer->buf[lexer->pos] = lexer->nextch;
-    lexer->nextch = lexer->pos > 0 ? lexer->buf[lexer->pos - 1] : '\0';
+    if (lexer->pos > 0) {
+        lexer->nextch = lexer->buf[lexer->pos - 1];
+    } else {
+        lexer->nextch = '\0';
+    }
 }
 
 static void readch(lexer_t *lexer) {
@@ -81,13 +85,13 @@ static token_t *lex_base(lexer_t *lexer, tag_t which) {
     if (which == TAG_HEX) {
         do {
             char c = lexer->nextch;
-            if (c >= 'A' && c <= 'F') c = c - 'A' + 'a';
+            if (c >= 'A' && c <= 'F') c = ((char) (c - 'A' + 'a'));
             next_word_buf[i++] = c;
             readch(lexer);
         } while ((lexer->nextch >= '0' && lexer->nextch <= '9') ||
                  (lexer->nextch >= 'a' && lexer->nextch <= 'f') ||
                  (lexer->nextch >= 'A' && lexer->nextch <= 'F'));
-    } else if (which == TAG_BIN) {
+    } else { // which == TAG_BIN
         do {
             next_word_buf[i++] = lexer->nextch;
             readch(lexer);
@@ -111,7 +115,7 @@ static token_t *lex_num(lexer_t *lexer) {
     int i = 0;
     int f = 0;
     int sign = 1;
-    float frac = 1.0;
+    float frac = 1.0f;
 
     // Integer part from digits up to any non-digit character.
     if (lexer->nextch >= '0' && lexer->nextch <= '9') {
@@ -147,7 +151,7 @@ static token_t *lex_num(lexer_t *lexer) {
         lexer->next_token.intval = sign * i;
     } else {
         lexer->next_token.tag = TAG_FLOAT;
-        lexer->next_token.floatval = sign * ((float) i) + ((float) f * frac);
+        lexer->next_token.floatval = ((float) sign) * ((float) i) + ((float) f * frac);
     }
 
     return &lexer->next_token;
@@ -369,9 +373,9 @@ static token_t *get_token(lexer_t *lexer) {
             return lex_char(lexer);
         case '"':
             return lex_string(lexer);
+        default:
+            return lexer_error(lexer);
     }
-
-    return lexer_error(lexer);
 }
 
 void advance(lexer_t *lexer) {

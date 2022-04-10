@@ -82,10 +82,6 @@ int run(char *fname) {
     fclose(fp);
 
     return _eval(program);
-
-    mem_free(program);
-    program = NULL;
-    return 0;
 }
 
 int main(int argc, char **argv) {

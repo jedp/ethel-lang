@@ -41,7 +41,7 @@ static void eval_rand(ast_expr_t *expr, eval_result_t *result, env_t *env) {
         result->obj = nil_obj();
         return;
     }
-    result->obj = int_obj(rand32() % result->obj->intval);
+    result->obj = int_obj((int) (rand32() % result->obj->intval));
 }
 
 static void eval_abs(ast_expr_t *expr, eval_result_t *result, env_t *env) {
@@ -183,9 +183,9 @@ static void eval_dict_expr(ast_dict_t *expr, eval_result_t *result, env_t *env) 
     result->obj = dict;
 }
 
-static void _eval_block_expr_in_scope(ast_expr_list_t *block_exprs,
-                                      eval_result_t *result,
-                                      env_t *env) {
+static void eval_block_expr_in_scope(ast_expr_list_t *block_exprs,
+                                     eval_result_t *result,
+                                     env_t *env) {
     ast_expr_list_t *node = block_exprs;
     obj_t *last_obj = nil_obj();
 
@@ -214,14 +214,14 @@ static void _eval_block_expr_in_scope(ast_expr_list_t *block_exprs,
 
 static void eval_block_expr(ast_expr_list_t *block_exprs, eval_result_t *result, env_t *env) {
     enter_scope(env);
-    _eval_block_expr_in_scope(block_exprs, result, env);
+    eval_block_expr_in_scope(block_exprs, result, env);
     leave_scope(env);
     //gc(env);
 }
 
 static void eval_return_expr(ast_expr_list_t *block_exprs, eval_result_t *result, env_t *env) {
     enter_scope(env);
-    _eval_block_expr_in_scope(block_exprs, result, env);
+    eval_block_expr_in_scope(block_exprs, result, env);
     // Wrap the return obj.
     result->obj = return_val(result->obj);
     leave_scope(env);
@@ -277,7 +277,7 @@ static void eval_func_call(ast_func_call_t *func_call, eval_result_t *result, en
         }
         bytearray_t *name = argnames->name;
         eval_expr(callargs->root, env, result);
-        error_t err = put_env_shadow(env, name, result->obj, F_NONE);
+        err = put_env_shadow(env, name, result->obj, F_NONE);
         if (err != ERR_NO_ERROR) {
             result->err = err;
             goto done;
@@ -287,7 +287,7 @@ static void eval_func_call(ast_func_call_t *func_call, eval_result_t *result, en
         callargs = callargs->next;
     }
 
-    _eval_block_expr_in_scope(fn->block_exprs, result, env);
+    eval_block_expr_in_scope(fn->block_exprs, result, env);
 
     done:
     // Not a typo. There was a push_scope and an enter_scope.
@@ -463,11 +463,9 @@ static void cmp(type_t type, obj_t *a, obj_t *b, eval_result_t *result) {
         case AST_GE:
             m = get_static_method(TYPEOF(a), METHOD_GE);
             break;
-    }
-
-    if (m == NULL) {
-        result->err = ERR_EVAL_TYPE_ERROR;
-        return;
+        default:
+            result->err = ERR_EVAL_TYPE_ERROR;
+            return;
     }
 
     result->obj = m(a, wrap_varargs(1, b));
@@ -786,7 +784,6 @@ static void resolve_callable_expr(ast_expr_t *expr, env_t *env, eval_result_t *r
             break;
         default:
             goto error;
-            break;
     }
 
     return;
@@ -1279,8 +1276,6 @@ static void eval_expr(ast_expr_t *expr, env_t *env, eval_result_t *result) {
                 // ... else other result.
                 break;
             }
-            result->obj = nil_obj();
-            break;
         }
         case AST_DO_WHILE_LOOP:
             eval_do_while_loop(expr, env, result);

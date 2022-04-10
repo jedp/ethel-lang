@@ -12,7 +12,7 @@
 static char c_str_buf[C_STR_BUF_SIZ];
 
 static void strip_trailing_ws(char *s) {
-    int end = c_str_len(s) - 1;
+    size_t end = c_str_len(s) - 1;
     while (end > 0) {
         if (s[end] != ' ' &&
             s[end] != '\t' &&
@@ -25,7 +25,7 @@ static void strip_trailing_ws(char *s) {
     }
 }
 
-static obj_t *_str_slice(obj_t *obj, int start, int end) {
+static obj_t *str_slice_internal(obj_t *obj, size_t start, size_t end) {
     if (end > obj->bytearray->size) end = obj->bytearray->size;
 
     if (end < 0 ||
@@ -49,11 +49,15 @@ obj_t *str_hash(obj_t *obj, obj_varargs_t /* Ignored */ *args) {
 }
 
 obj_t *str_copy(obj_t *obj, obj_varargs_t /* Ignored */ *args) {
+    (void) args;
+
     // string_obj copies the contents of the source.
     return string_obj(obj->bytearray);
 }
 
 obj_t *str_to_string(obj_t *obj, obj_varargs_t /* Ignored */ *args) {
+    (void) args;
+
     return obj;
 }
 
@@ -146,7 +150,7 @@ byte hex_char(int n) {
 }
 
 int hex_to_int(char *s) {
-    int strlen = c_str_len(s);
+    size_t strlen = c_str_len(s);
     int val = 0;
     int j;
     for (int i = 0; i < 8 && i < strlen; i++) {
@@ -210,7 +214,7 @@ int hex_to_int(char *s) {
 }
 
 int bin_to_int(char *s) {
-    int strlen = c_str_len(s);
+    size_t strlen = c_str_len(s);
     int val = 0;
     int j;
     for (int i = 0; i < 32 && i < strlen; i++) {
@@ -248,6 +252,8 @@ bytearray_t *int_to_bin(unsigned int n) {
 }
 
 obj_t *str_to_int(obj_t *obj, obj_varargs_t *args) {
+    (void) args;
+
     char *end = NULL;
     char *input = mem_alloc(obj->bytearray->size + 1);
     c_str_cp(input, bytearray_to_c_str(obj->bytearray));
@@ -268,6 +274,8 @@ obj_t *str_to_int(obj_t *obj, obj_varargs_t *args) {
 }
 
 obj_t *str_to_byte(obj_t *obj, obj_varargs_t *args) {
+    (void) args;
+
     char *end = NULL;
     char *input = mem_alloc(obj->bytearray->size + 1);
     c_str_cp(input, bytearray_to_c_str(obj->bytearray));
@@ -286,6 +294,8 @@ obj_t *str_to_byte(obj_t *obj, obj_varargs_t *args) {
 }
 
 obj_t *str_to_float(obj_t *obj, obj_varargs_t *args) {
+    (void) args;
+
     char *end = NULL;
     char *input = mem_alloc(obj->bytearray->size + 1);
     c_str_cp(input, bytearray_to_c_str(obj->bytearray));
@@ -318,7 +328,7 @@ bytearray_t *int_to_hex(unsigned int n) {
     return a;
 }
 
-static bytearray_t *_bytearray_alloc(size_t size) {
+static bytearray_t *bytearray_alloc_internal(size_t size) {
     bytearray_t *a = mem_alloc(size + sizeof(size_t) + sizeof(gc_header_t));
     ((gc_header_t *) a)->type = TYPE_BYTEARRAY_DATA;
     ((gc_header_t *) a)->flags = F_NONE;
@@ -328,13 +338,13 @@ static bytearray_t *_bytearray_alloc(size_t size) {
 }
 
 bytearray_t *bytearray_alloc_with_data(size_t size, uint8_t *data) {
-    bytearray_t *a = _bytearray_alloc(size);
+    bytearray_t *a = bytearray_alloc_internal(size);
     mem_cp(a->data, data, size);
     return a;
 }
 
 bytearray_t *bytearray_alloc(size_t size) {
-    bytearray_t *a = _bytearray_alloc(size);
+    bytearray_t *a = bytearray_alloc_internal(size);
     mem_set(a->data, '\0', size);
     return a;
 }
@@ -428,7 +438,7 @@ obj_t *str_substring(obj_t *obj, obj_varargs_t *args) {
     obj_t *end_arg = args->next->arg;
     if (TYPEOF(end_arg) != TYPE_INT) return nil_obj();
 
-    return _str_slice(obj, start_arg->intval, end_arg->intval);
+    return str_slice_internal(obj, start_arg->intval, end_arg->intval);
 }
 
 obj_t *str_add(obj_t *obj, obj_varargs_t *args) {

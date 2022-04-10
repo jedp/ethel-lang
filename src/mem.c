@@ -116,18 +116,10 @@ gc_header_t *alloc_type(type_t type, flags_t flags) {
         case AST_IDENT:
         case AST_STRING:
         case AST_FUNCTION_RETURN:
-        HDR_ALLOC(ast_expr_t, type, 1);
-            break;
-
-            // Unary operators.
         case AST_DELETE:
         case AST_NEGATE:
         case AST_NOT:
         case AST_BITWISE_NOT:
-        HDR_ALLOC(ast_expr_t, type, 1);
-            break;
-
-            // Unary operator data.
         case AST_UNARY_ARG:
         HDR_ALLOC(ast_unary_arg_t, type, 1);
             break;
@@ -179,8 +171,6 @@ gc_header_t *alloc_type(type_t type, flags_t flags) {
 
             // Compound objects and expressions.
         case AST_BLOCK:
-        HDR_ALLOC(ast_expr_t, type, 1);
-            break;
         case AST_LIST:
         HDR_ALLOC(ast_expr_t, type, 1);
             break;
@@ -293,7 +283,6 @@ gc_header_t *alloc_type(type_t type, flags_t flags) {
         default:
             printf("Unhandled GC type. Object will be untraceable: %s\n", type_names[type]);
             assert(0);
-            break;
     }
 
     hdr->flags = flags;

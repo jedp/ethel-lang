@@ -121,7 +121,7 @@ static int scan_unscanned_objects() {
                     heap_node_t *child_heap_node = NODE_FOR_DATA(*child);
 
                     // Move Unreached child to Unscanned.
-                    if (!(child_heap_node->flags == F_GC_SCANNED)) {
+                    if (child_heap_node->flags != F_GC_SCANNED) {
                         child_heap_node->flags &= ~F_GC_UNREACHED;
                         child_heap_node->flags |= F_GC_UNSCANNED;
                         unscanned++;

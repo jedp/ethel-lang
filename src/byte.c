@@ -4,19 +4,27 @@
 #include "../inc/str.h"
 
 obj_t *byte_hash(obj_t *obj, obj_varargs_t *args) {
+    (void) args;
+
     // 8-bit int is its own 32-bit hash.
     return int_obj((uint32_t) obj->byteval);
 }
 
 obj_t *byte_copy(obj_t *obj, obj_varargs_t *args) {
+    (void) args;
+
     return byte_obj(obj->byteval);
 }
 
 obj_t *byte_to_int(obj_t *obj, obj_varargs_t *args) {
+    (void) args;
+
     return int_obj((uint32_t) obj->byteval);
 }
 
 obj_t *byte_to_string(obj_t *obj, obj_varargs_t *args) {
+    (void) args;
+
     byte c = obj->byteval;
     if (c >= ' ' && c <= '~') {
         bytearray_t *a = bytearray_alloc(3);
@@ -35,10 +43,14 @@ obj_t *byte_to_string(obj_t *obj, obj_varargs_t *args) {
 }
 
 obj_t *byte_to_float(obj_t *obj, obj_varargs_t *args) {
+    (void) args;
+
     return float_obj((float) obj->byteval);
 }
 
 obj_t *byte_to_byte(obj_t *obj, obj_varargs_t *args) {
+    (void) args;
+
     return obj;
 }
 
@@ -77,7 +89,6 @@ obj_t *byte_math(obj_t *obj, obj_varargs_t *args, static_method_ident_t method_i
             printf("method_id %d not implemented!\n", method_id);
             return obj;
     }
-    return byte_obj((byte) ((obj->byteval + m_cast(arg, NULL)->byteval) & 0xff));
 }
 
 obj_t *byte_add(obj_t *obj, obj_varargs_t *args) {
@@ -263,6 +274,8 @@ obj_t *byte_bitwise_xor(obj_t *obj, obj_varargs_t *args) {
 }
 
 obj_t *byte_bitwise_not(obj_t *obj, obj_varargs_t /* Ignored */ *args) {
+    (void) args;
+
     return byte_obj(~obj->byteval);
 }
 

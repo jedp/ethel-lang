@@ -391,7 +391,7 @@ ast_expr_t *ast_continue(void) {
     return ast_node(AST_CONTINUE);
 }
 
-void _pretty_print(ast_expr_t *expr, int indent) {
+void pretty_print_internal(ast_expr_t *expr, int indent) {
     for (int i = 0; i < indent * 2; i++) {
         printf(" ");
     }
@@ -424,10 +424,10 @@ void _pretty_print(ast_expr_t *expr, int indent) {
     for (int i = 0; i < children; ++i) {
         size_t offset = sizeof(gc_header_t) + (i * sizeof(void *));
         void **child = (void *) (expr) + offset;
-        if (*child != NULL) _pretty_print((ast_expr_t *) *child, indent + 1);
+        if (*child != NULL) pretty_print_internal((ast_expr_t *) *child, indent + 1);
     }
 }
 
 void pretty_print(ast_expr_t *expr) {
-    _pretty_print(expr, 0);
+    pretty_print_internal(expr, 0);
 }

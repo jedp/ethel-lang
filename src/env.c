@@ -68,11 +68,11 @@ static env_sym_t *find_sym_by_name(env_t *env, bytearray_t *sym_name, boolean re
     return NULL;
 }
 
-error_t _put_env(env_t *env,
-                 bytearray_t *name_obj,
-                 const gc_header_t *obj,
-                 const flags_t flags,
-                 boolean can_shadow) {
+error_t put_env_internal(env_t *env,
+                         bytearray_t *name_obj,
+                         const gc_header_t *obj,
+                         const flags_t flags,
+                         boolean can_shadow) {
     assert(env->top >= 0);
 
     env_sym_t *found = find_sym_by_name(env, name_obj, !can_shadow);
@@ -109,15 +109,15 @@ error_t _put_env(env_t *env,
 }
 
 error_t put_env(env_t *env, bytearray_t *name_obj, const obj_t *obj, const flags_t flags) {
-    return _put_env(env, name_obj, (gc_header_t *) obj, flags, False);
+    return put_env_internal(env, name_obj, (gc_header_t *) obj, flags, False);
 }
 
 error_t put_env_shadow(env_t *env, bytearray_t *name_obj, const obj_t *obj, const flags_t flags) {
-    return _put_env(env, name_obj, (gc_header_t *) obj, flags, True);
+    return put_env_internal(env, name_obj, (gc_header_t *) obj, flags, True);
 }
 
 error_t put_env_gc_root(env_t *env, const gc_header_t *hdr) {
-    return _put_env(env, NULL, hdr, F_NONE, False);
+    return put_env_internal(env, NULL, hdr, F_NONE, False);
 }
 
 error_t del_env(env_t *env, bytearray_t *name_obj) {
@@ -149,7 +149,7 @@ obj_t *get_env(env_t *env, bytearray_t *name_obj) {
 }
 
 error_t env_init(env_t *env) {
-    // Intialize all pointers.
+    // Initialize all pointers.
     for (int i = 0; i < ENV_MAX_STACK_DEPTH; ++i) {
         env->symbols[i] = NULL;
     }

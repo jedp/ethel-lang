@@ -5,20 +5,28 @@
 #include "../inc/str.h"
 
 obj_t *float_hash(obj_t *obj, obj_varargs_t *args) {
+    (void) args;
+
     // 32-bit float is its own 32-bit hash value.
     uint32_t *ip = (uint32_t *) &(obj->floatval);
     return int_obj(*ip);
 }
 
 obj_t *float_copy(obj_t *obj, obj_varargs_t *args) {
+    (void) args;
+
     return float_obj(obj->floatval);
 }
 
 obj_t *float_to_int(obj_t *obj, obj_varargs_t *args) {
+    (void) args;
+
     return int_obj((int) obj->floatval);
 }
 
 obj_t *float_to_string(obj_t *obj, obj_varargs_t *args) {
+    (void) args;
+
     // TODO so lazy. Twiddle those bits, shed a dependency.
     float n = obj->floatval;
     int len = snprintf(NULL, 0, "%f", n);
@@ -28,18 +36,26 @@ obj_t *float_to_string(obj_t *obj, obj_varargs_t *args) {
 }
 
 obj_t *float_to_float(obj_t *obj, obj_varargs_t *args) {
+    (void) args;
+
     return obj;
 }
 
 obj_t *float_to_byte(obj_t *obj, obj_varargs_t *args) {
+    (void) args;
+
     return byte_obj((byte) ((int) obj->floatval & 0xff));
 }
 
 obj_t *float_abs(obj_t *obj, obj_varargs_t *args) {
+    (void) args;
+
     return float_obj((obj->floatval < 0) ? 1 - obj->floatval : obj->floatval);
 }
 
 obj_t *float_neg(obj_t *obj, obj_varargs_t *args) {
+    (void) args;
+
     return float_obj(-obj->floatval);
 }
 
