@@ -1,7 +1,8 @@
+#include "util.h"
 #include "unity/unity.h"
+#include "../inc/mem.h"
 #include "../inc/type.h"
 #include "../inc/str.h"
-#include "../inc/dict.h"
 #include "../inc/heap.h"
 #include "../inc/gc.h"
 
@@ -108,8 +109,23 @@ void gc_string(void) {
     TEST_ASSERT_EQUAL(init_free, final_free);
 }
 
+void gc_scope(void) {
+    // Regression test. Ensure the env stack can be cleanly unwound.
+    char *program = "{ val f = fn(x) {            \n"
+                    "    if x <= 1 then return 1  \n"
+                    "    f(x-1)                   \n"
+                    "  }                          \n"
+                    "  f(20)                      \n"
+                    "}";
+    eval_result_t *result = (eval_result_t *) alloc_type(EVAL_RESULT, F_NONE);
+    eval_program(program, result);
+
+    TEST_ASSERT_EQUAL(ERR_NO_ERROR, result->err);
+}
+
 void test_gc(void) {
     RUN_TEST(gc_primitives);
     RUN_TEST(gc_bytearray);
     RUN_TEST(gc_string);
+    RUN_TEST(gc_scope);
 }

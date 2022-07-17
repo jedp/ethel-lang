@@ -5,10 +5,11 @@
 #include "../inc/mem.h"
 #include "../inc/heap.h"
 
-#define HDR_ALLOC(t, y, c) \
+#define HDR_ALLOC(t, y, c) { \
   hdr = mem_alloc(sizeof(t)); \
   hdr->type = y; \
-  hdr->children = c
+  hdr->children = c; \
+}
 
 void *mem_alloc(size_t size) {
     return ealloc(size);

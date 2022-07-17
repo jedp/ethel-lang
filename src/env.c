@@ -37,7 +37,7 @@ error_t enter_scope(env_t *env) {
 }
 
 error_t leave_scope(env_t *env) {
-    env->symbols[env->top] = new_sym_elem(NULL);
+    env->symbols[env->top] = NULL;
     env->top -= 1;
 
     return ERR_NO_ERROR;
