@@ -30,7 +30,7 @@ val quicksort = fn(a, lo, hi) {
   }
 }
 
-val s = input("A string, please:")
+var s = input("A string, please:")
 quicksort(s, 0, s.length() - 1)
 print("Sorted:", s)
 
