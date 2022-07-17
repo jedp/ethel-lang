@@ -112,7 +112,8 @@ static void eval_byte_expr(ast_expr_t *expr, eval_result_t *result) {
 }
 
 static void eval_list_expr(ast_list_t *list, eval_result_t *result, env_t *env) {
-    if (list->es == NULL) {
+    if (list->es == NULL || list->es->root == NULL) {
+        // Empty list has null root node.
         result->obj = list_obj(NULL);
         return;
     }

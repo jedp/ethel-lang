@@ -727,6 +727,18 @@ void test_eval_string_length_in_expr(void) {
     TEST_ASSERT_EQUAL(35, obj->intval);
 }
 
+void test_eval_empty_list(void) {
+    char *program = "{ l = list { }\n"
+                    "  l.length() }";
+
+    eval_result_t *result = (eval_result_t *) alloc_type(EVAL_RESULT, F_NONE);
+    eval_program(program, result);
+    TEST_ASSERT_EQUAL(ERR_NO_ERROR, result->err);
+
+    obj_t *obj = result->obj;
+    TEST_ASSERT_EQUAL(0, obj->intval);
+}
+
 void test_eval_list_val_length(void) {
     char *program = "{ val l = list { 1, 2, 3}\n"
                     "  l.length() }";
@@ -1488,6 +1500,7 @@ void test_eval(void) {
     RUN_TEST(test_eval_string_length);
     RUN_TEST(test_eval_string_var_length);
     RUN_TEST(test_eval_string_length_in_expr);
+    RUN_TEST(test_eval_empty_list);
     RUN_TEST(test_eval_list_val_length);
     RUN_TEST(test_eval_list_val_eq);
     RUN_TEST(test_eval_list_val_get);
