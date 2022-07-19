@@ -44,6 +44,7 @@ TESTOBJS = test/unity/unity.o \
 					 test/test_eval.o \
 					 test/test_env.o \
 					 test/test_rand.o \
+					 test/test_closure.o \
 					 test/test_examples.o \
 					 test/test.o
 

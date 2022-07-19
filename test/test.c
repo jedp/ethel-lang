@@ -15,6 +15,7 @@
 #include "test_hash.h"
 #include "test_env.h"
 #include "test_rand.h"
+#include "test_closure.h"
 #include "test_examples.h"
 
 void setUp(void) {
@@ -42,6 +43,7 @@ int main(int argc, char **argv) {
     test_env();
     test_eval();
     test_rand();
+    test_closure();
     test_examples();
 
     UNITY_END();
