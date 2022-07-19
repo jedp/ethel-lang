@@ -704,7 +704,7 @@ static ast_expr_t *parse_atom(lexer_t *lexer) {
         case TAG_VARIABLE: {
             advance(lexer);
             if (!eat(lexer, TAG_IDENT)) goto error;
-            return ast_ident_decl(c_str_to_bytearray(lexer->token.string), F_ENV_VAR);
+            return ast_ident_decl(c_str_to_bytearray(lexer->token.string), F_ENV_MUTABLE);
         }
         case TAG_IDENT: {
             ast_expr_t *id = ast_ident(c_str_to_bytearray(lexer->token.string));

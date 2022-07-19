@@ -24,7 +24,7 @@ enum all_flags {
     F_NONE = 0,
     F_ENV_ASSIGNABLE = (1 << 0),
     F_ENV_OVERWRITE = (1 << 1),
-    F_ENV_VAR = (1 << 2),
+    F_ENV_MUTABLE = (1 << 2),
     // (1 << 3) is unused.
     F_GC_FREE = (1 << 4),  // Node is on the free list.
     F_GC_UNREACHED = (1 << 5),
