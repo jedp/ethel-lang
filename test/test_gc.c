@@ -9,42 +9,41 @@
 #define NAME(s) (c_str_to_bytearray(s))
 
 void gc_primitives(void) {
-    env_t env;
-    env_init(&env);
-    enter_scope(&env);
+    interp_t interp;
+    interp_init(&interp);
 
     obj_t *i = int_obj(42);
     // This object will always be in scope.
-    put_env(&env, NAME("keep-int"), i, F_NONE);
-    put_env(&env, NAME("keep-bool"), boolean_obj(1), F_NONE);
-    put_env(&env, NAME("keep-float"), float_obj(4.2), F_NONE);
-    put_env(&env, NAME("keep-byte"), byte_obj(0x0f), F_NONE);
-    gc(&env);
+    put_env(&interp, NAME("keep-int"), i);
+    put_env(&interp, NAME("keep-bool"), boolean_obj(1));
+    put_env(&interp, NAME("keep-float"), float_obj(4.2));
+    put_env(&interp, NAME("keep-byte"), byte_obj(0x0f));
+    gc(&interp);
     int init_free = get_heap_info()->bytes_free;
 
     // The object is unreachable by the env after we leave its scope.
-    enter_scope(&env);
-    put_env(&env, NAME("cull-int"), int_obj(17), F_NONE);
-    put_env(&env, NAME("cull-bool"), boolean_obj(1), F_NONE);
-    put_env(&env, NAME("cull-float"), float_obj(1.3), F_NONE);
-    put_env(&env, NAME("cull-byte"), byte_obj(0x0a), F_NONE);
-    leave_scope(&env);
+    enter_scope(&interp);
+    put_env(&interp, NAME("cull-int"), int_obj(17));
+    put_env(&interp, NAME("cull-bool"), boolean_obj(1));
+    put_env(&interp, NAME("cull-float"), float_obj(1.3));
+    put_env(&interp, NAME("cull-byte"), byte_obj(0x0a));
+    leave_scope(&interp);
 
     // There is garbage.
     int mid_free = get_heap_info()->bytes_free;
-    gc(&env);
+    gc(&interp);
 
     int final_free = get_heap_info()->bytes_free;
 
     // Object accessibility is correct.
-    TEST_ASSERT_EQUAL(TYPE_UNDEF, TYPEOF(get_env(&env, NAME("cull-int"))));
-    TEST_ASSERT_EQUAL(TYPE_UNDEF, TYPEOF(get_env(&env, NAME("cull-bool"))));
-    TEST_ASSERT_EQUAL(TYPE_UNDEF, TYPEOF(get_env(&env, NAME("cull-float"))));
-    TEST_ASSERT_EQUAL(TYPE_UNDEF, TYPEOF(get_env(&env, NAME("cull-byte"))));
-    TEST_ASSERT_EQUAL(TYPE_INT, TYPEOF(get_env(&env, NAME("keep-int"))));
-    TEST_ASSERT_EQUAL(TYPE_BOOLEAN, TYPEOF(get_env(&env, NAME("keep-bool"))));
-    TEST_ASSERT_EQUAL(TYPE_FLOAT, TYPEOF(get_env(&env, NAME("keep-float"))));
-    TEST_ASSERT_EQUAL(TYPE_BYTE, TYPEOF(get_env(&env, NAME("keep-byte"))));
+    TEST_ASSERT_EQUAL(TYPE_UNDEF, TYPEOF(get_env(&interp, NAME("cull-int"))));
+    TEST_ASSERT_EQUAL(TYPE_UNDEF, TYPEOF(get_env(&interp, NAME("cull-bool"))));
+    TEST_ASSERT_EQUAL(TYPE_UNDEF, TYPEOF(get_env(&interp, NAME("cull-float"))));
+    TEST_ASSERT_EQUAL(TYPE_UNDEF, TYPEOF(get_env(&interp, NAME("cull-byte"))));
+    TEST_ASSERT_EQUAL(TYPE_INT, TYPEOF(get_env(&interp, NAME("keep-int"))));
+    TEST_ASSERT_EQUAL(TYPE_BOOLEAN, TYPEOF(get_env(&interp, NAME("keep-bool"))));
+    TEST_ASSERT_EQUAL(TYPE_FLOAT, TYPEOF(get_env(&interp, NAME("keep-float"))));
+    TEST_ASSERT_EQUAL(TYPE_BYTE, TYPEOF(get_env(&interp, NAME("keep-byte"))));
 
     // We actually cleaned garbage up.
     TEST_ASSERT_GREATER_THAN(mid_free, final_free);
@@ -52,28 +51,27 @@ void gc_primitives(void) {
 }
 
 void gc_bytearray(void) {
-    env_t env;
-    env_init(&env);
-    enter_scope(&env);
+    interp_t interp;
+    interp_init(&interp);
 
-    put_env(&env, NAME("keep-bytearray"), bytearray_obj(0, NULL), F_NONE);
-    gc(&env);
+    put_env(&interp, NAME("keep-bytearray"), bytearray_obj(0, NULL));
+    gc(&interp);
     int init_free = get_heap_info()->bytes_free;
 
     // Will be unreachable after we exit scope.
-    enter_scope(&env);
-    put_env(&env, NAME("cull-bytearray"), bytearray_obj(0, NULL), F_NONE);
-    leave_scope(&env);
+    enter_scope(&interp);
+    put_env(&interp, NAME("cull-bytearray"), bytearray_obj(0, NULL));
+    leave_scope(&interp);
 
     // There is garbage.
     int mid_free = get_heap_info()->bytes_free;
-    gc(&env);
+    gc(&interp);
 
     int final_free = get_heap_info()->bytes_free;
 
     // Object accessibility is correct.
-    TEST_ASSERT_EQUAL(TYPE_UNDEF, TYPEOF(get_env(&env, NAME("cull-bytearray"))));
-    TEST_ASSERT_EQUAL(TYPE_BYTEARRAY, TYPEOF(get_env(&env, NAME("keep-bytearray"))));
+    TEST_ASSERT_EQUAL(TYPE_UNDEF, TYPEOF(get_env(&interp, NAME("cull-bytearray"))));
+    TEST_ASSERT_EQUAL(TYPE_BYTEARRAY, TYPEOF(get_env(&interp, NAME("keep-bytearray"))));
 
     // We actually cleaned garbage up.
     TEST_ASSERT_GREATER_THAN(mid_free, final_free);
@@ -81,28 +79,27 @@ void gc_bytearray(void) {
 }
 
 void gc_string(void) {
-    env_t env;
-    env_init(&env);
-    enter_scope(&env);
+    interp_t interp;
+    interp_init(&interp);
 
-    put_env(&env, NAME("keep-string"), string_obj(NAME("Hi")), F_NONE);
-    gc(&env);
+    put_env(&interp, NAME("keep-string"), string_obj(NAME("Hi")));
+    gc(&interp);
     int init_free = get_heap_info()->bytes_free;
 
     // Will be unreachable after we exit scope.
-    enter_scope(&env);
-    put_env(&env, NAME("cull-string"), string_obj(NAME("Bye")), F_NONE);
-    leave_scope(&env);
+    enter_scope(&interp);
+    put_env(&interp, NAME("cull-string"), string_obj(NAME("Bye")));
+    leave_scope(&interp);
 
     // There is garbage.
     int mid_free = get_heap_info()->bytes_free;
-    gc(&env);
+    gc(&interp);
 
     int final_free = get_heap_info()->bytes_free;
 
     // Object accessibility is correct.
-    TEST_ASSERT_EQUAL(TYPE_UNDEF, TYPEOF(get_env(&env, NAME("cull-string"))));
-    TEST_ASSERT_EQUAL(TYPE_STRING, TYPEOF(get_env(&env, NAME("keep-string"))));
+    TEST_ASSERT_EQUAL(TYPE_UNDEF, TYPEOF(get_env(&interp, NAME("cull-string"))));
+    TEST_ASSERT_EQUAL(TYPE_STRING, TYPEOF(get_env(&interp, NAME("keep-string"))));
 
     // We actually cleaned garbage up.
     TEST_ASSERT_GREATER_THAN(mid_free, final_free);

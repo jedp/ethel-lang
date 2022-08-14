@@ -217,7 +217,7 @@ ast_expr_t *ast_ident(bytearray_t *name) {
 ast_expr_t *ast_ident_decl(bytearray_t *name, flags_t flags) {
     ast_expr_t *node = ast_ident(name);
     gc_header_t *hdr = (gc_header_t *) node;
-    hdr->flags = flags | F_ENV_ASSIGNABLE;
+    hdr->flags = flags | F_ENV_ASSIGNABLE | F_ENV_DECLARATION;
     return node;
 }
 

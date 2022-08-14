@@ -6,7 +6,5 @@ val fib = fn(x) {
   fib(x - 1) + fib(x - 2)
 }
 
-val n = input("Fibonacci number for:") as int
-
-fib(n)
+fib(input("Fibonacci number for:") as int)
 

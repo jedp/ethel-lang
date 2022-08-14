@@ -83,6 +83,7 @@ static error_t dict_resize(obj_t *orig_obj) {
         return ERR_NO_ERROR;
     }
 
+    printf("Resizing\n");
     error_t err;
     obj_dict_t *new_dict = (obj_dict_t *) alloc_type(TYPE_DICT, F_ENV_ASSIGNABLE);
 

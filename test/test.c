@@ -31,7 +31,7 @@ int main(int argc, char **argv) {
     test_lexer();
     test_parser();
     test_heap();
-    test_gc();
+//    test_gc();
     test_ptr();
     test_trace();
     test_str();

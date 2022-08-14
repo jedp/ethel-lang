@@ -4,13 +4,12 @@
 #include "../inc/mem.h"
 
 static int evaluate(const char *program) {
-    env_t env;
-    env_init(&env);
-    enter_scope(&env);
+    interp_t interp;
+    interp_init(&interp);
 
     eval_result_t *result = mem_alloc(sizeof(eval_result_t));
 
-    eval(&env, program, result);
+    eval(&interp, program, result);
 
     return result->obj->intval;
 }

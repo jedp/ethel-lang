@@ -15,7 +15,7 @@
 
 size_t MAX_INPUT_LINE = 80;
 
-static void eval_expr(ast_expr_t *expr, env_t *env, eval_result_t *result);
+static void eval_expr(ast_expr_t *expr, interp_t *interp, eval_result_t *result);
 
 static void eval_nil_expr(ast_expr_t *expr, eval_result_t *result) {
     if (TYPEOF(expr) != AST_NIL) {
@@ -34,8 +34,8 @@ static void eval_boolean_expr(ast_expr_t *expr, eval_result_t *result) {
     result->obj = boolean_obj(expr->boolval);
 }
 
-static void eval_rand(ast_expr_t *expr, eval_result_t *result, env_t *env) {
-    eval_expr(expr, env, result);
+static void eval_rand(ast_expr_t *expr, eval_result_t *result, interp_t *interp) {
+    eval_expr(expr, interp, result);
     if (TYPEOF(result->obj) != TYPE_INT || result->obj->intval < 1) {
         result->err = ERR_TYPE_POSITIVE_INT_REQUIRED;
         result->obj = nil_obj();
@@ -44,8 +44,8 @@ static void eval_rand(ast_expr_t *expr, eval_result_t *result, env_t *env) {
     result->obj = int_obj((int) (rand32() % result->obj->intval));
 }
 
-static void eval_abs(ast_expr_t *expr, eval_result_t *result, env_t *env) {
-    eval_expr(expr, env, result);
+static void eval_abs(ast_expr_t *expr, eval_result_t *result, interp_t *interp) {
+    eval_expr(expr, interp, result);
 
     static_method m = get_static_method(TYPEOF(result->obj), METHOD_ABS);
     if (m == NULL) {
@@ -56,16 +56,16 @@ static void eval_abs(ast_expr_t *expr, eval_result_t *result, env_t *env) {
     result->obj = m(result->obj, NULL);
 }
 
-static void eval_type_of(ast_expr_t *expr, eval_result_t *result, env_t *env) {
-    eval_expr(expr, env, result);
+static void eval_type_of(ast_expr_t *expr, eval_result_t *result, interp_t *interp) {
+    eval_expr(expr, interp, result);
 
     if (result->err != ERR_NO_ERROR) return;
 
     result->obj = string_obj(c_str_to_bytearray(type_names[TYPEOF(result->obj)]));
 }
 
-static void eval_to_hex(ast_expr_t *expr, eval_result_t *result, env_t *env) {
-    eval_expr(expr, env, result);
+static void eval_to_hex(ast_expr_t *expr, eval_result_t *result, interp_t *interp) {
+    eval_expr(expr, interp, result);
 
     if (TYPEOF(result->obj) != TYPE_INT) {
         result->err = ERR_EVAL_TYPE_ERROR;
@@ -75,8 +75,8 @@ static void eval_to_hex(ast_expr_t *expr, eval_result_t *result, env_t *env) {
     result->obj = string_obj(int_to_hex(result->obj->intval));
 }
 
-static void eval_to_bin(ast_expr_t *expr, eval_result_t *result, env_t *env) {
-    eval_expr(expr, env, result);
+static void eval_to_bin(ast_expr_t *expr, eval_result_t *result, interp_t *interp) {
+    eval_expr(expr, interp, result);
 
     if (TYPEOF(result->obj) != TYPE_INT) {
         result->err = ERR_EVAL_TYPE_ERROR;
@@ -111,7 +111,7 @@ static void eval_byte_expr(ast_expr_t *expr, eval_result_t *result) {
     result->obj = byte_obj(expr->byteval);
 }
 
-static void eval_list_expr(ast_list_t *list, eval_result_t *result, env_t *env) {
+static void eval_list_expr(ast_list_t *list, eval_result_t *result, interp_t *interp) {
     if (list->es == NULL || list->es->root == NULL) {
         // Empty list has null root node.
         result->obj = list_obj(NULL);
@@ -124,7 +124,7 @@ static void eval_list_expr(ast_list_t *list, eval_result_t *result, env_t *env) 
 
     ast_expr_list_t *ast_node = list->es;
     while (ast_node != NULL) {
-        eval_expr(ast_node->root, env, result);
+        eval_expr(ast_node->root, interp, result);
 
         if (result->err != ERR_NO_ERROR) {
             result->obj = list_obj(NULL);
@@ -146,7 +146,7 @@ static void eval_list_expr(ast_list_t *list, eval_result_t *result, env_t *env) 
     result->obj = list_obj(root_elem);
 }
 
-static void eval_dict_expr(ast_dict_t *expr, eval_result_t *result, env_t *env) {
+static void eval_dict_expr(ast_dict_t *expr, eval_result_t *result, interp_t *interp) {
     if (expr->kv == NULL) {
         result->obj = dict_obj();
         return;
@@ -157,7 +157,7 @@ static void eval_dict_expr(ast_dict_t *expr, eval_result_t *result, env_t *env) 
 
     ast_expr_kv_list_t *kv = expr->kv;
     while (kv != NULL) {
-        eval_expr(kv->k, env, result);
+        eval_expr(kv->k, interp, result);
         if (result->err != ERR_NO_ERROR) {
             printf("Failed to evaluate %s for key.\n", type_names[TYPEOF(kv->k)]);
             result->obj = nil_obj();
@@ -165,7 +165,7 @@ static void eval_dict_expr(ast_dict_t *expr, eval_result_t *result, env_t *env) 
         }
         obj_t *k = result->obj;
 
-        eval_expr(kv->v, env, result);
+        eval_expr(kv->v, interp, result);
         if (result->err != ERR_NO_ERROR) {
             printf("Failed to evaluate %s for value.\n", type_names[TYPEOF(kv->v)]);
             result->obj = nil_obj();
@@ -186,12 +186,12 @@ static void eval_dict_expr(ast_dict_t *expr, eval_result_t *result, env_t *env) 
 
 static void eval_block_expr_in_scope(ast_expr_list_t *block_exprs,
                                      eval_result_t *result,
-                                     env_t *env) {
+                                     interp_t *interp) {
     ast_expr_list_t *node = block_exprs;
     obj_t *last_obj = nil_obj();
 
     while (node != NULL) {
-        eval_expr(node->root, env, result);
+        eval_expr(node->root, interp, result);
         if (result->err != ERR_NO_ERROR) return;
 
         // Unwrap and return any return val.
@@ -213,29 +213,29 @@ static void eval_block_expr_in_scope(ast_expr_list_t *block_exprs,
     result->obj = last_obj;
 }
 
-static void eval_block_expr(ast_expr_list_t *block_exprs, eval_result_t *result, env_t *env) {
-    enter_scope(env);
-    eval_block_expr_in_scope(block_exprs, result, env);
-    leave_scope(env);
-    //gc(env);
+static void eval_block_expr(ast_expr_list_t *block_exprs, eval_result_t *result, interp_t *interp) {
+    enter_scope(interp);
+    eval_block_expr_in_scope(block_exprs, result, interp);
+    leave_scope(interp);
+    //gc(interp);
 }
 
-static void eval_return_expr(ast_expr_list_t *block_exprs, eval_result_t *result, env_t *env) {
-    enter_scope(env);
-    eval_block_expr_in_scope(block_exprs, result, env);
+static void eval_return_expr(ast_expr_list_t *block_exprs, eval_result_t *result, interp_t *interp) {
+    enter_scope(interp);
+    eval_block_expr_in_scope(block_exprs, result, interp);
     // Wrap the return obj.
     result->obj = return_val(result->obj);
-    leave_scope(env);
-    //gc(env);
+    leave_scope(interp);
+    //gc(interp);
 }
 
 /* Wrap the function pointer in an obj. */
-static void eval_func_def(ast_func_def_t *func_def, eval_result_t *result, env_t *env) {
-    result->obj = func_obj((void *) func_def, env->symbols[env->top]);
+static void eval_func_def(ast_func_def_t *func_def, eval_result_t *result, interp_t *interp) {
+    result->obj = func_obj((void *) func_def, interp->env);
 }
 
-static void eval_func_call(ast_func_call_t *func_call, eval_result_t *result, env_t *env) {
-    eval_expr(func_call->expr, env, result);
+static void eval_func_call(ast_func_call_t *func_call, eval_result_t *result, interp_t *interp) {
+    eval_expr(func_call->expr, interp, result);
     if (result->err != ERR_NO_ERROR) {
         result->err = ERR_FUNCTION_UNDEFINED;
         result->obj = nil_obj();
@@ -250,50 +250,48 @@ static void eval_func_call(ast_func_call_t *func_call, eval_result_t *result, en
     }
 
     ast_func_def_t *fn = (ast_func_def_t *) obj->func_def->code;
-
-    /* Push the scope the function was defined in ... */
-    env_sym_elem_t *scope = (env_sym_elem_t *) obj->func_def->scope;
-    error_t err = push_scope(env, scope);
-
-    if ((result->err = err) != ERR_NO_ERROR) {
-        leave_scope(env);
-        result->obj = nil_obj();
-        return;
-    }
-
-    /* ... and create a new scope for the function itself. */
-    err = enter_scope(env);
-    if ((result->err = err) != ERR_NO_ERROR) {
-        result->obj = nil_obj();
-        goto done;
-    }
-
     ast_fn_arg_decl_t *argnames = fn->argnames;
     ast_expr_list_t *callargs = func_call->args;
+    error_t err;
+
+    /* Push the scope the function was defined in. */
+    env_t *scope = (env_t *) obj->func_def->scope;
+
+    /* Eval function args in parent scope, and create a new scope for the result. */
+    env_t *func_env = new_env();
+    func_env->parent = scope;
 
     while (argnames != NULL) {
         if (callargs == NULL) {
             result->err = ERR_WRONG_ARG_COUNT;
-            goto done;
+            goto error;
         }
         bytearray_t *name = argnames->name;
-        eval_expr(callargs->root, env, result);
-        err = put_env_shadow(env, name, result->obj, F_NONE);
+        eval_expr(callargs->root, interp, result);
+        err = dict_put((obj_t *) func_env->vars, string_obj(name), result->obj);
         if (err != ERR_NO_ERROR) {
             result->err = err;
-            goto done;
+            goto error;
         }
 
         argnames = argnames->next;
         callargs = callargs->next;
     }
 
-    eval_block_expr_in_scope(fn->block_exprs, result, env);
+    err = push_scope(interp, scope);
 
-    done:
-    // Not a typo. There was a push_scope and an enter_scope.
-    leave_scope(env);
-    leave_scope(env);
+    if ((result->err = err) != ERR_NO_ERROR) {
+        leave_scope(interp);
+        result->obj = nil_obj();
+        return;
+    }
+
+    push_scope(interp, func_env);
+    eval_block_expr_in_scope(fn->block_exprs, result, interp);
+    leave_scope(interp);
+
+    error:
+    leave_scope(interp);
 }
 
 static void eval_string_expr(ast_expr_t *expr, eval_result_t *result) {
@@ -333,11 +331,11 @@ static void list_subscript_assign(obj_t *obj,
                                   ast_expr_t *lhs,
                                   ast_expr_t *rhs,
                                   eval_result_t *result,
-                                  env_t *env) {
-    eval_expr(lhs->op_args->b, env, result);
+                                  interp_t *interp) {
+    eval_expr(lhs->op_args->b, interp, result);
     if (result->err != ERR_NO_ERROR) goto error;
     obj_t *offset = result->obj;
-    eval_expr(rhs, env, result);
+    eval_expr(rhs, interp, result);
     if (result->err != ERR_NO_ERROR) goto error;
     obj_t *val = result->obj;
     result->obj = list_set(obj, wrap_varargs(2, offset, val));
@@ -351,11 +349,11 @@ static void arr_subscript_assign(obj_t *obj,
                                  ast_expr_t *lhs,
                                  ast_expr_t *rhs,
                                  eval_result_t *result,
-                                 env_t *env) {
-    eval_expr(lhs->op_args->b, env, result);
+                                 interp_t *interp) {
+    eval_expr(lhs->op_args->b, interp, result);
     if (result->err != ERR_NO_ERROR) goto error;
     obj_t *offset = result->obj;
-    eval_expr(rhs, env, result);
+    eval_expr(rhs, interp, result);
     if (result->err != ERR_NO_ERROR) goto error;
     obj_t *val = result->obj;
     result->obj = arr_set(obj, wrap_varargs(2, offset, val));
@@ -369,11 +367,11 @@ static void dict_subscript_assign(obj_t *obj,
                                   ast_expr_t *lhs,
                                   ast_expr_t *rhs,
                                   eval_result_t *result,
-                                  env_t *env) {
-    eval_expr(lhs->op_args->b, env, result);
+                                  interp_t *interp) {
+    eval_expr(lhs->op_args->b, interp, result);
     if (result->err != ERR_NO_ERROR) goto error;
     obj_t *k = result->obj;
-    eval_expr(rhs, env, result);
+    eval_expr(rhs, interp, result);
     if (result->err != ERR_NO_ERROR) goto error;
     obj_t *v = result->obj;
     result->obj = dict_obj_put(obj, wrap_varargs(2, k, v));
@@ -387,24 +385,24 @@ static void dict_subscript_assign(obj_t *obj,
 static void assign(ast_expr_t *lhs,
                    ast_expr_t *rhs,
                    eval_result_t *result,
-                   env_t *env) {
+                   interp_t *interp) {
 
     if (TYPEOF(lhs) == AST_SUBSCRIPT) {
         // TODO this looks like a bug that might find an obj in the env
         // e.g., if we say "foo"[1] = 'c', and env has an obj named foo.
         bytearray_t *name = lhs->op_args->a->bytearray;
-        obj_t *obj = get_env(env, name);
+        obj_t *obj = get_env(interp, name);
 
         switch (TYPEOF(obj)) {
             case TYPE_LIST:
-                list_subscript_assign(obj, lhs, rhs, result, env);
+                list_subscript_assign(obj, lhs, rhs, result, interp);
                 return;
             case TYPE_STRING:    // fall-through
             case TYPE_BYTEARRAY:
-                arr_subscript_assign(obj, lhs, rhs, result, env);
+                arr_subscript_assign(obj, lhs, rhs, result, interp);
                 return;
             case TYPE_DICT:
-                dict_subscript_assign(obj, lhs, rhs, result, env);
+                dict_subscript_assign(obj, lhs, rhs, result, interp);
                 return;
             default:
                 printf("can't assign to %s\n", type_names[TYPEOF(obj)]);
@@ -422,9 +420,10 @@ static void assign(ast_expr_t *lhs,
     error_t error;
 
     if (TYPEOF(rhs) == AST_FUNCTION_DEF) {
-        eval_func_def(rhs->func_def, result, env);
+        eval_func_def(rhs->func_def, result, interp);
         if (result->err != ERR_NO_ERROR) goto error;
-        error = put_env(env, name, result->obj, F_NONE);
+        ((gc_header_t *) result->obj)->flags = FLAGS(lhs);
+        error = put_env(interp, name, result->obj);
         if (error != ERR_NO_ERROR) {
             result->err = error;
             goto error;
@@ -432,9 +431,11 @@ static void assign(ast_expr_t *lhs,
         return;
     }
 
-    eval_expr(rhs, env, result);
+    eval_expr(rhs, interp, result);
     if (result->err != ERR_NO_ERROR) goto error;
-    result->err = put_env(env, name, result->obj, FLAGS(lhs));
+    // Absorb lhs flags into the object we're saving.
+    ((gc_header_t *) result->obj)->flags = FLAGS(lhs);
+    result->err = put_env(interp, name, result->obj);
     if (result->err != ERR_NO_ERROR) goto error;
 
     return;
@@ -553,13 +554,13 @@ static void range_step(int from_inclusive,
     result->obj = range_step_obj(from_inclusive, to_inclusive, step);
 }
 
-static void apply(ast_expr_t *expr, eval_result_t *result, env_t *env) {
+static void apply(ast_expr_t *expr, eval_result_t *result, interp_t *interp) {
     if (TYPEOF(expr) != AST_APPLY) {
         result->err = ERR_SYNTAX_ERROR;
         return;
     }
 
-    eval_expr(expr->application->receiver, env, result);
+    eval_expr(expr->application->receiver, interp, result);
     if (result->err != ERR_NO_ERROR) return;
 
     obj_t *obj = result->obj;
@@ -597,7 +598,7 @@ static void apply(ast_expr_t *expr, eval_result_t *result, env_t *env) {
         obj_varargs_t *method_args_root = method_args;
 
         while (args != NULL) {
-            eval_expr(args->root, env, result);
+            eval_expr(args->root, interp, result);
 
             method_args->arg = result->obj;
             method_args->next = NULL;
@@ -614,12 +615,12 @@ static void apply(ast_expr_t *expr, eval_result_t *result, env_t *env) {
     }
 }
 
-static int print_args(ast_expr_list_t *args, eval_result_t *result, env_t *env) {
+static int print_args(ast_expr_list_t *args, eval_result_t *result, interp_t *interp) {
     int printed = 0;
     ast_expr_list_t *node = (ast_expr_list_t *) args;
     if (TYPEOF(args->root) != AST_EMPTY) {
         while (node != NULL) {
-            eval_expr(node->root, env, result);
+            eval_expr(node->root, interp, result);
 
             if (result->err != ERR_NO_ERROR) {
                 result->obj = undef_obj();
@@ -661,14 +662,14 @@ static int print_args(ast_expr_list_t *args, eval_result_t *result, env_t *env) 
     return printed;
 }
 
-static void println_args(ast_expr_list_t *args, eval_result_t *result, env_t *env) {
-    print_args(args, result, env);
+static void println_args(ast_expr_list_t *args, eval_result_t *result, interp_t *interp) {
+    print_args(args, result, interp);
     printf("\n");
 }
 
 // For messing about in the repl.
-static void eval_read_file(ast_expr_t *expr, eval_result_t *result, env_t *env) {
-    eval_expr(expr, env, result);
+static void eval_read_file(ast_expr_t *expr, eval_result_t *result, interp_t *interp) {
+    eval_expr(expr, interp, result);
     if (TYPEOF(result->obj) != TYPE_STRING) {
         result->err = ERR_BAD_FILENAME;
         result->obj = nil_obj();
@@ -694,13 +695,13 @@ static void eval_read_file(ast_expr_t *expr, eval_result_t *result, env_t *env) 
     result->obj = buffer;
 }
 
-static void dump_args(ast_expr_list_t *args, eval_result_t *result, env_t *env) {
+static void dump_args(ast_expr_list_t *args, eval_result_t *result, interp_t *interp) {
     if (args->root == NULL) {
         result->obj = nil_obj();
         return;
     }
 
-    eval_expr(args->root, env, result);
+    eval_expr(args->root, interp, result);
     switch (TYPEOF(result->obj)) {
         case TYPE_BYTE:
             result->obj = byte_dump(result->obj);
@@ -734,7 +735,7 @@ static void readln_input(eval_result_t *result) {
     result->obj = string_obj(c_str_to_bytearray(s));
 }
 
-static void resolve_callable_expr(ast_expr_t *expr, env_t *env, eval_result_t *result) {
+static void resolve_callable_expr(ast_expr_t *expr, interp_t *interp, eval_result_t *result) {
     if (TYPEOF(expr) != AST_RESERVED_CALLABLE) {
         result->err = ERR_EVAL_TYPE_ERROR;
         return;
@@ -744,44 +745,44 @@ static void resolve_callable_expr(ast_expr_t *expr, env_t *env, eval_result_t *r
 
     switch (expr->reserved_callable->type) {
         case AST_CALL_TYPE_OF:
-            eval_type_of(args->root, result, env);
+            eval_type_of(args->root, result, interp);
             break;
         case AST_CALL_TO_HEX:
-            eval_to_hex(args->root, result, env);
+            eval_to_hex(args->root, result, interp);
             break;
         case AST_CALL_TO_BIN:
-            eval_to_bin(args->root, result, env);
+            eval_to_bin(args->root, result, interp);
             break;
         case AST_CALL_DUMP:
-            dump_args(args, result, env);
+            dump_args(args, result, interp);
             break;
         case AST_CALL_PRINT:
-            println_args(args, result, env);
+            println_args(args, result, interp);
             break;
         case AST_CALL_INPUT: {
-            if (print_args(args, result, env) == 0) {
+            if (print_args(args, result, interp) == 0) {
                 printf("? ");
             }
             readln_input(result);
             break;
         }
         case AST_CALL_READ:
-            eval_read_file(args->root, result, env);
+            eval_read_file(args->root, result, interp);
             break;
         case AST_CALL_RAND:
-            eval_rand(args->root, result, env);
+            eval_rand(args->root, result, interp);
             break;
         case AST_CALL_ABS:
-            eval_abs(args->root, result, env);
+            eval_abs(args->root, result, interp);
             break;
         case AST_CALL_GC:
-            gc(env);
+            gc(interp);
             break;
         case AST_CALL_MEM:
             show_heap();
             break;
         case AST_CALL_ENV:
-            show_env(env);
+            show_env(interp);
             break;
         default:
             goto error;
@@ -794,7 +795,7 @@ static void resolve_callable_expr(ast_expr_t *expr, env_t *env, eval_result_t *r
     result->obj = undef_obj();
 }
 
-static void eval_do_while_loop(ast_expr_t *expr, env_t *env, eval_result_t *result) {
+static void eval_do_while_loop(ast_expr_t *expr, interp_t *interp, eval_result_t *result) {
     eval_result_t *cond_r = (eval_result_t *) alloc_type(EVAL_RESULT, F_NONE);
 
     ast_expr_t *pred = expr->do_while_loop->pred;
@@ -804,7 +805,7 @@ static void eval_do_while_loop(ast_expr_t *expr, env_t *env, eval_result_t *resu
     result->err = ERR_NO_ERROR;
 
     for (;;) {
-        eval_expr(pred, env, result);
+        eval_expr(pred, interp, result);
         if (result->err != ERR_NO_ERROR) {
             result->obj = undef_obj();
             return;
@@ -817,7 +818,7 @@ static void eval_do_while_loop(ast_expr_t *expr, env_t *env, eval_result_t *resu
             result->obj = nil_obj();
         }
 
-        eval_expr(cond, env, cond_r);
+        eval_expr(cond, interp, cond_r);
         if (cond_r->err != ERR_NO_ERROR) {
             result->err = cond_r->err;
             result->obj = undef_obj();
@@ -828,7 +829,7 @@ static void eval_do_while_loop(ast_expr_t *expr, env_t *env, eval_result_t *resu
     }
 }
 
-static void eval_while_loop(ast_expr_t *expr, env_t *env, eval_result_t *result) {
+static void eval_while_loop(ast_expr_t *expr, interp_t *interp, eval_result_t *result) {
     eval_result_t *cond_r = (eval_result_t *) alloc_type(EVAL_RESULT, F_NONE);
 
     result->obj = nil_obj();
@@ -837,10 +838,10 @@ static void eval_while_loop(ast_expr_t *expr, env_t *env, eval_result_t *result)
     ast_expr_t *cond = expr->while_loop->cond;
     ast_expr_t *pred = expr->while_loop->pred;
 
-    enter_scope(env);
+    enter_scope(interp);
 
     for (;;) {
-        eval_expr(cond, env, cond_r);
+        eval_expr(cond, interp, cond_r);
         if (cond_r->err != ERR_NO_ERROR) {
             result->err = cond_r->err;
             result->obj = undef_obj();
@@ -849,7 +850,7 @@ static void eval_while_loop(ast_expr_t *expr, env_t *env, eval_result_t *result)
 
         if (!truthy(cond_r->obj)) goto done;
 
-        eval_expr(pred, env, result);
+        eval_expr(pred, interp, result);
         if (result->err != ERR_NO_ERROR) {
             result->obj = undef_obj();
             goto done;
@@ -864,10 +865,10 @@ static void eval_while_loop(ast_expr_t *expr, env_t *env, eval_result_t *result)
     }
 
     done:
-    leave_scope(env);
+    leave_scope(interp);
 }
 
-static void eval_for_loop(ast_expr_t *expr, env_t *env, eval_result_t *result) {
+static void eval_for_loop(ast_expr_t *expr, interp_t *interp, eval_result_t *result) {
     obj_t *result_obj = undef_obj();
     result->obj = result_obj;
 
@@ -883,7 +884,7 @@ static void eval_for_loop(ast_expr_t *expr, env_t *env, eval_result_t *result) {
     // Evaluate the iterable expression to get it.
     eval_result_t *iter_r = (eval_result_t *) alloc_type(EVAL_RESULT, F_NONE);
 
-    eval_expr(expr->for_loop->iterable, env, iter_r);
+    eval_expr(expr->for_loop->iterable, interp, iter_r);
     if ((result->err = iter_r->err) != ERR_NO_ERROR) {
         printf("obj %llu err %d\n", ((gc_header_t *) iter_r->obj)->type, iter_r->err);
         goto error;
@@ -902,16 +903,18 @@ static void eval_for_loop(ast_expr_t *expr, env_t *env, eval_result_t *result) {
 
     // Push a new scope and store the index variable.
     // We will mutate this variable with each iteration through the loop.
-    enter_scope(env);
+    enter_scope(interp);
     obj_t *next_elem = iter->next(iter);
 
     // The actual iteration. Done when we encounter Nil as a sentinel.
     while (TYPEOF(next_elem) != TYPE_NIL) {
         // Not mutable in user code.
         assert(orig_expr == (size_t) expr);
-        put_env(env, elem_name, next_elem, F_ENV_OVERWRITE);
+        // The special OVERWRITE flags lets the loop mutate vars the user can't.
+        next_elem->hdr.flags |= F_ENV_OVERWRITE;
+        put_env(interp, elem_name, next_elem);
 
-        eval_expr(pred, env, result);
+        eval_expr(pred, interp, result);
 
         if (result->err != ERR_NO_ERROR) goto error;
 
@@ -925,17 +928,17 @@ static void eval_for_loop(ast_expr_t *expr, env_t *env, eval_result_t *result) {
     }
 
     done:
-    leave_scope(env);
+    leave_scope(interp);
     result->obj = result_obj;
     return;
 
     error:
     printf("Leaving scope on error %d\n", result->err);
-    leave_scope(env);
+    leave_scope(interp);
     result->obj = undef_obj();
 }
 
-static void eval_expr(ast_expr_t *expr, env_t *env, eval_result_t *result) {
+static void eval_expr(ast_expr_t *expr, interp_t *interp, eval_result_t *result) {
     result->err = ERR_NO_ERROR;
 
     switch (TYPEOF(expr)) {
@@ -944,158 +947,158 @@ static void eval_expr(ast_expr_t *expr, env_t *env, eval_result_t *result) {
             break;
         }
         case AST_IS: {
-            eval_expr(expr->cast_args->a, env, result);
+            eval_expr(expr->cast_args->a, interp, result);
             if (result->err != ERR_NO_ERROR) return;
             obj_t *o1 = result->obj;
-            eval_expr(expr->cast_args->b, env, result);
+            eval_expr(expr->cast_args->b, interp, result);
             if (result->err != ERR_NO_ERROR) return;
             obj_t *o2 = result->obj;
             is_type(o1, o2, result);
             break;
         }
         case AST_CAST: {
-            eval_expr(expr->cast_args->a, env, result);
+            eval_expr(expr->cast_args->a, interp, result);
             if (result->err != ERR_NO_ERROR) return;
             obj_t *o1 = result->obj;
-            eval_expr(expr->cast_args->b, env, result);
+            eval_expr(expr->cast_args->b, interp, result);
             if (result->err != ERR_NO_ERROR) return;
             obj_t *o2 = result->obj;
             cast(o1, o2, result);
             break;
         }
         case AST_ADD: {
-            eval_expr(expr->op_args->a, env, result);
+            eval_expr(expr->op_args->a, interp, result);
             if (result->err != ERR_NO_ERROR) return;
             obj_t *o1 = result->obj;
-            eval_expr(expr->op_args->b, env, result);
+            eval_expr(expr->op_args->b, interp, result);
             if (result->err != ERR_NO_ERROR) return;
             obj_t *o2 = result->obj;
             math(o1, o2, result, METHOD_ADD);
             break;
         }
         case AST_SUB: {
-            eval_expr(expr->op_args->a, env, result);
+            eval_expr(expr->op_args->a, interp, result);
             if (result->err != ERR_NO_ERROR) return;
             obj_t *o1 = result->obj;
-            eval_expr(expr->op_args->b, env, result);
+            eval_expr(expr->op_args->b, interp, result);
             if (result->err != ERR_NO_ERROR) return;
             obj_t *o2 = result->obj;
             math(o1, o2, result, METHOD_SUB);
             break;
         }
         case AST_MUL: {
-            eval_expr(expr->op_args->a, env, result);
+            eval_expr(expr->op_args->a, interp, result);
             if (result->err != ERR_NO_ERROR) return;
             obj_t *o1 = result->obj;
-            eval_expr(expr->op_args->b, env, result);
+            eval_expr(expr->op_args->b, interp, result);
             if (result->err != ERR_NO_ERROR) return;
             obj_t *o2 = result->obj;
             math(o1, o2, result, METHOD_MUL);
             break;
         }
         case AST_DIV: {
-            eval_expr(expr->op_args->a, env, result);
+            eval_expr(expr->op_args->a, interp, result);
             if (result->err != ERR_NO_ERROR) return;
             obj_t *o1 = result->obj;
-            eval_expr(expr->op_args->b, env, result);
+            eval_expr(expr->op_args->b, interp, result);
             if (result->err != ERR_NO_ERROR) return;
             obj_t *o2 = result->obj;
             math(o1, o2, result, METHOD_DIV);
             break;
         }
         case AST_MOD: {
-            eval_expr(expr->op_args->a, env, result);
+            eval_expr(expr->op_args->a, interp, result);
             if (result->err != ERR_NO_ERROR) return;
             obj_t *o1 = result->obj;
-            eval_expr(expr->op_args->b, env, result);
+            eval_expr(expr->op_args->b, interp, result);
             if (result->err != ERR_NO_ERROR) return;
             obj_t *o2 = result->obj;
             math(o1, o2, result, METHOD_MOD);
             break;
         }
         case AST_AND: {
-            eval_expr(expr->op_args->a, env, result);
+            eval_expr(expr->op_args->a, interp, result);
             if (result->err != ERR_NO_ERROR) return;
             obj_t *o1 = result->obj;
-            eval_expr(expr->op_args->b, env, result);
+            eval_expr(expr->op_args->b, interp, result);
             if (result->err != ERR_NO_ERROR) return;
             obj_t *o2 = result->obj;
             boolean_and(o1, o2, result);
             break;
         }
         case AST_OR: {
-            eval_expr(expr->op_args->a, env, result);
+            eval_expr(expr->op_args->a, interp, result);
             if (result->err != ERR_NO_ERROR) return;
             obj_t *o1 = result->obj;
-            eval_expr(expr->op_args->b, env, result);
+            eval_expr(expr->op_args->b, interp, result);
             if (result->err != ERR_NO_ERROR) return;
             obj_t *o2 = result->obj;
             boolean_or(o1, o2, result);
             break;
         }
         case AST_NOT: {
-            eval_expr(expr->op_args->a, env, result);
+            eval_expr(expr->op_args->a, interp, result);
             if (result->err != ERR_NO_ERROR) return;
             result->obj = boolean_obj(truthy(result->obj) == True ? False : True);
             break;
         }
         case AST_NEGATE: {
-            eval_expr(expr->op_args->a, env, result);
+            eval_expr(expr->op_args->a, interp, result);
             if (result->err != ERR_NO_ERROR) return;
             negate(result->obj, result);
             break;
         }
         case AST_BITWISE_NOT: {
-            eval_expr(expr->op_args->a, env, result);
+            eval_expr(expr->op_args->a, interp, result);
             if (result->err != ERR_NO_ERROR) return;
             math(result->obj, NULL, result, METHOD_BITWISE_NOT);
             break;
         }
         case AST_BITWISE_SHL: {
-            eval_expr(expr->op_args->a, env, result);
+            eval_expr(expr->op_args->a, interp, result);
             if (result->err != ERR_NO_ERROR) return;
             obj_t *o1 = result->obj;
-            eval_expr(expr->op_args->b, env, result);
+            eval_expr(expr->op_args->b, interp, result);
             if (result->err != ERR_NO_ERROR) return;
             obj_t *o2 = result->obj;
             math(o1, o2, result, METHOD_BITWISE_SHL);
             break;
         }
         case AST_BITWISE_SHR: {
-            eval_expr(expr->op_args->a, env, result);
+            eval_expr(expr->op_args->a, interp, result);
             if (result->err != ERR_NO_ERROR) return;
             obj_t *o1 = result->obj;
-            eval_expr(expr->op_args->b, env, result);
+            eval_expr(expr->op_args->b, interp, result);
             if (result->err != ERR_NO_ERROR) return;
             obj_t *o2 = result->obj;
             math(o1, o2, result, METHOD_BITWISE_SHR);
             break;
         }
         case AST_BITWISE_OR: {
-            eval_expr(expr->op_args->a, env, result);
+            eval_expr(expr->op_args->a, interp, result);
             if (result->err != ERR_NO_ERROR) return;
             obj_t *o1 = result->obj;
-            eval_expr(expr->op_args->b, env, result);
+            eval_expr(expr->op_args->b, interp, result);
             if (result->err != ERR_NO_ERROR) return;
             obj_t *o2 = result->obj;
             math(o1, o2, result, METHOD_BITWISE_OR);
             break;
         }
         case AST_BITWISE_XOR: {
-            eval_expr(expr->op_args->a, env, result);
+            eval_expr(expr->op_args->a, interp, result);
             if (result->err != ERR_NO_ERROR) return;
             obj_t *o1 = result->obj;
-            eval_expr(expr->op_args->b, env, result);
+            eval_expr(expr->op_args->b, interp, result);
             if (result->err != ERR_NO_ERROR) return;
             obj_t *o2 = result->obj;
             math(o1, o2, result, METHOD_BITWISE_XOR);
             break;
         }
         case AST_BITWISE_AND: {
-            eval_expr(expr->op_args->a, env, result);
+            eval_expr(expr->op_args->a, interp, result);
             if (result->err != ERR_NO_ERROR) return;
             obj_t *o1 = result->obj;
-            eval_expr(expr->op_args->b, env, result);
+            eval_expr(expr->op_args->b, interp, result);
             if (result->err != ERR_NO_ERROR) return;
             obj_t *o2 = result->obj;
             math(o1, o2, result, METHOD_BITWISE_AND);
@@ -1107,50 +1110,50 @@ static void eval_expr(ast_expr_t *expr, env_t *env, eval_result_t *result) {
         case AST_LE:
         case AST_NE:
         case AST_EQ: {
-            eval_expr(expr->op_args->a, env, result);
+            eval_expr(expr->op_args->a, interp, result);
             if (result->err != ERR_NO_ERROR) return;
             obj_t *o1 = result->obj;
-            eval_expr(expr->op_args->b, env, result);
+            eval_expr(expr->op_args->b, interp, result);
             if (result->err != ERR_NO_ERROR) return;
             obj_t *o2 = result->obj;
             cmp(TYPEOF(expr), o1, o2, result);
             break;
         }
         case AST_ASSIGN: {
-            assign(expr->op_args->a, expr->op_args->b, result, env);
+            assign(expr->op_args->a, expr->op_args->b, result, interp);
             break;
         }
         case AST_IN: {
-            eval_expr(expr->op_args->a, env, result);
+            eval_expr(expr->op_args->a, interp, result);
             if (result->err != ERR_NO_ERROR) return;
             obj_t *o1 = result->obj;
-            eval_expr(expr->op_args->b, env, result);
+            eval_expr(expr->op_args->b, interp, result);
             if (result->err != ERR_NO_ERROR) return;
             obj_t *o2 = result->obj;
             member_of(o1, o2, result);
             break;
         }
         case AST_SUBSCRIPT: {
-            eval_expr(expr->op_args->a, env, result);
+            eval_expr(expr->op_args->a, interp, result);
             if (result->err != ERR_NO_ERROR) return;
             obj_t *o1 = result->obj;
-            eval_expr(expr->op_args->b, env, result);
+            eval_expr(expr->op_args->b, interp, result);
             if (result->err != ERR_NO_ERROR) return;
             obj_t *o2 = result->obj;
             subscript_of(o1, o2, result);
             break;
         }
         case AST_RANGE: {
-            eval_expr(expr->range->from, env, result);
+            eval_expr(expr->range->from, interp, result);
             obj_t *o1 = result->obj;
             if (result->err != ERR_NO_ERROR) return;
             if (TYPEOF(o1) != TYPE_INT) result->err = ERR_TYPE_INT_REQUIRED;
-            eval_expr(expr->range->to, env, result);
+            eval_expr(expr->range->to, interp, result);
             obj_t *o2 = result->obj;
             if (result->err != ERR_NO_ERROR) return;
             if (TYPEOF(o2) != TYPE_INT) result->err = ERR_TYPE_INT_REQUIRED;
             if (expr->range->step != NULL) {
-                eval_expr(expr->range->step, env, result);
+                eval_expr(expr->range->step, interp, result);
                 obj_t *o3 = result->obj;
                 if (result->err != ERR_NO_ERROR) return;
                 if (TYPEOF(o3) != TYPE_INT) result->err = ERR_TYPE_INT_REQUIRED;
@@ -1164,7 +1167,7 @@ static void eval_expr(ast_expr_t *expr, env_t *env, eval_result_t *result) {
             break;
         }
         case AST_FUNCTION_RETURN: {
-            eval_return_expr(expr->func_return_values, result, env);
+            eval_return_expr(expr->func_return_values, result, interp);
             break;
         }
         case AST_NIL: {
@@ -1189,7 +1192,7 @@ static void eval_expr(ast_expr_t *expr, env_t *env, eval_result_t *result) {
             break;
         case AST_IDENT: {
             bytearray_t *name = expr->bytearray;
-            obj_t *obj = get_env(env, name);
+            obj_t *obj = get_env(interp, name);
             if (TYPEOF(obj) == TYPE_UNDEF) {
                 result->err = ERR_ENV_SYMBOL_UNDEFINED;
                 return;
@@ -1202,48 +1205,48 @@ static void eval_expr(ast_expr_t *expr, env_t *env, eval_result_t *result) {
                 result->err = ERR_TYPE_INT_REQUIRED;
                 return;
             }
-            eval_expr(expr->range->from, env, result);
+            eval_expr(expr->range->from, interp, result);
             if (result->err != ERR_NO_ERROR) return;
             result->obj = bytearray_obj(result->obj->intval, NULL);
             break;
         }
         case AST_LIST: {
-            eval_list_expr(expr->list, result, env);
+            eval_list_expr(expr->list, result, interp);
             if (result->err != ERR_NO_ERROR) return;
             break;
         }
         case AST_DICT: {
-            eval_dict_expr(expr->dict, result, env);
+            eval_dict_expr(expr->dict, result, interp);
             if (result->err != ERR_NO_ERROR) return;
             break;
         }
         case AST_BLOCK: {
-            eval_block_expr(expr->block_exprs, result, env);
+            eval_block_expr(expr->block_exprs, result, interp);
             if (result->err != ERR_NO_ERROR) return;
             break;
         }
         case AST_FUNCTION_DEF: {
-            eval_func_def(expr->func_def, result, env);
+            eval_func_def(expr->func_def, result, interp);
             if (result->err != ERR_NO_ERROR) return;
             break;
         }
         case AST_FUNCTION_CALL: {
-            eval_func_call(expr->func_call, result, env);
+            eval_func_call(expr->func_call, result, interp);
             if (result->err != ERR_NO_ERROR) return;
             break;
         }
         case AST_RESERVED_CALLABLE: {
-            resolve_callable_expr(expr, env, result);
+            resolve_callable_expr(expr, interp, result);
             if (result->err != ERR_NO_ERROR) return;
             break;
         }
         case AST_APPLY: {
-            apply(expr, result, env);
+            apply(expr, result, interp);
             if (result->err != ERR_NO_ERROR) return;
             break;
         }
         case AST_DELETE: {
-            error_t error = del_env(env, expr->bytearray);
+            error_t error = del_env(interp, expr->bytearray);
             if (error != ERR_NO_ERROR) {
                 result->err = error;
                 return;
@@ -1252,11 +1255,11 @@ static void eval_expr(ast_expr_t *expr, env_t *env, eval_result_t *result) {
             break;
         }
         case AST_IF_THEN: {
-            eval_expr(expr->if_then_args->cond, env, result);
+            eval_expr(expr->if_then_args->cond, interp, result);
             if (result->err != ERR_NO_ERROR) return;
             // If cond ...
             if (truthy(result->obj)) {
-                eval_expr(expr->if_then_else_args->pred, env, result);
+                eval_expr(expr->if_then_else_args->pred, interp, result);
                 if (result->err != ERR_NO_ERROR) return;
                 // ... then result.
                 break;
@@ -1265,27 +1268,27 @@ static void eval_expr(ast_expr_t *expr, env_t *env, eval_result_t *result) {
             break;
         }
         case AST_IF_THEN_ELSE: {
-            eval_expr(expr->if_then_else_args->cond, env, result);
+            eval_expr(expr->if_then_else_args->cond, interp, result);
             if (result->err != ERR_NO_ERROR) return;
             // If cond ...
             if (truthy(result->obj)) {
-                eval_expr(expr->if_then_else_args->pred, env, result);
+                eval_expr(expr->if_then_else_args->pred, interp, result);
                 // ... then result ...
                 break;
             } else {
-                eval_expr(expr->if_then_else_args->else_pred, env, result);
+                eval_expr(expr->if_then_else_args->else_pred, interp, result);
                 // ... else other result.
                 break;
             }
         }
         case AST_DO_WHILE_LOOP:
-            eval_do_while_loop(expr, env, result);
+            eval_do_while_loop(expr, interp, result);
             break;
         case AST_WHILE_LOOP:
-            eval_while_loop(expr, env, result);
+            eval_while_loop(expr, interp, result);
             break;
         case AST_FOR_LOOP:
-            eval_for_loop(expr, env, result);
+            eval_for_loop(expr, interp, result);
             break;
         case AST_BREAK:
             result->obj = break_obj();
@@ -1300,7 +1303,7 @@ static void eval_expr(ast_expr_t *expr, env_t *env, eval_result_t *result) {
     }
 }
 
-void eval(env_t *env, const char *input, eval_result_t *result) {
+void eval(interp_t *interp, const char *input, eval_result_t *result) {
     ast_expr_t *ast = ast_empty();
     parse_result_t *parse_result = mem_alloc(sizeof(parse_result_t));
     parse_program(input, ast, parse_result);
@@ -1317,5 +1320,5 @@ void eval(env_t *env, const char *input, eval_result_t *result) {
     pretty_print(ast);
 #endif
 
-    eval_expr(ast, env, result);
+    eval_expr(ast, interp, result);
 }

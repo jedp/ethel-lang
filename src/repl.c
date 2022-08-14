@@ -82,13 +82,11 @@ int main() {
     program[0] = 0;
     unsigned int indent = 0;
 
-    env_t env;
-    env_init(&env);
-    enter_scope(&env);
+    interp_t interp;
+    interp_init(&interp);
 
     eval_result_t *result = (eval_result_t *) alloc_type(EVAL_RESULT, F_NONE);
-    put_env_gc_root(&env, (gc_header_t *) result);
-    enter_scope(&env);
+    put_env_gc_root(&interp, (gc_header_t *) result);
 
     while (1) {
         if (indent) {
@@ -106,7 +104,7 @@ int main() {
         program = (char *) realloc(program, program_len);
         c_str_ncat(program, input, program_len);
 
-        eval(&env, program, result);
+        eval(&interp, program, result);
         obj_t *obj = (obj_t *) result->obj;
         indent = result->depth;
 

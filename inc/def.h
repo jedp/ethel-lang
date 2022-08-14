@@ -25,7 +25,7 @@ enum all_flags {
     F_ENV_ASSIGNABLE = (1 << 0),
     F_ENV_OVERWRITE = (1 << 1),
     F_ENV_MUTABLE = (1 << 2),
-    // (1 << 3) is unused.
+    F_ENV_DECLARATION = (1 << 3),
     F_GC_FREE = (1 << 4),  // Node is on the free list.
     F_GC_UNREACHED = (1 << 5),
     F_GC_UNSCANNED = (1 << 6),
@@ -165,8 +165,8 @@ enum every_type {
     TYPE_BREAK,
     TYPE_CONTINUE,
     EVAL_RESULT,
-    ENV_SYM,
-    ENV_SYM_ELEM,
+    INTERP_ENV,
+    INTERP_STATE,
     TYPE_MAX,
 };
 
@@ -303,8 +303,8 @@ static const char *type_names[TYPE_MAX] = {
         "Break",
         "Continue",
         "<Eval Result>",
-        "<Env Symbol>",
-        "<Env Symbol Container>",
+        "<Interpreter Env>",
+        "<Interpreter State>",
 };
 
 typedef uint8_t byte;

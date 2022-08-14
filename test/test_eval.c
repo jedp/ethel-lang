@@ -728,7 +728,7 @@ void test_eval_string_length_in_expr(void) {
 }
 
 void test_eval_empty_list(void) {
-    char *program = "{ l = list { }\n"
+    char *program = "{ val l = list { }\n"
                     "  l.length() }";
 
     eval_result_t *result = (eval_result_t *) alloc_type(EVAL_RESULT, F_NONE);

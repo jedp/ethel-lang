@@ -1,183 +1,136 @@
 #include <assert.h>
 #include <stdio.h>
 #include "../inc/type.h"
+#include "../inc/dict.h"
 #include "../inc/mem.h"
 #include "../inc/str.h"
 #include "../inc/env.h"
 
-static env_sym_t *new_sym(bytearray_t *name_obj, gc_header_t *obj, flags_t flags) {
-    env_sym_t *sym = (env_sym_t *) alloc_type(ENV_SYM, flags);
-    sym->name_obj = bytearray_clone(name_obj);
-    sym->obj = obj;
-
-    return sym;
+env_t *new_env(void) {
+    env_t *env = (env_t *) alloc_type(INTERP_ENV, F_NONE);
+    env->parent = NULL;
+    env->vars = dict_obj();
+    return env;
 }
 
-static env_sym_elem_t *new_sym_elem(env_sym_t *sym) {
-    env_sym_elem_t *elem = (env_sym_elem_t *) alloc_type(ENV_SYM_ELEM, F_NONE);
-    elem->sym = (env_sym_t *) sym;
-    elem->prev = NULL;
-    elem->next = NULL;
-
-    return elem;
-}
-
-error_t push_scope(env_t *env, env_sym_elem_t *scope) {
-    env->top += 1;
-    if (env->top == ENV_MAX_STACK_DEPTH) {
+error_t push_scope(interp_t *interp, env_t *scope) {
+    interp->top += 1;
+    if (interp->top == ENV_MAX_STACK_DEPTH) {
         return ERR_ENV_MAX_DEPTH_EXCEEDED;
     }
-
-    env->symbols[env->top] = scope;
+    interp->ret_stack[interp->top] = scope;
+    interp->env = interp->ret_stack[interp->top];
     return ERR_NO_ERROR;
 }
 
-error_t enter_scope(env_t *env) {
-    return push_scope(env, NULL);
+error_t enter_scope(interp_t *interp) {
+    env_t *env = new_env();
+    env->parent = interp->env;
+    return push_scope(interp, env);
 }
 
-error_t leave_scope(env_t *env) {
-    env->symbols[env->top] = NULL;
-    env->top -= 1;
-
-    return ERR_NO_ERROR;
-}
-
-static env_sym_t *find_sym_by_name(env_t *env, bytearray_t *sym_name, boolean recursive) {
-    if (env->top < 0) return NULL;
-
-    // NULL is a valid name for planting gc roots.
-    if (sym_name == NULL) return NULL;
-
-    // Search back through the scopes to find the name.
-    for (int i = env->top; i >= 0; --i) {
-        // Start at the node the root points to.
-        env_sym_elem_t *elem = env->symbols[i];
-        while (elem != NULL) {
-            if (elem->sym != NULL
-                && elem->sym->name_obj != NULL
-                && bytearray_eq(sym_name, elem->sym->name_obj)) {
-                return elem->sym;
-            }
-            elem = elem->next;
-        }
-
-        if (!recursive) return NULL;
+error_t leave_scope(interp_t *interp) {
+    if (interp->top == 0) {
+        return ERR_UNDERFLOW_ERROR;
     }
 
-    return NULL;
+    interp->ret_stack[interp->top] = NULL;
+    interp->top -= 1;
+    interp->env = interp->ret_stack[interp->top];
+
+    return ERR_NO_ERROR;
 }
 
-error_t put_env_internal(env_t *env,
-                         bytearray_t *name_obj,
-                         const gc_header_t *obj,
-                         const flags_t flags,
-                         boolean can_shadow) {
-    assert(env->top >= 0);
+static error_t put_env_internal(interp_t *interp,
+                                bytearray_t *name_obj,
+                                gc_header_t *obj) {
+    env_t *env = interp->env;
+    obj_t *found;
 
-    env_sym_t *found = find_sym_by_name(env, name_obj, !can_shadow);
-    // Already exists in scopes we can access.
-    if (found != NULL) {
-        if (!(flags & F_ENV_OVERWRITE) && !(FLAGS(found) & F_ENV_MUTABLE)) {
+    // New declaration in this scope? (Can shadow.)
+    if (obj->flags & F_ENV_DECLARATION) {
+        found = dict_get(env->vars, string_obj(name_obj));
+        if (found->hdr.type != TYPE_NIL) {
             return ERR_ENV_SYMBOL_REDEFINED;
         }
-
-        found->obj = (gc_header_t *) obj;
-        return ERR_NO_ERROR;
+        // Strip off the declaration flag. Don't need to preserve that.
+        obj->flags &= ~F_ENV_DECLARATION;
+        return dict_put(env->vars, string_obj(name_obj), (obj_t *) obj);
     }
 
-    // Not found. Put it in the current scope.
-    env_sym_t *new = new_sym(name_obj, (gc_header_t *) obj, flags);
+    // (Re-)assignment in this or a higher scope?
+    while (env != NULL) {
+        found = dict_get(env->vars, string_obj(name_obj));
 
-    env_sym_elem_t *top_elem = env->symbols[env->top];
-    env_sym_elem_t *new_elem = new_sym_elem(new);
+        if (found->hdr.type != TYPE_NIL) {
+            if (!(found->hdr.flags & F_ENV_MUTABLE) &&
+                !(found->hdr.flags & F_ENV_OVERWRITE)) {
+                return ERR_ENV_SYMBOL_REDEFINED;
+            }
 
-    // First thing in this scope?
-    if (top_elem == NULL) {
-        env->symbols[env->top] = new_elem;
-        return ERR_NO_ERROR;
-    }
-
-    // Insert into list of other things at this scope.
-    assert(top_elem->prev == NULL);
-    new_elem->prev = NULL;
-    new_elem->next = top_elem;
-    top_elem->prev = new_elem;
-    env->symbols[env->top] = new_elem;
-
-    return ERR_NO_ERROR;
-}
-
-error_t put_env(env_t *env, bytearray_t *name_obj, const obj_t *obj, const flags_t flags) {
-    return put_env_internal(env, name_obj, (gc_header_t *) obj, flags, False);
-}
-
-error_t put_env_shadow(env_t *env, bytearray_t *name_obj, const obj_t *obj, const flags_t flags) {
-    return put_env_internal(env, name_obj, (gc_header_t *) obj, flags, True);
-}
-
-error_t put_env_gc_root(env_t *env, const gc_header_t *hdr) {
-    return put_env_internal(env, NULL, hdr, F_NONE, False);
-}
-
-error_t del_env(env_t *env, bytearray_t *name_obj) {
-    env_sym_elem_t *sym_elem = env->symbols[env->top];
-
-    while (sym_elem != NULL) {
-        if (sym_elem->sym != NULL
-            && sym_elem->sym->name_obj != NULL
-            && bytearray_eq(name_obj, sym_elem->sym->name_obj)) {
-            sym_elem->sym = NULL;
-
-            if (sym_elem->prev != NULL) sym_elem->prev = sym_elem->next;
-            if (sym_elem->next != NULL) sym_elem->next = sym_elem->prev;
-            sym_elem = NULL;
-
-            return ERR_NO_ERROR;
+            // Mutate, preserving original flags.
+            obj->flags = found->hdr.flags;
+            return dict_put(env->vars, string_obj(name_obj), (obj_t *) obj);
         }
-        sym_elem = sym_elem->next;
+
+        // Keep looking in the parent env.
+        env = env->parent;
+    }
+
+    // First-time declaration of loop variable?
+    if (obj->flags & F_ENV_OVERWRITE) {
+        return dict_put(interp->env->vars, string_obj(name_obj), (obj_t *) obj);
     }
 
     return ERR_ENV_SYMBOL_UNDEFINED;
 }
 
-obj_t *get_env(env_t *env, bytearray_t *name_obj) {
-    env_sym_t *sym = find_sym_by_name(env, name_obj, True);
-    if (sym == NULL) return undef_obj();
-
-    return (obj_t *) sym->obj;
+error_t put_env(interp_t *interp, bytearray_t *name_obj, obj_t *obj) {
+    return put_env_internal(interp, name_obj, (gc_header_t *) obj);
 }
 
-error_t env_init(env_t *env) {
-    // Initialize all pointers.
-    for (int i = 0; i < ENV_MAX_STACK_DEPTH; ++i) {
-        env->symbols[i] = NULL;
+error_t put_env_gc_root(interp_t *interp, gc_header_t *hdr) {
+    return put_env_internal(interp, c_str_to_bytearray("<gc-root>"), hdr);
+}
+
+error_t del_env(interp_t *interp, bytearray_t *name_obj) {
+    dict_remove(interp->env->vars, string_obj(name_obj));
+    return ERR_NO_ERROR;
+}
+
+obj_t *get_env(interp_t *interp, bytearray_t *name_obj) {
+    obj_t *found;
+    env_t *env = interp->env;
+    while (env != NULL) {
+        found = dict_get(env->vars, string_obj(name_obj));
+        if (found->hdr.type != TYPE_NIL) {
+            return found;
+        }
+        assert(env != env->parent);
+        env = env->parent;
     }
 
-    // An outer new_scope() is required.
-    env->top = -1;
+    return undef_obj();
+}
+
+error_t interp_init(interp_t *interp) {
+    env_t *env = new_env();
+
+    for (int i = 0; i < ENV_MAX_STACK_DEPTH; ++i) {
+        interp->ret_stack[i] = NULL;
+    }
+    interp->ret_stack[0] = env;
+    interp->top = 0;
+    interp->env = env;
 
     return ERR_NO_ERROR;
 }
 
-void show_env(env_t *env) {
-    env_sym_elem_t *sym_elem;
-
-    printf("Env:\n");
-    for (int i = env->top; i >= 0; --i) {
-        printf("[Level %d]\n", i);
-        sym_elem = env->symbols[i];
-        while (sym_elem != NULL) {
-            if (sym_elem->sym != NULL) {
-                if (sym_elem->sym->name_obj == NULL) {
-                    printf("  <hidden> %s\n", type_names[TYPEOF(sym_elem->sym->obj)]);
-                } else {
-                    printf("  '%s' %s\n", bytearray_to_c_str(sym_elem->sym->name_obj),
-                           type_names[TYPEOF(sym_elem->sym->obj)]);
-                }
-            }
-            sym_elem = sym_elem->next;
-        }
+void show_env(interp_t *interp) {
+    printf("interp: top %d, env %p\n", interp->top, interp->env);
+    for (int i = interp->top; i >= 0; --i) {
+        printf("ret%d:\n env %p\n parent %p\n", i,
+               interp->ret_stack[i],
+               interp->ret_stack[i]->parent);
     }
-    printf("----\n");
 }

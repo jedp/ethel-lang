@@ -3,6 +3,6 @@
 
 #include "../inc/env.h"
 
-void gc(env_t *env);
+void gc(interp_t *interp);
 
 #endif

@@ -90,10 +90,33 @@ void test_generate_multiple_closures(void) {
     TEST_ASSERT_EQUAL(2, obj->intval);
 }
 
+void test_variable_mutation_in_closure(void) {
+    char *program = "{                 \n"
+                    "  val f = fn(x) { \n"
+                    "    var i = x + 2 \n"
+                    "    fn(y) {       \n"
+                    "      i = i + y   \n"
+                    "      i           \n"
+                    "    }             \n"
+                    "  }               \n"
+                    "                  \n"
+                    " val x = f(2)     \n"
+                    " x(3)  ;; -> 7    \n"
+                    " x(1)  ;; -> 8    \n"
+                    " }";
+
+    eval_result_t *result = (eval_result_t *) alloc_type(EVAL_RESULT, F_NONE);
+    eval_program(program, result);
+
+    obj_t *obj = result->obj;
+    TEST_ASSERT_EQUAL(8, obj->intval);
+}
+
 void test_closure(void) {
     RUN_TEST(test_return_closure);
     RUN_TEST(test_return_closure_unbound);
     RUN_TEST(test_return_anonymous_closure);
     RUN_TEST(test_return_anonymous_closure_unbound);
     RUN_TEST(test_generate_multiple_closures);
+    RUN_TEST(test_variable_mutation_in_closure);
 }

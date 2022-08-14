@@ -139,26 +139,22 @@ static int scan_unscanned_objects() {
 /*
  * Mark nodes reached by the root set as Unscanned.
  */
-static void initialize_unscanned_roots(env_t *env) {
-    assert(env->top >= 0);
-
+static void initialize_unscanned_roots(interp_t *interp) {
     // Move objects referenced by the root set from Unreached to Unscanned.
-    for (int i = env->top; i >= 0; --i) {
-        env_sym_elem_t *env_elem = env->symbols[i];
-        while (env_elem != NULL) {
-            heap_node_t *heap_node = NODE_FOR_DATA(env_elem);
+    for (int i = interp->top; i >= 0; --i) {
+        env_t *env = interp->ret_stack[i];
+        // TODO left off here
+        // TODO this can't really work
+        heap_node_t *heap_node = NODE_FOR_DATA(env);
 
-            // By definition allocated, so should already have been marked as Unreached.
-            assert(!(heap_node->flags & F_GC_FREE));
+        // By definition allocated, so should already have been marked as Unreached.
+        assert(!(heap_node->flags & F_GC_FREE));
 
-            // I guess this assertion doesn't hold for shadowing vars?
-            // assert(heap_node->flags & F_GC_UNREACHED);
+        // I guess this assertion doesn't hold for shadowing vars?
+        // assert(heap_node->flags & F_GC_UNREACHED);
 
-            heap_node->flags &= ~F_GC_UNREACHED;
-            heap_node->flags |= F_GC_UNSCANNED;
-
-            env_elem = env_elem->next;
-        }
+        heap_node->flags &= ~F_GC_UNREACHED;
+        heap_node->flags |= F_GC_UNSCANNED;
     }
 }
 
@@ -186,11 +182,11 @@ static void initialize_gc(void) {
 /*
  * Stop the world, someone has to get off.
  */
-void gc(env_t *env) {
+void gc(interp_t *interp) {
     size_t used_before = get_heap_info()->bytes_used;
 
     initialize_gc();
-    initialize_unscanned_roots(env);
+    initialize_unscanned_roots(interp);
     while (scan_unscanned_objects());
     move_unreached_to_free();
     coalesce_free_nodes();

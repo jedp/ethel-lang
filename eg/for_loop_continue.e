@@ -10,4 +10,5 @@ for c in s {
 }
 
 ; Result.
+print("Expect asc 'a' + 'c' = 196")
 n

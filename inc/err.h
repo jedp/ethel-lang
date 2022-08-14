@@ -50,7 +50,7 @@ static const char *err_names[ERR_MAX] = {
         "Parser error: Unhandled type!",
         "Max scope depth exceeded",
         "No current variable scope!",
-        "Cannot redefine immutable object",
+        "Cannot redefine object",
         "Symbol undefined",
         "Type unsupported",
         "Type invalid as dictionary key",

@@ -61,19 +61,18 @@ obj_t *make_list(int n_elems, ...) {
 }
 
 void eval_program(const char *program, eval_result_t *result) {
-    env_t env;
-    env_init(&env);
-    enter_scope(&env);
+    interp_t interp;
+    interp_init(&interp);
 
     // Move input to ethel's memory.
     size_t len = c_str_len(program) + 1;
     char *buf = mem_alloc(len);
     mem_cp(buf, (void *) program, len);
 
-    put_env_gc_root(&env, (gc_header_t *) result);
-    enter_scope(&env);
+    put_env_gc_root(&interp, (gc_header_t *) result);
+    enter_scope(&interp);
 
-    eval(&env, program, result);
+    eval(&interp, program, result);
 
     if (result->err != ERR_NO_ERROR) {
         printf("Error executing program: %s\n", err_names[result->err]);

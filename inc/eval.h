@@ -13,6 +13,6 @@ typedef struct Result {
     uint16_t err;
 } eval_result_t;
 
-void eval(env_t *env, const char *input, eval_result_t *result);
+void eval(interp_t *interp, const char *input, eval_result_t *result);
 
 #endif

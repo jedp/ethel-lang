@@ -8,15 +8,14 @@
 #include "../inc/run.h"
 
 static int _eval(char *program) {
-    env_t env;
-    env_init(&env);
-    enter_scope(&env);
+    interp_t interp;
+    interp_init(&interp);
 
     eval_result_t *result = (eval_result_t *) alloc_type(EVAL_RESULT, F_NONE);
-    put_env_gc_root(&env, (gc_header_t *) result);
-    enter_scope(&env);
+    put_env_gc_root(&interp, (gc_header_t *) result);
+    enter_scope(&interp);
 
-    eval(&env, program, result);
+    eval(&interp, program, result);
 
     if (result->err != ERR_NO_ERROR) {
         printf("Error: %s\n", err_names[result->err]);
