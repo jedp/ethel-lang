@@ -152,7 +152,6 @@ static int scan_unscanned_objects() {
             gc_header_t *data_ptr = (gc_header_t *) DATA_FOR_NODE(heap_node);
             assert_valid_typed_node(data_ptr);
 
-            printf("scanning children of type %d\n", (int) data_ptr->type);
             if (data_ptr->type == TYPE_DICT_DATA) {
                 unscanned += scan_dict_children(data_ptr);
             } else {
