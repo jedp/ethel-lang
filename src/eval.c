@@ -422,7 +422,7 @@ static void assign(ast_expr_t *lhs,
         eval_func_def(rhs->func_def, result, interp);
         if (result->err != ERR_NO_ERROR) goto error;
         ((gc_header_t *) result->obj)->flags = FLAGS(lhs);
-        error = put_env(interp, name, result->obj);
+        error = put_env(interp, name, (gc_header_t*) result->obj);
         if (error != ERR_NO_ERROR) {
             result->err = error;
             goto error;
@@ -434,7 +434,7 @@ static void assign(ast_expr_t *lhs,
     if (result->err != ERR_NO_ERROR) goto error;
     // Absorb lhs flags into the object we're saving.
     ((gc_header_t *) result->obj)->flags = FLAGS(lhs);
-    result->err = put_env(interp, name, result->obj);
+    result->err = put_env(interp, name, (gc_header_t*) result->obj);
     if (result->err != ERR_NO_ERROR) goto error;
 
     return;
@@ -914,7 +914,7 @@ static void eval_for_loop(ast_expr_t *expr, interp_t *interp, eval_result_t *res
         assert(orig_expr == (size_t) expr);
         // The special OVERWRITE flags lets the loop mutate vars the user can't.
         next_elem->hdr.flags |= F_ENV_OVERWRITE;
-        put_env(interp, elem_name, next_elem);
+        put_env(interp, elem_name, (gc_header_t*) next_elem);
 
         eval_expr(pred, interp, result);
 

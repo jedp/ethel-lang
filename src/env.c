@@ -89,10 +89,6 @@ error_t put_env(interp_t *interp, bytearray_t *name_obj, gc_header_t *hdr) {
     return put_env_internal(interp, name_obj, hdr);
 }
 
-error_t put_env_gc_root(interp_t *interp, gc_header_t *hdr) {
-    return put_env_internal(interp, c_str_to_bytearray("<gc-root>"), hdr);
-}
-
 error_t del_env(interp_t *interp, bytearray_t *name_obj) {
     dict_remove(interp->env->vars, string_obj(name_obj));
     return ERR_NO_ERROR;

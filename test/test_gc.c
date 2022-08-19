@@ -14,10 +14,10 @@ void gc_primitives(void) {
 
     obj_t *i = int_obj(42);
     // This object will always be in scope.
-    put_env(&interp, NAME("keep-int"), i);
-    put_env(&interp, NAME("keep-bool"), boolean_obj(1));
-    put_env(&interp, NAME("keep-float"), float_obj(4.2));
-    put_env(&interp, NAME("keep-byte"), byte_obj(0x0f));
+    put_env(&interp, NAME("keep-int"), (gc_header_t*) i);
+    put_env(&interp, NAME("keep-bool"), (gc_header_t*) boolean_obj(1));
+    put_env(&interp, NAME("keep-float"), (gc_header_t*) float_obj(4.2));
+    put_env(&interp, NAME("keep-byte"), (gc_header_t*) byte_obj(0x0f));
 
     TEST_ASSERT_EQUAL(TYPE_INT, TYPEOF(get_env(&interp, NAME("keep-int"))));
     TEST_ASSERT_EQUAL(TYPE_BOOLEAN, TYPEOF(get_env(&interp, NAME("keep-bool"))));
@@ -29,10 +29,10 @@ void gc_primitives(void) {
 
     // The object is unreachable by the env after we leave its scope.
     enter_scope(&interp);
-    put_env(&interp, NAME("cull-int"), int_obj(17));
-    put_env(&interp, NAME("cull-bool"), boolean_obj(1));
-    put_env(&interp, NAME("cull-float"), float_obj(1.3));
-    put_env(&interp, NAME("cull-byte"), byte_obj(0x0a));
+    put_env(&interp, NAME("cull-int"), (gc_header_t*) int_obj(17));
+    put_env(&interp, NAME("cull-bool"), (gc_header_t*) boolean_obj(1));
+    put_env(&interp, NAME("cull-float"), (gc_header_t*) float_obj(1.3));
+    put_env(&interp, NAME("cull-byte"), (gc_header_t*) byte_obj(0x0a));
     leave_scope(&interp);
 
     // There is garbage.
@@ -60,13 +60,13 @@ void gc_bytearray(void) {
     interp_t interp;
     interp_init(&interp);
 
-    put_env(&interp, NAME("keep-bytearray"), bytearray_obj(0, NULL));
+    put_env(&interp, NAME("keep-bytearray"), (gc_header_t*) bytearray_obj(0, NULL));
     gc(&interp);
     int init_free = get_heap_info()->bytes_free;
 
     // Will be unreachable after we exit scope.
     enter_scope(&interp);
-    put_env(&interp, NAME("cull-bytearray"), bytearray_obj(0, NULL));
+    put_env(&interp, NAME("cull-bytearray"), (gc_header_t*) bytearray_obj(0, NULL));
     leave_scope(&interp);
 
     // There is garbage.
@@ -88,13 +88,13 @@ void gc_string(void) {
     interp_t interp;
     interp_init(&interp);
 
-    put_env(&interp, NAME("keep-string"), string_obj(NAME("Hi")));
+    put_env(&interp, NAME("keep-string"), (gc_header_t*) string_obj(NAME("Hi")));
     gc(&interp);
     int init_free = get_heap_info()->bytes_free;
 
     // Will be unreachable after we exit scope.
     enter_scope(&interp);
-    put_env(&interp, NAME("cull-string"), string_obj(NAME("Bye")));
+    put_env(&interp, NAME("cull-string"), (gc_header_t*) string_obj(NAME("Bye")));
     leave_scope(&interp);
 
     // There is garbage.
