@@ -12,9 +12,9 @@ typedef struct {
     int etc;
 } fake_ast_block_t;
 
-static obj_t *decl(obj_t *obj) {
+static gc_header_t *decl(obj_t *obj) {
     obj->hdr.flags |= F_ENV_DECLARATION;
-    return obj;
+    return (gc_header_t *) obj;
 }
 
 void test_env_init() {
@@ -31,7 +31,7 @@ void test_env_put_get() {
     obj_t *not_found = get_env(&interp, NAME("ethel"));
     TEST_ASSERT_EQUAL(TYPE_UNDEF, TYPEOF(not_found));
 
-    obj_t *obj = decl(int_obj(42));
+    gc_header_t *obj = decl(int_obj(42));
 
     int error = put_env(&interp, NAME("ethel"), obj);
     TEST_ASSERT_EQUAL(ERR_NO_ERROR, error);
@@ -48,7 +48,7 @@ void test_env_put_del_get() {
     obj_t *not_found = get_env(&interp, NAME("ethel"));
     TEST_ASSERT_EQUAL(TYPE_UNDEF, TYPEOF(not_found));
 
-    obj_t *obj = decl(int_obj(42));
+    gc_header_t *obj = decl(int_obj(42));
 
     int error = put_env(&interp, NAME("ethel"), obj);
     TEST_ASSERT_EQUAL(ERR_NO_ERROR, error);
@@ -161,50 +161,13 @@ void test_env_redefinition_error(void) {
     TEST_ASSERT_EQUAL(6, get_env(&interp, NAME("thing"))->intval);
 
     // Can't define it again at this scope.
-    TEST_ASSERT_EQUAL(ERR_ENV_SYMBOL_REDEFINED, put_env(&interp, NAME("thing"), float_obj(1.2)));
+    TEST_ASSERT_EQUAL(ERR_ENV_SYMBOL_REDEFINED, put_env(&interp, NAME("thing"), (gc_header_t *) float_obj(1.2)));
 
     // Also cannot shadow it in a deeper scope.
     enter_scope(&interp);
-    TEST_ASSERT_EQUAL(ERR_ENV_SYMBOL_REDEFINED, put_env(&interp, NAME("thing"), float_obj(1.2)));
+    TEST_ASSERT_EQUAL(ERR_ENV_SYMBOL_REDEFINED, put_env(&interp, NAME("thing"), (gc_header_t *) float_obj(1.2)));
 }
 
-void test_plant_gc_root(void) {
-    interp_t interp;
-    interp_init(&interp);
-    int error;
-
-    obj_t *obj1 = decl(int_obj(42));
-    error = put_env(&interp, NAME("ethel-int"), obj1);
-    TEST_ASSERT_EQUAL(ERR_NO_ERROR, error);
-
-    fake_ast_block_t *thing = (fake_ast_block_t *) alloc_type(AST_BLOCK, F_NONE);
-    thing->hdr.flags |= F_ENV_DECLARATION;
-    error = put_env_gc_root(&interp, (gc_header_t *) thing);
-    TEST_ASSERT_EQUAL(ERR_NO_ERROR, error);
-
-    // Put another object to make sure finding names works
-    // now that there are null names for gc roots.
-    obj_t *obj2 = decl(float_obj(4.2));
-    error = put_env(&interp, NAME("ethel-float"), obj2);
-    TEST_ASSERT_EQUAL(ERR_NO_ERROR, error);
-
-    TEST_ASSERT_EQUAL(42, get_env(&interp, NAME("ethel-int"))->intval);
-    TEST_ASSERT_EQUAL(4.2, get_env(&interp, NAME("ethel-float"))->floatval);
-
-    /* TODO fix
-    // Confirm "thing" is in the scope.
-    env_sym_elem_t *node = env.symbols[env.top];
-    while (node != NULL) {
-        if (node->sym->obj->type == AST_BLOCK) break;
-        node = node->next;
-    }
-
-    // We should have found the right thing.
-    // As a GC root, its name is null.
-    TEST_ASSERT_NULL(node->sym->name_obj);
-    TEST_ASSERT_EQUAL(AST_BLOCK, node->sym->obj->type);
-     */
-}
 
 void test_env(void) {
     RUN_TEST(test_env_init);
@@ -212,5 +175,4 @@ void test_env(void) {
     RUN_TEST(test_env_put_del_get);
     RUN_TEST(test_env_scopes);
     RUN_TEST(test_env_redefinition_error);
-    RUN_TEST(test_plant_gc_root);
 }

@@ -43,13 +43,21 @@ typedef struct ObjDictKvNode {
     obj_t *v;
     struct ObjDictKvNode *next;
     uint32_t hash_val;
-} dict_node_t;
+} dict_kv_node_t;
 
+/**
+ * This guy breaks the gc header + children model.
+ *
+ * The array of nodes could be any size.
+ *
+ * So we will special-case this for gc.
+ */
 typedef struct ObjDictElem {
     gc_header_t hdr;
-    dict_node_t **nodes;
     uint32_t buckets;
     uint32_t nelems;
+    /* Array alloc'd to size when struct is instantiated. */
+    dict_kv_node_t *nodes[0];
 } obj_dict_t;
 
 typedef struct ObjFuncDef {
@@ -214,6 +222,7 @@ obj_t *range_step_obj(int from_inclusive, int to_inclusive, int step);
 
 obj_t *list_obj(obj_list_element_t *elems);
 
+obj_t *dict_obj_of_size(size_t buckets);
 obj_t *dict_obj(void);
 
 obj_t *func_obj(void *code, void *scope);

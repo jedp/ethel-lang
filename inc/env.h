@@ -34,7 +34,7 @@ error_t leave_scope(interp_t *interp);
  *
  * They will be protected from GC as long as they are in scope.
  */
-error_t put_env(interp_t *interp, bytearray_t *name_obj, obj_t *obj);
+error_t put_env(interp_t *interp, bytearray_t *name_obj, gc_header_t *hdr);
 
 /*
  * Plant a GC root for an object in the current scope.

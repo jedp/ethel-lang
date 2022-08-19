@@ -153,7 +153,6 @@ static void eval_dict_expr(ast_dict_t *expr, eval_result_t *result, interp_t *in
     }
 
     obj_t *dict = dict_obj();
-    dict_init(dict, DICT_INIT_BUCKETS);
 
     ast_expr_kv_list_t *kv = expr->kv;
     while (kv != NULL) {
@@ -777,12 +776,15 @@ static void resolve_callable_expr(ast_expr_t *expr, interp_t *interp, eval_resul
             break;
         case AST_CALL_GC:
             gc(interp);
+            result->obj = nil_obj();
             break;
         case AST_CALL_MEM:
             show_heap();
+            result->obj = nil_obj();
             break;
         case AST_CALL_ENV:
             show_env(interp);
+            result->obj = nil_obj();
             break;
         default:
             goto error;

@@ -6,8 +6,11 @@
 /*
  * Allocate an object of size type_t with the given flags.
  *
+ * For dictionaries, use the special alloc_dict(buckets, flags);
+ *
  * Makes the allocated object traceable by GC.
  */
+gc_header_t *alloc_dict(uint32_t buckets, flags_t flags);
 gc_header_t *alloc_type(type_t type, flags_t flags);
 
 /*

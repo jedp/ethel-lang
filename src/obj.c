@@ -113,17 +113,22 @@ obj_t *list_obj(obj_list_element_t *elems) {
     return obj;
 }
 
-obj_t *dict_obj(void) {
+obj_t *dict_obj_of_size(size_t buckets) {
     obj_t *obj = obj_of(TYPE_DICT);
     ((gc_header_t *) obj)->flags = F_ENV_ASSIGNABLE;
-    obj->dict = (obj_dict_t *) alloc_type(TYPE_DICT_DATA, F_NONE);
-    if (obj->dict == NULL ||
-        dict_init(obj, DICT_INIT_BUCKETS) != ERR_NO_ERROR) {
+    obj->dict = (obj_dict_t *) alloc_dict(buckets, F_NONE);
+    obj->dict->buckets = buckets;
+    obj->dict->nelems = 0;
+    if (obj->dict == NULL) {
         mem_free(obj);
         obj = NULL;
         return nil_obj();
     }
     return obj;
+}
+
+obj_t *dict_obj(void) {
+    return dict_obj_of_size(DICT_INIT_BUCKETS);
 }
 
 obj_t *func_obj(void *code, void *scope) {

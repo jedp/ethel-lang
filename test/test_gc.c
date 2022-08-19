@@ -18,6 +18,12 @@ void gc_primitives(void) {
     put_env(&interp, NAME("keep-bool"), boolean_obj(1));
     put_env(&interp, NAME("keep-float"), float_obj(4.2));
     put_env(&interp, NAME("keep-byte"), byte_obj(0x0f));
+
+    TEST_ASSERT_EQUAL(TYPE_INT, TYPEOF(get_env(&interp, NAME("keep-int"))));
+    TEST_ASSERT_EQUAL(TYPE_BOOLEAN, TYPEOF(get_env(&interp, NAME("keep-bool"))));
+    TEST_ASSERT_EQUAL(TYPE_FLOAT, TYPEOF(get_env(&interp, NAME("keep-float"))));
+    TEST_ASSERT_EQUAL(TYPE_BYTE, TYPEOF(get_env(&interp, NAME("keep-byte"))));
+
     gc(&interp);
     int init_free = get_heap_info()->bytes_free;
 

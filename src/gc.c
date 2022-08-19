@@ -90,6 +90,45 @@ static void move_unreached_to_free(void) {
     }
 }
 
+static int scan_non_dict_children(gc_header_t *data_ptr) {
+    int unscanned = 0;
+    for (int i = 0; i < data_ptr->children; ++i) {
+        size_t offset = sizeof(gc_header_t) + (i * sizeof(void *));
+        void **child = (void *) ((size_t) data_ptr + offset);
+        // Pointers can be null. elem->next, etc.
+        if (*child != NULL) {
+            heap_node_t *child_heap_node = NODE_FOR_DATA(*child);
+
+            // Move Unreached child to Unscanned.
+            if (child_heap_node->flags != F_GC_SCANNED) {
+                child_heap_node->flags &= ~F_GC_UNREACHED;
+                child_heap_node->flags |= F_GC_UNSCANNED;
+                unscanned++;
+            }
+        }
+    }
+    return unscanned;
+}
+
+static int scan_dict_children(gc_header_t *data_ptr) {
+    int unscanned = 0;
+    obj_dict_t *dict = (obj_dict_t*) data_ptr;
+    for (int i = 0; i < dict->buckets; ++i) {
+        dict_kv_node_t *child = dict->nodes[i];
+        if (child != NULL) {
+            heap_node_t *child_heap_node = NODE_FOR_DATA(child);
+
+            // Move Unreached child to Unscanned.
+            if (child_heap_node->flags != F_GC_SCANNED) {
+                child_heap_node->flags &= ~F_GC_UNREACHED;
+                child_heap_node->flags |= F_GC_UNSCANNED;
+                unscanned++;
+            }
+        }
+    }
+    return unscanned;
+}
+
 /*
  * While there are Unscanned nodes,
  *
@@ -113,20 +152,10 @@ static int scan_unscanned_objects() {
             gc_header_t *data_ptr = (gc_header_t *) DATA_FOR_NODE(heap_node);
             assert_valid_typed_node(data_ptr);
 
-            for (int i = 0; i < data_ptr->children; ++i) {
-                size_t offset = sizeof(gc_header_t) + (i * sizeof(void *));
-                void **child = (void *) ((size_t) data_ptr + offset);
-                // Pointers can be null. elem->next, etc.
-                if (*child != NULL) {
-                    heap_node_t *child_heap_node = NODE_FOR_DATA(*child);
-
-                    // Move Unreached child to Unscanned.
-                    if (child_heap_node->flags != F_GC_SCANNED) {
-                        child_heap_node->flags &= ~F_GC_UNREACHED;
-                        child_heap_node->flags |= F_GC_UNSCANNED;
-                        unscanned++;
-                    }
-                }
+            if (data_ptr->type == TYPE_DICT_DATA) {
+                unscanned += scan_dict_children(data_ptr);
+            } else {
+                unscanned += scan_non_dict_children(data_ptr);
             }
         }
 

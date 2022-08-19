@@ -12,7 +12,7 @@ static int _eval(char *program) {
     interp_init(&interp);
 
     eval_result_t *result = (eval_result_t *) alloc_type(EVAL_RESULT, F_NONE);
-    put_env_gc_root(&interp, (gc_header_t *) result);
+    put_env(&interp, c_str_to_bytearray("__eval_result"), (gc_header_t *) result);
     enter_scope(&interp);
 
     eval(&interp, program, result);

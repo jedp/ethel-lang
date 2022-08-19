@@ -85,8 +85,8 @@ static error_t put_env_internal(interp_t *interp,
     return ERR_ENV_SYMBOL_UNDEFINED;
 }
 
-error_t put_env(interp_t *interp, bytearray_t *name_obj, obj_t *obj) {
-    return put_env_internal(interp, name_obj, (gc_header_t *) obj);
+error_t put_env(interp_t *interp, bytearray_t *name_obj, gc_header_t *hdr) {
+    return put_env_internal(interp, name_obj, hdr);
 }
 
 error_t put_env_gc_root(interp_t *interp, gc_header_t *hdr) {

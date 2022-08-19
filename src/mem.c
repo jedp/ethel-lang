@@ -3,6 +3,7 @@
 #include "../inc/obj.h"
 #include "../inc/eval.h"
 #include "../inc/mem.h"
+#include "../inc/ptr.h"
 #include "../inc/heap.h"
 
 #define HDR_ALLOC(t, y, c) { \
@@ -27,6 +28,22 @@ void mem_init(unsigned char initval) {
     heap_init(initval);
 }
 
+/**
+ * Allocate a dict obj, sizing the obj_dict_t array according to the number of buckets.
+ */
+gc_header_t *alloc_dict(uint32_t buckets, flags_t flags) {
+    gc_header_t *hdr;
+
+    hdr = mem_alloc(sizeof(obj_dict_t) + buckets * sizeof(dict_kv_node_t*));
+    hdr->type = TYPE_DICT_DATA;
+    hdr->flags = flags;
+    hdr->children = 0;
+
+    mem_set(((obj_dict_t*) hdr)->nodes, 0, sizeof(dict_kv_node_t*) * buckets);
+
+    return hdr;
+}
+
 gc_header_t *alloc_type(type_t type, flags_t flags) {
     assert(type > TYPE_ERR_DO_NOT_USE && type < TYPE_MAX);
 
@@ -44,8 +61,7 @@ gc_header_t *alloc_type(type_t type, flags_t flags) {
         case TYPE_BYTE:
         case TYPE_BOOLEAN:
         case TYPE_BREAK:
-        case TYPE_CONTINUE:
-        HDR_ALLOC(obj_t, type, 0);
+        case TYPE_CONTINUE: HDR_ALLOC(obj_t, type, 0)
             break;
 
             // Fancy types have one pointer to the child structure.
@@ -55,51 +71,38 @@ gc_header_t *alloc_type(type_t type, flags_t flags) {
         case TYPE_STRING:
         case TYPE_FUNCTION:
         case TYPE_RANGE:
-        case TYPE_ITERATOR:
-        HDR_ALLOC(obj_t, type, 1);
+        case TYPE_ITERATOR: HDR_ALLOC(obj_t, type, 1)
             break;
 
             // Various child data structures.
             // TYPE_BYTEARRAY_DATA gets special handling in str.c.
-        case TYPE_RANGE_DATA:
-        HDR_ALLOC(obj_range_t, type, 0);
+        case TYPE_RANGE_DATA: HDR_ALLOC(obj_range_t, type, 0)
             break;
-        case TYPE_VARIABLE_ARGS:
-        HDR_ALLOC(obj_varargs_t, type, 2);
+        case TYPE_VARIABLE_ARGS: HDR_ALLOC(obj_varargs_t, type, 2)
             break;
-        case TYPE_LIST_DATA:
-        HDR_ALLOC(obj_list_t, type, 1);
+        case TYPE_LIST_DATA: HDR_ALLOC(obj_list_t, type, 1)
             break;
-        case TYPE_LIST_ELEM_DATA:
-        HDR_ALLOC(obj_list_element_t, type, 2);
+        case TYPE_LIST_ELEM_DATA: HDR_ALLOC(obj_list_element_t, type, 2)
             break;
-        case TYPE_DICT_DATA:
-        HDR_ALLOC(obj_dict_t, type, 0);
+        case TYPE_DICT_DATA: assert("Use alloc_dict instead");
             break;
-        case TYPE_DICT_KV_DATA:
-        HDR_ALLOC(dict_node_t, type, 3);
+        case TYPE_DICT_KV_DATA: HDR_ALLOC(dict_kv_node_t, type, 3)
             break;
-        case TYPE_FUNCTION_PTR_DATA:
-        HDR_ALLOC(obj_func_def_t, type, 2);
+        case TYPE_FUNCTION_PTR_DATA: HDR_ALLOC(obj_func_def_t, type, 2)
             break;
-        case TYPE_RETURN_VAL:
-        HDR_ALLOC(obj_t, type, 1);
+        case TYPE_RETURN_VAL: HDR_ALLOC(obj_t, type, 1)
             break;
-        case TYPE_ITERATOR_DATA:
-        HDR_ALLOC(obj_iter_t, type, 2);
+        case TYPE_ITERATOR_DATA: HDR_ALLOC(obj_iter_t, type, 2)
             break;
 
             // Environment.
-        case INTERP_ENV:
-        HDR_ALLOC(env_t, type, 2);
+        case INTERP_ENV: HDR_ALLOC(env_t, type, 2)
             break;
-        case INTERP_STATE:
-        HDR_ALLOC(interp_t, type, 2);
+        case INTERP_STATE: HDR_ALLOC(interp_t, type, 2)
             break;
 
             // Eval Result
-        case EVAL_RESULT:
-        HDR_ALLOC(eval_result_t, type, 1);
+        case EVAL_RESULT: HDR_ALLOC(eval_result_t, type, 1)
             break;
 
             // AST.
@@ -110,8 +113,7 @@ gc_header_t *alloc_type(type_t type, flags_t flags) {
         case AST_BOOLEAN:
         case AST_BYTE:
         case AST_BREAK:
-        case AST_CONTINUE:
-        HDR_ALLOC(ast_expr_t, type, 0);
+        case AST_CONTINUE: HDR_ALLOC(ast_expr_t, type, 0)
             break;
 
         case AST_IDENT:
@@ -121,8 +123,7 @@ gc_header_t *alloc_type(type_t type, flags_t flags) {
         case AST_NEGATE:
         case AST_NOT:
         case AST_BITWISE_NOT:
-        case AST_UNARY_ARG:
-        HDR_ALLOC(ast_unary_arg_t, type, 1);
+        case AST_UNARY_ARG: HDR_ALLOC(ast_unary_arg_t, type, 1)
             break;
 
             // Binop nodes.
@@ -148,137 +149,95 @@ gc_header_t *alloc_type(type_t type, flags_t flags) {
         case AST_IN:
         case AST_SUBSCRIPT:
         case AST_MAPS_TO:
-        case AST_ASSIGN:
-        HDR_ALLOC(ast_expr_t, type, 1);
+        case AST_ASSIGN: HDR_ALLOC(ast_expr_t, type, 1)
             break;
 
             // Binop args.
-        case AST_BINOP_ARGS:
-        HDR_ALLOC(ast_op_args_t, type, 2);
+        case AST_BINOP_ARGS: HDR_ALLOC(ast_op_args_t, type, 2)
             break;
 
-        case AST_RANGE:
-        HDR_ALLOC(ast_expr_t, type, 1);
+        case AST_RANGE: HDR_ALLOC(ast_expr_t, type, 1)
             break;
-        case AST_RANGE_ARGS:
-        HDR_ALLOC(ast_range_args_t, type, 3);
+        case AST_RANGE_ARGS: HDR_ALLOC(ast_range_args_t, type, 3)
             break;
-        case AST_CAST:
-        HDR_ALLOC(ast_expr_t, type, 1);
+        case AST_CAST: HDR_ALLOC(ast_expr_t, type, 1)
             break;
-        case AST_CAST_ARGS:
-        HDR_ALLOC(ast_cast_args_t, type, 2);
+        case AST_CAST_ARGS: HDR_ALLOC(ast_cast_args_t, type, 2)
             break;
 
             // Compound objects and expressions.
         case AST_BLOCK:
-        case AST_LIST:
-        HDR_ALLOC(ast_expr_t, type, 1);
+        case AST_LIST: HDR_ALLOC(ast_expr_t, type, 1)
             break;
-        case AST_LIST_ELEMS:
-        HDR_ALLOC(ast_list_t, type, 1);
+        case AST_LIST_ELEMS: HDR_ALLOC(ast_list_t, type, 1)
             break;
-        case AST_DICT:
-        HDR_ALLOC(ast_expr_t, type, 1);
+        case AST_DICT: HDR_ALLOC(ast_expr_t, type, 1)
             break;
-        case AST_DICT_KVS:
-        HDR_ALLOC(ast_dict_t, type, 1);
+        case AST_DICT_KVS: HDR_ALLOC(ast_dict_t, type, 1)
             break;
-        case AST_DICT_KV:
-        HDR_ALLOC(ast_expr_kv_list_t, type, 3);
+        case AST_DICT_KV: HDR_ALLOC(ast_expr_kv_list_t, type, 3)
             break;
-        case AST_TYPED:
-        HDR_ALLOC(ast_expr_t, type, 1);
+        case AST_TYPED: HDR_ALLOC(ast_expr_t, type, 1)
             break;
-        case AST_TYPED_DATA:
-        HDR_ALLOC(ast_typed_expr_t, type, 2);
+        case AST_TYPED_DATA: HDR_ALLOC(ast_typed_expr_t, type, 2)
             break;
-        case AST_TYPEDEF:
-        HDR_ALLOC(ast_data_type_t, type, 2);
+        case AST_TYPEDEF: HDR_ALLOC(ast_data_type_t, type, 2)
             break;
-        case AST_BYTEARRAY_DECL:
-        HDR_ALLOC(ast_expr_t, type, 1);
+        case AST_BYTEARRAY_DECL: HDR_ALLOC(ast_expr_t, type, 1)
             break;
-        case AST_BYTEARRAY_DECL_DATA:
-        HDR_ALLOC(bytearray_t, type, 0);
+        case AST_BYTEARRAY_DECL_DATA: HDR_ALLOC(bytearray_t, type, 0)
             break;
-        case AST_APPLY:
-        HDR_ALLOC(ast_expr_t, type, 1);
+        case AST_APPLY: HDR_ALLOC(ast_expr_t, type, 1)
             break;
-        case AST_APPLY_DATA:
-        HDR_ALLOC(ast_apply_t, type, 3);
+        case AST_APPLY_DATA: HDR_ALLOC(ast_apply_t, type, 3)
             break;
-        case AST_FIELD:
-        HDR_ALLOC(ast_expr_t, type, 1);
+        case AST_FIELD: HDR_ALLOC(ast_expr_t, type, 1)
             break;
-        case AST_FIELD_DATA:
-        HDR_ALLOC(ast_field_t, type, 2);
+        case AST_FIELD_DATA: HDR_ALLOC(ast_field_t, type, 2)
             break;
-        case AST_EXPR_LIST:
-        HDR_ALLOC(ast_expr_list_t, type, 2);
+        case AST_EXPR_LIST: HDR_ALLOC(ast_expr_list_t, type, 2)
             break;
-        case AST_METHOD_CALL:
-        HDR_ALLOC(ast_expr_t, type, 1);
+        case AST_METHOD_CALL: HDR_ALLOC(ast_expr_t, type, 1)
             break;
-        case AST_METHOD_CALL_DATA:
-        HDR_ALLOC(ast_method_t, type, 2);
+        case AST_METHOD_CALL_DATA: HDR_ALLOC(ast_method_t, type, 2)
             break;
-        case AST_FIELD_GET:
-        HDR_ALLOC(ast_expr_t, type, 1);
+        case AST_FIELD_GET: HDR_ALLOC(ast_expr_t, type, 1)
             break;
-        case AST_FIELD_GET_DATA:
-        HDR_ALLOC(ast_method_t, type, 1);
+        case AST_FIELD_GET_DATA: HDR_ALLOC(ast_method_t, type, 1)
             break;
-        case AST_FUNCTION_DEF:
-        HDR_ALLOC(ast_expr_t, type, 1);
+        case AST_FUNCTION_DEF: HDR_ALLOC(ast_expr_t, type, 1)
             break;
-        case AST_FUNCTION_DEF_DATA:
-        HDR_ALLOC(ast_func_def_t, type, 2);
+        case AST_FUNCTION_DEF_DATA: HDR_ALLOC(ast_func_def_t, type, 2)
             break;
-        case AST_FUNCTION_DEF_ARGS:
-        HDR_ALLOC(ast_fn_arg_decl_t, type, 2);
+        case AST_FUNCTION_DEF_ARGS: HDR_ALLOC(ast_fn_arg_decl_t, type, 2)
             break;
-        case AST_FUNCTION_CALL:
-        HDR_ALLOC(ast_expr_t, type, 1);
+        case AST_FUNCTION_CALL: HDR_ALLOC(ast_expr_t, type, 1)
             break;
-        case AST_FUNCTION_CALL_DATA:
-        HDR_ALLOC(ast_func_call_t, type, 2);
+        case AST_FUNCTION_CALL_DATA: HDR_ALLOC(ast_func_call_t, type, 2)
             break;
-        case AST_RESERVED_CALLABLE:
-        HDR_ALLOC(ast_expr_t, type, 1);
+        case AST_RESERVED_CALLABLE: HDR_ALLOC(ast_expr_t, type, 1)
             break;
-        case AST_RESERVED_CALLABLE_DATA:
-        HDR_ALLOC(ast_reserved_callable_t, type, 1);
+        case AST_RESERVED_CALLABLE_DATA: HDR_ALLOC(ast_reserved_callable_t, type, 1)
             break;
-        case AST_IF_THEN:
-        HDR_ALLOC(ast_expr_t, type, 1);
+        case AST_IF_THEN: HDR_ALLOC(ast_expr_t, type, 1)
             break;
-        case AST_IF_THEN_DATA:
-        HDR_ALLOC(ast_if_then_args_t, type, 2);
+        case AST_IF_THEN_DATA: HDR_ALLOC(ast_if_then_args_t, type, 2)
             break;
-        case AST_IF_THEN_ELSE:
-        HDR_ALLOC(ast_expr_t, type, 1);
+        case AST_IF_THEN_ELSE: HDR_ALLOC(ast_expr_t, type, 1)
             break;
-        case AST_IF_THEN_ELSE_DATA:
-        HDR_ALLOC(ast_if_then_else_args_t, type, 3);
+        case AST_IF_THEN_ELSE_DATA: HDR_ALLOC(ast_if_then_else_args_t, type, 3)
             break;
-        case AST_DO_WHILE_LOOP:
-        HDR_ALLOC(ast_expr_t, type, 1);
+        case AST_DO_WHILE_LOOP: HDR_ALLOC(ast_expr_t, type, 1)
             break;
-        case AST_DO_WHILE_LOOP_DATA:
-        HDR_ALLOC(ast_do_while_loop_t, type, 2);
+        case AST_DO_WHILE_LOOP_DATA: HDR_ALLOC(ast_do_while_loop_t, type, 2)
             break;
-        case AST_WHILE_LOOP:
-        HDR_ALLOC(ast_expr_t, type, 1);
+        case AST_WHILE_LOOP: HDR_ALLOC(ast_expr_t, type, 1)
             break;
-        case AST_WHILE_LOOP_DATA:
-        HDR_ALLOC(ast_while_loop_t, type, 2);
+        case AST_WHILE_LOOP_DATA: HDR_ALLOC(ast_while_loop_t, type, 2)
             break;
-        case AST_FOR_LOOP:
-        HDR_ALLOC(ast_expr_t, type, 1);
+        case AST_FOR_LOOP: HDR_ALLOC(ast_expr_t, type, 1)
             break;
-        case AST_FOR_LOOP_DATA:
-        HDR_ALLOC(ast_for_loop_t, type, 3);
+        case AST_FOR_LOOP_DATA: HDR_ALLOC(ast_for_loop_t, type, 3)
             break;
 
         default:

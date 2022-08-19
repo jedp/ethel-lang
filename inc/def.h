@@ -316,10 +316,10 @@ typedef struct {
 #ifdef BUILD64
     uint64_t type: 52;
 #else
-    int type : 20;
+    unsigned int type : 20;
 #endif
-    int flags: 8;
-    int children: 4;
+    unsigned int flags: 8;
+    unsigned int children: 4;
 } gc_header_t;
 
 typedef struct {

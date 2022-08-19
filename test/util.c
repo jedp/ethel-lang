@@ -69,7 +69,7 @@ void eval_program(const char *program, eval_result_t *result) {
     char *buf = mem_alloc(len);
     mem_cp(buf, (void *) program, len);
 
-    put_env_gc_root(&interp, (gc_header_t *) result);
+    put_env(&interp, c_str_to_bytearray("__prog_result"), (gc_header_t *) result);
     enter_scope(&interp);
 
     eval(&interp, program, result);
