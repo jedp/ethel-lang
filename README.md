@@ -149,42 +149,36 @@ Function
 <Nil>
 ```
 
-Quicksort, with a little scoping nit.
+Lexical scope.
 
 ```
-> val quicksort = fn(a, lo, hi) {
-    if lo < hi then {
-      var p = partition(a, lo, hi)
-      quicksort(a, lo, p-1)
-      quicksort(a, p+1, hi)
-      }
+> val x = 42
+42
+> val f = fn() { x }
+<Function>
+> val g = fn(x) { f() }
+<Function>
+> g(17)
+42
+```
+
+Closures.
+
+```
+> val f = fn(x) {
+    var i = x + 100
+    fn(y) {
+      i = i + y
+      i
     }
-Function
-> val partition = fn(a, lo, hi) {
-    val pivot = a[hi]
-    var i = lo
-    for j in lo..hi {
-      if a[j] < pivot then {
-        swap(a, i, j)
-        i = i + 1
-        }
-      }
-    swap(a, i, hi)
-    i
-    }
-Function
-> val swap = fn(a, i, j) {
-    val t = a[i]
-    a[i] = a[j]
-    a[j] = t
-    }
-Function
-> val s = "I like potatoes!"
-I like potatoes!
-> quicksort(s, 0, s.length() - 1)
-<Nil>
-> s
-  !Iaeeikloopstt
+  }
+<Function>
+> val x = f(10)
+<Function>
+> x(1)
+111
+> x(3)
+114
 ```
 
 ### Loops
@@ -229,6 +223,20 @@ true
 31133
 > hex(0x7ff0 ^ 0b11001101101)
 0x799d
+```
+
+### Garbage collection
+
+```
+> val x = 42
+42
+> { val y = 19 }
+19
+> gc()
+GC freed 1632 bytes. Bytes avail: 15999432.
+<Nil>
+> x
+42
 ```
 
 ### Dumps of internal representation
