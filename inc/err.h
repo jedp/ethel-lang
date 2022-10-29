@@ -3,8 +3,7 @@
 
 #include <inttypes.h>
 
-typedef uint8_t error_t;
-enum error_enum {
+typedef enum {
     ERR_NO_ERROR = 0,
     ERR_LEX_ERROR,
     ERR_LEX_UNEXPECTED_TOKEN,
@@ -40,7 +39,7 @@ enum error_enum {
     ERR_SYNTAX_ERROR,
     ERR_OUT_OF_MEMORY,
     ERR_MAX
-};
+} error_t;
 
 static const char *err_names[ERR_MAX] = {
         "Ok",

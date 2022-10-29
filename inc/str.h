@@ -60,6 +60,10 @@ bytearray_t *bytearray_alloc_with_data(size_t size, uint8_t *data);
 
 bytearray_t *bytearray_alloc(size_t size);
 
+error_t bytearray_set(bytearray_t *bytearray, uint8_t byte, uint32_t offset);
+
+uint8_t bytearray_get(bytearray_t *bytearray, uint32_t offset);
+
 /* Return a new bytearray that is a bytewise copy of the original. */
 bytearray_t *bytearray_clone(bytearray_t *src);
 

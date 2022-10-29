@@ -3,6 +3,7 @@ COMPOBJS = src/ptr.o \
 					 src/heap.o \
 					 src/gc.o \
 					 src/mem.o \
+					 src/comp.o \
 					 src/obj.o \
 					 src/math.o \
 					 src/range.o \
@@ -26,6 +27,8 @@ COMPOBJS = src/ptr.o \
 REPLOBJS = src/repl.o
 
 RUNOBJS = src/run.o
+
+DISOBJS = src/dis.o
 
 TESTOBJS = test/unity/unity.o \
 					 test/util.o \
@@ -81,6 +84,9 @@ debug: repl
 repl: $(REPLOBJS) $(COMPOBJS)
 	$(CC) $(CFLAGS) $(EXTRA_CFLAGS) -o $@ $^ $(LDFLAGS)
 
+dis: $(DISOBJS) $(COMPOBJS)
+	$(CC) $(CFLAGS) $(EXTRA_CFLAGS) -o $@ $^ $(LDFLAGS)
+
 run: $(RUNOBJS) $(COMPOBJS)
 	$(CC) $(CFLAGS) $(EXTRA_CFLAGS) -o $@ $^ $(LDFLAGS)
 
@@ -94,5 +100,5 @@ wc:
 .PHONY: all clean test debug
 clean:
 	rm -f $(COMPOBJS) $(REPLOBJS) $(RUNOBJS) $(TESTOBJS)
-	rm -f repl test/test
+	rm -f dis repl test/test
 

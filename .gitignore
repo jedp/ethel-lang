@@ -1,4 +1,5 @@
 *.o
+dis
 repl
 run
 test/test

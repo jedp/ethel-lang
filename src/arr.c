@@ -1,6 +1,5 @@
 #include <stdio.h>
 #include "../inc/type.h"
-#include "../inc/mem.h"
 #include "../inc/rand.h"
 #include "../inc/arr.h"
 

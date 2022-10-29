@@ -349,6 +349,24 @@ bytearray_t *bytearray_alloc(size_t size) {
     return a;
 }
 
+error_t bytearray_set(bytearray_t *bytearray, uint8_t byte, uint32_t offset) {
+   if (offset >= bytearray->size) {
+       return ERR_INDEX_OUT_OF_RANGE;
+   }
+
+   bytearray->data[offset] = byte;
+
+   return ERR_NO_ERROR;
+}
+
+uint8_t bytearray_get(bytearray_t *bytearray, uint32_t offset) {
+    if (offset >= bytearray->size) {
+        return 0;
+    }
+
+    return bytearray->data[offset];
+}
+
 bytearray_t *bytearray_clone(bytearray_t *src) {
     if (src == NULL) return NULL;
     bytearray_t *dst = bytearray_alloc(src->size);

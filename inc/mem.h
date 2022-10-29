@@ -3,6 +3,9 @@
 
 #include "def.h"
 
+#define GROW_MAX_ARRAY_SIZE(old_max) \
+    ((old_max) < 8 ? 8 : (old_max) * 2)
+
 /*
  * Allocate an object of size type_t with the given flags.
  *

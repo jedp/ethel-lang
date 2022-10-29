@@ -1,6 +1,5 @@
 #include <stdio.h>
 #include "../inc/type.h"
-#include "../inc/ptr.h"
 #include "../inc/mem.h"
 #include "../inc/list.h"
 #include "../inc/dict.h"
