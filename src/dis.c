@@ -1,7 +1,6 @@
 #include <stdlib.h>
 #include <stdio.h>
 #include "../inc/mem.h"
-#include "../inc/comp.h"
 #include "../inc/str.h"
 #include "../inc/dis.h"
 
@@ -20,12 +19,12 @@ static uint32_t dis_op(cg_t *cg, uint32_t offset)
     }
 }
 
-void dis(cg_t *cg, const char *name)
+void dis(vm_t *vm, const char *name)
 {
     printf("Disassembly of %s:\n", name);
 
-    for (uint32_t i = 0; i < cg->code_len;) {
-        i = dis_op(cg, i);
+    for (uint32_t i = 0; i < vm->cg->code_len;) {
+        i = dis_op(vm->cg, i);
     }
 }
 
@@ -34,14 +33,16 @@ int main(int argc, const char **argv)
     (void) argc;
     (void) argv;
 
-    // TODO - the heap is global
-    mem_init(0);
+    mem_init('Q');
+
+    vm_t *vm;
+    vm = mem_alloc(sizeof(vm_t));
+
+    vm_reset(vm);
 
     // Hello, world.
-    cg_t cg;
-    cg_new(&cg);
-    cg_byte(&cg, OP_RET);
+    cg_byte(vm, OP_RET);
 
-    dis(&cg, "Hello, world!");
+    dis(vm, "Hello, world!");
     return 0;
 }

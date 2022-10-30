@@ -4,7 +4,9 @@
 #include "vm.h"
 
 void cg_new(cg_t *cg);
-void cg_byte(cg_t *cg, uint8_t b);
+
+void consts_new(obj_arr_t *consts);
+
 void cg_free(cg_t *cg);
 
 #endif

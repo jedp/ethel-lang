@@ -4,6 +4,7 @@ COMPOBJS = src/ptr.o \
 					 src/gc.o \
 					 src/mem.o \
 					 src/comp.o \
+					 src/vm.o \
 					 src/obj.o \
 					 src/math.o \
 					 src/range.o \

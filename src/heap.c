@@ -209,7 +209,7 @@ void efree(void *data_ptr) {
  *
  * Exposed for testing.
  */
-void heap_init(unsigned char initval) {
+void heap_reset(unsigned char initval) {
     // Clear the heap
     size_t *p = heap;
     size_t size = HEAP_BYTES;

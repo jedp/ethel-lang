@@ -13,6 +13,7 @@
 }
 
 void *mem_alloc(size_t size) {
+    printf("ealloc bytes: %d\n", size);
     return ealloc(size);
 }
 
@@ -25,7 +26,7 @@ void mem_free(void *b) {
 }
 
 void mem_init(unsigned char initval) {
-    heap_init(initval);
+    heap_reset(initval);
 }
 
 /**

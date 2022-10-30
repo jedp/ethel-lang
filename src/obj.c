@@ -2,9 +2,7 @@
 #include <stdarg.h>
 #include <stdint.h>
 #include "../inc/type.h"
-#include "../inc/ptr.h"
 #include "../inc/mem.h"
-#include "../inc/dict.h"
 #include "../inc/str.h"
 
 obj_t *arg_at(obj_varargs_t *args, int index) {

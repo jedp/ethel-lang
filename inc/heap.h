@@ -47,7 +47,7 @@ typedef struct {
  * on the heap should not be used again. Intended to be done once on first
  * execution. Exposed for testing.
  */
-void heap_init(unsigned char initval);
+void heap_reset(unsigned char initval);
 
 /*
  * Try to allocate the given number of bytes. Allocations are always a multiple

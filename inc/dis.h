@@ -3,6 +3,6 @@
 
 #include "../inc/vm.h"
 
-void dis(cg_t *cg, const char *name);
+void dis(vm_t *vm, const char *name);
 
 #endif
