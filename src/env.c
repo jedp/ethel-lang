@@ -6,6 +6,14 @@
 #include "../inc/str.h"
 #include "../inc/env.h"
 
+/*
+ * Environment for the Ethel Runtime, or ert. It is not inert.
+ *
+ *     "I am no longer ert, for I have lost my ertia."
+ *
+ *     -- The immobile King Gwain of Yarrow, in The Thirteen Clocks, by James Thurber.
+ */
+
 env_t *new_env(void) {
     env_t *env = (env_t *) alloc_type(INTERP_ENV, F_NONE);
     env->parent = NULL;

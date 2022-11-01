@@ -7,15 +7,25 @@
 #include "obj.h"
 
 typedef enum {
+    OP_ERROR,
     OP_NO_OP,
     OP_RET,
     OP_CONST,
+    OP_ADD,
+    OP_SUB,
+    OP_MUL,
+    OP_DIV,
 } op_t;
 
 static const char *op_names[] = {
         "ERROR_INVALID",
+        "NOP",
         "RETURN",
         "PUSH_CONSTANT",
+        "ADD",
+        "SUBTRACT",
+        "MULTIPLY",
+        "DIVIDE",
 };
 
 typedef struct {
