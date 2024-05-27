@@ -304,7 +304,7 @@ void test_lex_assign(void) {
 }
 
 void test_lex_line_with_comment(void) {
-    char *expr = "val a = 3 ; a comment ... ";
+    char *expr = "val a = 3 // a comment ... ";
     lexer_t lexer;
     lexer_init(&lexer, expr, c_str_len(expr));
 
@@ -335,7 +335,7 @@ void test_lex_no_input(void) {
 }
 
 void test_lex_comment_only(void) {
-    char *expr = ";";
+    char *expr = "//";
     lexer_t lexer;
     lexer_init(&lexer, expr, c_str_len(expr));
 

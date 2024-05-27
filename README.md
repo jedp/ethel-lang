@@ -123,16 +123,16 @@ true
 Functions are first-class objects.
 
 ```
-> fn(x) { x + 1 }(5)         ;; Anonymous (lambda)
+> fn(x) { x + 1 }(5)         // Anonymous (lambda)
 6
-> val f = fn(a, b) { a * b } ;; As durable values
+> val f = fn(a, b) { a * b } // As durable values
 f
 > f(2, 5)
 10
 > val fib = fn(n) {
-    if n <= 0 then return 0  ;; Early returns
+    if n <= 0 then return 0  // Early returns
     if n == 1 then return 1
-    fib(n - 2) + fib(n - 1)  ;; Last expr is still normal result value
+    fib(n - 2) + fib(n - 1)  // Last expr is still normal result value
     }
 Function
 > for i in 1..10 { print(i, fib(i)) }
@@ -194,7 +194,7 @@ Closures.
     x = x - 1
     }
 0
-> y ;; loop is still an expr, returning last value
+> y // loop is still an expr, returning last value
 0
 > x
 0
@@ -217,9 +217,9 @@ Byte Array
 41
 > 1 << 4
 16
-> 5 & 7 == 5 and 1 << 4 + 2 == 18 ;; Un-astonishing order of operations.
+> 5 & 7 == 5 and 1 << 4 + 2 == 18 // Un-astonishing order of operations.
 true
-> 0x7ff0 ^ 0b11001101101          ;; Mix and match hex and bin representations.
+> 0x7ff0 ^ 0b11001101101          // Mix and match hex and bin representations.
 31133
 > hex(0x7ff0 ^ 0b11001101101)
 0x799d
@@ -244,22 +244,22 @@ GC freed 1632 bytes. Bytes avail: 15999432.
 It's always instructive to see how data is actually stored as bits.
 
 ```
-> dump("This is the quickening!") ;; Strings get a canonical hex dump.
+> dump("This is the quickening!") // Strings get a canonical hex dump.
 00000000  54 68 69 73 20 69 73 20  74 68 65 20 71 75 69 63  |This.is.the.quic|
 00000010  6b 65 6e 69 6e 67 21                              |kening!|
-> dump(arr(40))                   ;; Same for bytearrays.
+> dump(arr(40))                   // Same for bytearrays.
 00000000  00 00 00 00 00 00 00 00  00 00 00 00 00 00 00 00  |................|
 00000010  00 00 00 00 00 00 00 00  00 00 00 00 00 00 00 00  |................|
 00000020  00 00 00 00 00 00 00 00                           |........|
-> dump('x')                       ;; Bytes get int, hex, and bin value.
+> dump('x')                       // Bytes get int, hex, and bin value.
 120  0x78  01111000
-> dump(42)                        ;; Ints get hex and 32-bit bin value.
+> dump(42)                        // Ints get hex and 32-bit bin value.
 0x0000002a  00000000 00000000 00000000 00101010
-> dump(-6.8)                      ;; 32-bit float repr, for the brave.
+> dump(-6.8)                      // 32-bit float repr, for the brave.
 1  10000001  10110011001100110011010
-> dump(0x799d)                    ;; You can specify ints by hex value.
+> dump(0x799d)                    // You can specify ints by hex value.
 0x0000799d  00000000 00000000 01111001 10011101
-> dump(0b10101100)                ;; Also by binary value.
+> dump(0b10101100)                // Also by binary value.
 0x000000ac  00000000 00000000 00000000 10101100
 ```
 

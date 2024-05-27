@@ -275,8 +275,6 @@ static token_t *get_token(lexer_t *lexer) {
         return lex_word(lexer);
 
     switch (ch) {
-        case ';':
-            return lex_comment(lexer);
         case '{':
             return lex_paren(lexer, TAG_BEGIN);
         case '}':
@@ -300,8 +298,15 @@ static token_t *get_token(lexer_t *lexer) {
             return lex_op(lexer, TAG_MINUS);
         case '*':
             return lex_op(lexer, TAG_TIMES);
-        case '/':
-            return lex_op(lexer, TAG_DIVIDE);
+        case '/': {
+            readch(lexer);
+            if (lexer->nextch == '/') {
+                return lex_comment(lexer);
+            } else {
+                unreadch(lexer);
+                return lex_op(lexer, TAG_DIVIDE);
+            }
+        }
         case '%':
             return lex_op(lexer, TAG_MOD);
         case '&':
