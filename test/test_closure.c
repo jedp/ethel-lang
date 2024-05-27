@@ -101,8 +101,8 @@ void test_variable_mutation_in_closure(void) {
                     "  }               \n"
                     "                  \n"
                     " val x = f(2)     \n"
-                    " x(3)  ;; -> 7    \n"
-                    " x(1)  ;; -> 8    \n"
+                    " x(3)  // -> 7    \n"
+                    " x(1)  // -> 8    \n"
                     " }";
 
     eval_result_t *result = (eval_result_t *) alloc_type(EVAL_RESULT, F_NONE);

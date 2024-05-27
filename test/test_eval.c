@@ -180,7 +180,7 @@ void test_eval_for_loop_range(void) {
 void test_eval_for_loop_range_step(void) {
     char *program = "{ var n = 0                  \n"
                     "  for i in 1..10 step 4 {    \n"
-                    "    ;; 1, 5, 9               \n"
+                    "    // 1, 5, 9               \n"
                     "    n = n + i                \n"
                     "  }                          \n"
                     "  n                          \n"
@@ -1382,7 +1382,7 @@ void test_eval_dict_len(void) {
     char *program = "{ val d = dict                      \n"
                     "  var i = d.length()                \n"
                     "  d['a'] = 1                        \n"
-                    "  ;; 'a' and 97 hash collide        \n"
+                    "  // 'a' and 97 hash collide        \n"
                     "  d[97] = 1                         \n"
                     "  d[0] = 1                          \n"
                     "  d[1] = 1                          \n"
@@ -1398,7 +1398,7 @@ void test_eval_dict_len(void) {
 void test_eval_dict_remove(void) {
     char *program = "{ val d = dict                      \n"
                     "  d['a'] = 1                        \n"
-                    "  ;; 'a' and 97 hash collide        \n"
+                    "  // 'a' and 97 hash collide        \n"
                     "  d[97] = 2                         \n"
                     "  d.remove('a')                     \n"
                     "}";
@@ -1431,7 +1431,7 @@ void test_eval_dict_keys(void) {
 
 void test_eval_iterable_random_choice() {
     rand32_init();
-    char *program = "{ var i = 0;                             \n"
+    char *program = "{ var i = 0                              \n"
                     "  val l = list {'a', 'b', 'c'}           \n"
                     "  val d = dict { 1=>1, 2=>1, 3=>1}       \n"
                     "  val r = 1..10                          \n"
