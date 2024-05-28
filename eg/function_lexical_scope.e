@@ -1,4 +1,4 @@
-; Test lexical scoping.
+// Test lexical scoping.
 
 val x = 42
 

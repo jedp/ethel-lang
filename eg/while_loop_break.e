@@ -1,14 +1,11 @@
-; Test while loop.
+// Test while loop.
 
 var x = 10
 
-while x > 0 {
+while x > 0 do
   if x == 3 then break
-
   x = x - 1
-}
 
 print("Result should be 3")
 
 x
-

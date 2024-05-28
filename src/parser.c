@@ -529,6 +529,7 @@ static ast_expr_t *parse_expr(lexer_t *lexer) {
             }
             return ast_if_then(if_clause, then_clause);
         }
+        /*
         case TAG_DO: {
             advance(lexer);
             ast_expr_t *pred = parse_expr(lexer);
@@ -546,6 +547,7 @@ static ast_expr_t *parse_expr(lexer_t *lexer) {
             if (TYPEOF(pred) == AST_EMPTY) goto error;
             return ast_while_loop(cond, pred);
         }
+         */
         case TAG_FOR: {
             advance(lexer);
             // Be sure not to interpret the 'in' as part of a binop.

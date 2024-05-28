@@ -22,11 +22,15 @@ static void readch(lexer_t *lexer) {
     lexer->nextch = lexer->buf[lexer->pos++];
 }
 
-static void consume_ws(lexer_t *lexer) {
+static int consume_ws(lexer_t *lexer) {
+    int ws = 0;
     for (;;) {
         readch(lexer);
         switch (lexer->nextch) {
             case ' ':
+                ws++;
+                break;
+
             case '\t':
             case '\r':
                 // Do not eat EOL.
@@ -34,14 +38,15 @@ static void consume_ws(lexer_t *lexer) {
                 break;
 
             default:
-                return;
+                return ws;
         }
     }
 }
 
-static token_t *lexer_error(lexer_t *lexer) {
+static token_t *lexer_error(lexer_t *lexer, uint8_t err) {
+    printf("ERROR: %s\n", err_names[err]);
     lexer->next_token.tag = TAG_EOF;
-    lexer->err = ERR_LEX_UNEXPECTED_TOKEN;
+    lexer->err = err;
     // The error was at the previous pos.
     lexer->err_pos = lexer->pos > 0 ? lexer->pos - 1 : 0;
     return &lexer->next_token;
@@ -54,6 +59,12 @@ static token_t *lex_eof(lexer_t *lexer) {
 
 static token_t *lex_eol(lexer_t *lexer) {
     lexer->next_token.tag = TAG_EOL;
+    return &lexer->next_token;
+}
+
+static token_t *lex_ws(lexer_t *lexer, int nspaces) {
+    lexer->next_token.tag = TAG_WS;
+    lexer->next_token.intval = nspaces;
     return &lexer->next_token;
 }
 
@@ -85,7 +96,8 @@ static token_t *lex_base(lexer_t *lexer, tag_t which) {
     if (which == TAG_HEX) {
         do {
             char c = lexer->nextch;
-            if (c >= 'A' && c <= 'F') c = ((char) (c - 'A' + 'a'));
+            if (c >= 'A' && c <= 'F')
+                c = ((char) (c - 'A' + 'a'));
             next_word_buf[i++] = c;
             readch(lexer);
         } while ((lexer->nextch >= '0' && lexer->nextch <= '9') ||
@@ -184,7 +196,7 @@ static token_t *lex_word(lexer_t *lexer) {
         return lex_field_or_method(lexer);
     }
 
-    // Get the word.
+    // Get the word into next_word_buf.
     lex_word_raw(lexer);
 
     // Is it a reserved word?
@@ -214,9 +226,13 @@ static token_t *lex_op(lexer_t *lexer, tag_t op) {
 static token_t *lex_char(lexer_t *lexer) {
     readch(lexer);
     char c = lexer->nextch;
-    if (c == '\'') return lexer_error(lexer);
+    if (c == '\'') {
+        return lexer_error(lexer, ERR_LEX_UNEXPECTED_TOKEN);
+    }
     readch(lexer);
-    if (lexer->nextch != '\'') return lexer_error(lexer);
+    if (lexer->nextch != '\'') {
+        return lexer_error(lexer, ERR_LEX_UNEXPECTED_TOKEN);
+    }
 
     lexer->next_token.tag = TAG_BYTE;
     lexer->next_token.ch = c;
@@ -245,12 +261,32 @@ static token_t *lex_string(lexer_t *lexer) {
 }
 
 static token_t *get_token(lexer_t *lexer) {
-    consume_ws(lexer);
+    int indent = consume_ws(lexer);
     char ch = lexer->nextch;
 
-    if (ch == 0) return lex_eof(lexer);
+    if (ch == 0)
+        return lex_eof(lexer);
 
-    if (ch == '\n') return lex_eol(lexer);
+    // Discards any whitespace leading up to newline.
+    if (ch == '\n') {
+        return lex_eol(lexer);
+    }
+
+    // Comment line.
+    if (ch == '/') {
+        readch(lexer);
+        if (lexer->nextch == '/') {
+            return lex_comment(lexer);
+        }
+        // Not a comment line. Put next character back.
+        unreadch(lexer);
+    }
+
+    // Last character was a newline, so this is leading indentation.
+    if (lexer->token.tag == TAG_EOL && indent) {
+        unreadch(lexer);
+        return lex_ws(lexer, indent);
+    }
 
     if (ch == '0') {
         readch(lexer);
@@ -267,18 +303,21 @@ static token_t *get_token(lexer_t *lexer) {
         }
     }
 
-    if (ch >= '0' && ch <= '9') return lex_num(lexer);
+    if (ch >= '0' && ch <= '9') {
+        return lex_num(lexer);
+    }
 
     if ((ch >= 'a' && ch <= 'z') ||
         (ch >= 'A' && ch <= 'Z') ||
-        (ch == '_'))
+        (ch == '_')) {
         return lex_word(lexer);
+    }
 
     switch (ch) {
         case '{':
-            return lex_paren(lexer, TAG_BEGIN);
+            return lex_paren(lexer, TAG_LBRACE);
         case '}':
-            return lex_paren(lexer, TAG_END);
+            return lex_paren(lexer, TAG_RBRACE);
         case '(':
             return lex_paren(lexer, TAG_LPAREN);
         case ')':
@@ -372,14 +411,15 @@ static token_t *get_token(lexer_t *lexer) {
             }
             unreadch(lexer);
             // Logical not is the word "not"
-            return lexer_error(lexer);
+            printf("Incorrect use of '!'\n");
+            return lexer_error(lexer, ERR_LEX_UNEXPECTED_TOKEN);
         }
         case '\'':
             return lex_char(lexer);
         case '"':
             return lex_string(lexer);
         default:
-            return lexer_error(lexer);
+            return lexer_error(lexer, ERR_LEX_UNEXPECTED_TOKEN);
     }
 }
 
@@ -394,6 +434,9 @@ void advance(lexer_t *lexer) {
             break;
         case TAG_BYTE:
             lexer->token.ch = lexer->next_token.ch;
+            break;
+        case TAG_WS:
+            lexer->token.intval = lexer->next_token.intval;
             break;
         default:
             for (int i = 0; i < MAX_WORD; i++) {

@@ -21,14 +21,14 @@ void test_lex_word(void) {
     lexer_init(&lexer, expr, c_str_len(expr));
 
     token_t expected[] = {
-            {.tag = TAG_FOR, .string = "for"},
-            {.tag = TAG_IDENT, .string = "i"},
-            {.tag = TAG_IN, .string = "in"},
-            {.tag = TAG_INT, .intval = 1},
-            {.tag = TAG_RANGE},
-            {.tag = TAG_INT, .intval = 10},
-            {.tag = TAG_STEP, .string = "step"},
-            {.tag = TAG_INT, .intval = 2},
+        {.tag = TAG_FOR, .string = "for"},
+        {.tag = TAG_IDENT, .string = "i"},
+        {.tag = TAG_IN, .string = "in"},
+        {.tag = TAG_INT, .intval = 1},
+        {.tag = TAG_RANGE},
+        {.tag = TAG_INT, .intval = 10},
+        {.tag = TAG_STEP, .string = "step"},
+        {.tag = TAG_INT, .intval = 2},
     };
 
     for (int i = 0; i < sizeof(expected) / sizeof(expected[0]); i++) {
@@ -137,11 +137,11 @@ void test_lex_arithmetic(void) {
     lexer_init(&lexer, expr, c_str_len(expr));
 
     int expected[] = {
-            TAG_INT, TAG_PLUS,
-            TAG_FLOAT, TAG_TIMES,
-            TAG_INT, TAG_MINUS,
-            TAG_FLOAT, TAG_DIVIDE,
-            TAG_INT, TAG_EOF
+        TAG_INT, TAG_PLUS,
+        TAG_FLOAT, TAG_TIMES,
+        TAG_INT, TAG_MINUS,
+        TAG_FLOAT, TAG_DIVIDE,
+        TAG_INT, TAG_EOF
     };
 
     for (int i = 0; i < sizeof(expected) / sizeof(expected[0]); i++) {
@@ -157,11 +157,11 @@ void test_lex_arithmetic_no_spaces(void) {
     lexer_init(&lexer, expr, c_str_len(expr));
 
     int expected[] = {
-            TAG_INT, TAG_PLUS,
-            TAG_FLOAT, TAG_TIMES,
-            TAG_INT, TAG_MINUS,
-            TAG_FLOAT, TAG_DIVIDE,
-            TAG_INT, TAG_EOF
+        TAG_INT, TAG_PLUS,
+        TAG_FLOAT, TAG_TIMES,
+        TAG_INT, TAG_MINUS,
+        TAG_FLOAT, TAG_DIVIDE,
+        TAG_INT, TAG_EOF
     };
 
     for (int i = 0; i < sizeof(expected) / sizeof(expected[0]); i++) {
@@ -177,10 +177,10 @@ void test_lex_inequality(void) {
     lexer_init(&lexer, expr, c_str_len(expr));
 
     int expected[] = {
-            TAG_IF, TAG_IDENT, TAG_LT, TAG_INT,
-            TAG_AND, TAG_IDENT, TAG_LE, TAG_INT,
-            TAG_AND, TAG_IDENT, TAG_GT, TAG_INT,
-            TAG_AND, TAG_IDENT, TAG_GE, TAG_INT
+        TAG_IF, TAG_IDENT, TAG_LT, TAG_INT,
+        TAG_AND, TAG_IDENT, TAG_LE, TAG_INT,
+        TAG_AND, TAG_IDENT, TAG_GT, TAG_INT,
+        TAG_AND, TAG_IDENT, TAG_GE, TAG_INT
     };
 
     for (int i = 0; i < sizeof(expected) / sizeof(expected[0]); i++) {
@@ -196,10 +196,10 @@ void test_lex_inequality_no_spaces(void) {
     lexer_init(&lexer, expr, c_str_len(expr));
 
     int expected[] = {
-            TAG_IF, TAG_IDENT, TAG_LT, TAG_INT,
-            TAG_AND, TAG_IDENT, TAG_LE, TAG_INT,
-            TAG_AND, TAG_IDENT, TAG_GT, TAG_INT,
-            TAG_AND, TAG_IDENT, TAG_GE, TAG_INT
+        TAG_IF, TAG_IDENT, TAG_LT, TAG_INT,
+        TAG_AND, TAG_IDENT, TAG_LE, TAG_INT,
+        TAG_AND, TAG_IDENT, TAG_GT, TAG_INT,
+        TAG_AND, TAG_IDENT, TAG_GE, TAG_INT
     };
 
     for (int i = 0; i < sizeof(expected) / sizeof(expected[0]); i++) {
@@ -215,11 +215,11 @@ void test_lex_inequality_nested_expressions(void) {
     lexer_init(&lexer, expr, c_str_len(expr));
 
     int expected[] = {
-            TAG_IF, TAG_NOT, TAG_LPAREN, TAG_IDENT, TAG_LT, TAG_INT, TAG_RPAREN,
-            TAG_AND, TAG_LPAREN, TAG_IDENT, TAG_LE,
-            TAG_LPAREN, TAG_INT, TAG_TIMES, TAG_INT, TAG_RPAREN, TAG_RPAREN,
-            TAG_AND, TAG_IDENT, TAG_GT, TAG_INT,
-            TAG_AND, TAG_IDENT, TAG_GE, TAG_INT
+        TAG_IF, TAG_NOT, TAG_LPAREN, TAG_IDENT, TAG_LT, TAG_INT, TAG_RPAREN,
+        TAG_AND, TAG_LPAREN, TAG_IDENT, TAG_LE,
+        TAG_LPAREN, TAG_INT, TAG_TIMES, TAG_INT, TAG_RPAREN, TAG_RPAREN,
+        TAG_AND, TAG_IDENT, TAG_GT, TAG_INT,
+        TAG_AND, TAG_IDENT, TAG_GE, TAG_INT
     };
 
     for (int i = 0; i < sizeof(expected) / sizeof(expected[0]); i++) {
@@ -258,10 +258,10 @@ void test_lex_parens(void) {
     lexer_init(&lexer, expr, c_str_len(expr));
 
     int expected[] = {
-            TAG_LPAREN, TAG_FLOAT, TAG_TIMES,
-            TAG_LPAREN, TAG_FLOAT, TAG_MINUS, TAG_INT, TAG_PLUS, TAG_INT, TAG_RPAREN,
-            TAG_PLUS, TAG_INT, TAG_RPAREN,
-            TAG_TIMES, TAG_INT
+        TAG_LPAREN, TAG_FLOAT, TAG_TIMES,
+        TAG_LPAREN, TAG_FLOAT, TAG_MINUS, TAG_INT, TAG_PLUS, TAG_INT, TAG_RPAREN,
+        TAG_PLUS, TAG_INT, TAG_RPAREN,
+        TAG_TIMES, TAG_INT
     };
 
     for (int i = 0; i < sizeof(expected) / sizeof(expected[0]); i++) {
@@ -277,10 +277,10 @@ void test_lex_parens_no_spaces(void) {
     lexer_init(&lexer, expr, c_str_len(expr));
 
     int expected[] = {
-            TAG_LPAREN, TAG_FLOAT, TAG_TIMES,
-            TAG_LPAREN, TAG_FLOAT, TAG_MINUS, TAG_INT, TAG_PLUS, TAG_INT, TAG_RPAREN,
-            TAG_PLUS, TAG_INT, TAG_RPAREN,
-            TAG_TIMES, TAG_INT
+        TAG_LPAREN, TAG_FLOAT, TAG_TIMES,
+        TAG_LPAREN, TAG_FLOAT, TAG_MINUS, TAG_INT, TAG_PLUS, TAG_INT, TAG_RPAREN,
+        TAG_PLUS, TAG_INT, TAG_RPAREN,
+        TAG_TIMES, TAG_INT
     };
 
     for (int i = 0; i < sizeof(expected) / sizeof(expected[0]); i++) {
@@ -345,14 +345,14 @@ void test_lex_comment_only(void) {
 }
 
 void test_lex_begin_end(void) {
-    char *expr = "for i in 1 .. 10 {\n  print(i) \n}";
+    char *expr = "for i in 1 .. 10 { print(i) }";
     lexer_t lexer;
     lexer_init(&lexer, expr, c_str_len(expr));
 
     int expected[] = {
-            TAG_FOR, TAG_IDENT, TAG_IN, TAG_INT, TAG_RANGE, TAG_INT, TAG_BEGIN, TAG_EOL,
-            TAG_PRINT, TAG_LPAREN, TAG_IDENT, TAG_RPAREN, TAG_EOL,
-            TAG_END, TAG_EOF
+        TAG_FOR, TAG_IDENT, TAG_IN, TAG_INT, TAG_RANGE, TAG_INT, TAG_LBRACE,
+        TAG_PRINT, TAG_LPAREN, TAG_IDENT, TAG_RPAREN,
+        TAG_RBRACE, TAG_EOF
     };
     for (int i = 0; i < sizeof(expected) / sizeof(expected[0]); i++) {
         TEST_ASSERT_EQUAL(ERR_NO_ERROR, lexer.err);
@@ -367,7 +367,7 @@ void test_lex_list_init(void) {
     lexer_init(&lexer, expr, c_str_len(expr));
 
     int expected[] = {
-            TAG_VARIABLE, TAG_IDENT, TAG_ASSIGN, TAG_LIST
+        TAG_VARIABLE, TAG_IDENT, TAG_ASSIGN, TAG_LIST
     };
     for (int i = 0; i < sizeof(expected) / sizeof(expected[0]); i++) {
         TEST_ASSERT_EQUAL(ERR_NO_ERROR, lexer.err);
@@ -382,8 +382,56 @@ void test_lex_list_with_values_init(void) {
     lexer_init(&lexer, expr, c_str_len(expr));
 
     int expected[] = {
-            TAG_INVARIABLE, TAG_IDENT, TAG_ASSIGN, TAG_LIST,
-            TAG_BEGIN, TAG_INT, TAG_COMMA, TAG_FLOAT, TAG_COMMA, TAG_STRING, TAG_END
+        TAG_INVARIABLE, TAG_IDENT, TAG_ASSIGN, TAG_LIST,
+        TAG_LBRACE, TAG_INT, TAG_COMMA, TAG_FLOAT, TAG_COMMA, TAG_STRING, TAG_RBRACE
+    };
+    for (int i = 0; i < sizeof(expected) / sizeof(expected[0]); i++) {
+        TEST_ASSERT_EQUAL(ERR_NO_ERROR, lexer.err);
+        TEST_ASSERT_EQUAL(expected[i], lexer.token.tag);
+        advance(&lexer);
+    }
+}
+
+void test_lex_list_multiline(void) {
+    char *expr = "val l = list {  \n"
+                 "  1, 2,         \n"
+                 "  3, 4          \n"
+                 "}               \n";
+    lexer_t lexer;
+    lexer_init(&lexer, expr, c_str_len(expr));
+
+    int expected[] = {
+        TAG_INVARIABLE, TAG_IDENT, TAG_ASSIGN, TAG_LIST, TAG_LBRACE, TAG_EOL,
+        TAG_WS, TAG_INT, TAG_COMMA, TAG_INT, TAG_COMMA, TAG_EOL,
+        TAG_WS, TAG_INT, TAG_COMMA, TAG_INT, TAG_EOL,
+        TAG_RBRACE
+    };
+    for (int i = 0; i < sizeof(expected) / sizeof(expected[0]); i++) {
+        TEST_ASSERT_EQUAL(ERR_NO_ERROR, lexer.err);
+        TEST_ASSERT_EQUAL(expected[i], lexer.token.tag);
+        advance(&lexer);
+    }
+}
+
+void test_lex_list_of_functions(void) {
+    char *expr = "val l = list {         \n"
+                 "  fn(x) do             \n"
+                 "    for i in 0 .. x do \n"
+                 "      something(i)     \n"
+                 "  fn(x) do             \n"
+                 "    x + 2              \n"
+                 "}                      \n";
+    lexer_t lexer;
+    lexer_init(&lexer, expr, c_str_len(expr));
+
+    int expected[] = {
+        TAG_INVARIABLE, TAG_IDENT, TAG_ASSIGN, TAG_LIST, TAG_LBRACE, TAG_EOL,
+        TAG_WS, TAG_FUNC_DEF, TAG_LPAREN, TAG_IDENT, TAG_RPAREN, TAG_DO, TAG_EOL,
+        TAG_WS, TAG_FOR, TAG_IDENT, TAG_IN, TAG_INT, TAG_RANGE, TAG_IDENT, TAG_DO, TAG_EOL,
+        TAG_WS, TAG_IDENT, TAG_LPAREN, TAG_IDENT, TAG_RPAREN, TAG_EOL,
+        TAG_WS, TAG_FUNC_DEF, TAG_LPAREN, TAG_IDENT, TAG_RPAREN, TAG_DO, TAG_EOL,
+        TAG_WS, TAG_IDENT, TAG_PLUS, TAG_INT, TAG_EOL,
+        TAG_RBRACE
     };
     for (int i = 0; i < sizeof(expected) / sizeof(expected[0]); i++) {
         TEST_ASSERT_EQUAL(ERR_NO_ERROR, lexer.err);
@@ -411,12 +459,12 @@ void test_lex_dict_with_kv_init(void) {
     lexer_init(&lexer, expr, c_str_len(expr));
 
     int expected[] = {
-            TAG_INVARIABLE, TAG_IDENT, TAG_ASSIGN, TAG_DICT,
-            TAG_BEGIN,
-            TAG_BYTE, TAG_MAPS_TO, TAG_INT, TAG_COMMA,
-            TAG_STRING, TAG_MAPS_TO, TAG_BYTE, TAG_COMMA,
-            TAG_INT, TAG_MAPS_TO, TAG_HEX,
-            TAG_END
+        TAG_INVARIABLE, TAG_IDENT, TAG_ASSIGN, TAG_DICT,
+        TAG_LBRACE,
+        TAG_BYTE, TAG_MAPS_TO, TAG_INT, TAG_COMMA,
+        TAG_STRING, TAG_MAPS_TO, TAG_BYTE, TAG_COMMA,
+        TAG_INT, TAG_MAPS_TO, TAG_HEX,
+        TAG_RBRACE
     };
     for (int i = 0; i < sizeof(expected) / sizeof(expected[0]); i++) {
         TEST_ASSERT_EQUAL(ERR_NO_ERROR, lexer.err);
@@ -431,8 +479,8 @@ void test_lex_member_of(void) {
     lexer_init(&lexer, expr, c_str_len(expr));
 
     int expected[] = {
-            TAG_INVARIABLE, TAG_IDENT, TAG_ASSIGN,
-            TAG_INT, TAG_IN, TAG_INT, TAG_RANGE, TAG_INT
+        TAG_INVARIABLE, TAG_IDENT, TAG_ASSIGN,
+        TAG_INT, TAG_IN, TAG_INT, TAG_RANGE, TAG_INT
     };
     for (int i = 0; i < sizeof(expected) / sizeof(expected[0]); i++) {
         TEST_ASSERT_EQUAL(ERR_NO_ERROR, lexer.err);
@@ -447,8 +495,8 @@ void test_lex_field_assign(void) {
     lexer_init(&lexer, expr, c_str_len(expr));
 
     int expected[] = {
-            TAG_IDENT, TAG_MEMBER_ACCESS, TAG_FIELD_ACCESS,
-            TAG_ASSIGN, TAG_IDENT
+        TAG_IDENT, TAG_MEMBER_ACCESS, TAG_FIELD_ACCESS,
+        TAG_ASSIGN, TAG_IDENT
     };
     for (int i = 0; i < sizeof(expected) / sizeof(expected[0]); i++) {
         TEST_ASSERT_EQUAL(ERR_NO_ERROR, lexer.err);
@@ -468,8 +516,8 @@ void test_lex_field_access(void) {
     lexer_init(&lexer, expr, c_str_len(expr));
 
     int expected[] = {
-            TAG_INVARIABLE, TAG_IDENT, TAG_ASSIGN,
-            TAG_IDENT, TAG_MEMBER_ACCESS, TAG_FIELD_ACCESS
+        TAG_INVARIABLE, TAG_IDENT, TAG_ASSIGN,
+        TAG_IDENT, TAG_MEMBER_ACCESS, TAG_FIELD_ACCESS
     };
     for (int i = 0; i < sizeof(expected) / sizeof(expected[0]); i++) {
         TEST_ASSERT_EQUAL(ERR_NO_ERROR, lexer.err);
@@ -489,7 +537,7 @@ void test_lex_method_access(void) {
     lexer_init(&lexer, expr, c_str_len(expr));
 
     int expected[] = {
-            TAG_IDENT, TAG_MEMBER_ACCESS, TAG_METHOD_CALL, TAG_LPAREN, TAG_INT, TAG_RPAREN
+        TAG_IDENT, TAG_MEMBER_ACCESS, TAG_METHOD_CALL, TAG_LPAREN, TAG_INT, TAG_RPAREN
     };
     for (int i = 0; i < sizeof(expected) / sizeof(expected[0]); i++) {
         TEST_ASSERT_EQUAL(ERR_NO_ERROR, lexer.err);
@@ -508,8 +556,8 @@ void test_lex_array_access(void) {
     lexer_init(&lexer, expr, c_str_len(expr));
 
     int expected[] = {
-            TAG_INVARIABLE, TAG_IDENT, TAG_ASSIGN,
-            TAG_IDENT, TAG_LBRACKET, TAG_INT, TAG_RBRACKET
+        TAG_INVARIABLE, TAG_IDENT, TAG_ASSIGN,
+        TAG_IDENT, TAG_LBRACKET, TAG_INT, TAG_RBRACKET
     };
     for (int i = 0; i < sizeof(expected) / sizeof(expected[0]); i++) {
         TEST_ASSERT_EQUAL(ERR_NO_ERROR, lexer.err);
@@ -524,8 +572,8 @@ void test_lex_array_constructor(void) {
     lexer_init(&lexer, expr, c_str_len(expr));
 
     int expected[] = {
-            TAG_INVARIABLE, TAG_IDENT, TAG_ASSIGN,
-            TAG_ARR_DECL, TAG_LPAREN, TAG_INT, TAG_RPAREN
+        TAG_INVARIABLE, TAG_IDENT, TAG_ASSIGN,
+        TAG_ARR_DECL, TAG_LPAREN, TAG_INT, TAG_RPAREN
     };
     for (int i = 0; i < sizeof(expected) / sizeof(expected[0]); i++) {
         TEST_ASSERT_EQUAL(ERR_NO_ERROR, lexer.err);
@@ -535,14 +583,14 @@ void test_lex_array_constructor(void) {
 }
 
 void test_lex_function_definition(void) {
-    char *expr = "val f = fn(x, y) { x + y }";
+    char *expr = "val f = fn(x, y) do { x + y }";
     lexer_t lexer;
     lexer_init(&lexer, expr, c_str_len(expr));
 
     int expected[] = {
-            TAG_INVARIABLE, TAG_IDENT, TAG_ASSIGN,
-            TAG_FUNC_DEF, TAG_LPAREN, TAG_IDENT, TAG_COMMA, TAG_IDENT, TAG_RPAREN,
-            TAG_BEGIN, TAG_IDENT, TAG_PLUS, TAG_IDENT, TAG_END
+        TAG_INVARIABLE, TAG_IDENT, TAG_ASSIGN,
+        TAG_FUNC_DEF, TAG_LPAREN, TAG_IDENT, TAG_COMMA, TAG_IDENT, TAG_RPAREN,
+        TAG_DO, TAG_LBRACE, TAG_IDENT, TAG_PLUS, TAG_IDENT, TAG_RBRACE
     };
     for (int i = 0; i < sizeof(expected) / sizeof(expected[0]); i++) {
         TEST_ASSERT_EQUAL(ERR_NO_ERROR, lexer.err);
@@ -557,8 +605,8 @@ void test_lex_function_call(void) {
     lexer_init(&lexer, expr, c_str_len(expr));
 
     int expected[] = {
-            TAG_INVARIABLE, TAG_IDENT, TAG_ASSIGN,
-            TAG_IDENT, TAG_LPAREN, TAG_INT, TAG_RPAREN
+        TAG_INVARIABLE, TAG_IDENT, TAG_ASSIGN,
+        TAG_IDENT, TAG_LPAREN, TAG_INT, TAG_RPAREN
     };
     for (int i = 0; i < sizeof(expected) / sizeof(expected[0]); i++) {
         TEST_ASSERT_EQUAL(ERR_NO_ERROR, lexer.err);
@@ -568,20 +616,164 @@ void test_lex_function_call(void) {
 }
 
 void test_lex_function_with_return(void) {
-    char *expr = "val x = fn(x) { return x + 1 }";
+    char *expr = "val x = fn(x) do { return x + 1 }";
     lexer_t lexer;
     lexer_init(&lexer, expr, c_str_len(expr));
 
     int expected[] = {
-            TAG_INVARIABLE, TAG_IDENT, TAG_ASSIGN,
-            TAG_FUNC_DEF, TAG_LPAREN, TAG_IDENT, TAG_RPAREN,
-            TAG_BEGIN, TAG_FUNC_RETURN, TAG_IDENT, TAG_PLUS, TAG_INT, TAG_END
+        TAG_INVARIABLE, TAG_IDENT, TAG_ASSIGN,
+        TAG_FUNC_DEF, TAG_LPAREN, TAG_IDENT, TAG_RPAREN, TAG_DO,
+        TAG_LBRACE, TAG_FUNC_RETURN, TAG_IDENT, TAG_PLUS, TAG_INT, TAG_RBRACE
     };
     for (int i = 0; i < sizeof(expected) / sizeof(expected[0]); i++) {
         TEST_ASSERT_EQUAL(ERR_NO_ERROR, lexer.err);
         TEST_ASSERT_EQUAL(expected[i], lexer.token.tag);
         advance(&lexer);
     }
+}
+
+void test_lex_nested_indentation(void) {
+    char *expr = "for i in 0..10 do           \n"
+                 "  for j in 0..10 do         \n"
+                 "    print (j)               \n"
+                 "    print (\"same indent\") \n"
+                 "  print (i)                 \n"
+                 "                            \n"
+                 "print(\"Done\")             \n";
+    lexer_t lexer;
+    lexer_init(&lexer, expr, c_str_len(expr));
+    int expected[] = {
+        TAG_FOR, TAG_IDENT, TAG_IN, TAG_INT, TAG_RANGE, TAG_INT, TAG_DO, TAG_EOL,
+        TAG_WS, TAG_FOR, TAG_IDENT, TAG_IN, TAG_INT, TAG_RANGE, TAG_INT, TAG_DO, TAG_EOL,
+        TAG_WS, TAG_PRINT, TAG_LPAREN, TAG_IDENT, TAG_RPAREN, TAG_EOL,
+        TAG_WS, TAG_PRINT, TAG_LPAREN, TAG_STRING, TAG_RPAREN, TAG_EOL,
+        TAG_WS, TAG_PRINT, TAG_LPAREN, TAG_IDENT, TAG_RPAREN, TAG_EOL,
+        TAG_EOL,
+        TAG_PRINT, TAG_LPAREN, TAG_STRING, TAG_RPAREN
+    };
+
+    for (int i = 0; i < sizeof(expected) / sizeof(expected[0]); i++) {
+        TEST_ASSERT_EQUAL(ERR_NO_ERROR, lexer.err);
+        TEST_ASSERT_EQUAL(expected[i], lexer.token.tag);
+        advance(&lexer);
+    }
+}
+
+void test_lex_struct(void) {
+    char *expr = "struct Point {           \n"
+                 "  var x: Int             \n"
+                 "  var y: Int             \n"
+                 "                         \n"
+                 "  plot: fn() do          \n"
+                 "    plotPoint(x, y)      \n"
+                 "                         \n"
+                 "  copy: fn(p: Point) do  \n"
+                 "    this.x = p.x         \n"
+                 "    this.y = p.y         \n"
+                 "}                        \n";
+    lexer_t lexer;
+    lexer_init(&lexer, expr, c_str_len(expr));
+    int expected[] = {
+        TAG_STRUCT, TAG_IDENT,
+        TAG_LBRACE, TAG_EOL,
+
+        TAG_WS, TAG_VARIABLE, TAG_IDENT, TAG_COLON, TAG_TYPE_INT, TAG_EOL,
+        TAG_WS, TAG_VARIABLE, TAG_IDENT, TAG_COLON, TAG_TYPE_INT, TAG_EOL,
+        TAG_EOL,
+
+        TAG_WS, TAG_IDENT, TAG_COLON, TAG_FUNC_DEF, TAG_LPAREN, TAG_RPAREN, TAG_DO, TAG_EOL,
+        TAG_WS, TAG_IDENT, TAG_LPAREN, TAG_IDENT, TAG_COMMA, TAG_IDENT, TAG_RPAREN, TAG_EOL,
+        TAG_EOL,
+
+        TAG_WS, TAG_IDENT, TAG_COLON, TAG_FUNC_DEF, TAG_LPAREN, TAG_IDENT, TAG_COLON, TAG_IDENT, TAG_RPAREN, TAG_DO,
+        TAG_EOL,
+        TAG_WS, TAG_THIS, TAG_MEMBER_ACCESS, TAG_FIELD_ACCESS, TAG_ASSIGN, TAG_IDENT, TAG_MEMBER_ACCESS,
+        TAG_FIELD_ACCESS, TAG_EOL,
+        TAG_WS, TAG_THIS, TAG_MEMBER_ACCESS, TAG_FIELD_ACCESS, TAG_ASSIGN, TAG_IDENT, TAG_MEMBER_ACCESS,
+        TAG_FIELD_ACCESS, TAG_EOL,
+
+        TAG_RBRACE,
+    };
+
+    for (int i = 0; i < sizeof(expected) / sizeof(expected[0]); i++) {
+        TEST_ASSERT_EQUAL(ERR_NO_ERROR, lexer.err);
+        TEST_ASSERT_EQUAL(expected[i], lexer.token.tag);
+        advance(&lexer);
+    }
+}
+
+void test_lex_multiline_conditional(void) {
+    char *expr = "if x >= 0 and     \n"
+                 "   x <= w and     \n"
+                 "   y >= 0 and     \n"
+                 "   y <= h then do \n"
+                 "   print(\"in bounds\") \n";
+
+    lexer_t lexer;
+    lexer_init(&lexer, expr, c_str_len(expr));
+    int expected[] = {
+        TAG_IF, TAG_IDENT, TAG_GE, TAG_INT, TAG_AND, TAG_EOL,
+        TAG_WS, TAG_IDENT, TAG_LE, TAG_IDENT, TAG_AND, TAG_EOL,
+        TAG_WS, TAG_IDENT, TAG_GE, TAG_INT, TAG_AND, TAG_EOL,
+        TAG_WS, TAG_IDENT, TAG_LE, TAG_IDENT, TAG_THEN, TAG_DO, TAG_EOL,
+        TAG_WS, TAG_PRINT, TAG_LPAREN, TAG_STRING, TAG_RPAREN
+    };
+    for (int i = 0; i < sizeof(expected) / sizeof(expected[0]); i++) {
+        TEST_ASSERT_EQUAL(ERR_NO_ERROR, lexer.err);
+        TEST_ASSERT_EQUAL(expected[i], lexer.token.tag);
+        advance(&lexer);
+    }
+}
+
+void test_lex_whitespace_and_comments(void) {
+    char *expr = "none                \n"
+                 "  two // ignored    \n"
+                 "    // none         \n"
+                 "    four            \n"
+                 "                    \n"
+                 "none                \n";
+
+    lexer_t lexer;
+    lexer_init(&lexer, expr, c_str_len(expr));
+
+    // First line.
+    TEST_ASSERT_EQUAL(TAG_IDENT, lexer.token.tag);
+    advance(&lexer);
+    TEST_ASSERT_EQUAL(TAG_EOL, lexer.token.tag);
+    advance(&lexer);
+
+    // Second line.
+    TEST_ASSERT_EQUAL(TAG_WS, lexer.token.tag);
+    TEST_ASSERT_EQUAL(2, lexer.token.intval);
+    advance(&lexer);
+    TEST_ASSERT_EQUAL(TAG_IDENT, lexer.token.tag);
+    advance(&lexer);
+    TEST_ASSERT_EQUAL(TAG_EOL, lexer.token.tag);
+    advance(&lexer);
+
+    // Third line; comment line and leading whitespace discarded.
+    TEST_ASSERT_EQUAL(TAG_EOL, lexer.token.tag);
+    advance(&lexer);
+
+    // Fourth line.
+    TEST_ASSERT_EQUAL(TAG_WS, lexer.token.tag);
+    TEST_ASSERT_EQUAL(4, lexer.token.intval);
+    advance(&lexer);
+    TEST_ASSERT_EQUAL(TAG_IDENT, lexer.token.tag);
+    advance(&lexer);
+    TEST_ASSERT_EQUAL(TAG_EOL, lexer.token.tag);
+    advance(&lexer);
+
+    // Fifth line is blank.
+    TEST_ASSERT_EQUAL(TAG_EOL, lexer.token.tag);
+    advance(&lexer);
+
+    // Sixth line.
+    TEST_ASSERT_EQUAL(TAG_IDENT, lexer.token.tag);
+    advance(&lexer);
+    TEST_ASSERT_EQUAL(TAG_EOL, lexer.token.tag);
+    advance(&lexer);
+    TEST_ASSERT_EQUAL(TAG_EOF, lexer.token.tag);
 }
 
 void test_lex_all_tokens(void) {
@@ -591,55 +783,55 @@ void test_lex_all_tokens(void) {
     } test_data_t;
 
     test_data_t test_data[] = {
-            (test_data_t) {.text = "fn", .expected_tag = TAG_FUNC_DEF},
-            (test_data_t) {.text = "return", .expected_tag = TAG_FUNC_RETURN},
-            (test_data_t) {.text = "x", .expected_tag = TAG_IDENT},
-            (test_data_t) {.text = "=", .expected_tag = TAG_ASSIGN},
-            (test_data_t) {.text = "{", .expected_tag = TAG_BEGIN},
-            (test_data_t) {.text = "}", .expected_tag = TAG_END},
-            (test_data_t) {.text = "(", .expected_tag = TAG_LPAREN},
-            (test_data_t) {.text = ")", .expected_tag = TAG_RPAREN},
-            (test_data_t) {.text = ",", .expected_tag = TAG_COMMA},
-            (test_data_t) {.text = ":", .expected_tag = TAG_COLON},
-            (test_data_t) {.text = "+", .expected_tag = TAG_PLUS},
-            (test_data_t) {.text = "-", .expected_tag = TAG_MINUS},
-            (test_data_t) {.text = "*", .expected_tag = TAG_TIMES},
-            (test_data_t) {.text = "/", .expected_tag = TAG_DIVIDE},
-            (test_data_t) {.text = "&", .expected_tag = TAG_BITWISE_AND},
-            (test_data_t) {.text = "|", .expected_tag = TAG_BITWISE_OR},
-            (test_data_t) {.text = "^", .expected_tag = TAG_BITWISE_XOR},
-            (test_data_t) {.text = "~", .expected_tag = TAG_BITWISE_NOT},
-            (test_data_t) {.text = "<<", .expected_tag = TAG_BITWISE_SHL},
-            (test_data_t) {.text = ">>", .expected_tag = TAG_BITWISE_SHR},
-            (test_data_t) {.text = "==", .expected_tag = TAG_EQ},
-            (test_data_t) {.text = "!=", .expected_tag = TAG_NE},
-            (test_data_t) {.text = "<", .expected_tag = TAG_LT},
-            (test_data_t) {.text = "<=", .expected_tag = TAG_LE},
-            (test_data_t) {.text = ">", .expected_tag = TAG_GT},
-            (test_data_t) {.text = ">=", .expected_tag = TAG_GE},
-            (test_data_t) {.text = "and", .expected_tag = TAG_AND},
-            (test_data_t) {.text = "or", .expected_tag = TAG_OR},
-            (test_data_t) {.text = "not", .expected_tag = TAG_NOT},
-            (test_data_t) {.text = "42", .expected_tag = TAG_INT},
-            (test_data_t) {.text = "3.14", .expected_tag = TAG_FLOAT},
-            (test_data_t) {.text = "'c'", .expected_tag = TAG_BYTE},
-            (test_data_t) {.text = "\"string\"", .expected_tag = TAG_STRING},
-            (test_data_t) {.text = "list", .expected_tag = TAG_LIST},
-            (test_data_t) {.text = "if", .expected_tag = TAG_IF},
-            (test_data_t) {.text = "then", .expected_tag = TAG_THEN},
-            (test_data_t) {.text = "else", .expected_tag = TAG_ELSE},
-            (test_data_t) {.text = "do", .expected_tag = TAG_DO},
-            (test_data_t) {.text = "while", .expected_tag = TAG_WHILE},
-            (test_data_t) {.text = "for", .expected_tag = TAG_FOR},
-            (test_data_t) {.text = "in", .expected_tag = TAG_IN},
-            (test_data_t) {.text = "break", .expected_tag = TAG_BREAK},
-            (test_data_t) {.text = "continue", .expected_tag = TAG_CONTINUE},
-            (test_data_t) {.text = "match", .expected_tag = TAG_MATCH},
-            (test_data_t) {.text = "step", .expected_tag = TAG_STEP},
-            (test_data_t) {.text = "is", .expected_tag = TAG_IS},
-            (test_data_t) {.text = "typeof", .expected_tag = TAG_TYPEOF},
-            (test_data_t) {.text = "hex", .expected_tag = TAG_TO_HEX},
-            (test_data_t) {.text = "bin", .expected_tag = TAG_TO_BIN},
+        (test_data_t) {.text = "fn", .expected_tag = TAG_FUNC_DEF},
+        (test_data_t) {.text = "return", .expected_tag = TAG_FUNC_RETURN},
+        (test_data_t) {.text = "x", .expected_tag = TAG_IDENT},
+        (test_data_t) {.text = "=", .expected_tag = TAG_ASSIGN},
+        (test_data_t) {.text = "{", .expected_tag = TAG_LBRACE},
+        (test_data_t) {.text = "}", .expected_tag = TAG_RBRACE},
+        (test_data_t) {.text = "(", .expected_tag = TAG_LPAREN},
+        (test_data_t) {.text = ")", .expected_tag = TAG_RPAREN},
+        (test_data_t) {.text = ",", .expected_tag = TAG_COMMA},
+        (test_data_t) {.text = ":", .expected_tag = TAG_COLON},
+        (test_data_t) {.text = "+", .expected_tag = TAG_PLUS},
+        (test_data_t) {.text = "-", .expected_tag = TAG_MINUS},
+        (test_data_t) {.text = "*", .expected_tag = TAG_TIMES},
+        (test_data_t) {.text = "/", .expected_tag = TAG_DIVIDE},
+        (test_data_t) {.text = "&", .expected_tag = TAG_BITWISE_AND},
+        (test_data_t) {.text = "|", .expected_tag = TAG_BITWISE_OR},
+        (test_data_t) {.text = "^", .expected_tag = TAG_BITWISE_XOR},
+        (test_data_t) {.text = "~", .expected_tag = TAG_BITWISE_NOT},
+        (test_data_t) {.text = "<<", .expected_tag = TAG_BITWISE_SHL},
+        (test_data_t) {.text = ">>", .expected_tag = TAG_BITWISE_SHR},
+        (test_data_t) {.text = "==", .expected_tag = TAG_EQ},
+        (test_data_t) {.text = "!=", .expected_tag = TAG_NE},
+        (test_data_t) {.text = "<", .expected_tag = TAG_LT},
+        (test_data_t) {.text = "<=", .expected_tag = TAG_LE},
+        (test_data_t) {.text = ">", .expected_tag = TAG_GT},
+        (test_data_t) {.text = ">=", .expected_tag = TAG_GE},
+        (test_data_t) {.text = "and", .expected_tag = TAG_AND},
+        (test_data_t) {.text = "or", .expected_tag = TAG_OR},
+        (test_data_t) {.text = "not", .expected_tag = TAG_NOT},
+        (test_data_t) {.text = "42", .expected_tag = TAG_INT},
+        (test_data_t) {.text = "3.14", .expected_tag = TAG_FLOAT},
+        (test_data_t) {.text = "'c'", .expected_tag = TAG_BYTE},
+        (test_data_t) {.text = "\"string\"", .expected_tag = TAG_STRING},
+        (test_data_t) {.text = "list", .expected_tag = TAG_LIST},
+        (test_data_t) {.text = "if", .expected_tag = TAG_IF},
+        (test_data_t) {.text = "then", .expected_tag = TAG_THEN},
+        (test_data_t) {.text = "else", .expected_tag = TAG_ELSE},
+        (test_data_t) {.text = "do", .expected_tag = TAG_DO},
+        (test_data_t) {.text = "while", .expected_tag = TAG_WHILE},
+        (test_data_t) {.text = "for", .expected_tag = TAG_FOR},
+        (test_data_t) {.text = "in", .expected_tag = TAG_IN},
+        (test_data_t) {.text = "break", .expected_tag = TAG_BREAK},
+        (test_data_t) {.text = "continue", .expected_tag = TAG_CONTINUE},
+        (test_data_t) {.text = "match", .expected_tag = TAG_MATCH},
+        (test_data_t) {.text = "step", .expected_tag = TAG_STEP},
+        (test_data_t) {.text = "is", .expected_tag = TAG_IS},
+        (test_data_t) {.text = "typeof", .expected_tag = TAG_TYPEOF},
+        (test_data_t) {.text = "hex", .expected_tag = TAG_TO_HEX},
+        (test_data_t) {.text = "bin", .expected_tag = TAG_TO_BIN},
     };
 
     int num_data = sizeof(test_data) / sizeof(test_data[0]);
@@ -677,6 +869,8 @@ void test_lexer(void) {
     RUN_TEST(test_lex_begin_end);
     RUN_TEST(test_lex_list_init);
     RUN_TEST(test_lex_list_with_values_init);
+    RUN_TEST(test_lex_list_multiline);
+    RUN_TEST(test_lex_list_of_functions);
     RUN_TEST(test_lex_dict_init);
     RUN_TEST(test_lex_dict_with_kv_init);
     RUN_TEST(test_lex_member_of);
@@ -688,5 +882,9 @@ void test_lexer(void) {
     RUN_TEST(test_lex_function_definition);
     RUN_TEST(test_lex_function_call);
     RUN_TEST(test_lex_function_with_return);
+    RUN_TEST(test_lex_nested_indentation);
+    RUN_TEST(test_lex_struct);
+    RUN_TEST(test_lex_multiline_conditional);
+    RUN_TEST(test_lex_whitespace_and_comments);
     RUN_TEST(test_lex_all_tokens);
 }
