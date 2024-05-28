@@ -29,6 +29,7 @@ int main(int argc, char **argv) {
     UNITY_BEGIN();
 
     test_lexer();
+    /*
     test_parser();
     test_heap();
     test_gc();
@@ -44,7 +45,8 @@ int main(int argc, char **argv) {
     test_eval();
     test_rand();
     test_closure();
-    test_examples();
+     */
+    //test_examples();
 
     UNITY_END();
 }

@@ -6,17 +6,20 @@
 #include "def.h"
 #include "token.h"
 
-#define LEXER_BUF_SIZE 64000
+#define LEXER_BUF_SIZE (64000)
+#define LEXER_MAX_INDENT_LEVELS (16)
 
 typedef struct {
     uint32_t pos;
     uint32_t err_pos;
     uint8_t depth; // Gross to have message-passing from the parser here :(
-    error_t err;
+    int current_indent_level;
+    int indent_levels[LEXER_MAX_INDENT_LEVELS];
     char nextch;
     char buf[LEXER_BUF_SIZE];
     token_t token;
     token_t next_token;
+    error_t err;
 } lexer_t;
 
 void lexer_init(lexer_t *lexer, const char input[], uint32_t input_size);

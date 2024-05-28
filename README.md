@@ -129,13 +129,13 @@ Functions are first-class objects.
 f
 > f(2, 5)
 10
-> val fib = fn(n) {
+> val fib = fn(n) do
     if n <= 0 then return 0  // Early returns
     if n == 1 then return 1
     fib(n - 2) + fib(n - 1)  // Last expr is still normal result value
-    }
+
 Function
-> for i in 1..10 { print(i, fib(i)) }
+> for i in 1..10 do print(i, fib(i))
 1 1
 2 1
 3 2

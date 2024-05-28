@@ -345,13 +345,13 @@ void test_lex_comment_only(void) {
 }
 
 void test_lex_begin_end(void) {
-    char *expr = "for i in 1 .. 10 {\n  print(i) \n}";
+    char *expr = "for i in 1 .. 10 { print(i) }";
     lexer_t lexer;
     lexer_init(&lexer, expr, c_str_len(expr));
 
     int expected[] = {
-            TAG_FOR, TAG_IDENT, TAG_IN, TAG_INT, TAG_RANGE, TAG_INT, TAG_BEGIN, TAG_EOL,
-            TAG_PRINT, TAG_LPAREN, TAG_IDENT, TAG_RPAREN, TAG_EOL,
+            TAG_FOR, TAG_IDENT, TAG_IN, TAG_INT, TAG_RANGE, TAG_INT, TAG_BEGIN,
+            TAG_PRINT, TAG_LPAREN, TAG_IDENT, TAG_RPAREN,
             TAG_END, TAG_EOF
     };
     for (int i = 0; i < sizeof(expected) / sizeof(expected[0]); i++) {
@@ -584,6 +584,66 @@ void test_lex_function_with_return(void) {
     }
 }
 
+// TODO: In the lexer, remove the DO before BEGIN; it should just be BEGIN
+void test_lex_good_indentation(void) {
+   char *expr = "for i in 0..10 do           \n"
+                "  for j in 0..10 do         \n"
+                "    print (j)               \n"
+                "    print (\"same indent\") \n"
+                "  print (i)                 \n"
+                "                            \n"
+                "print(\"Done\")             \n";
+   lexer_t lexer;
+   lexer_init(&lexer, expr, c_str_len(expr));
+   int expected[] = {
+       TAG_FOR, TAG_IDENT, TAG_IN, TAG_INT, TAG_RANGE, TAG_INT, TAG_DO,
+       TAG_BEGIN,
+       TAG_FOR, TAG_IDENT, TAG_IN, TAG_INT, TAG_RANGE, TAG_INT, TAG_DO,
+       TAG_BEGIN,
+       TAG_PRINT, TAG_LPAREN, TAG_IDENT, TAG_RPAREN, TAG_EOL,
+       TAG_PRINT, TAG_LPAREN, TAG_STRING, TAG_RPAREN,
+       TAG_END,
+       TAG_PRINT, TAG_LPAREN, TAG_IDENT, TAG_RPAREN,
+       TAG_EOL,
+       TAG_END,
+       TAG_PRINT, TAG_LPAREN, TAG_STRING, TAG_RPAREN, TAG_EOL,
+       TAG_EOF
+   };
+
+   for (int i = 0; i < sizeof(expected) / sizeof(expected[0]); i++) {
+       // printf("tok: %s\n", tag_names[lexer.token.tag]);
+       TEST_ASSERT_EQUAL(ERR_NO_ERROR, lexer.err);
+       TEST_ASSERT_EQUAL(expected[i], lexer.token.tag);
+       advance(&lexer);
+   }
+}
+
+// TODO: In the lexer, remove the DO before BEGIN; it should just be BEGIN
+void test_lex_bad_indentation(void) {
+    char *expr = "for i in 0..10 do           \n"
+                 "  for j in 0..10 do         \n"
+                 "    print (j)               \n"
+                 "   print (\"bad indent!\")  \n";
+
+    lexer_t lexer;
+    lexer_init(&lexer, expr, c_str_len(expr));
+    int expected[] = {
+        TAG_FOR, TAG_IDENT, TAG_IN, TAG_INT, TAG_RANGE, TAG_INT, TAG_DO,
+        TAG_BEGIN,
+        TAG_FOR, TAG_IDENT, TAG_IN, TAG_INT, TAG_RANGE, TAG_INT, TAG_DO,
+        TAG_BEGIN,
+        TAG_PRINT, TAG_LPAREN, TAG_IDENT,
+    };
+
+    for (int i = 0; i < sizeof(expected) / sizeof(expected[0]); i++) {
+        TEST_ASSERT_EQUAL(ERR_NO_ERROR, lexer.err);
+        TEST_ASSERT_EQUAL(expected[i], lexer.token.tag);
+        advance(&lexer);
+    }
+
+    TEST_ASSERT_EQUAL(ERR_LEX_UNEXPECTED_TOKEN, lexer.err);
+}
+
 void test_lex_all_tokens(void) {
     typedef struct {
         char *text;
@@ -688,5 +748,7 @@ void test_lexer(void) {
     RUN_TEST(test_lex_function_definition);
     RUN_TEST(test_lex_function_call);
     RUN_TEST(test_lex_function_with_return);
+    RUN_TEST(test_lex_good_indentation);
+    RUN_TEST(test_lex_bad_indentation);
     RUN_TEST(test_lex_all_tokens);
 }

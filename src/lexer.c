@@ -22,11 +22,15 @@ static void readch(lexer_t *lexer) {
     lexer->nextch = lexer->buf[lexer->pos++];
 }
 
-static void consume_ws(lexer_t *lexer) {
+static int consume_ws(lexer_t *lexer) {
+    int ws = 0;
     for (;;) {
         readch(lexer);
         switch (lexer->nextch) {
             case ' ':
+                ws++;
+                break;
+
             case '\t':
             case '\r':
                 // Do not eat EOL.
@@ -34,7 +38,7 @@ static void consume_ws(lexer_t *lexer) {
                 break;
 
             default:
-                return;
+                return ws;
         }
     }
 }
@@ -184,7 +188,7 @@ static token_t *lex_word(lexer_t *lexer) {
         return lex_field_or_method(lexer);
     }
 
-    // Get the word.
+    // Get the word into next_word_buf.
     lex_word_raw(lexer);
 
     // Is it a reserved word?
@@ -250,7 +254,42 @@ static token_t *get_token(lexer_t *lexer) {
 
     if (ch == 0) return lex_eof(lexer);
 
-    if (ch == '\n') return lex_eol(lexer);
+    if (ch == '\n') {
+        // Consume line-initial whitespace and Compare indentation level.
+        int indent = consume_ws(lexer);
+        int current_indent = lexer->indent_levels[lexer->current_indent_level];
+
+        if (lexer->nextch == '\n' || lexer->nextch == '/') {
+            // Blank or comment line. Just emit EOL.
+            unreadch(lexer);
+            return lex_eol(lexer);
+        } else if (indent > current_indent) {
+            // Greater indentation level means new block.
+            // Emit a synthetic BEGIN tag.
+            lexer->current_indent_level++;
+            if (lexer->current_indent_level == LEXER_MAX_INDENT_LEVELS) {
+                return lexer_error(lexer);
+            }
+            lexer->indent_levels[lexer->current_indent_level] = indent;
+            unreadch(lexer);
+            return lex_paren(lexer, TAG_BEGIN);
+        } else if (indent < current_indent) {
+            lexer->current_indent_level--;
+            if (lexer->current_indent_level < 0) {
+                return lexer_error(lexer);
+            }
+            if (indent != lexer->indent_levels[lexer->current_indent_level]) {
+                return lexer_error(lexer);
+            }
+            // Lesser indentation level means close block.
+            // Emit a synthetic END tag.
+            unreadch(lexer);
+            return lex_paren(lexer, TAG_END);
+        } else {
+            unreadch(lexer);
+            return lex_eol(lexer);
+        }
+    }
 
     if (ch == '0') {
         readch(lexer);
@@ -267,12 +306,15 @@ static token_t *get_token(lexer_t *lexer) {
         }
     }
 
-    if (ch >= '0' && ch <= '9') return lex_num(lexer);
+    if (ch >= '0' && ch <= '9') {
+        return lex_num(lexer);
+    }
 
     if ((ch >= 'a' && ch <= 'z') ||
         (ch >= 'A' && ch <= 'Z') ||
-        (ch == '_'))
+        (ch == '_')) {
         return lex_word(lexer);
+    }
 
     switch (ch) {
         case '{':
@@ -424,6 +466,9 @@ void lexer_init(lexer_t *lexer, const char input[], const uint32_t input_size) {
     lexer->err_pos = 0;
     lexer->depth = 1;
     lexer->err = ERR_NO_ERROR;
+
+    lexer->current_indent_level = 0;
+    lexer->indent_levels[0] = 0;
 
     if (input_size > LEXER_BUF_SIZE) {
         lexer->err = ERR_INPUT_TOO_LONG;
