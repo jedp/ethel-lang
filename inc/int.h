@@ -1,5 +1,4 @@
-#ifndef __INT_H
-#define __INT_H
+#pragma once
 
 #include "obj.h"
 
@@ -58,5 +57,3 @@ obj_t *int_bitwise_shr(obj_t *obj, obj_varargs_t *args);
 obj_t *int_bitwise_not(obj_t *obj, obj_varargs_t *args);
 
 static_method get_int_static_method(static_method_ident_t method_id);
-
-#endif

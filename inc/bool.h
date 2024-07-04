@@ -1,5 +1,4 @@
-#ifndef __BOOL_H
-#define __BOOL_H
+#pragma once
 
 #include "obj.h"
 
@@ -20,5 +19,3 @@ obj_t *bool_ne(obj_t *obj, obj_varargs_t *args);
 obj_t *bool_as(obj_t *obj, obj_varargs_t *args);
 
 static_method get_bool_static_method(static_method_ident_t method_id);
-
-#endif

@@ -3,8 +3,7 @@
  * https://www.jstatsoft.org/v08/i14/paper
  */
 
-#ifndef __RAND_H
-#define __RAND_H
+#pragma once
 
 #include <inttypes.h>
 
@@ -20,5 +19,3 @@ void rand32_seed(uint32_t seed);
 
 /* Return a 32-bit pseudo-random number. */
 uint32_t rand32(void);
-
-#endif

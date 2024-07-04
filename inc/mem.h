@@ -1,5 +1,4 @@
-#ifndef __MEM_H
-#define __MEM_H
+#pragma once
 
 #include "def.h"
 
@@ -36,5 +35,3 @@ void mem_free(void *b);
 void mem_init(unsigned char initval);
 
 void assert_valid_typed_node(gc_header_t *node);
-
-#endif

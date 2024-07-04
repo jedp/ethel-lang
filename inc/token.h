@@ -1,5 +1,4 @@
-#ifndef __TOKEN_H
-#define __TOKEN_H
+#pragma once
 
 #include <inttypes.h>
 
@@ -267,5 +266,3 @@ static const token_t reserved[] = {
         {TAG_LN, .string = (char *) "ln"},
         {TAG_LOG, .string = (char *) "log"},
 };
-
-#endif

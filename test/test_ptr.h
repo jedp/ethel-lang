@@ -1,6 +1,3 @@
-#ifndef __TEST_PTR_H
-#define __TEST_PTR_H
+#pragma once
 
 void test_ptr(void);
-
-#endif

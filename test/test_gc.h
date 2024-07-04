@@ -1,6 +1,3 @@
-#ifndef __TEST_GC_H
-#define __TEST_GC_H
+#pragma once
 
 void test_gc(void);
-
-#endif

@@ -1,5 +1,4 @@
-#ifndef __DICT_H
-#define __DICT_H
+#pragma once
 
 #include "def.h"
 #include "err.h"
@@ -27,5 +26,3 @@ obj_t *dict_obj_remove(obj_t *obj, obj_varargs_t *args);
 obj_t *dict_obj_iterator(obj_t *obj, obj_varargs_t *args);
 
 static_method get_dict_static_method(static_method_ident_t method_id);
-
-#endif

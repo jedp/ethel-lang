@@ -1,6 +1,3 @@
-#ifndef __TEST_LIST_H
-#define __TEST_LIST_H
+#pragma once
 
 void test_list(void);
-
-#endif

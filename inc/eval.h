@@ -1,5 +1,4 @@
-#ifndef _EVAL_H
-#define _EVAL_H
+#pragma once
 
 #include <inttypes.h>
 #include "obj.h"
@@ -14,5 +13,3 @@ typedef struct Result {
 } eval_result_t;
 
 void eval(interp_t *interp, const char *input, eval_result_t *result);
-
-#endif

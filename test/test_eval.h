@@ -1,6 +1,3 @@
-#ifndef __TEST_EVAL_H
-#define __TEST_EVAL_H
+#pragma once
 
 void test_eval(void);
-
-#endif

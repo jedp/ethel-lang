@@ -1,5 +1,4 @@
-#ifndef __DEF_H
-#define __DEF_H
+#pragma once
 
 #include <stdio.h>
 #include <stdint.h>
@@ -327,5 +326,3 @@ typedef struct {
     size_t size;
     byte data[];
 } bytearray_t;
-
-#endif

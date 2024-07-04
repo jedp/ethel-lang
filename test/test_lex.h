@@ -1,6 +1,3 @@
-#ifndef __TEST_LEXER_H
-#define __TEST_LEXER_H
+#pragma once
 
 void test_lexer(void);
-
-#endif

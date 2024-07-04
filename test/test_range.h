@@ -1,6 +1,3 @@
-#ifndef __TEST_RANGE_H
-#define __TEST_RANGE_H
+#pragma once
 
 void test_range(void);
-
-#endif

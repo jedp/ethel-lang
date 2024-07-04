@@ -1,5 +1,4 @@
-#ifndef __OBJ_H
-#define __OBJ_H
+#pragma once
 
 #include <inttypes.h>
 #include "err.h"
@@ -238,5 +237,3 @@ obj_t *continue_obj(void);
 obj_varargs_t *wrap_varargs(int n_args, ...);
 
 boolean obj_prim_eq(obj_t *a, obj_t *b);
-
-#endif

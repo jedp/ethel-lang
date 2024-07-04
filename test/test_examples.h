@@ -1,6 +1,3 @@
-#ifndef __TEST_EXAMPLES_H
-#define __TEST_EXAMPLES_H
+#pragma once
 
 void test_examples(void);
-
-#endif

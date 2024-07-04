@@ -1,5 +1,4 @@
-#ifndef __ERR_H
-#define __ERR_H
+#pragma once
 
 #include <inttypes.h>
 
@@ -78,5 +77,3 @@ static const char *err_names[ERR_MAX] = {
         "Syntax error",
         "Out of memory",
 };
-
-#endif

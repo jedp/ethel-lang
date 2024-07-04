@@ -1,5 +1,4 @@
-#ifndef __RANGE_H
-#define __RANGE_H
+#pragma once
 
 #include "obj.h"
 
@@ -26,5 +25,3 @@ obj_t *range_to_string(obj_t *obj, obj_varargs_t *args);
 obj_t *range_iterator(obj_t *obj, obj_varargs_t *args);
 
 static_method get_range_static_method(static_method_ident_t method_id);
-
-#endif

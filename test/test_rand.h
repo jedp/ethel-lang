@@ -1,6 +1,3 @@
-#ifndef __TEST_RAND_H
-#define __TEST_RAND_H
+#pragma once
 
 void test_rand(void);
-
-#endif

@@ -1,6 +1,3 @@
-#ifndef __TEST_TRACE_H
-#define __TEST_TRACE_H
+#pragma once
 
 void test_trace(void);
-
-#endif

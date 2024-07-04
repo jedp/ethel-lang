@@ -1,5 +1,4 @@
-#ifndef __LEXER_H
-#define __LEXER_H
+#pragma once
 
 #include <inttypes.h>
 #include "err.h"
@@ -24,5 +23,3 @@ void lexer_init(lexer_t *lexer, const char input[], uint32_t input_size);
 void advance(lexer_t *lexer);
 
 boolean eat(lexer_t *lexer, tag_t t);
-
-#endif

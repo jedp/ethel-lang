@@ -1,5 +1,4 @@
-#ifndef _AST_H
-#define _AST_H
+#pragma once
 
 #include <inttypes.h>
 #include "def.h"
@@ -280,5 +279,3 @@ ast_expr_t *ast_break(void);
 ast_expr_t *ast_continue(void);
 
 ast_expr_t *ast_empty(void);
-
-#endif

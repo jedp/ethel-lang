@@ -1,5 +1,4 @@
-#ifndef __OBJ_LIST_H
-#define __OBJ_LIST_H
+#pragma once
 
 #include "obj.h"
 
@@ -47,5 +46,3 @@ obj_t *list_random_choice(obj_t *obj, obj_varargs_t *args);
 obj_t *list_iterator(obj_t *obj, obj_varargs_t *args);
 
 static_method get_list_static_method(static_method_ident_t method_id);
-
-#endif

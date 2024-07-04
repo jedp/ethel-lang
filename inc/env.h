@@ -1,5 +1,4 @@
-#ifndef __ENV_H
-#define __ENV_H
+#pragma once
 
 #include "err.h"
 #include "obj.h"
@@ -55,5 +54,3 @@ error_t del_env(interp_t *interp, bytearray_t *name_obj);
 obj_t *get_env(interp_t *interp, bytearray_t *name_obj);
 
 void show_env(interp_t *interp);
-
-#endif

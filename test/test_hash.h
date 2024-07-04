@@ -1,6 +1,3 @@
-#ifndef __TEST_HASH_H
-#define __TEST_HASH_H
+#pragma once
 
 void test_hash(void);
-
-#endif

@@ -1,6 +1,3 @@
-#ifndef __TEST_HEAP_H
-#define __TEST_HEAP_H
+#pragma once
 
 void test_heap(void);
-
-#endif

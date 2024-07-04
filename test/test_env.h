@@ -1,6 +1,3 @@
-#ifndef __TEST_ENV_H
-#define __TEST_ENV_H
+#pragma once
 
 void test_env(void);
-
-#endif

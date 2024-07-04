@@ -1,5 +1,4 @@
-#ifndef __PARSER_H
-#define __PARSER_H
+#pragma once
 
 #include "err.h"
 #include "lex.h"
@@ -47,5 +46,3 @@ typedef struct {
 } parse_result_t;
 
 void parse_program(const char *input, ast_expr_t *ast, parse_result_t *parse_result);
-
-#endif

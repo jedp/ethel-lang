@@ -1,5 +1,4 @@
-#ifndef __FLOAT_H
-#define __FLOAT_H
+#pragma once
 
 #include "obj.h"
 
@@ -52,5 +51,3 @@ obj_t *float_div(obj_t *obj, obj_varargs_t *args);
 obj_t *float_mod(obj_t *obj, obj_varargs_t *args);
 
 static_method get_float_static_method(static_method_ident_t method_id);
-
-#endif

@@ -1,5 +1,4 @@
-#ifndef __HEAP_H
-#define __HEAP_H
+#pragma once
 
 #include <stdio.h>
 #include <stdint.h>
@@ -112,5 +111,3 @@ void dump_heap(void);
 void assert_valid_heap_node(heap_node_t *node);
 
 void assert_valid_data_ptr(void *data_ptr);
-
-#endif

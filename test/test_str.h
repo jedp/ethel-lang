@@ -1,6 +1,3 @@
-#ifndef __TEST_STR_H
-#define __TEST_STR_H
+#pragma once
 
 void test_str(void);
-
-#endif

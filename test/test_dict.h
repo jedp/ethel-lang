@@ -1,6 +1,3 @@
-#ifndef __TEST_DICT_H
-#define __TEST_DICT_H
+#pragma once
 
 void test_dict(void);
-
-#endif

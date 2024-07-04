@@ -1,6 +1,3 @@
-#ifndef _RUN_H
-#define _RUN_H
+#pragma once
 
 int run(char *fname);
-
-#endif
