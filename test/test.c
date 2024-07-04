@@ -18,6 +18,7 @@
 #include "test_closure.h"
 #include "test_examples.h"
 #include "test_cg.h"
+#include "test_dis.h"
 
 void setUp(void) {
     mem_init('x');
@@ -30,6 +31,7 @@ int main(int argc, char **argv) {
     UNITY_BEGIN();
 
     test_cg();
+    test_dis();
     test_lexer();
     test_parser();
     test_heap();

@@ -1,5 +1,7 @@
 #pragma once
 
+#include <inttypes.h>
+
 typedef struct cg_t {
     uint32_t len;
     uint32_t max;
