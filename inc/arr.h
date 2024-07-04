@@ -8,8 +8,6 @@
 #define ARR_GROW(type, arr, size) \
     (type *) mem_realloc(arr, sizeof(type) * size)
 
-#define ARR_FREE(arr) mem_free(arr)
-
 /*
  * Return the integer hash of the array object.
  *

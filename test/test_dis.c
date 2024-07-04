@@ -9,6 +9,10 @@ void test_print_dis(void) {
     cg_t cg;
     cg_init(&cg);
 
+    cg_add_const(&cg, int_obj(1), int_obj(42));
+
+    cg_byte(&cg, VM_OP_LOADI);
+    cg_byte(&cg, 42);
     cg_byte(&cg, VM_OP_NOP);
     cg_byte(&cg, VM_OP_RET);
 
