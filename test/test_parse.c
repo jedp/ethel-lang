@@ -1,9 +1,9 @@
 #include "unity/unity.h"
-#include "test_parser.h"
+#include "test_parse.h"
 #include "../inc/type.h"
 #include "../inc/mem.h"
 #include "../inc/str.h"
-#include "../inc/parser.h"
+#include "../inc/parse.h"
 
 void test_parse_empty(void) {
     char *program = "  ";

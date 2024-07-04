@@ -1,10 +1,10 @@
 #include <assert.h>
 #include <stdio.h>
-#include "../inc/type.h"
-#include "../inc/dict.h"
-#include "../inc/mem.h"
-#include "../inc/str.h"
-#include "../inc/env.h"
+#include "../../inc/type.h"
+#include "../../inc/dict.h"
+#include "../../inc/mem.h"
+#include "../../inc/str.h"
+#include "../../inc/env.h"
 
 env_t *new_env(void) {
     env_t *env = (env_t *) alloc_type(INTERP_ENV, F_NONE);

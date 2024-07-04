@@ -2,7 +2,7 @@
 #define __PARSER_H
 
 #include "err.h"
-#include "lexer.h"
+#include "lex.h"
 #include "ast.h"
 
 /*

@@ -11,7 +11,7 @@
 #include "../inc/type.h"
 #include "../inc/rand.h"
 #include "../inc/eval.h"
-#include "../inc/parser.h"
+#include "../inc/parse.h"
 
 size_t MAX_INPUT_LINE = 80;
 

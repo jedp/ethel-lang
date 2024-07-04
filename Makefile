@@ -17,9 +17,9 @@ COMPOBJS = src/ptr.o \
 					 src/fn.o \
 					 src/type.o \
 					 src/rand.o \
-					 src/lexer.o \
-					 src/parser.o \
-					 src/env.o \
+					 src/comp/lex.o \
+					 src/comp/parse.o \
+					 src/comp/env.o \
 					 src/ast.o \
 					 src/eval.o
 
@@ -39,8 +39,8 @@ TESTOBJS = test/unity/unity.o \
 					 test/test_trace.o \
 					 test/test_gc.o \
 					 test/test_bytearray.o \
-					 test/test_lexer.o \
-					 test/test_parser.o \
+					 test/test_lex.o \
+					 test/test_parse.o \
 					 test/test_eval.o \
 					 test/test_env.o \
 					 test/test_rand.o \
