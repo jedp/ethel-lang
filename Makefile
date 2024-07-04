@@ -20,6 +20,7 @@ COMPOBJS = src/ptr.o \
 					 src/comp/lex.o \
 					 src/comp/parse.o \
 					 src/comp/env.o \
+					 src/comp/cg.o \
 					 src/ast.o \
 					 src/eval.o
 
@@ -46,6 +47,7 @@ TESTOBJS = test/unity/unity.o \
 					 test/test_rand.o \
 					 test/test_closure.o \
 					 test/test_examples.o \
+					 test/test_cg.o \
 					 test/test.o
 
 CFLAGS = -std=gnu11 -g3 -Os -I inc
