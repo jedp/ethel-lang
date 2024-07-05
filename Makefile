@@ -12,6 +12,7 @@ COMPOBJS = src/ptr.o \
 					 src/byte.o \
 					 src/int.o \
 					 src/list.o \
+					 src/map.o \
 					 src/dict.o \
 					 src/bool.o \
 					 src/fn.o \
@@ -35,6 +36,7 @@ TESTOBJS = test/unity/unity.o \
 					 test/test_hash.o \
 					 test/test_str.o \
 					 test/test_list.o \
+					 test/test_map.o \
 					 test/test_dict.o \
 					 test/test_range.o \
 					 test/test_ptr.o \

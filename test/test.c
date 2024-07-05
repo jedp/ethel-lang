@@ -20,6 +20,7 @@
 #include "test_cg.h"
 #include "test_dis.h"
 #include "test_vm.h"
+#include "test_map.h"
 
 void setUp(void) {
     mem_init('x');
@@ -34,6 +35,7 @@ int main(int argc, char **argv) {
     test_cg();
     test_dis();
     test_vm();
+    test_map();
     /*
     test_lexer();
     test_parser();
