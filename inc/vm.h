@@ -33,7 +33,7 @@ typedef struct vm_stack_t {
     uint32_t size;
     // top is pointer into buf.
     vm_stack_elem_t *top;
-    vm_stack_elem_t *buf;
+    vm_stack_elem_t buf[VM_DATA_STACK_SIZE];
 } vm_stack_t;
 
 typedef struct vm_t {

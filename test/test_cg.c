@@ -1,6 +1,7 @@
 #include "unity/unity.h"
 #include "test_cg.h"
 #include "../inc/cg.h"
+#include "../inc/map.h"
 #include "../inc/op.h"
 
 void test_cg_init(void) {
@@ -41,9 +42,9 @@ void test_cg_add_const(void) {
     cg_t cg;
     cg_init(&cg);
 
-    cg_add_const(&cg, int_obj(6), int_obj(42));
+    cg_add_const(&cg, 6, 42);
 
-    TEST_ASSERT_EQUAL(42, cg_get_const(&cg, int_obj(6))->intval);
+    TEST_ASSERT_EQUAL(42, cg_get_const(&cg, 6));
 
     cg_free(&cg);
 }

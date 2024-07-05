@@ -10,6 +10,7 @@ typedef enum {
     MAP_ELEM_BOOL_TYPE,
     MAP_ELEM_CHAR_TYPE,
     MAP_ELEM_INT_TYPE,
+    MAP_ELEM_UINT_TYPE,
     MAP_ELEM_FLOAT_TYPE,
     MAP_ELEM_OBJ_TYPE,
 } map_elem_type_t;
@@ -19,6 +20,7 @@ typedef union {
     uint8_t boolval;
     unsigned char charval;
     int intval;
+    uint32_t uintval;
     float floatval;
     void *obj;
 } map_elem;

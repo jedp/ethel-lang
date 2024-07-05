@@ -1,5 +1,5 @@
 #include <stdlib.h>
-
+#include <string.h>
 #include <stdio.h>
 #include <stdlib.h>
 
@@ -9,10 +9,16 @@
 uint32_t hash_primitive(map_elem_t *e) {
     switch (e->type) {
         case MAP_ELEM_BOOL_TYPE:
+            return (uint32_t) e->elem.boolval;
         case MAP_ELEM_BYTE_TYPE:
+            return (uint32_t) e->elem.byteval;
         case MAP_ELEM_CHAR_TYPE:
-        case MAP_ELEM_INT_TYPE:
+            return (uint32_t) e->elem.charval;
+        case MAP_ELEM_UINT_TYPE:
+            return (uint32_t) e->elem.uintval;
         case MAP_ELEM_FLOAT_TYPE:
+            return (uint32_t) e->elem.uintval;
+        case MAP_ELEM_INT_TYPE:
             return (uint32_t) e->elem.intval;
         case MAP_ELEM_OBJ_TYPE:
             // TODO
@@ -24,13 +30,18 @@ uint32_t hash_primitive(map_elem_t *e) {
 }
 
 uint8_t eq_primitive(map_elem_t *a, map_elem_t *b) {
+    // TODO test b is of primitive type
     switch (a->type) {
         case MAP_ELEM_BOOL_TYPE:
+            return (a->elem.boolval == b->elem.boolval) ? 1 : 0;
         case MAP_ELEM_BYTE_TYPE:
+            return (a->elem.byteval == b->elem.byteval) ? 1 : 0;
         case MAP_ELEM_CHAR_TYPE:
-        case MAP_ELEM_INT_TYPE:
+            return (a->elem.charval == b->elem.charval) ? 1 : 0;
+        case MAP_ELEM_UINT_TYPE:
         case MAP_ELEM_FLOAT_TYPE:
-            // TODO test b is of primitive type
+            return (a->elem.uintval == b->elem.uintval) ? 1 : 0;
+        case MAP_ELEM_INT_TYPE:
             return (a->elem.intval == b->elem.intval) ? 1 : 0;
         case MAP_ELEM_OBJ_TYPE:
             // TODO
@@ -89,7 +100,8 @@ static error_t buckets_put_internal(map_buckets_t *buckets,
         if (node->hash_val == hash_val &&
             eq_func(node->k, k)) {
             // Key already in the map. Update the value.
-            node->v = v;
+            node->v->type = v->type;
+            node->v->elem.uintval = v->elem.uintval;
             return ERR_NO_ERROR;
         }
         node = node->next;
@@ -104,8 +116,10 @@ static error_t buckets_put_internal(map_buckets_t *buckets,
     new->hash_val = hash_val;
     new->k = (map_elem_t *) mem_alloc(sizeof(map_elem_t));
     new->k->type = k->type;
-    new->k->elem = k->elem;
-    new->v = v;
+    new->k->elem.uintval = k->elem.uintval;
+    new->v = (map_elem_t *) mem_alloc(sizeof(map_elem_t));
+    new->v->type = v->type;
+    new->v->elem.uintval = v->elem.uintval;
 
     // Insert at head of list in this bucket.
     new->next = (first == NULL) ? NULL : first;

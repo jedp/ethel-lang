@@ -1,7 +1,7 @@
 #include "unity/unity.h"
 #include "test_vm.h"
 #include "../inc/cg.h"
-#include "../inc/dict.h"
+#include "../inc/map.h"
 #include "../inc/op.h"
 #include "../inc/str.h"
 #include "../inc/vm.h"
@@ -51,17 +51,21 @@ void test_vm_loadi(void) {
     vm_t vm;
     vm_init(&vm);
 
-    error_t err;
+    error_t err = ERR_NO_ERROR;
 
     uint8_t bytes[] = {VM_OP_NOP, VM_OP_LOADI, 42, VM_OP_RET};
     bytearray_t *bytecode = bytearray_alloc_with_data(4, bytes);
 
-    err = vm_load_code(&vm, bytecode);
-    err |= cg_add_const(vm.cg, int_obj(42), int_obj(123));
-    TEST_ASSERT_EQUAL(ERR_NO_ERROR, err);
-    TEST_ASSERT_EQUAL(123, cg_get_const(vm.cg, int_obj(42))->intval);
+    err |= vm_load_code(&vm, bytecode);
 
-    vm_interp(&vm);
+    // Hand-code the interpretation part.
+    err |= cg_add_const(vm.cg, 42, 123);
+
+    err |= vm_interp(&vm);
+    TEST_ASSERT_EQUAL(ERR_VM_INTERP_OK, err);
+    // Should be both in the const pool and on the stack.
+    TEST_ASSERT_EQUAL(VM_STACK_INT_TYPE, vm_stack_peek(&vm)->type);
+    TEST_ASSERT_EQUAL(123, vm_stack_peek(&vm)->intval);
 
     vm_free(&vm);
 }

@@ -2,13 +2,13 @@
 
 #include "arr.h"
 #include "cg.h"
-#include "dict.h"
+#include "map.h"
 
 void cg_init(cg_t *cg) {
     cg->len = 0;
     cg->max = 0;
     cg->code = NULL;
-    cg->consts = dict_obj();
+    cg->consts = map_new(MAP_NEW_BUCKETS, &hash_primitive, &eq_primitive);
 }
 
 void cg_free(cg_t *cg) {
@@ -38,10 +38,24 @@ void cg_bytes(cg_t *cg, bytearray_t *bytes) {
     }
 }
 
-error_t cg_add_const(cg_t *cg, obj_t *k, obj_t *v) {
-    return dict_put(cg->consts, k, v);
+error_t cg_add_const(cg_t *cg, uint32_t n, int v) {
+    map_elem_t ek;
+    ek.type = MAP_ELEM_UINT_TYPE;
+    ek.elem.uintval = n;
+    map_elem_t ev;
+    ev.type = MAP_ELEM_INT_TYPE;
+    ev.elem.intval = v;
+    return map_put(cg->consts, &ek, &ev);
 }
 
-obj_t* cg_get_const(cg_t *cg, obj_t *k) {
-    return dict_get(cg->consts, k);
+int cg_get_const(cg_t *cg, uint32_t n) {
+    map_elem_t ek;
+    ek.type = MAP_ELEM_UINT_TYPE;
+    ek.elem.uintval = n;
+    map_elem_t *found = map_get(cg->consts, &ek);
+    if (found == NULL) {
+        // TODO here's a weird number to signal problems. (decimal 90.)
+        return 0x5a;
+    }
+    return found->elem.intval;
 }
