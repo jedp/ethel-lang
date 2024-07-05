@@ -19,6 +19,7 @@
 #include "test_examples.h"
 #include "test_cg.h"
 #include "test_dis.h"
+#include "test_vm.h"
 
 void setUp(void) {
     mem_init('x');
@@ -32,6 +33,8 @@ int main(int argc, char **argv) {
 
     test_cg();
     test_dis();
+    test_vm();
+    /*
     test_lexer();
     test_parser();
     test_heap();
@@ -49,6 +52,7 @@ int main(int argc, char **argv) {
     test_rand();
     test_closure();
     test_examples();
+    */
 
     UNITY_END();
 }

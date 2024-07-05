@@ -41,9 +41,9 @@ void test_cg_add_const(void) {
     cg_t cg;
     cg_init(&cg);
 
-    cg_add_const(&cg, int_obj(1), int_obj(42));
+    cg_add_const(&cg, int_obj(6), int_obj(42));
 
-    TEST_ASSERT_EQUAL(42, cg_get_const(&cg, int_obj(1))->intval);
+    TEST_ASSERT_EQUAL(42, cg_get_const(&cg, int_obj(6))->intval);
 
     cg_free(&cg);
 }

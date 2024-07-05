@@ -222,6 +222,7 @@ obj_t *range_step_obj(int from_inclusive, int to_inclusive, int step);
 obj_t *list_obj(obj_list_element_t *elems);
 
 obj_t *dict_obj_of_size(size_t buckets);
+
 obj_t *dict_obj(void);
 
 obj_t *func_obj(void *code, void *scope);

@@ -1,6 +1,6 @@
 #include <stdio.h>
 
-#include "dict.h"
+#include "cg.h"
 #include "dis.h"
 #include "op.h"
 
@@ -10,7 +10,7 @@ static uint32_t print_op(const char *name, uint32_t offset) {
 }
 
 static uint32_t print_loadi(const char *name, cg_t *cg, uint32_t offset) {
-    obj_t *const_obj = dict_get(cg->consts, int_obj(cg->code[offset + 1]));
+    obj_t *const_obj = cg_get_const(cg, int_obj(cg->code[offset + 1]));
     printf("%8s %4d [%d]\n", name, cg->code[offset + 1], const_obj->intval);
     return offset + 2;
 }

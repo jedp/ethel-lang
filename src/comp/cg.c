@@ -32,6 +32,12 @@ void cg_byte(cg_t *cg, uint8_t byte) {
     cg->len++;
 }
 
+void cg_bytes(cg_t *cg, bytearray_t *bytes) {
+    for (uint32_t i = 0; i < bytes->size; i++) {
+        cg_byte(cg, bytes->data[i]);
+    }
+}
+
 error_t cg_add_const(cg_t *cg, obj_t *k, obj_t *v) {
     return dict_put(cg->consts, k, v);
 }
