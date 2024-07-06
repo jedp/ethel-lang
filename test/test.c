@@ -32,6 +32,7 @@ void tearDown(void) {
 int main(int argc, char **argv) {
     UNITY_BEGIN();
 
+    test_heap();
     test_cg();
     test_dis();
     test_vm();
@@ -39,7 +40,6 @@ int main(int argc, char **argv) {
     /*
     test_lexer();
     test_parser();
-    test_heap();
     test_gc();
     test_ptr();
     test_trace();

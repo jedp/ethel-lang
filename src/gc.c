@@ -137,6 +137,7 @@ static int scan_dict_children(gc_header_t *data_ptr) {
  */
 static int scan_unscanned_objects() {
     heap_node_t *heap_node = heap_head();
+    printf("GC scanning from heap head %p\n", heap_node);
 
     int unscanned = 0;
 

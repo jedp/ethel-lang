@@ -23,11 +23,15 @@ uint32_t print_dis_byte(cg_t *cg, uint32_t offset) {
     switch (op) {
         case VM_OP_NOP:
         case VM_OP_RET:
+        case VM_OP_NEGATE:
+        case VM_OP_ADD:
+        case VM_OP_SUB:
+        case VM_OP_MUL:
+        case VM_OP_DIV:
+        case VM_OP_REM:
             return print_op(op_names[op], offset);
         case VM_OP_LOADI:
             return print_loadi(op_names[op], cg, offset);
-        case VM_OP_NEGATE:
-            return print_op(op_names[op], offset);
         default:
             return print_op("**UNKNOWN**", offset);
     }

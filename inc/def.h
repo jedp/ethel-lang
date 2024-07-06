@@ -166,6 +166,7 @@ enum every_type {
     EVAL_RESULT,
     INTERP_ENV,
     INTERP_STATE,
+    VM_DATA_NO_GC,
     TYPE_MAX,
 };
 
@@ -304,6 +305,7 @@ static const char *type_names[TYPE_MAX] = {
         "<Eval Result>",
         "<Interpreter Env>",
         "<Interpreter State>",
+        "VM Internal Data",
 };
 
 typedef uint8_t byte;

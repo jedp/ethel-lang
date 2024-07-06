@@ -74,6 +74,7 @@ static void print_result(obj_t *obj) {
 
 int main() {
     // Init ethel memory management.
+    printf("main\n");
     mem_init('x');
 
     mem_set(input, 0, MAX_INPUT);

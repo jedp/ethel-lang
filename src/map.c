@@ -3,6 +3,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 
+#include "def.h"
 #include "map.h"
 #include "mem.h"
 
@@ -54,6 +55,7 @@ uint8_t eq_primitive(map_elem_t *a, map_elem_t *b) {
 
 static map_buckets_t *buckets_new(uint8_t nbuckets) {
     map_buckets_t *buckets = (map_buckets_t *) mem_alloc(sizeof(map_buckets_t) * nbuckets);
+    ((gc_header_t *) buckets)->type = VM_DATA_NO_GC;
     for (uint8_t i = 0; i < nbuckets; i++) {
         buckets->nodes[i] = NULL;
     }
@@ -72,6 +74,7 @@ map_t *map_new(
     buckets->nelems = 0;
 
     map_t *map = (map_t *) mem_alloc(sizeof(map_t));
+    ((gc_header_t *) map)->type = VM_DATA_NO_GC;
 
     if (buckets == NULL || map == NULL) {
         printf("Can't allocate new map. Out of memory.\n");
@@ -108,14 +111,17 @@ static error_t buckets_put_internal(map_buckets_t *buckets,
 
     // Create a new node.
     map_kv_node_t *new = (map_kv_node_t *) mem_alloc(sizeof(map_kv_node_t));
+    ((gc_header_t *) new)->type = VM_DATA_NO_GC;
     if (new == NULL) {
         exit(1);
     }
 
     new->hash_val = hash_val;
     new->k = (map_elem_t *) mem_alloc(sizeof(map_elem_t));
+    ((gc_header_t *) new->k)->type = VM_DATA_NO_GC;
     *(new->k) = *k;
     new->v = (map_elem_t *) mem_alloc(sizeof(map_elem_t));
+    ((gc_header_t *) new->v)->type = VM_DATA_NO_GC;
     *(new->v) = *v;
 
     // Insert at head of list in this bucket.

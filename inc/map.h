@@ -1,5 +1,6 @@
 #pragma once
 
+#include "def.h"
 #include "err.h"
 
 #define MAP_NEW_BUCKETS (8)
@@ -26,11 +27,13 @@ typedef union {
 } map_elem;
 
 typedef struct map_elem_t {
+    gc_header_t hdr;
     map_elem_type_t type;
     map_elem elem;
 } map_elem_t;
 
 typedef struct map_kv_node_t {
+    gc_header_t hdr;
     map_elem_t *k;
     map_elem_t *v;
     struct map_kv_node_t *next;
@@ -38,6 +41,7 @@ typedef struct map_kv_node_t {
 } map_kv_node_t;
 
 typedef struct map_buckets_t {
+    gc_header_t hdr;
     uint32_t nbuckets;
     uint32_t nelems;
     // Allocated to size when struct is instantiated;
@@ -45,6 +49,8 @@ typedef struct map_buckets_t {
 } map_buckets_t;
 
 typedef struct map_t {
+    gc_header_t hdr;
+
     uint32_t (*hash_func)(map_elem_t *node);
 
     uint8_t (*eq_func)(map_elem_t *node, map_elem_t *other);

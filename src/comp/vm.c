@@ -1,3 +1,4 @@
+#include <stdio.h>
 #include "cg.h"
 #include "def.h"
 #include "dis.h"
@@ -32,7 +33,54 @@ static error_t numeric_negate(vm_stack_elem_t *e) {
     return ERR_NO_ERROR;
 }
 
+static error_t binop(vm_t *vm, vm_op_t op) {
+    vm_stack_elem_t *a = vm_stack_pop(vm);
+    vm_stack_elem_t *b = vm_stack_pop(vm);
+
+    // TODO support more than just int.
+    if (a->type != VM_STACK_INT_TYPE || b->type != VM_STACK_INT_TYPE) {
+        printf("Time to implement the other types!\n");
+        return ERR_VM_RUNTIME_ERROR;
+    }
+
+    vm_stack_elem_t *e = vm_stack_elem_new();
+    e->type = a->type > b->type ? a->type : b->type;
+
+    switch (op) {
+        case VM_OP_ADD:
+            e->intval = b->intval + a->intval;
+            break;
+        case VM_OP_SUB:
+            e->intval = b->intval - a->intval;
+            break;
+        case VM_OP_MUL:
+            e->intval = b->intval * a->intval;
+            break;
+        case VM_OP_DIV:
+            e->intval = b->intval / a->intval;
+            break;
+        case VM_OP_REM:
+            e->intval = b->intval % a->intval;
+            break;
+        default:
+            printf("Unsupported type for numeric binary operation: %d\n", e->type);
+            return ERR_VM_RUNTIME_ERROR;
+    }
+
+    // TODO ugh fun bug
+    /*
+    mem_free(b);
+    mem_free(a);
+     */
+
+    printf("new elem %p - type %d, val %d\n", e, e->type, e->intval);
+
+    vm_stack_push(vm, e);
+    return ERR_NO_ERROR;
+}
+
 static error_t exec(vm_t *vm) {
+    error_t err = ERR_NO_ERROR;
     for (;;) {
         uint8_t bytecode;
         switch (bytecode = READ_BYTE()) {
@@ -43,23 +91,42 @@ static error_t exec(vm_t *vm) {
                 break;
             case VM_OP_NEGATE: {
                 vm_stack_elem_t *e = vm_stack_pop(vm);
-                error_t err = numeric_negate(e);
-                if (err) {
-                    return err;
-                }
+                err = numeric_negate(e);
                 vm_stack_push(vm, e);
                 break;
             }
+            case VM_OP_ADD:
+                err = binop(vm, VM_OP_ADD);
+                break;
+            case VM_OP_SUB:
+                err = binop(vm, VM_OP_SUB);
+                break;
+            case VM_OP_MUL:
+                err = binop(vm, VM_OP_MUL);
+                break;
+            case VM_OP_DIV:
+                err = binop(vm, VM_OP_DIV);
+                break;
+            case VM_OP_REM:
+                err = binop(vm, VM_OP_REM);
+                break;
             case VM_OP_RET:
                 return ERR_VM_INTERP_OK;
             default:
+                printf("Unsupported bytecode: %d\n", bytecode);
                 return ERR_VM_RUNTIME_ERROR;
         }
+        if (err) {
+            printf("Execution error: %d\n", err);
+            return err;
+        }
     }
+    return err;
 }
 
 error_t vm_init(vm_t *vm) {
     cg_t *cg = mem_alloc(sizeof(cg_t));
+    ((gc_header_t *) cg)->type = VM_DATA_NO_GC;
     if (cg == NULL)
         return ERR_OUT_OF_MEMORY;
     cg_init(cg);
@@ -68,6 +135,7 @@ error_t vm_init(vm_t *vm) {
     // Top always points to the next value to be filled.
     // If top == buf, stack is empty.
     vm_stack_t *stack = mem_alloc(sizeof(vm_stack_t));
+    ((gc_header_t *) stack)->type = VM_DATA_NO_GC;
     if (stack == NULL)
         return ERR_OUT_OF_MEMORY;
 
@@ -96,11 +164,18 @@ error_t vm_stack_reset(vm_t *vm) {
     return ERR_NO_ERROR;
 }
 
+vm_stack_elem_t *vm_stack_elem_new() {
+    vm_stack_elem_t *e = (vm_stack_elem_t *) mem_alloc(sizeof(vm_stack_elem_t));
+    ((gc_header_t *) e)->type = VM_DATA_NO_GC;
+    ((gc_header_t *) e)->flags = F_ENV_ASSIGNABLE;
+    return e;
+}
+
 error_t vm_stack_push_int(vm_t *vm, int i) {
-    vm_stack_elem_t e;
-    e.type = VM_STACK_INT_TYPE;
-    e.intval = i;
-    return vm_stack_push(vm, &e);
+    vm_stack_elem_t *e = vm_stack_elem_new();
+    e->type = VM_STACK_INT_TYPE;
+    e->intval = i;
+    return vm_stack_push(vm, e);
 }
 
 error_t vm_stack_push(vm_t *vm, vm_stack_elem_t *e) {
@@ -125,10 +200,6 @@ vm_stack_elem_t *vm_stack_pop(vm_t *vm) {
 }
 
 error_t vm_load_code(vm_t *vm, bytearray_t *bytecode) {
-    error_t err = vm_free(vm);
-    if (err != ERR_NO_ERROR)
-        return err;
-
     vm_init(vm);
     cg_bytes(vm->cg, bytecode);
     vm->pc = vm->cg->code;

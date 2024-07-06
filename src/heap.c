@@ -27,6 +27,18 @@ heap_info_t heap_info = {
         .bytes_free = HEAP_BYTES
 };
 
+void dump_heap(void) {
+    get_heap_info();
+    printf("Heap start: 0x%lx\n", HEAP_DATA_BEGIN);
+    printf("Heap end:   0x%lx\n", HEAP_DATA_END);
+    printf("Heap bytes: %zu\n", HEAP_BYTES);
+    printf("==== Heap\n");
+    printf("  Total nodes: %zu\n", heap_info.total_nodes);
+    printf("   Free nodes: %zu\n", heap_info.free_nodes);
+    printf("   Bytes used: %zu\n", heap_info.bytes_used);
+    printf("   Bytes free: %zu\n", heap_info.bytes_free);
+}
+
 size_t node_size(heap_node_t *node) {
     // Last node in the heap?
     if (node->next == NULL) {
@@ -186,7 +198,10 @@ void *erealloc(void *data_ptr, size_t size) {
 }
 
 void efree(void *data_ptr) {
-    if (data_ptr == NULL) return;
+    if (data_ptr == NULL) {
+        printf("Can't free null pointer\n");
+        return;
+    }
     assert_valid_data_ptr(data_ptr);
 
     // Pointer arithmetic to find metadata for node.
@@ -259,23 +274,12 @@ void show_heap(void) {
     }
 }
 
-void dump_heap(void) {
-    get_heap_info();
-    printf("Heap start: 0x%lx\n", HEAP_DATA_BEGIN);
-    printf("Heap end:   0x%lx\n", HEAP_DATA_END);
-    printf("Heap bytes: %zu\n", HEAP_BYTES);
-    printf("==== Heap\n");
-    printf("  Total nodes: %zu\n", heap_info.total_nodes);
-    printf("   Free nodes: %zu\n", heap_info.free_nodes);
-    printf("   Bytes used: %zu\n", heap_info.bytes_used);
-    printf("   Bytes free: %zu\n", heap_info.bytes_free);
-}
-
 heap_node_t *heap_head(void) {
     return (heap_node_t *) heap;
 }
 
 void assert_valid_heap_node(heap_node_t *node) {
+    if (node->magic != 0x4849) dump_heap();
     assert(node->magic == 0x4849);
     assert((size_t) node >= (size_t) heap);
     assert((size_t) node <= (size_t) heap + HEAP_BYTES - sizeof(heap_node_t));
@@ -293,6 +297,9 @@ void assert_valid_heap_node(heap_node_t *node) {
     }
 }
 
+/*
+ * Check that the pointer is to an object in the heap.
+ */
 void assert_valid_data_ptr(void *data_ptr) {
     assert((size_t) data_ptr >= HEAP_DATA_BEGIN);
     assert((size_t) data_ptr <= HEAP_DATA_END);
