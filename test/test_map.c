@@ -1,6 +1,5 @@
 #include "unity/unity.h"
-#include "../inc/map.h"
-#include "../inc/mem.h"
+#include "../src/comp/map.h"
 #include "test_map.h"
 
 void test_map_new(void) {
@@ -8,7 +7,7 @@ void test_map_new(void) {
 
     TEST_ASSERT_EQUAL(0, map->buckets->nelems);
 
-    mem_free(map);
+    map_free(map);
 }
 
 void test_map_put(void) {
@@ -20,7 +19,7 @@ void test_map_put(void) {
 
     TEST_ASSERT_EQUAL(42, map_get(map, &k)->elem.intval);
 
-    mem_free(map);
+    map_free(map);
 }
 
 void test_map_put_collision(void) {
@@ -40,7 +39,7 @@ void test_map_put_collision(void) {
     TEST_ASSERT_EQUAL(2, map_get(map, &k2)->elem.intval);
     TEST_ASSERT_EQUAL(1, map_get(map, &k1)->elem.intval);
 
-    mem_free(map);
+    map_free(map);
 }
 
 void test_map() {

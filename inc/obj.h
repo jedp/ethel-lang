@@ -1,8 +1,8 @@
 #pragma once
 
 #include <inttypes.h>
-#include "err.h"
-#include "def.h"
+#include "../src/common/err.h"
+#include "../src/common/def.h"
 
 enum iter_state {
     ITER_NOT_STARTED,

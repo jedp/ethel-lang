@@ -2,7 +2,7 @@
 
 #include <stdio.h>
 #include <stdint.h>
-#include "../inc/def.h"
+#include "../src/common/def.h"
 
 /*
  * The heap is a simple doubly-linked list of nodes.

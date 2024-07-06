@@ -1,7 +1,7 @@
 #include "unity/unity.h"
 #include "test_lex.h"
 #include "../inc/str.h"
-#include "../inc/lex.h"
+#include "../src/comp/lex.h"
 
 void test_lex_error(void) {
     char *expr = "if 42 @ moo";

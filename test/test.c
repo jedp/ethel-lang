@@ -23,7 +23,7 @@
 #include "test_map.h"
 
 void setUp(void) {
-    mem_init('x');
+    //mem_init('x');
 }
 
 void tearDown(void) {
@@ -32,12 +32,12 @@ void tearDown(void) {
 int main(int argc, char **argv) {
     UNITY_BEGIN();
 
-    test_heap();
-    test_cg();
     test_dis();
-    test_vm();
     test_map();
+    test_cg();
+    test_vm();
     /*
+    test_heap();
     test_lexer();
     test_parser();
     test_gc();

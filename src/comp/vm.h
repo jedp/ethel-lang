@@ -1,8 +1,8 @@
 #pragma once
 
 #include "cg.h"
-#include "def.h"
-#include "err.h"
+#include "../common/def.h"
+#include "../common/err.h"
 
 #define VM_DATA_STACK_SIZE (64)
 
@@ -24,19 +24,17 @@ typedef enum {
  * faster with no obj lookup.
  */
 typedef struct vm_stack_elem_t {
-    gc_header_t hdr;
     vm_stack_elem_type_t type;
     union {
         uint8_t byteval;
         int intval;
         float floatval;
         int boolval;
-        obj_t *obj_ptr;
+        void *obj_ptr;
     };
 } vm_stack_elem_t;
 
 typedef struct vm_stack_t {
-    gc_header_t hdr;
     uint32_t size;
     // top is pointer into buf.
     vm_stack_elem_t *top;
@@ -44,7 +42,6 @@ typedef struct vm_stack_t {
 } vm_stack_t;
 
 typedef struct vm_t {
-    gc_header_t hdr;
     uint32_t code_size;
     // pc is a pointer into the cg->code bytearray.
     uint8_t *pc;
@@ -68,6 +65,6 @@ vm_stack_elem_t *vm_stack_peek(vm_t *vm);
 
 vm_stack_elem_t *vm_stack_pop(vm_t *vm);
 
-error_t vm_load_code(vm_t *vm, bytearray_t *bytes);
+error_t vm_load_code(vm_t *vm, uint8_t *bytes, size_t size);
 
 error_t vm_interp(vm_t *vm);

@@ -2,7 +2,7 @@
 #include "../../inc/ptr.h"
 #include "../../inc/str.h"
 #include "../../inc/token.h"
-#include "../../inc/lex.h"
+#include "lex.h"
 
 #define MAX_WORD 256
 char word_buf[MAX_WORD];

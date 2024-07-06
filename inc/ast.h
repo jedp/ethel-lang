@@ -1,7 +1,7 @@
 #pragma once
 
 #include <inttypes.h>
-#include "def.h"
+#include "../src/common/def.h"
 
 typedef uint8_t ast_reserved_callable_type_t;
 

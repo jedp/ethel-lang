@@ -1,10 +1,10 @@
 #include "unity/unity.h"
 #include "test_dis.h"
 
-#include "../inc/cg.h"
-#include "../inc/dis.h"
-#include "../inc/map.h"
-#include "../inc/op.h"
+#include "../src/comp/cg.h"
+#include "../src/comp/dis.h"
+#include "../src/comp/map.h"
+#include "../src/comp/op.h"
 
 void test_print_dis(void) {
     cg_t cg;

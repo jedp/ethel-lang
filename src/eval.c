@@ -1,6 +1,6 @@
 #include <assert.h>
 #include <stdio.h>
-#include "../inc/err.h"
+#include "common/err.h"
 #include "../inc/mem.h"
 #include "../inc/heap.h"
 #include "../inc/gc.h"

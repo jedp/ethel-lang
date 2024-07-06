@@ -1,6 +1,6 @@
 #pragma once
 
-#include "err.h"
+#include "../src/common/err.h"
 #include "obj.h"
 
 #define ENV_MAX_STACK_DEPTH 50

@@ -1,7 +1,7 @@
 #pragma once
 
-#include "def.h"
-#include "err.h"
+#include "../src/common/def.h"
+#include "../src/common/err.h"
 #include "obj.h"
 
 obj_t *dict_get(obj_t *obj, obj_t *k);

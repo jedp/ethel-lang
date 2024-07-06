@@ -12,12 +12,12 @@ static uint32_t print_op(const char *name, uint32_t offset) {
 
 static uint32_t print_loadi(const char *name, cg_t *cg, uint32_t offset) {
     int const_int = cg_get_const(cg, cg->code[offset + 1]);
-    printf("%8s %4d [%d]\n", name, cg->code[offset + 1], const_int);
+    printf("%8s #%d [%d]\n", name, cg->code[offset + 1], const_int);
     return offset + 2;
 }
 
 uint32_t print_dis_byte(cg_t *cg, uint32_t offset) {
-    printf("%08d ", offset);
+    printf("%08d %02x ", offset, cg->code[offset]);
 
     uint8_t op = cg->code[offset];
     switch (op) {

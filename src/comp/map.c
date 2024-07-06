@@ -3,9 +3,8 @@
 #include <stdio.h>
 #include <stdlib.h>
 
-#include "def.h"
+#include "cmem.h"
 #include "map.h"
-#include "mem.h"
 
 uint32_t hash_primitive(map_elem_t *e) {
     switch (e->type) {
@@ -54,8 +53,7 @@ uint8_t eq_primitive(map_elem_t *a, map_elem_t *b) {
 }
 
 static map_buckets_t *buckets_new(uint8_t nbuckets) {
-    map_buckets_t *buckets = (map_buckets_t *) mem_alloc(sizeof(map_buckets_t) * nbuckets);
-    ((gc_header_t *) buckets)->type = VM_DATA_NO_GC;
+    map_buckets_t *buckets = (map_buckets_t *) comp_alloc(sizeof(map_buckets_t) * nbuckets);
     for (uint8_t i = 0; i < nbuckets; i++) {
         buckets->nodes[i] = NULL;
     }
@@ -70,11 +68,8 @@ map_t *map_new(
     uint8_t (*eq_func)(map_elem_t *node, map_elem_t *other)
 ) {
     map_buckets_t *buckets = buckets_new(nbuckets);
-    buckets->nbuckets = nbuckets;
-    buckets->nelems = 0;
 
-    map_t *map = (map_t *) mem_alloc(sizeof(map_t));
-    ((gc_header_t *) map)->type = VM_DATA_NO_GC;
+    map_t *map = (map_t *) comp_alloc(sizeof(map_t));
 
     if (buckets == NULL || map == NULL) {
         printf("Can't allocate new map. Out of memory.\n");
@@ -86,6 +81,11 @@ map_t *map_new(
     map->buckets = buckets;
 
     return map;
+}
+
+void map_free(map_t *map) {
+    comp_free(map->buckets);
+    comp_free(map);
 }
 
 static error_t buckets_put_internal(map_buckets_t *buckets,
@@ -110,18 +110,15 @@ static error_t buckets_put_internal(map_buckets_t *buckets,
     }
 
     // Create a new node.
-    map_kv_node_t *new = (map_kv_node_t *) mem_alloc(sizeof(map_kv_node_t));
-    ((gc_header_t *) new)->type = VM_DATA_NO_GC;
+    map_kv_node_t *new = (map_kv_node_t *) comp_alloc(sizeof(map_kv_node_t));
     if (new == NULL) {
         exit(1);
     }
 
     new->hash_val = hash_val;
-    new->k = (map_elem_t *) mem_alloc(sizeof(map_elem_t));
-    ((gc_header_t *) new->k)->type = VM_DATA_NO_GC;
+    new->k = (map_elem_t *) comp_alloc(sizeof(map_elem_t));
     *(new->k) = *k;
-    new->v = (map_elem_t *) mem_alloc(sizeof(map_elem_t));
-    ((gc_header_t *) new->v)->type = VM_DATA_NO_GC;
+    new->v = (map_elem_t *) comp_alloc(sizeof(map_elem_t));
     *(new->v) = *v;
 
     // Insert at head of list in this bucket.
@@ -155,8 +152,7 @@ static error_t maybe_grow_map(map_t *orig_map) {
 
     map_buckets_t *old_buckets = orig_map->buckets;
     orig_map->buckets = new_buckets;
-    mem_free(old_buckets);
-    old_buckets = NULL;
+    comp_free(old_buckets);
 
     return ERR_NO_ERROR;
 }

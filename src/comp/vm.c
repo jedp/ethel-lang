@@ -1,10 +1,10 @@
 #include <stdio.h>
+#include "../common/def.h"
+#include "../common/err.h"
 #include "cg.h"
-#include "def.h"
+#include "cmem.h"
 #include "dis.h"
-#include "err.h"
 #include "map.h"
-#include "mem.h"
 #include "op.h"
 #include "vm.h"
 
@@ -67,13 +67,7 @@ static error_t binop(vm_t *vm, vm_op_t op) {
             return ERR_VM_RUNTIME_ERROR;
     }
 
-    // TODO ugh fun bug
-    /*
-    mem_free(b);
-    mem_free(a);
-     */
-
-    printf("new elem %p - type %d, val %d\n", e, e->type, e->intval);
+    // Don't free b and a: They are still slots in the stack.
 
     vm_stack_push(vm, e);
     return ERR_NO_ERROR;
@@ -125,7 +119,7 @@ static error_t exec(vm_t *vm) {
 }
 
 error_t vm_init(vm_t *vm) {
-    cg_t *cg = mem_alloc(sizeof(cg_t));
+    cg_t *cg = comp_alloc(sizeof(cg_t));
     ((gc_header_t *) cg)->type = VM_DATA_NO_GC;
     if (cg == NULL)
         return ERR_OUT_OF_MEMORY;
@@ -134,12 +128,12 @@ error_t vm_init(vm_t *vm) {
     // A stack of objects. Top is a pointer into buf.
     // Top always points to the next value to be filled.
     // If top == buf, stack is empty.
-    vm_stack_t *stack = mem_alloc(sizeof(vm_stack_t));
+    vm_stack_t *stack = comp_alloc(sizeof(vm_stack_t));
     ((gc_header_t *) stack)->type = VM_DATA_NO_GC;
     if (stack == NULL)
         return ERR_OUT_OF_MEMORY;
 
-    vm_stack_elem_t *stack_buf = mem_alloc(sizeof(vm_stack_elem_t) * VM_DATA_STACK_SIZE);
+    vm_stack_elem_t *stack_buf = comp_alloc(sizeof(vm_stack_elem_t) * VM_DATA_STACK_SIZE);
     stack->size = 0;
     stack->top = stack->buf;
 
@@ -153,7 +147,7 @@ error_t vm_init(vm_t *vm) {
 
 error_t vm_free(vm_t *vm) {
     cg_free(vm->cg);
-    mem_free(vm->cg);
+    comp_free(vm->cg);
     vm_init(vm);
 
     return ERR_NO_ERROR;
@@ -165,7 +159,7 @@ error_t vm_stack_reset(vm_t *vm) {
 }
 
 vm_stack_elem_t *vm_stack_elem_new() {
-    vm_stack_elem_t *e = (vm_stack_elem_t *) mem_alloc(sizeof(vm_stack_elem_t));
+    vm_stack_elem_t *e = (vm_stack_elem_t *) comp_alloc(sizeof(vm_stack_elem_t));
     ((gc_header_t *) e)->type = VM_DATA_NO_GC;
     ((gc_header_t *) e)->flags = F_ENV_ASSIGNABLE;
     return e;
@@ -199,9 +193,9 @@ vm_stack_elem_t *vm_stack_pop(vm_t *vm) {
     return vm->stack->top;
 }
 
-error_t vm_load_code(vm_t *vm, bytearray_t *bytecode) {
+error_t vm_load_code(vm_t *vm, uint8_t *bytecode, size_t size) {
     vm_init(vm);
-    cg_bytes(vm->cg, bytecode);
+    cg_bytes(vm->cg, bytecode, size);
     vm->pc = vm->cg->code;
     vm->code_size = vm->cg->len;
     return ERR_NO_ERROR;

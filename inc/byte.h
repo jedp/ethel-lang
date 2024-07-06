@@ -1,6 +1,6 @@
 #pragma once
 
-#include "def.h"
+#include "../src/common/def.h"
 #include "obj.h"
 
 /* Return the integer hash of the integer. */

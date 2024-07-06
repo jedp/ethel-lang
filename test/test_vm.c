@@ -1,10 +1,9 @@
 #include "unity/unity.h"
 #include "test_vm.h"
-#include "../inc/cg.h"
-#include "../inc/map.h"
-#include "../inc/op.h"
-#include "../inc/str.h"
-#include "../inc/vm.h"
+#include "../src/comp/cg.h"
+#include "../src/comp/map.h"
+#include "../src/comp/op.h"
+#include "../src/comp/vm.h"
 
 void test_vm_init(void) {
     vm_t vm;
@@ -22,9 +21,8 @@ void test_vm_load_code(void) {
     vm_init(&vm);
 
     uint8_t bytes[] = {VM_OP_NOP, VM_OP_RET};
-    bytearray_t *bytecode = bytearray_alloc_with_data(2, bytes);
 
-    vm_load_code(&vm, bytecode);
+    vm_load_code(&vm, bytes, sizeof(bytes));
 
     TEST_ASSERT_EQUAL(VM_OP_NOP, *vm.pc++);
     TEST_ASSERT_EQUAL(VM_OP_RET, *vm.pc);
@@ -78,9 +76,8 @@ void test_vm_loadi(void) {
     error_t err = ERR_NO_ERROR;
 
     uint8_t bytes[] = {VM_OP_NOP, VM_OP_LOADI, 42, VM_OP_RET};
-    bytearray_t *bytecode = bytearray_alloc_with_data(4, bytes);
 
-    err |= vm_load_code(&vm, bytecode);
+    err |= vm_load_code(&vm, bytes, sizeof(bytes));
 
     // Hand-code the interpretation part.
     err |= cg_add_const(vm.cg, 42, 123);
@@ -105,9 +102,8 @@ void test_vm_stack_negate(void) {
         VM_OP_NEGATE,
         VM_OP_RET
     };
-    bytearray_t *bytecode = bytearray_alloc_with_data(4, bytes);
 
-    err |= vm_load_code(&vm, bytecode);
+    err |= vm_load_code(&vm, bytes, sizeof(bytes));
 
     // Hand-code the interpretation part.
     err |= cg_add_const(vm.cg, 42, 123);
@@ -127,24 +123,25 @@ void test_vm_stack_add(void) {
 
     error_t err = ERR_NO_ERROR;
 
+    // 123 + 456
     uint8_t bytes[] = {
-        VM_OP_LOADI, 42,
-        VM_OP_LOADI, 42,
+        VM_OP_LOADI, 1,
+        VM_OP_LOADI, 2,
         VM_OP_ADD,
         VM_OP_RET
     };
-    bytearray_t *bytecode = bytearray_alloc_with_data(sizeof(bytes), bytes);
 
-    err |= vm_load_code(&vm, bytecode);
+    err |= vm_load_code(&vm, bytes, sizeof(bytes));
 
     // Hand-code the interpretation part.
-    err |= cg_add_const(vm.cg, 42, 123);
+    err |= cg_add_const(vm.cg, 1, 123);
+    err |= cg_add_const(vm.cg, 2, 456);
 
     err |= vm_interp(&vm);
     TEST_ASSERT_EQUAL(ERR_VM_INTERP_OK, err);
     // Should be both in the const pool and on the stack.
     TEST_ASSERT_EQUAL(VM_STACK_INT_TYPE, vm_stack_peek(&vm)->type);
-    TEST_ASSERT_EQUAL(246, vm_stack_peek(&vm)->intval);
+    TEST_ASSERT_EQUAL(579, vm_stack_peek(&vm)->intval);
 
     vm_free(&vm);
 }
@@ -162,13 +159,12 @@ void test_vm_stack_sub(void) {
         VM_OP_SUB,
         VM_OP_RET
     };
-    bytearray_t *bytecode = bytearray_alloc_with_data(sizeof(bytes), bytes);
 
-    err |= vm_load_code(&vm, bytecode);
+    err |= vm_load_code(&vm, bytes, sizeof(bytes));
 
     // Hand-code the interpretation part.
-    err |= cg_add_const(vm.cg, 2, 2);
     err |= cg_add_const(vm.cg, 1, 5);
+    err |= cg_add_const(vm.cg, 2, 2);
 
     err |= vm_interp(&vm);
     TEST_ASSERT_EQUAL(ERR_VM_INTERP_OK, err);
@@ -178,6 +174,94 @@ void test_vm_stack_sub(void) {
 
     vm_free(&vm);
 }
+
+void test_vm_stack_mul(void) {
+    vm_t vm;
+    vm_init(&vm);
+
+    error_t err = ERR_NO_ERROR;
+
+    // 5 * 3
+    uint8_t bytes[] = {
+        VM_OP_LOADI, 1,
+        VM_OP_LOADI, 2,
+        VM_OP_MUL,
+        VM_OP_RET
+    };
+
+    err |= vm_load_code(&vm, bytes, sizeof(bytes));
+
+    // Hand-code the interpretation part.
+    err |= cg_add_const(vm.cg, 1, 5);
+    err |= cg_add_const(vm.cg, 2, 3);
+
+    err |= vm_interp(&vm);
+    TEST_ASSERT_EQUAL(ERR_VM_INTERP_OK, err);
+    // Should be both in the const pool and on the stack.
+    TEST_ASSERT_EQUAL(VM_STACK_INT_TYPE, vm_stack_peek(&vm)->type);
+    TEST_ASSERT_EQUAL(15, vm_stack_peek(&vm)->intval);
+
+    vm_free(&vm);
+}
+
+void test_vm_stack_div(void) {
+    vm_t vm;
+    vm_init(&vm);
+
+    error_t err = ERR_NO_ERROR;
+
+    // Integer division. 12 / 2
+    uint8_t bytes[] = {
+        VM_OP_LOADI, 1,
+        VM_OP_LOADI, 2,
+        VM_OP_DIV,
+        VM_OP_RET
+    };
+
+    err |= vm_load_code(&vm, bytes, sizeof(bytes));
+
+    // Hand-code the interpretation part.
+    err |= cg_add_const(vm.cg, 1, 12);
+    err |= cg_add_const(vm.cg, 2, 2);
+
+    err |= vm_interp(&vm);
+    TEST_ASSERT_EQUAL(ERR_VM_INTERP_OK, err);
+    // Should be both in the const pool and on the stack.
+    TEST_ASSERT_EQUAL(VM_STACK_INT_TYPE, vm_stack_peek(&vm)->type);
+    TEST_ASSERT_EQUAL(6, vm_stack_peek(&vm)->intval);
+
+    vm_free(&vm);
+}
+
+void test_vm_stack_rem(void) {
+    vm_t vm;
+    vm_init(&vm);
+
+    error_t err = ERR_NO_ERROR;
+
+    // Modulus. 11 % 3
+    uint8_t bytes[] = {
+        VM_OP_LOADI, 1,
+        VM_OP_LOADI, 2,
+        VM_OP_REM,
+        VM_OP_RET
+    };
+
+    err |= vm_load_code(&vm, bytes, sizeof(bytes));
+
+    // Hand-code the interpretation part.
+    err |= cg_add_const(vm.cg, 1, 11);
+    err |= cg_add_const(vm.cg, 2, 3);
+
+    err |= vm_interp(&vm);
+    TEST_ASSERT_EQUAL(ERR_VM_INTERP_OK, err);
+    // Should be both in the const pool and on the stack.
+    TEST_ASSERT_EQUAL(VM_STACK_INT_TYPE, vm_stack_peek(&vm)->type);
+    TEST_ASSERT_EQUAL(2, vm_stack_peek(&vm)->intval);
+
+    vm_free(&vm);
+}
+
 
 void test_vm_stack_arith(void) {
     vm_t vm;
@@ -200,18 +284,13 @@ void test_vm_stack_arith(void) {
         VM_OP_REM,
         VM_OP_RET
     };
-    bytearray_t *bytecode = bytearray_alloc_with_data(sizeof(bytes), bytes);
 
-    err |= vm_load_code(&vm, bytecode);
+    err |= vm_load_code(&vm, bytes, sizeof(bytes));
 
     // Hand-code the interpretation part.
-    printf("add const 1\n");
     err |= cg_add_const(vm.cg, 1, 2);
-    printf("add const 2\n");
     err |= cg_add_const(vm.cg, 2, 1);
-    printf("add const 3\n");
     err |= cg_add_const(vm.cg, 3, 3);
-    printf("add const 4\n");
     err |= cg_add_const(vm.cg, 4, 5);
 
     err |= vm_interp(&vm);
@@ -232,5 +311,8 @@ void test_vm() {
     RUN_TEST(test_vm_stack_negate);
     RUN_TEST(test_vm_stack_add);
     RUN_TEST(test_vm_stack_sub);
+    RUN_TEST(test_vm_stack_mul);
+    RUN_TEST(test_vm_stack_div);
+    RUN_TEST(test_vm_stack_rem);
     RUN_TEST(test_vm_stack_arith);
 }

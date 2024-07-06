@@ -2,10 +2,9 @@
 
 #include <inttypes.h>
 
-#include "def.h"
-#include "err.h"
+#include "../common/def.h"
+#include "../common/err.h"
 #include "map.h"
-#include "obj.h"
 
 typedef struct cg_t {
     gc_header_t hdr;
@@ -21,7 +20,7 @@ void cg_free(cg_t *cg);
 
 void cg_byte(cg_t *cg, uint8_t byte);
 
-void cg_bytes(cg_t *cg, bytearray_t *bytes);
+void cg_bytes(cg_t *cg, uint8_t *bytes, size_t size);
 
 error_t cg_add_const(cg_t *cg, uint32_t n, int v);
 

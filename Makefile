@@ -12,15 +12,16 @@ COMPOBJS = src/ptr.o \
 					 src/byte.o \
 					 src/int.o \
 					 src/list.o \
-					 src/map.o \
 					 src/dict.o \
 					 src/bool.o \
 					 src/fn.o \
 					 src/type.o \
 					 src/rand.o \
+					 src/env.o \
+					 src/parse.o \
+					 src/comp/cmem.o \
 					 src/comp/lex.o \
-					 src/comp/parse.o \
-					 src/comp/env.o \
+					 src/comp/map.o \
 					 src/comp/cg.o \
 					 src/comp/dis.o \
 					 src/comp/vm.o \

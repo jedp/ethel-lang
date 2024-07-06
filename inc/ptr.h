@@ -1,6 +1,6 @@
 #pragma once
 
-#include "def.h"
+#include "../src/common/def.h"
 
 /* Set the first len bytes in b to val. */
 void mem_set(void *b, int val, size_t len);

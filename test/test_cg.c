@@ -1,8 +1,8 @@
 #include "unity/unity.h"
 #include "test_cg.h"
-#include "../inc/cg.h"
-#include "../inc/map.h"
-#include "../inc/op.h"
+#include "../src/comp/cg.h"
+#include "../src/comp/map.h"
+#include "../src/comp/op.h"
 
 void test_cg_init(void) {
     cg_t cg;
@@ -42,9 +42,17 @@ void test_cg_add_const(void) {
     cg_t cg;
     cg_init(&cg);
 
-    cg_add_const(&cg, 6, 42);
+    error_t err = ERR_NO_ERROR;
 
-    TEST_ASSERT_EQUAL(42, cg_get_const(&cg, 6));
+    err |= cg_add_const(&cg, 1, 5);
+    err |= cg_add_const(&cg, 2, 6);
+    err |= cg_add_const(&cg, 3, 7);
+    err |= cg_add_const(&cg, 4, 8);
+
+    TEST_ASSERT_EQUAL(5, cg_get_const(&cg, 1));
+    TEST_ASSERT_EQUAL(6, cg_get_const(&cg, 2));
+    TEST_ASSERT_EQUAL(7, cg_get_const(&cg, 3));
+    TEST_ASSERT_EQUAL(8, cg_get_const(&cg, 4));
 
     cg_free(&cg);
 }
