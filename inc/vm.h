@@ -52,6 +52,8 @@ error_t vm_stack_reset(vm_t *vm);
 
 error_t vm_stack_push_int(vm_t *vm, int i);
 
+error_t vm_stack_push(vm_t *vm, vm_stack_elem_t *e);
+
 vm_stack_elem_t *vm_stack_peek(vm_t *vm);
 
 vm_stack_elem_t *vm_stack_pop(vm_t *vm);

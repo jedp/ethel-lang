@@ -11,6 +11,27 @@
 
 #define LOADI() (cg_get_const(vm->cg, READ_BYTE()))
 
+static error_t numeric_negate(vm_stack_elem_t *e) {
+    switch (e->type) {
+        case VM_STACK_BOOL_TYPE:
+            e->boolval = e->boolval ? 0 : 1;
+            break;
+        case VM_STACK_BYTE_TYPE:
+            e->byteval = ((0xff ^ e->byteval) + 1) & 0xff;
+            break;
+        case VM_STACK_INT_TYPE:
+            e->intval = -e->intval;
+            break;
+        case VM_STACK_FLOAT_TYPE:
+            e->floatval = -e->floatval;
+            break;
+        default:
+            printf("Unsupported type for numeric negation: %d\n", e->type);
+            return ERR_VM_RUNTIME_ERROR;
+    }
+    return ERR_NO_ERROR;
+}
+
 static error_t exec(vm_t *vm) {
     for (;;) {
         uint8_t bytecode;
@@ -20,6 +41,15 @@ static error_t exec(vm_t *vm) {
             case VM_OP_LOADI:
                 vm_stack_push_int(vm, LOADI());
                 break;
+            case VM_OP_NEGATE: {
+                vm_stack_elem_t *e = vm_stack_pop(vm);
+                error_t err = numeric_negate(e);
+                if (err) {
+                    return err;
+                }
+                vm_stack_push(vm, e);
+                break;
+            }
             case VM_OP_RET:
                 return ERR_VM_INTERP_OK;
             default:
@@ -67,11 +97,17 @@ error_t vm_stack_reset(vm_t *vm) {
 }
 
 error_t vm_stack_push_int(vm_t *vm, int i) {
+    vm_stack_elem_t e;
+    e.type = VM_STACK_INT_TYPE;
+    e.intval = i;
+    return vm_stack_push(vm, &e);
+}
+
+error_t vm_stack_push(vm_t *vm, vm_stack_elem_t *e) {
     if (vm->stack->top > vm->stack->buf + sizeof(vm_stack_elem_t * ) * VM_DATA_STACK_SIZE) {
         return ERR_VM_STACK_OVERFLOW;
     }
-    vm->stack->top->type = VM_STACK_INT_TYPE;
-    vm->stack->top->intval = i;
+    *(vm->stack->top) = *e;
     vm->stack->top += sizeof(vm->stack->top);
     return ERR_NO_ERROR;
 }

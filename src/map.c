@@ -100,8 +100,7 @@ static error_t buckets_put_internal(map_buckets_t *buckets,
         if (node->hash_val == hash_val &&
             eq_func(node->k, k)) {
             // Key already in the map. Update the value.
-            node->v->type = v->type;
-            node->v->elem.uintval = v->elem.uintval;
+            *(node->v) = *v;
             return ERR_NO_ERROR;
         }
         node = node->next;
@@ -115,11 +114,9 @@ static error_t buckets_put_internal(map_buckets_t *buckets,
 
     new->hash_val = hash_val;
     new->k = (map_elem_t *) mem_alloc(sizeof(map_elem_t));
-    new->k->type = k->type;
-    new->k->elem.uintval = k->elem.uintval;
+    *(new->k) = *k;
     new->v = (map_elem_t *) mem_alloc(sizeof(map_elem_t));
-    new->v->type = v->type;
-    new->v->elem.uintval = v->elem.uintval;
+    *(new->v) = *v;
 
     // Insert at head of list in this bucket.
     new->next = (first == NULL) ? NULL : first;

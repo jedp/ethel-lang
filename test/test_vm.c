@@ -32,7 +32,7 @@ void test_vm_load_code(void) {
     vm_free(&vm);
 }
 
-void test_vm_stack_int(void) {
+void test_vm_stack_push_int(void) {
     vm_t vm;
     vm_init(&vm);
 
@@ -45,6 +45,30 @@ void test_vm_stack_int(void) {
     TEST_ASSERT_EQUAL(3456, vm_stack_pop(&vm)->intval);
     TEST_ASSERT_EQUAL(2345, vm_stack_pop(&vm)->intval);
     TEST_ASSERT_EQUAL(1234, vm_stack_pop(&vm)->intval);
+
+    vm_free(&vm);
+}
+
+void test_vm_stack_push(void) {
+    vm_t vm;
+    vm_init(&vm);
+
+    vm_stack_elem_t i = {.type = VM_STACK_INT_TYPE, .intval = 42};
+    vm_stack_elem_t f = {.type = VM_STACK_FLOAT_TYPE, .floatval = 2.34};
+    vm_stack_elem_t b = {.type = VM_STACK_BYTE_TYPE, .byteval = 0xff};
+    vm_stack_elem_t y = {.type = VM_STACK_BOOL_TYPE, .boolval = 1};
+
+    vm_stack_push(&vm, &y);
+    vm_stack_push(&vm, &b);
+    vm_stack_push(&vm, &f);
+    vm_stack_push(&vm, &i);
+
+    TEST_ASSERT_EQUAL(42, vm_stack_pop(&vm)->intval);
+    TEST_ASSERT_EQUAL(2.34, vm_stack_pop(&vm)->floatval);
+    TEST_ASSERT_EQUAL(0xff, vm_stack_pop(&vm)->byteval);
+    TEST_ASSERT_EQUAL(1, vm_stack_pop(&vm)->boolval);
+
+    vm_free(&vm);
 }
 
 void test_vm_loadi(void) {
@@ -70,9 +94,34 @@ void test_vm_loadi(void) {
     vm_free(&vm);
 }
 
+void test_vm_stack_negate(void) {
+    vm_t vm;
+    vm_init(&vm);
+
+    error_t err = ERR_NO_ERROR;
+
+    uint8_t bytes[] = {VM_OP_LOADI, 42, VM_OP_NEGATE, VM_OP_RET};
+    bytearray_t *bytecode = bytearray_alloc_with_data(4, bytes);
+
+    err |= vm_load_code(&vm, bytecode);
+
+    // Hand-code the interpretation part.
+    err |= cg_add_const(vm.cg, 42, 123);
+
+    err |= vm_interp(&vm);
+    TEST_ASSERT_EQUAL(ERR_VM_INTERP_OK, err);
+    // Should be both in the const pool and on the stack.
+    TEST_ASSERT_EQUAL(VM_STACK_INT_TYPE, vm_stack_peek(&vm)->type);
+    TEST_ASSERT_EQUAL(-123, vm_stack_peek(&vm)->intval);
+
+    vm_free(&vm);
+}
+
 void test_vm() {
     RUN_TEST(test_vm_init);
     RUN_TEST(test_vm_load_code);
-    RUN_TEST(test_vm_stack_int);
+    RUN_TEST(test_vm_stack_push_int);
+    RUN_TEST(test_vm_stack_push);
+    RUN_TEST(test_vm_stack_negate);
     RUN_TEST(test_vm_loadi);
 }
