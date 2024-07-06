@@ -1,5 +1,5 @@
 
-COMPOBJS = src/ptr.o \
+COMMONOBJS = src/ptr.o \
 					 src/heap.o \
 					 src/gc.o \
 					 src/mem.o \
@@ -19,16 +19,18 @@ COMPOBJS = src/ptr.o \
 					 src/rand.o \
 					 src/env.o \
 					 src/parse.o \
-					 src/comp/cmem.o \
-					 src/comp/lex.o \
+					 src/lex.o \
+					 src/interact.o \
+					 src/ast.o \
+					 src/eval.o
+
+COMPOBJS = src/comp/cmem.o \
 					 src/comp/map.o \
 					 src/comp/cg.o \
 					 src/comp/dis.o \
 					 src/comp/vm.o \
-					 src/ast.o \
-					 src/eval.o
 
-REPLOBJS = src/repl.o
+REPLOBJS = src/repl/repl.o
 
 RUNOBJS = src/run.o
 
@@ -87,13 +89,13 @@ debug: repl
 %.o: %.c
 	$(CC) $(CFLAGS) -c -o $@ $<
 
-repl: $(REPLOBJS) $(COMPOBJS)
+repl: $(REPLOBJS) $(COMPOBJS) $(COMMONOBJS)
 	$(CC) $(CFLAGS) $(EXTRA_CFLAGS) -o $@ $^ $(LDFLAGS)
 
-run: $(RUNOBJS) $(COMPOBJS)
+run: $(RUNOBJS) $(COMMONOBJS)
 	$(CC) $(CFLAGS) $(EXTRA_CFLAGS) -o $@ $^ $(LDFLAGS)
 
-test: $(COMPOBJS) $(TESTOBJS)
+test: $(COMMONOBJS) $(COMPOBJS) $(TESTOBJS)
 	$(CC) $(CFLAGS_TEST) $(TESTFLAGS) -o $@/test $^ $(LDFLAGS)
 	./test/test
 
@@ -102,6 +104,6 @@ wc:
 
 .PHONY: all clean test debug
 clean:
-	rm -f $(COMPOBJS) $(REPLOBJS) $(RUNOBJS) $(TESTOBJS)
+	rm -f $(COMMONOBJS) $(COMPOBJS) $(REPLOBJS) $(RUNOBJS) $(TESTOBJS)
 	rm -f repl test/test
 

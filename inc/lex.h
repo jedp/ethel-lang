@@ -1,9 +1,9 @@
 #pragma once
 
 #include <inttypes.h>
-#include "../common/err.h"
-#include "../common/def.h"
-#include "../../inc/token.h"
+#include "../src/common/err.h"
+#include "../src/common/def.h"
+#include "token.h"
 
 #define LEXER_BUF_SIZE 64000
 

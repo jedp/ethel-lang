@@ -1,8 +1,8 @@
 #include <ctype.h>
-#include "../../inc/ptr.h"
-#include "../../inc/str.h"
-#include "../../inc/token.h"
-#include "lex.h"
+#include "../inc/ptr.h"
+#include "../inc/str.h"
+#include "../inc/token.h"
+#include "../inc/lex.h"
 
 #define MAX_WORD 256
 char word_buf[MAX_WORD];

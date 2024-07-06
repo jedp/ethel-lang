@@ -8,7 +8,7 @@
 #include "../inc/mem.h"
 #include "../inc/str.h"
 #include "../inc/ast.h"
-#include "comp/lex.h"
+#include "../inc/lex.h"
 #include "../inc/parse.h"
 
 static ast_expr_t *parse_start(lexer_t *lexer);

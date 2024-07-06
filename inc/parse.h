@@ -1,7 +1,7 @@
 #pragma once
 
 #include "../src/common/err.h"
-#include "../src/comp/lex.h"
+#include "lex.h"
 #include "ast.h"
 
 /*

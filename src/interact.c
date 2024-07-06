@@ -72,7 +72,7 @@ static void print_result(obj_t *obj) {
     printf("\n");
 }
 
-int main() {
+int interact_main() {
     // Init ethel memory management.
     printf("main\n");
     mem_init('x');
