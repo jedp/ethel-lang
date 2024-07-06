@@ -80,6 +80,15 @@ static error_t exec(vm_t *vm) {
         switch (bytecode = READ_BYTE()) {
             case VM_OP_NOP:
                 break;
+            case VM_OP_LOADI_1N:
+                vm_stack_push_int(vm, -1);
+                break;
+            case VM_OP_LOADI_0:
+                vm_stack_push_int(vm, 0);
+                break;
+            case VM_OP_LOADI_1:
+                vm_stack_push_int(vm, 1);
+                break;
             case VM_OP_LOADI:
                 vm_stack_push_int(vm, LOADI());
                 break;
@@ -104,6 +113,12 @@ static error_t exec(vm_t *vm) {
             case VM_OP_REM:
                 err = binop(vm, VM_OP_REM);
                 break;
+            case VM_OP_INC:
+                vm_stack_peek(vm)->intval += 1;
+                break;
+            case VM_OP_DEC:
+                vm_stack_peek(vm)->intval -= 1;
+                break;
             case VM_OP_RET:
                 return ERR_VM_INTERP_OK;
             default:
@@ -120,7 +135,6 @@ static error_t exec(vm_t *vm) {
 
 error_t vm_init(vm_t *vm) {
     cg_t *cg = comp_alloc(sizeof(cg_t));
-    ((gc_header_t *) cg)->type = VM_DATA_NO_GC;
     if (cg == NULL)
         return ERR_OUT_OF_MEMORY;
     cg_init(cg);
@@ -129,7 +143,6 @@ error_t vm_init(vm_t *vm) {
     // Top always points to the next value to be filled.
     // If top == buf, stack is empty.
     vm_stack_t *stack = comp_alloc(sizeof(vm_stack_t));
-    ((gc_header_t *) stack)->type = VM_DATA_NO_GC;
     if (stack == NULL)
         return ERR_OUT_OF_MEMORY;
 
@@ -160,8 +173,6 @@ error_t vm_stack_reset(vm_t *vm) {
 
 vm_stack_elem_t *vm_stack_elem_new() {
     vm_stack_elem_t *e = (vm_stack_elem_t *) comp_alloc(sizeof(vm_stack_elem_t));
-    ((gc_header_t *) e)->type = VM_DATA_NO_GC;
-    ((gc_header_t *) e)->flags = F_ENV_ASSIGNABLE;
     return e;
 }
 

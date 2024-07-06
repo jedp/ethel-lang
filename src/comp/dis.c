@@ -24,11 +24,16 @@ uint32_t print_dis_byte(cg_t *cg, uint32_t offset) {
         case VM_OP_NOP:
         case VM_OP_RET:
         case VM_OP_NEGATE:
+        case VM_OP_LOADI_1N:
+        case VM_OP_LOADI_0:
+        case VM_OP_LOADI_1:
         case VM_OP_ADD:
         case VM_OP_SUB:
         case VM_OP_MUL:
         case VM_OP_DIV:
         case VM_OP_REM:
+        case VM_OP_INC:
+        case VM_OP_DEC:
             return print_op(op_names[op], offset);
         case VM_OP_LOADI:
             return print_loadi(op_names[op], cg, offset);

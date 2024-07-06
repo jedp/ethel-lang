@@ -7,7 +7,6 @@
 #include "map.h"
 
 typedef struct cg_t {
-    gc_header_t hdr;
     uint32_t len;
     uint32_t max;
     uint8_t *code;

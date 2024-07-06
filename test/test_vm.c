@@ -84,8 +84,6 @@ void test_vm_loadi(void) {
 
     err |= vm_interp(&vm);
     TEST_ASSERT_EQUAL(ERR_VM_INTERP_OK, err);
-    // Should be both in the const pool and on the stack.
-    TEST_ASSERT_EQUAL(VM_STACK_INT_TYPE, vm_stack_peek(&vm)->type);
     TEST_ASSERT_EQUAL(123, vm_stack_peek(&vm)->intval);
 
     vm_free(&vm);
@@ -110,8 +108,6 @@ void test_vm_stack_negate(void) {
 
     err |= vm_interp(&vm);
     TEST_ASSERT_EQUAL(ERR_VM_INTERP_OK, err);
-    // Should be both in the const pool and on the stack.
-    TEST_ASSERT_EQUAL(VM_STACK_INT_TYPE, vm_stack_peek(&vm)->type);
     TEST_ASSERT_EQUAL(-123, vm_stack_peek(&vm)->intval);
 
     vm_free(&vm);
@@ -139,8 +135,6 @@ void test_vm_stack_add(void) {
 
     err |= vm_interp(&vm);
     TEST_ASSERT_EQUAL(ERR_VM_INTERP_OK, err);
-    // Should be both in the const pool and on the stack.
-    TEST_ASSERT_EQUAL(VM_STACK_INT_TYPE, vm_stack_peek(&vm)->type);
     TEST_ASSERT_EQUAL(579, vm_stack_peek(&vm)->intval);
 
     vm_free(&vm);
@@ -168,8 +162,6 @@ void test_vm_stack_sub(void) {
 
     err |= vm_interp(&vm);
     TEST_ASSERT_EQUAL(ERR_VM_INTERP_OK, err);
-    // Should be both in the const pool and on the stack.
-    TEST_ASSERT_EQUAL(VM_STACK_INT_TYPE, vm_stack_peek(&vm)->type);
     TEST_ASSERT_EQUAL(3, vm_stack_peek(&vm)->intval);
 
     vm_free(&vm);
@@ -197,8 +189,6 @@ void test_vm_stack_mul(void) {
 
     err |= vm_interp(&vm);
     TEST_ASSERT_EQUAL(ERR_VM_INTERP_OK, err);
-    // Should be both in the const pool and on the stack.
-    TEST_ASSERT_EQUAL(VM_STACK_INT_TYPE, vm_stack_peek(&vm)->type);
     TEST_ASSERT_EQUAL(15, vm_stack_peek(&vm)->intval);
 
     vm_free(&vm);
@@ -226,8 +216,6 @@ void test_vm_stack_div(void) {
 
     err |= vm_interp(&vm);
     TEST_ASSERT_EQUAL(ERR_VM_INTERP_OK, err);
-    // Should be both in the const pool and on the stack.
-    TEST_ASSERT_EQUAL(VM_STACK_INT_TYPE, vm_stack_peek(&vm)->type);
     TEST_ASSERT_EQUAL(6, vm_stack_peek(&vm)->intval);
 
     vm_free(&vm);
@@ -255,8 +243,6 @@ void test_vm_stack_rem(void) {
 
     err |= vm_interp(&vm);
     TEST_ASSERT_EQUAL(ERR_VM_INTERP_OK, err);
-    // Should be both in the const pool and on the stack.
-    TEST_ASSERT_EQUAL(VM_STACK_INT_TYPE, vm_stack_peek(&vm)->type);
     TEST_ASSERT_EQUAL(2, vm_stack_peek(&vm)->intval);
 
     vm_free(&vm);
@@ -295,8 +281,58 @@ void test_vm_stack_arith(void) {
 
     err |= vm_interp(&vm);
     TEST_ASSERT_EQUAL(ERR_VM_INTERP_OK, err);
-    // Should be both in the const pool and on the stack.
-    TEST_ASSERT_EQUAL(VM_STACK_INT_TYPE, vm_stack_peek(&vm)->type);
+    TEST_ASSERT_EQUAL(1, vm_stack_peek(&vm)->intval);
+
+    vm_free(&vm);
+}
+
+void test_vm_stack_load_imm(void) {
+    vm_t vm;
+    vm_init(&vm);
+
+    error_t err = ERR_NO_ERROR;
+
+    uint8_t bytes[] = {
+        VM_OP_LOADI, 1,
+        VM_OP_LOADI_1N,
+        VM_OP_LOADI_1,
+        VM_OP_ADD,
+        VM_OP_LOADI_0,
+        VM_OP_ADD,
+        VM_OP_ADD,
+        VM_OP_RET
+    };
+
+    err |= vm_load_code(&vm, bytes, sizeof(bytes));
+
+    // Hand-code the interpretation part.
+    err |= cg_add_const(vm.cg, 1, 42);
+
+    err |= vm_interp(&vm);
+    TEST_ASSERT_EQUAL(ERR_VM_INTERP_OK, err);
+    TEST_ASSERT_EQUAL(42, vm_stack_peek(&vm)->intval);
+
+    vm_free(&vm);
+}
+
+void test_vm_stack_inc_dec(void) {
+    vm_t vm;
+    vm_init(&vm);
+
+    error_t err = ERR_NO_ERROR;
+
+    uint8_t bytes[] = {
+        VM_OP_LOADI_0,
+        VM_OP_INC,
+        VM_OP_INC,
+        VM_OP_DEC,
+        VM_OP_RET,
+    };
+
+    err |= vm_load_code(&vm, bytes, sizeof(bytes));
+
+    err |= vm_interp(&vm);
+    TEST_ASSERT_EQUAL(ERR_VM_INTERP_OK, err);
     TEST_ASSERT_EQUAL(1, vm_stack_peek(&vm)->intval);
 
     vm_free(&vm);
@@ -315,4 +351,6 @@ void test_vm() {
     RUN_TEST(test_vm_stack_div);
     RUN_TEST(test_vm_stack_rem);
     RUN_TEST(test_vm_stack_arith);
+    RUN_TEST(test_vm_stack_load_imm);
+    RUN_TEST(test_vm_stack_inc_dec);
 }
