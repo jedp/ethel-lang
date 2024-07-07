@@ -1,8 +1,8 @@
 #include "unity/unity.h"
 #include "test_cg.h"
 #include "../src/comp/cg.h"
-#include "../src/comp/map.h"
-#include "../src/comp/op.h"
+#include "../src/vm/map.h"
+#include "../src/vm/op.h"
 
 void test_cg_init(void) {
     cg_t cg;

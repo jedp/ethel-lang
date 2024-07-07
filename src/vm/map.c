@@ -3,7 +3,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 
-#include "cmem.h"
+#include "../comp/cmem.h"
 #include "map.h"
 
 uint32_t hash_primitive(map_elem_t *e) {

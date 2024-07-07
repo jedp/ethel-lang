@@ -1,6 +1,6 @@
 #include <stdio.h>
 
-#include "cg.h"
+#include "../comp/cg.h"
 #include "dis.h"
 #include "map.h"
 #include "op.h"

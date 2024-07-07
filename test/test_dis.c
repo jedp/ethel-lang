@@ -2,9 +2,9 @@
 #include "test_dis.h"
 
 #include "../src/comp/cg.h"
-#include "../src/comp/dis.h"
-#include "../src/comp/map.h"
-#include "../src/comp/op.h"
+#include "../src/vm/dis.h"
+#include "../src/vm/map.h"
+#include "../src/vm/op.h"
 
 void test_print_dis(void) {
     cg_t cg;

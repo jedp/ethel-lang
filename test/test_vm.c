@@ -1,9 +1,9 @@
 #include "unity/unity.h"
 #include "test_vm.h"
 #include "../src/comp/cg.h"
-#include "../src/comp/map.h"
-#include "../src/comp/op.h"
-#include "../src/comp/vm.h"
+#include "../src/vm/map.h"
+#include "../src/vm/op.h"
+#include "../src/vm/vm.h"
 
 void test_vm_init(void) {
     vm_t vm;

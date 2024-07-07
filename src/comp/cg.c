@@ -3,8 +3,8 @@
 #include "../common/def.h"
 #include "cmem.h"
 #include "cg.h"
-#include "map.h"
-#include "op.h"
+#include "../vm/map.h"
+#include "../vm/op.h"
 
 void cg_init(cg_t *cg) {
     cg->len = 0;

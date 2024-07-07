@@ -1,8 +1,8 @@
 #include <stdio.h>
 #include "../common/err.h"
-#include "cg.h"
-#include "comp.h"
-#include "cmem.h"
+#include "../comp/cg.h"
+#include "../comp/comp.h"
+#include "../comp/cmem.h"
 #include "dis.h"
 #include "op.h"
 #include "vm.h"

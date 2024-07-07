@@ -4,7 +4,7 @@
 
 #include "../common/def.h"
 #include "../common/err.h"
-#include "map.h"
+#include "../vm/map.h"
 
 typedef struct cg_t {
     uint32_t len;

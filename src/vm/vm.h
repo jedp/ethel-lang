@@ -1,6 +1,6 @@
 #pragma once
 
-#include "cg.h"
+#include "../comp/cg.h"
 #include "../common/def.h"
 #include "../common/err.h"
 

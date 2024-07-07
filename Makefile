@@ -6,12 +6,14 @@ COMMONOBJS = \
 COMPOBJS = \
 					 src/comp/cmem.o \
 					 src/comp/comp.o \
-					 src/comp/map.o \
 					 src/comp/lex.o \
 					 src/comp/comp.o \
-					 src/comp/cg.o \
-					 src/comp/dis.o \
-					 src/comp/vm.o \
+					 src/comp/cg.o
+
+VMOBJS = \
+					 src/vm/map.o \
+					 src/vm/dis.o \
+					 src/vm/vm.o
 
 REPLOBJS = src/repl/repl.o
 
@@ -54,10 +56,10 @@ debug: repl
 %.o: %.c
 	$(CC) $(CFLAGS) -c -o $@ $<
 
-repl: $(REPLOBJS) $(COMPOBJS) $(COMMONOBJS)
+repl: $(REPLOBJS) $(VMOBJS) $(COMPOBJS) $(COMMONOBJS)
 	$(CC) $(CFLAGS) $(EXTRA_CFLAGS) -o $@ $^ $(LDFLAGS)
 
-test: $(COMMONOBJS) $(COMPOBJS) $(TESTOBJS)
+test: $(COMMONOBJS) $(COMPOBJS) $(VMOBJS) $(TESTOBJS)
 	$(CC) $(CFLAGS_TEST) $(TESTFLAGS) -o $@/test $^ $(LDFLAGS)
 	./test/test
 
@@ -66,6 +68,6 @@ wc:
 
 .PHONY: clean all test repl debug
 clean:
-	rm -f $(COMMONOBJS) $(COMPOBJS) $(REPLOBJS) $(RUNOBJS) $(TESTOBJS)
+	rm -f $(COMMONOBJS) $(COMPOBJS) $(VMOBJS) $(REPLOBJS) $(RUNOBJS) $(TESTOBJS)
 	rm -f repl test/test
 
