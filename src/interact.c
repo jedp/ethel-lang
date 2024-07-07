@@ -1,6 +1,6 @@
 #include <stdlib.h>
 #include <stdio.h>
-#include "../inc/ptr.h"
+#include "common/ptr.h"
 #include "../inc/mem.h"
 #include "../inc/int.h"
 #include "../inc/str.h"

@@ -1,4 +1,4 @@
-#include "../inc/rand.h"
+#include "rand.h"
 
 static unsigned long y = 2463534242;
 

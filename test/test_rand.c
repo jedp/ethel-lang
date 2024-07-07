@@ -1,6 +1,6 @@
 #include "unity/unity.h"
 #include "test_rand.h"
-#include "../inc/rand.h"
+#include "../src/common/rand.h"
 
 void test_rand_seq(void) {
     // Regression test. In case this ever changes.

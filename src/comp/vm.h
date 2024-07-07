@@ -67,4 +67,6 @@ vm_stack_elem_t *vm_stack_pop(vm_t *vm);
 
 error_t vm_load_code(vm_t *vm, uint8_t *bytes, size_t size);
 
-error_t vm_interp(vm_t *vm);
+error_t vm_exec(vm_t *vm);
+
+error_t vm_interp(vm_t *vm, const char *input);

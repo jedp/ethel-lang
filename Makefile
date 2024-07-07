@@ -1,59 +1,24 @@
 
-COMMONOBJS = src/ptr.o \
-					 src/heap.o \
-					 src/gc.o \
-					 src/mem.o \
-					 src/obj.o \
-					 src/math.o \
-					 src/range.o \
-					 src/arr.o \
-					 src/str.o \
-					 src/float.o \
-					 src/byte.o \
-					 src/int.o \
-					 src/list.o \
-					 src/dict.o \
-					 src/bool.o \
-					 src/fn.o \
-					 src/type.o \
-					 src/rand.o \
-					 src/env.o \
-					 src/parse.o \
-					 src/lex.o \
-					 src/interact.o \
-					 src/ast.o \
-					 src/eval.o
+COMMONOBJS = \
+					 src/common/math.o \
+					 src/common/rand.o \
 
-COMPOBJS = src/comp/cmem.o \
+COMPOBJS = \
+					 src/comp/cmem.o \
+					 src/comp/comp.o \
 					 src/comp/map.o \
+					 src/comp/lex.o \
+					 src/comp/comp.o \
 					 src/comp/cg.o \
 					 src/comp/dis.o \
 					 src/comp/vm.o \
 
 REPLOBJS = src/repl/repl.o
 
-RUNOBJS = src/run.o
-
 TESTOBJS = test/unity/unity.o \
-					 test/util.o \
-					 test/test_hash.o \
-					 test/test_str.o \
-					 test/test_list.o \
 					 test/test_map.o \
-					 test/test_dict.o \
-					 test/test_range.o \
-					 test/test_ptr.o \
-					 test/test_heap.o \
-					 test/test_trace.o \
-					 test/test_gc.o \
-					 test/test_bytearray.o \
 					 test/test_lex.o \
-					 test/test_parse.o \
-					 test/test_eval.o \
-					 test/test_env.o \
 					 test/test_rand.o \
-					 test/test_closure.o \
-					 test/test_examples.o \
 					 test/test_cg.o \
 					 test/test_dis.o \
 					 test/test_vm.o \
@@ -81,7 +46,7 @@ EXTRA_CFLAGS = \
 TESTFLAGS = -I test -fno-omit-frame-pointer -fsanitize=address
 LDFLAGS = -lm -lreadline -ldl
 
-all: test repl run
+all: test repl
 
 debug: CFLAGS += -DDEBUG
 debug: repl
@@ -92,9 +57,6 @@ debug: repl
 repl: $(REPLOBJS) $(COMPOBJS) $(COMMONOBJS)
 	$(CC) $(CFLAGS) $(EXTRA_CFLAGS) -o $@ $^ $(LDFLAGS)
 
-run: $(RUNOBJS) $(COMMONOBJS)
-	$(CC) $(CFLAGS) $(EXTRA_CFLAGS) -o $@ $^ $(LDFLAGS)
-
 test: $(COMMONOBJS) $(COMPOBJS) $(TESTOBJS)
 	$(CC) $(CFLAGS_TEST) $(TESTFLAGS) -o $@/test $^ $(LDFLAGS)
 	./test/test
@@ -102,7 +64,7 @@ test: $(COMMONOBJS) $(COMPOBJS) $(TESTOBJS)
 wc:
 	find . -name "*.[ch]" | xargs wc -l | sort -n
 
-.PHONY: all clean test debug
+.PHONY: clean all test repl debug
 clean:
 	rm -f $(COMMONOBJS) $(COMPOBJS) $(REPLOBJS) $(RUNOBJS) $(TESTOBJS)
 	rm -f repl test/test

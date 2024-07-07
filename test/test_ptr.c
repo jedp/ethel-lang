@@ -1,6 +1,6 @@
 #include "unity/unity.h"
 #include "test_ptr.h"
-#include "../inc/ptr.h"
+#include "../src/common/ptr.h"
 #include "../inc/mem.h"
 #include "../inc/str.h"
 

@@ -82,7 +82,7 @@ void test_vm_loadi(void) {
     // Hand-code the interpretation part.
     err |= cg_add_const(vm.cg, 42, 123);
 
-    err |= vm_interp(&vm);
+    err |= vm_exec(&vm);
     TEST_ASSERT_EQUAL(ERR_VM_INTERP_OK, err);
     TEST_ASSERT_EQUAL(123, vm_stack_peek(&vm)->intval);
 
@@ -106,7 +106,7 @@ void test_vm_stack_negate(void) {
     // Hand-code the interpretation part.
     err |= cg_add_const(vm.cg, 42, 123);
 
-    err |= vm_interp(&vm);
+    err |= vm_exec(&vm);
     TEST_ASSERT_EQUAL(ERR_VM_INTERP_OK, err);
     TEST_ASSERT_EQUAL(-123, vm_stack_peek(&vm)->intval);
 
@@ -133,7 +133,7 @@ void test_vm_stack_add(void) {
     err |= cg_add_const(vm.cg, 1, 123);
     err |= cg_add_const(vm.cg, 2, 456);
 
-    err |= vm_interp(&vm);
+    err |= vm_exec(&vm);
     TEST_ASSERT_EQUAL(ERR_VM_INTERP_OK, err);
     TEST_ASSERT_EQUAL(579, vm_stack_peek(&vm)->intval);
 
@@ -160,7 +160,7 @@ void test_vm_stack_sub(void) {
     err |= cg_add_const(vm.cg, 1, 5);
     err |= cg_add_const(vm.cg, 2, 2);
 
-    err |= vm_interp(&vm);
+    err |= vm_exec(&vm);
     TEST_ASSERT_EQUAL(ERR_VM_INTERP_OK, err);
     TEST_ASSERT_EQUAL(3, vm_stack_peek(&vm)->intval);
 
@@ -187,7 +187,7 @@ void test_vm_stack_mul(void) {
     err |= cg_add_const(vm.cg, 1, 5);
     err |= cg_add_const(vm.cg, 2, 3);
 
-    err |= vm_interp(&vm);
+    err |= vm_exec(&vm);
     TEST_ASSERT_EQUAL(ERR_VM_INTERP_OK, err);
     TEST_ASSERT_EQUAL(15, vm_stack_peek(&vm)->intval);
 
@@ -214,7 +214,7 @@ void test_vm_stack_div(void) {
     err |= cg_add_const(vm.cg, 1, 12);
     err |= cg_add_const(vm.cg, 2, 2);
 
-    err |= vm_interp(&vm);
+    err |= vm_exec(&vm);
     TEST_ASSERT_EQUAL(ERR_VM_INTERP_OK, err);
     TEST_ASSERT_EQUAL(6, vm_stack_peek(&vm)->intval);
 
@@ -241,7 +241,7 @@ void test_vm_stack_rem(void) {
     err |= cg_add_const(vm.cg, 1, 11);
     err |= cg_add_const(vm.cg, 2, 3);
 
-    err |= vm_interp(&vm);
+    err |= vm_exec(&vm);
     TEST_ASSERT_EQUAL(ERR_VM_INTERP_OK, err);
     TEST_ASSERT_EQUAL(2, vm_stack_peek(&vm)->intval);
 
@@ -279,7 +279,7 @@ void test_vm_stack_arith(void) {
     err |= cg_add_const(vm.cg, 3, 3);
     err |= cg_add_const(vm.cg, 4, 5);
 
-    err |= vm_interp(&vm);
+    err |= vm_exec(&vm);
     TEST_ASSERT_EQUAL(ERR_VM_INTERP_OK, err);
     TEST_ASSERT_EQUAL(1, vm_stack_peek(&vm)->intval);
 
@@ -308,7 +308,7 @@ void test_vm_stack_load_imm(void) {
     // Hand-code the interpretation part.
     err |= cg_add_const(vm.cg, 1, 42);
 
-    err |= vm_interp(&vm);
+    err |= vm_exec(&vm);
     TEST_ASSERT_EQUAL(ERR_VM_INTERP_OK, err);
     TEST_ASSERT_EQUAL(42, vm_stack_peek(&vm)->intval);
 
@@ -331,7 +331,7 @@ void test_vm_stack_inc_dec(void) {
 
     err |= vm_load_code(&vm, bytes, sizeof(bytes));
 
-    err |= vm_interp(&vm);
+    err |= vm_exec(&vm);
     TEST_ASSERT_EQUAL(ERR_VM_INTERP_OK, err);
     TEST_ASSERT_EQUAL(1, vm_stack_peek(&vm)->intval);
 

@@ -4,11 +4,11 @@
 
 #include <stdio.h>
 #include "../inc/type.h"
-#include "../inc/ptr.h"
+#include "common/ptr.h"
 #include "../inc/mem.h"
 #include "../inc/str.h"
 #include "../inc/ast.h"
-#include "../inc/lex.h"
+#include "comp/lex.h"
 #include "../inc/parse.h"
 
 static ast_expr_t *parse_start(lexer_t *lexer);

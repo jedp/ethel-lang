@@ -32,13 +32,13 @@ void tearDown(void) {
 int main(int argc, char **argv) {
     UNITY_BEGIN();
 
+    test_lex();
     test_dis();
     test_map();
     test_cg();
     test_vm();
     /*
     test_heap();
-    test_lexer();
     test_parser();
     test_gc();
     test_ptr();

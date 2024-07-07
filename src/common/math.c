@@ -1,4 +1,4 @@
-#include "../inc/math.h"
+#include "math.h"
 
 int min(int a, int b) {
     if (a < b) return a;

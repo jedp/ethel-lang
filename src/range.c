@@ -2,8 +2,8 @@
 #include <limits.h>
 #include "../inc/type.h"
 #include "../inc/range.h"
-#include "../inc/rand.h"
-#include "../inc/math.h"
+#include "common/rand.h"
+#include "common/math.h"
 #include "../inc/str.h"
 #include "../inc/int.h"
 

@@ -4,7 +4,7 @@
 #include "../inc/type.h"
 #include "../inc/mem.h"
 #include "../inc/str.h"
-#include "../inc/rand.h"
+#include "../src/common/rand.h"
 
 obj_t *evaluate(const char *program) {
     eval_result_t *result = (eval_result_t *) alloc_type(EVAL_RESULT, F_NONE);

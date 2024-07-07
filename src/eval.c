@@ -9,7 +9,7 @@
 #include "../inc/list.h"
 #include "../inc/dict.h"
 #include "../inc/type.h"
-#include "../inc/rand.h"
+#include "common/rand.h"
 #include "../inc/eval.h"
 #include "../inc/parse.h"
 

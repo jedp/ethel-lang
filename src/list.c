@@ -1,9 +1,9 @@
 #include <stdio.h>
 #include "../inc/type.h"
-#include "../inc/math.h"
+#include "common/math.h"
 #include "../inc/mem.h"
 #include "../inc/list.h"
-#include "../inc/rand.h"
+#include "common/rand.h"
 
 static obj_t *new_empty_list() {
     obj_t *obj = (obj_t *) alloc_type(TYPE_LIST, F_ENV_ASSIGNABLE);

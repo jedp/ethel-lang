@@ -1,10 +1,9 @@
 #include <stdio.h>
-#include "../common/def.h"
 #include "../common/err.h"
 #include "cg.h"
+#include "comp.h"
 #include "cmem.h"
 #include "dis.h"
-#include "map.h"
 #include "op.h"
 #include "vm.h"
 
@@ -212,8 +211,14 @@ error_t vm_load_code(vm_t *vm, uint8_t *bytecode, size_t size) {
     return ERR_NO_ERROR;
 }
 
-error_t vm_interp(vm_t *vm) {
+error_t vm_exec(vm_t *vm) {
     printf("Executing code:\n");
     print_dis(vm->cg);
     return exec(vm);
+}
+
+error_t vm_interp(vm_t *vm, const char *input) {
+    comp(input);
+
+    return ERR_VM_INTERP_OK;
 }

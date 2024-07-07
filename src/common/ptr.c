@@ -1,4 +1,4 @@
-#include "../inc/ptr.h"
+#include "ptr.h"
 
 void mem_set(void *b, int val, size_t len) {
     unsigned char *p = b;

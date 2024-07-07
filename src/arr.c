@@ -1,7 +1,7 @@
 #include <stdio.h>
 #include "../inc/type.h"
 #include "../inc/mem.h"
-#include "../inc/rand.h"
+#include "common/rand.h"
 #include "../inc/arr.h"
 
 static boolean bytesarrays_eq(bytearray_t *a, bytearray_t *b) {

@@ -1,7 +1,7 @@
 #include <stdarg.h>
 #include <stdio.h>
 #include "util.h"
-#include "../inc/ptr.h"
+#include "../src/common/ptr.h"
 #include "../inc/str.h"
 #include "../inc/mem.h"
 

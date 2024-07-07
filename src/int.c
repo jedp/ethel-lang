@@ -1,7 +1,7 @@
 #include <stdio.h>
 #include "../inc/type.h"
 #include "../inc/mem.h"
-#include "../inc/math.h"
+#include "common/math.h"
 #include "../inc/float.h"
 #include "../inc/int.h"
 #include "../inc/str.h"

@@ -4,7 +4,7 @@
 #include "../inc/mem.h"
 #include "../inc/type.h"
 #include "../inc/str.h"
-#include "../inc/rand.h"
+#include "../src/common/rand.h"
 
 void test_ex_fibonacci(void) {
     char *program = "{ val fib = fn(x) {          \n"

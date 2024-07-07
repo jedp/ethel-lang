@@ -1,3 +1,3 @@
 #pragma once
 
-void test_lexer(void);
+void test_lex(void);

@@ -1,7 +1,7 @@
 #include <assert.h>
 #include <stdio.h>
 #include "../inc/type.h"
-#include "../inc/ptr.h"
+#include "common/ptr.h"
 #include "../inc/heap.h"
 
 // Ye olde heape.
