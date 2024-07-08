@@ -80,6 +80,13 @@ static void parse_expr(parser_t *parser) {
     parse_preced(parser, PRECED_NONE);
 }
 
+static void parse_start(parser_t *parser) {
+    while (!lexer_at_eof(parser->lexer)) {
+        parse_expr(parser);
+        advance(parser);
+    }
+}
+
 error_t comp(const char *input) {
     lexer_t lexer;
     lexer_init(&lexer, input);
@@ -93,7 +100,7 @@ error_t comp(const char *input) {
     parser.err = COMP_ERR_NO_ERROR;
     advance(&parser);
 
-    parse_expr(&parser);
+    parse_start(&parser);
 
     return parser.err;
 }

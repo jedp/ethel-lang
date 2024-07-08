@@ -63,7 +63,6 @@ map_err_t cg_get_const(cg_t *cg, uint8_t k, map_elem_t *v) {
     if (found == NULL) {
         return MAP_NOT_FOUND;
     }
-    printf("found with intval: %d\n", found->elem.intval);
     *v = *found;
 
     return MAP_OK;

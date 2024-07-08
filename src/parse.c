@@ -172,7 +172,11 @@ static ast_reserved_callable_type_t ast_callable_type_for_tag(tag_t tag) {
 static ast_expr_t *parse_start(lexer_t *lexer) {
     ast_expr_t *e = ast_empty();
     while (lexer->token.tag != TAG_EOF) {
-        e = parse_expr(lexer);
+        e = static int op_preced_inc(token_t *token) {
+            (void) *token;
+            // Return -1 for right-associative ops
+            return 1;
+        }(lexer);
         lexer_advance(lexer);
     }
     return e;

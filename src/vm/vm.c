@@ -93,7 +93,6 @@ static error_t exec(vm_t *vm) {
                 map_elem_t v;
                 uint8_t k = READ_BYTE();
                 cg_get_const(vm->cg, k, &v);
-                printf("LOADI %d -> %d\n", k, v.elem.intval);
                 vm_stack_push_int(vm, v.elem.intval);
                 break;
             }

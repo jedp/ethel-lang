@@ -4,7 +4,7 @@
 #include "token.h"
 #include "lex.h"
 
-static boolean at_eof(lexer_t *lexer) {
+boolean lexer_at_eof(lexer_t *lexer) {
     return *lexer->curr == '\0';
 }
 
@@ -18,14 +18,14 @@ static char peek(lexer_t *lexer) {
 }
 
 static char peek_next(lexer_t *lexer) {
-    if (at_eof(lexer)) {
+    if (lexer_at_eof(lexer)) {
         return '\0';
     }
     return lexer->curr[1];
 }
 
 static boolean match_next(lexer_t *lexer, const char ch) {
-    if (at_eof(lexer)) {
+    if (lexer_at_eof(lexer)) {
         return False;
     }
 
@@ -95,7 +95,7 @@ static token_t make_char_token(lexer_t *lexer) {
 }
 
 static token_t make_string_token(lexer_t *lexer) {
-    while (peek(lexer) != '"' && !at_eof(lexer)) {
+    while (peek(lexer) != '"' && !lexer_at_eof(lexer)) {
         if (peek(lexer) == '\n') {
             lexer->char_pos = 0;
             lexer->line_pos++;
@@ -103,7 +103,7 @@ static token_t make_string_token(lexer_t *lexer) {
         advance(lexer);
     }
 
-    if (at_eof(lexer)) {
+    if (lexer_at_eof(lexer)) {
         return make_error_token(lexer, LEX_ERR_UNTERMINATED_STRING);
     }
 
