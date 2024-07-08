@@ -9,6 +9,11 @@ static uint32_t print_op(const char *name, uint32_t offset) {
     return offset + 1;
 }
 
+static uint32_t print_bpush(const char *name, cg_t *cg, uint32_t offset) {
+    printf("%8s [0x%2x]\n", name, cg->code[offset + 1]);
+    return offset + 2;
+}
+
 static uint32_t print_loadi(const char *name, cg_t *cg, uint32_t offset) {
     map_elem_t v;
     cg_get_const(cg, cg->code[offset + 1], &v);
@@ -35,6 +40,8 @@ uint32_t print_dis_byte(cg_t *cg, uint32_t offset) {
         case VM_OP_INC:
         case VM_OP_DEC:
             return print_op(op_names[op], offset);
+        case VM_OP_BPUSH:
+            return print_bpush(op_names[op], cg, offset);
         case VM_OP_LOADI:
             return print_loadi(op_names[op], cg, offset);
         default:

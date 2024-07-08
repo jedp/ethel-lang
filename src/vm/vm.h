@@ -16,7 +16,7 @@ typedef enum {
     VM_STACK_BYTE_TYPE,
     VM_STACK_INT_TYPE,
     VM_STACK_FLOAT_TYPE,
-    VM_STACK_OBJ_TYPE,
+    VM_STACK_ADDR_TYPE,
 } vm_stack_elem_type_t;
 
 /*
@@ -30,7 +30,7 @@ typedef struct vm_stack_elem_t {
         int intval;
         float floatval;
         int boolval;
-        void *obj_ptr;
+        uint8_t addrval;
     };
 } vm_stack_elem_t;
 
@@ -55,11 +55,13 @@ error_t vm_free(vm_t *vm);
 
 error_t vm_stack_reset(vm_t *vm);
 
-vm_stack_elem_t *vm_stack_elem_new(void);
-
-error_t vm_stack_push_int(vm_t *vm, int i);
+vm_stack_elem_t vm_stack_elem_new(void);
 
 error_t vm_stack_push(vm_t *vm, vm_stack_elem_t *e);
+
+error_t vm_stack_push_byte(vm_t *vm, uint8_t b);
+
+error_t vm_stack_push_int(vm_t *vm, int i);
 
 vm_stack_elem_t *vm_stack_peek(vm_t *vm);
 

@@ -40,33 +40,33 @@ static error_t binop(vm_t *vm, vm_op_t op) {
         return ERR_VM_RUNTIME_ERROR;
     }
 
-    vm_stack_elem_t *e = vm_stack_elem_new();
-    e->type = a->type > b->type ? a->type : b->type;
+    vm_stack_elem_t e;
+    e.type = a->type > b->type ? a->type : b->type;
 
     switch (op) {
         case VM_OP_ADD:
-            e->intval = b->intval + a->intval;
+            e.intval = b->intval + a->intval;
             break;
         case VM_OP_SUB:
-            e->intval = b->intval - a->intval;
+            e.intval = b->intval - a->intval;
             break;
         case VM_OP_MUL:
-            e->intval = b->intval * a->intval;
+            e.intval = b->intval * a->intval;
             break;
         case VM_OP_DIV:
-            e->intval = b->intval / a->intval;
+            e.intval = b->intval / a->intval;
             break;
         case VM_OP_REM:
-            e->intval = b->intval % a->intval;
+            e.intval = b->intval % a->intval;
             break;
         default:
-            printf("Unsupported type for numeric binary operation: %d\n", e->type);
+            printf("Unsupported type for numeric binary operation: %d\n", e.type);
             return ERR_VM_RUNTIME_ERROR;
     }
 
     // Don't free b and a: They are still slots in the stack.
 
-    vm_stack_push(vm, e);
+    vm_stack_push(vm, &e);
     return ERR_NO_ERROR;
 }
 
@@ -76,6 +76,9 @@ static error_t exec(vm_t *vm) {
         uint8_t bytecode;
         switch (bytecode = READ_BYTE()) {
             case VM_OP_NOP:
+                break;
+            case VM_OP_BPUSH:
+                vm_stack_push_int(vm, READ_BYTE());
                 break;
             case VM_OP_LOADI_1N:
                 vm_stack_push_int(vm, -1);
@@ -173,18 +176,6 @@ error_t vm_stack_reset(vm_t *vm) {
     return ERR_NO_ERROR;
 }
 
-vm_stack_elem_t *vm_stack_elem_new() {
-    vm_stack_elem_t *e = (vm_stack_elem_t *) comp_alloc(sizeof(vm_stack_elem_t));
-    return e;
-}
-
-error_t vm_stack_push_int(vm_t *vm, int i) {
-    vm_stack_elem_t *e = vm_stack_elem_new();
-    e->type = VM_STACK_INT_TYPE;
-    e->intval = i;
-    return vm_stack_push(vm, e);
-}
-
 error_t vm_stack_push(vm_t *vm, vm_stack_elem_t *e) {
     if (vm->stack->top > vm->stack->buf + sizeof(vm_stack_elem_t *) * VM_DATA_STACK_SIZE) {
         return ERR_VM_STACK_OVERFLOW;
@@ -192,6 +183,22 @@ error_t vm_stack_push(vm_t *vm, vm_stack_elem_t *e) {
     *(vm->stack->top) = *e;
     vm->stack->top += sizeof(vm_stack_elem_t);
     return ERR_NO_ERROR;
+}
+
+error_t vm_stack_push_byte(vm_t *vm, uint8_t b) {
+    vm_stack_elem_t e = {
+        .type = VM_STACK_BYTE_TYPE,
+        .byteval = b
+    };
+    return vm_stack_push(vm, &e);
+}
+
+error_t vm_stack_push_int(vm_t *vm, int i) {
+    vm_stack_elem_t e = {
+        .type = VM_STACK_INT_TYPE,
+        .intval = i
+    };
+    return vm_stack_push(vm, &e);
 }
 
 vm_stack_elem_t *vm_stack_peek(vm_t *vm) {

@@ -31,6 +31,23 @@ void test_vm_load_code(void) {
     vm_free(&vm);
 }
 
+void test_vm_stack_push_byte(void) {
+    vm_t vm;
+    vm_init(&vm);
+
+    TEST_ASSERT_EQUAL_PTR(vm.stack->buf, vm.stack->top);
+
+    vm_stack_push_byte(&vm, 0x88);
+    vm_stack_push_byte(&vm, 0x00);
+    vm_stack_push_byte(&vm, 0xff);
+
+    TEST_ASSERT_EQUAL(0xff, vm_stack_pop(&vm)->byteval);
+    TEST_ASSERT_EQUAL(0x00, vm_stack_pop(&vm)->byteval);
+    TEST_ASSERT_EQUAL(0x88, vm_stack_pop(&vm)->byteval);
+
+    vm_free(&vm);
+}
+
 void test_vm_stack_push_int(void) {
     vm_t vm;
     vm_init(&vm);
@@ -365,6 +382,7 @@ void test_vm_stack_inc_dec(void) {
 void test_vm() {
     RUN_TEST(test_vm_init);
     RUN_TEST(test_vm_load_code);
+    RUN_TEST(test_vm_stack_push_byte);
     RUN_TEST(test_vm_stack_push_int);
     RUN_TEST(test_vm_stack_push);
     RUN_TEST(test_vm_loadi);

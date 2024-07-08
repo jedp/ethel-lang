@@ -19,7 +19,7 @@ uint32_t hash_primitive(map_elem_t *e) {
             return (uint32_t) e->elem.uintval;
         case MAP_ELEM_INT_TYPE:
             return (uint32_t) e->elem.intval;
-        case MAP_ELEM_OBJ_TYPE:
+        case MAP_ELEM_ADDR_TYPE:
             // TODO
             return 77;
         default:
@@ -42,7 +42,7 @@ uint8_t eq_primitive(map_elem_t *a, map_elem_t *b) {
             return (a->elem.uintval == b->elem.uintval) ? 1 : 0;
         case MAP_ELEM_INT_TYPE:
             return (a->elem.intval == b->elem.intval) ? 1 : 0;
-        case MAP_ELEM_OBJ_TYPE:
+        case MAP_ELEM_ADDR_TYPE:
             // TODO
             return 0;
         default:
