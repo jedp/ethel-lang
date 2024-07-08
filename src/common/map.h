@@ -1,9 +1,15 @@
 #pragma once
 
-#include "../common/def.h"
-#include "../common/err.h"
+#include "def.h"
+#include "err.h"
 
 #define MAP_NEW_BUCKETS (8)
+
+typedef enum map_err {
+    MAP_OK,
+    MAP_NOT_FOUND,
+    MAP_TOO_MANY_ITEMS,
+} map_err_t;
 
 typedef enum {
     MAP_ELEM_ERR_NO_TYPE,
@@ -65,6 +71,6 @@ map_t *map_new(
 
 void map_free(map_t *map);
 
-error_t map_put(map_t *map, map_elem_t *k, map_elem_t *v);
+map_err_t map_put(map_t *map, map_elem_t *k, map_elem_t *v);
 
 map_elem_t *map_get(map_t *map, map_elem_t *k);

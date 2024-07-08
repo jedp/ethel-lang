@@ -554,16 +554,6 @@ token_t next_token(lexer_t *lexer) {
     }
 }
 
-boolean eat(lexer_t *lexer, char expected) {
-    if (peek(lexer) != expected) {
-        return False;
-    }
-
-    lexer->start = lexer->curr;
-    advance(lexer);
-    return True;
-}
-
 void lexer_init(lexer_t *lexer, const char input[]) {
     lexer->err_pos = 0;
     lexer->start = input;

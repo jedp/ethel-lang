@@ -1,10 +1,9 @@
 #include <stdlib.h>
 
 #include "../common/def.h"
+#include "../common/map.h"
 #include "cmem.h"
 #include "cg.h"
-#include "../vm/map.h"
-#include "../vm/op.h"
 
 void cg_init(cg_t *cg) {
     cg->len = 0;
@@ -40,25 +39,32 @@ void cg_bytes(cg_t *cg, uint8_t *bytes, size_t size) {
     }
 }
 
-error_t cg_add_const(cg_t *cg, uint32_t n, int v) {
+map_err_t cg_put_const(cg_t *cg, map_elem_t v, uint8_t *k) {
+    uint8_t next_k = cg->consts->buckets->nelems + 1;
+    if (next_k > UINT8_MAX) {
+        return MAP_TOO_MANY_ITEMS;
+    }
+
     map_elem_t *ek = (map_elem_t *) comp_alloc(sizeof(map_elem_t));
     ek->type = MAP_ELEM_UINT_TYPE;
-    ek->elem.uintval = n;
-    map_elem_t *ev = (map_elem_t *) comp_alloc(sizeof(map_elem_t));
-    ev->type = MAP_ELEM_INT_TYPE;
-    ev->elem.intval = v;
-    return map_put(cg->consts, ek, ev);
+    ek->elem.uintval = next_k;
+    error_t err = map_put(cg->consts, ek, &v);
+
+    *k = next_k;
+
+    return err;
 }
 
-int cg_get_const(cg_t *cg, uint32_t n) {
+map_err_t cg_get_const(cg_t *cg, uint8_t k, map_elem_t *v) {
     map_elem_t *ek = (map_elem_t *) comp_alloc(sizeof(map_elem_t));
     ek->type = MAP_ELEM_UINT_TYPE;
-    ek->elem.uintval = n;
+    ek->elem.uintval = k;
     map_elem_t *found = map_get(cg->consts, ek);
     if (found == NULL) {
-        // TODO here's a weird number to signal problems. (decimal 90.)
-        printf("\n%d not found!\n", n);
-        return 0x5a;
+        return MAP_NOT_FOUND;
     }
-    return found->elem.intval;
+    printf("found with intval: %d\n", found->elem.intval);
+    *v = *found;
+
+    return MAP_OK;
 }

@@ -23,6 +23,4 @@ typedef struct {
 
 void lexer_init(lexer_t *lexer, const char input[]);
 
-boolean eat(lexer_t *lexer, char expected);
-
 token_t next_token(lexer_t *lexer);

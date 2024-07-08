@@ -4,12 +4,10 @@
 #include "../comp/comp.h"
 #include "../comp/cmem.h"
 #include "dis.h"
-#include "op.h"
+#include "../common/op.h"
 #include "vm.h"
 
 #define READ_BYTE() (*vm->pc++)
-
-#define LOADI() (cg_get_const(vm->cg, READ_BYTE()))
 
 static error_t numeric_negate(vm_stack_elem_t *e) {
     switch (e->type) {
@@ -88,9 +86,14 @@ static error_t exec(vm_t *vm) {
             case VM_OP_LOADI_1:
                 vm_stack_push_int(vm, 1);
                 break;
-            case VM_OP_LOADI:
-                vm_stack_push_int(vm, LOADI());
+            case VM_OP_LOADI: {
+                map_elem_t v;
+                uint8_t k = READ_BYTE();
+                cg_get_const(vm->cg, k, &v);
+                printf("LOADI %d -> %d\n", k, v.elem.intval);
+                vm_stack_push_int(vm, v.elem.intval);
                 break;
+            }
             case VM_OP_NEGATE: {
                 vm_stack_elem_t *e = vm_stack_pop(vm);
                 err = numeric_negate(e);
@@ -183,11 +186,11 @@ error_t vm_stack_push_int(vm_t *vm, int i) {
 }
 
 error_t vm_stack_push(vm_t *vm, vm_stack_elem_t *e) {
-    if (vm->stack->top > vm->stack->buf + sizeof(vm_stack_elem_t * ) * VM_DATA_STACK_SIZE) {
+    if (vm->stack->top > vm->stack->buf + sizeof(vm_stack_elem_t *) * VM_DATA_STACK_SIZE) {
         return ERR_VM_STACK_OVERFLOW;
     }
     *(vm->stack->top) = *e;
-    vm->stack->top += sizeof(vm->stack->top);
+    vm->stack->top += sizeof(vm_stack_elem_t);
     return ERR_NO_ERROR;
 }
 
@@ -195,11 +198,12 @@ vm_stack_elem_t *vm_stack_peek(vm_t *vm) {
     if (vm->stack->top == vm->stack->buf) {
         return NULL;
     }
-    return vm->stack->top - sizeof(vm->stack->top);
+    return vm->stack->top - sizeof(vm_stack_elem_t);
+
 }
 
 vm_stack_elem_t *vm_stack_pop(vm_t *vm) {
-    vm->stack->top -= sizeof(vm->stack->top);
+    vm->stack->top -= sizeof(vm_stack_elem_t);
     return vm->stack->top;
 }
 

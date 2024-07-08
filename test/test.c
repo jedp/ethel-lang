@@ -37,6 +37,7 @@ int main(int argc, char **argv) {
     test_map();
     test_cg();
     test_vm();
+
     /*
     test_heap();
     test_parser();

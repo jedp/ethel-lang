@@ -2,6 +2,7 @@
 COMMONOBJS = \
 					 src/common/math.o \
 					 src/common/rand.o \
+					 src/common/map.o \
 
 COMPOBJS = \
 					 src/comp/cmem.o \
@@ -10,8 +11,10 @@ COMPOBJS = \
 					 src/comp/comp.o \
 					 src/comp/cg.o
 
+ECOBJS = \
+					 src/comp/ec.o
+
 VMOBJS = \
-					 src/vm/map.o \
 					 src/vm/dis.o \
 					 src/vm/vm.o
 
@@ -48,13 +51,16 @@ EXTRA_CFLAGS = \
 TESTFLAGS = -I test -fno-omit-frame-pointer -fsanitize=address
 LDFLAGS = -lm -lreadline -ldl
 
-all: test repl
+all: test repl ec
 
 debug: CFLAGS += -DDEBUG
 debug: repl
 
 %.o: %.c
 	$(CC) $(CFLAGS) -c -o $@ $<
+
+ec: $(COMPOBJS) $(COMMONOBJS) $(ECOBJS)
+	$(CC) $(CFLAGS) $(EXTRA_CFLAGS) -o $@ $^ $(LDFLAGS)
 
 repl: $(REPLOBJS) $(VMOBJS) $(COMPOBJS) $(COMMONOBJS)
 	$(CC) $(CFLAGS) $(EXTRA_CFLAGS) -o $@ $^ $(LDFLAGS)
@@ -66,7 +72,7 @@ test: $(COMMONOBJS) $(COMPOBJS) $(VMOBJS) $(TESTOBJS)
 wc:
 	find . -name "*.[ch]" | xargs wc -l | sort -n
 
-.PHONY: clean all test repl debug
+.PHONY: clean all test ec repl debug
 clean:
 	rm -f $(COMMONOBJS) $(COMPOBJS) $(VMOBJS) $(REPLOBJS) $(RUNOBJS) $(TESTOBJS)
 	rm -f repl test/test

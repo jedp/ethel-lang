@@ -1,8 +1,7 @@
 #include "unity/unity.h"
 #include "test_vm.h"
 #include "../src/comp/cg.h"
-#include "../src/vm/map.h"
-#include "../src/vm/op.h"
+#include "../src/common/op.h"
 #include "../src/vm/vm.h"
 
 void test_vm_init(void) {
@@ -20,7 +19,9 @@ void test_vm_load_code(void) {
     vm_t vm;
     vm_init(&vm);
 
-    uint8_t bytes[] = {VM_OP_NOP, VM_OP_RET};
+    uint8_t bytes[] = {
+        VM_OP_NOP,
+        VM_OP_RET};
 
     vm_load_code(&vm, bytes, sizeof(bytes));
 
@@ -52,7 +53,7 @@ void test_vm_stack_push(void) {
     vm_init(&vm);
 
     vm_stack_elem_t i = {.type = VM_STACK_INT_TYPE, .intval = 42};
-    vm_stack_elem_t f = {.type = VM_STACK_FLOAT_TYPE, .floatval = 2.34};
+    vm_stack_elem_t f = {.type = VM_STACK_FLOAT_TYPE, .floatval = 2.34f};
     vm_stack_elem_t b = {.type = VM_STACK_BYTE_TYPE, .byteval = 0xff};
     vm_stack_elem_t y = {.type = VM_STACK_BOOL_TYPE, .boolval = 1};
 
@@ -75,16 +76,21 @@ void test_vm_loadi(void) {
 
     error_t err = ERR_NO_ERROR;
 
-    uint8_t bytes[] = {VM_OP_NOP, VM_OP_LOADI, 42, VM_OP_RET};
+    uint8_t bytes[] = {
+        VM_OP_NOP,
+        VM_OP_LOADI, 1,
+        VM_OP_RET};
 
     err |= vm_load_code(&vm, bytes, sizeof(bytes));
 
-    // Hand-code the interpretation part.
-    err |= cg_add_const(vm.cg, 42, 123);
+    uint8_t k;
+    map_elem_t v = {.type=MAP_ELEM_INT_TYPE, .elem.intval = 42};
+    err |= cg_put_const(vm.cg, v, &k);
+    TEST_ASSERT_EQUAL(1, k);
 
     err |= vm_exec(&vm);
     TEST_ASSERT_EQUAL(ERR_VM_INTERP_OK, err);
-    TEST_ASSERT_EQUAL(123, vm_stack_peek(&vm)->intval);
+    TEST_ASSERT_EQUAL(42, vm_stack_peek(&vm)->intval);
 
     vm_free(&vm);
 }
@@ -96,15 +102,16 @@ void test_vm_stack_negate(void) {
     error_t err = ERR_NO_ERROR;
 
     uint8_t bytes[] = {
-        VM_OP_LOADI, 42,
+        VM_OP_LOADI, 1,
         VM_OP_NEGATE,
         VM_OP_RET
     };
 
     err |= vm_load_code(&vm, bytes, sizeof(bytes));
 
-    // Hand-code the interpretation part.
-    err |= cg_add_const(vm.cg, 42, 123);
+    uint8_t k;
+    map_elem_t v = {.type=MAP_ELEM_INT_TYPE, .elem.intval = 123};
+    err |= cg_put_const(vm.cg, v, &k);
 
     err |= vm_exec(&vm);
     TEST_ASSERT_EQUAL(ERR_VM_INTERP_OK, err);
@@ -129,9 +136,13 @@ void test_vm_stack_add(void) {
 
     err |= vm_load_code(&vm, bytes, sizeof(bytes));
 
-    // Hand-code the interpretation part.
-    err |= cg_add_const(vm.cg, 1, 123);
-    err |= cg_add_const(vm.cg, 2, 456);
+    uint8_t k1;
+    uint8_t k2;
+    map_elem_t v;
+    v = (map_elem_t) {.type=MAP_ELEM_INT_TYPE, .elem.intval = 123};
+    err |= cg_put_const(vm.cg, v, &k1);
+    v = (map_elem_t) {.type=MAP_ELEM_INT_TYPE, .elem.intval = 456};
+    err |= cg_put_const(vm.cg, v, &k2);
 
     err |= vm_exec(&vm);
     TEST_ASSERT_EQUAL(ERR_VM_INTERP_OK, err);
@@ -155,10 +166,12 @@ void test_vm_stack_sub(void) {
     };
 
     err |= vm_load_code(&vm, bytes, sizeof(bytes));
-
-    // Hand-code the interpretation part.
-    err |= cg_add_const(vm.cg, 1, 5);
-    err |= cg_add_const(vm.cg, 2, 2);
+    uint8_t k;
+    map_elem_t v;
+    v = (map_elem_t) {.type=MAP_ELEM_INT_TYPE, .elem.intval = 5};
+    err |= cg_put_const(vm.cg, v, &k);
+    v = (map_elem_t) {.type=MAP_ELEM_INT_TYPE, .elem.intval = 2};
+    err |= cg_put_const(vm.cg, v, &k);
 
     err |= vm_exec(&vm);
     TEST_ASSERT_EQUAL(ERR_VM_INTERP_OK, err);
@@ -182,10 +195,12 @@ void test_vm_stack_mul(void) {
     };
 
     err |= vm_load_code(&vm, bytes, sizeof(bytes));
-
-    // Hand-code the interpretation part.
-    err |= cg_add_const(vm.cg, 1, 5);
-    err |= cg_add_const(vm.cg, 2, 3);
+    uint8_t k;
+    map_elem_t v;
+    v = (map_elem_t) {.type=MAP_ELEM_INT_TYPE, .elem.intval = 5};
+    err |= cg_put_const(vm.cg, v, &k);
+    v = (map_elem_t) {.type=MAP_ELEM_INT_TYPE, .elem.intval = 3};
+    err |= cg_put_const(vm.cg, v, &k);
 
     err |= vm_exec(&vm);
     TEST_ASSERT_EQUAL(ERR_VM_INTERP_OK, err);
@@ -209,10 +224,12 @@ void test_vm_stack_div(void) {
     };
 
     err |= vm_load_code(&vm, bytes, sizeof(bytes));
-
-    // Hand-code the interpretation part.
-    err |= cg_add_const(vm.cg, 1, 12);
-    err |= cg_add_const(vm.cg, 2, 2);
+    uint8_t k;
+    map_elem_t v;
+    v = (map_elem_t) {.type=MAP_ELEM_INT_TYPE, .elem.intval = 12};
+    err |= cg_put_const(vm.cg, v, &k);
+    v = (map_elem_t) {.type=MAP_ELEM_INT_TYPE, .elem.intval = 2};
+    err |= cg_put_const(vm.cg, v, &k);
 
     err |= vm_exec(&vm);
     TEST_ASSERT_EQUAL(ERR_VM_INTERP_OK, err);
@@ -236,10 +253,12 @@ void test_vm_stack_rem(void) {
     };
 
     err |= vm_load_code(&vm, bytes, sizeof(bytes));
-
-    // Hand-code the interpretation part.
-    err |= cg_add_const(vm.cg, 1, 11);
-    err |= cg_add_const(vm.cg, 2, 3);
+    uint8_t k;
+    map_elem_t v;
+    v = (map_elem_t) {.type=MAP_ELEM_INT_TYPE, .elem.intval = 11};
+    err |= cg_put_const(vm.cg, v, &k);
+    v = (map_elem_t) {.type=MAP_ELEM_INT_TYPE, .elem.intval = 3};
+    err |= cg_put_const(vm.cg, v, &k);
 
     err |= vm_exec(&vm);
     TEST_ASSERT_EQUAL(ERR_VM_INTERP_OK, err);
@@ -272,12 +291,16 @@ void test_vm_stack_arith(void) {
     };
 
     err |= vm_load_code(&vm, bytes, sizeof(bytes));
-
-    // Hand-code the interpretation part.
-    err |= cg_add_const(vm.cg, 1, 2);
-    err |= cg_add_const(vm.cg, 2, 1);
-    err |= cg_add_const(vm.cg, 3, 3);
-    err |= cg_add_const(vm.cg, 4, 5);
+    uint8_t k;
+    map_elem_t v;
+    v = (map_elem_t) {.type=MAP_ELEM_INT_TYPE, .elem.intval = 2};
+    err |= cg_put_const(vm.cg, v, &k);
+    v = (map_elem_t) {.type=MAP_ELEM_INT_TYPE, .elem.intval = 1};
+    err |= cg_put_const(vm.cg, v, &k);
+    v = (map_elem_t) {.type=MAP_ELEM_INT_TYPE, .elem.intval = 3};
+    err |= cg_put_const(vm.cg, v, &k);
+    v = (map_elem_t) {.type=MAP_ELEM_INT_TYPE, .elem.intval = 5};
+    err |= cg_put_const(vm.cg, v, &k);
 
     err |= vm_exec(&vm);
     TEST_ASSERT_EQUAL(ERR_VM_INTERP_OK, err);
@@ -304,9 +327,10 @@ void test_vm_stack_load_imm(void) {
     };
 
     err |= vm_load_code(&vm, bytes, sizeof(bytes));
-
-    // Hand-code the interpretation part.
-    err |= cg_add_const(vm.cg, 1, 42);
+    uint8_t k;
+    map_elem_t v;
+    v = (map_elem_t) {.type=MAP_ELEM_INT_TYPE, .elem.intval = 42};
+    err |= cg_put_const(vm.cg, v, &k);
 
     err |= vm_exec(&vm);
     TEST_ASSERT_EQUAL(ERR_VM_INTERP_OK, err);

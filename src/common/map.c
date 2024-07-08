@@ -1,7 +1,6 @@
 #include <stdlib.h>
 #include <string.h>
 #include <stdio.h>
-#include <stdlib.h>
 
 #include "../comp/cmem.h"
 #include "map.h"
@@ -88,11 +87,11 @@ void map_free(map_t *map) {
     comp_free(map);
 }
 
-static error_t buckets_put_internal(map_buckets_t *buckets,
-                                    map_elem_t *k,
-                                    map_elem_t *v,
-                                    uint32_t (*hash_func)(map_elem_t *elem),
-                                    uint8_t (*eq_func)(map_elem_t *node, map_elem_t *other)
+static map_err_t buckets_put_internal(map_buckets_t *buckets,
+                                      map_elem_t *k,
+                                      map_elem_t *v,
+                                      uint32_t (*hash_func)(map_elem_t *elem),
+                                      uint8_t (*eq_func)(map_elem_t *node, map_elem_t *other)
 ) {
     uint32_t hash_val = hash_func(k);
     uint32_t bucket_index = hash_val % buckets->nbuckets;
@@ -104,7 +103,7 @@ static error_t buckets_put_internal(map_buckets_t *buckets,
             eq_func(node->k, k)) {
             // Key already in the map. Update the value.
             *(node->v) = *v;
-            return ERR_NO_ERROR;
+            return MAP_OK;
         }
         node = node->next;
     }
@@ -126,16 +125,16 @@ static error_t buckets_put_internal(map_buckets_t *buckets,
     buckets->nodes[bucket_index] = new;
     buckets->nelems++;
 
-    return ERR_NO_ERROR;
+    return MAP_OK;
 }
 
-static error_t maybe_grow_map(map_t *orig_map) {
+static map_err_t maybe_grow_map(map_t *orig_map) {
     uint32_t new_nbuckets =
         MAP_NEW_BUCKETS +
         (orig_map->buckets->nelems / MAP_NEW_BUCKETS) * MAP_NEW_BUCKETS;
 
     if (new_nbuckets == orig_map->buckets->nbuckets) {
-        return ERR_NO_ERROR;
+        return MAP_OK;
     }
 
     map_buckets_t *new_buckets = buckets_new(new_nbuckets);
@@ -154,10 +153,10 @@ static error_t maybe_grow_map(map_t *orig_map) {
     orig_map->buckets = new_buckets;
     comp_free(old_buckets);
 
-    return ERR_NO_ERROR;
+    return MAP_OK;
 }
 
-error_t map_put(map_t *map, map_elem_t *k, map_elem_t *v) {
+map_err_t map_put(map_t *map, map_elem_t *k, map_elem_t *v) {
     maybe_grow_map(map);
 
     return buckets_put_internal(map->buckets, k, v, map->hash_func, map->eq_func);

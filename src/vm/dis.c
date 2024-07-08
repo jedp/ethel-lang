@@ -1,9 +1,8 @@
 #include <stdio.h>
 
 #include "../comp/cg.h"
+#include "../common/op.h"
 #include "dis.h"
-#include "map.h"
-#include "op.h"
 
 static uint32_t print_op(const char *name, uint32_t offset) {
     printf("%8s\n", name);
@@ -11,8 +10,9 @@ static uint32_t print_op(const char *name, uint32_t offset) {
 }
 
 static uint32_t print_loadi(const char *name, cg_t *cg, uint32_t offset) {
-    int const_int = cg_get_const(cg, cg->code[offset + 1]);
-    printf("%8s #%d [%d]\n", name, cg->code[offset + 1], const_int);
+    map_elem_t v;
+    cg_get_const(cg, cg->code[offset + 1], &v);
+    printf("%8s #%d [%d]\n", name, cg->code[offset + 1], v.elem.intval);
     return offset + 2;
 }
 

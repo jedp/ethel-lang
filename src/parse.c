@@ -173,7 +173,7 @@ static ast_expr_t *parse_start(lexer_t *lexer) {
     ast_expr_t *e = ast_empty();
     while (lexer->token.tag != TAG_EOF) {
         e = parse_expr(lexer);
-        advance(lexer);
+        lexer_advance(lexer);
     }
     return e;
 }
@@ -203,16 +203,16 @@ static ast_fn_arg_decl_t *parse_fn_arg_decl(lexer_t *lexer) {
     if (lexer->token.tag != TAG_IDENT) return NULL;
 
     node->name = bytearray_clone(c_str_to_bytearray(lexer->token.string));
-    advance(lexer);
+    lexer_advance(lexer);
 
     while (lexer->token.tag == TAG_COMMA) {
-        advance(lexer);
+        lexer_advance(lexer);
 
         node->next = (ast_fn_arg_decl_t *) alloc_type(AST_FUNCTION_DEF_ARGS, F_NONE);
         node = node->next;
 
         node->name = bytearray_clone(c_str_to_bytearray(lexer->token.string));
-        advance(lexer);
+        lexer_advance(lexer);
     }
 
     node->next = NULL;
@@ -227,7 +227,7 @@ static ast_expr_list_t *parse_expr_list(lexer_t *lexer) {
     node->root = e;
 
     while (lexer->token.tag == TAG_COMMA) {
-        advance(lexer);
+        lexer_advance(lexer);
         ast_expr_list_t *next = (ast_expr_list_t *) alloc_type(AST_EXPR_LIST, F_NONE);
         e = parse_expr(lexer);
         next->root = e;
@@ -249,7 +249,7 @@ static ast_expr_list_t *parse_list_expr_list(lexer_t *lexer) {
     if (TYPEOF(e) > AST_EMPTY) node->root = e;
 
     while (lexer->token.tag == TAG_COMMA || lexer->token.tag == TAG_EOL) {
-        advance(lexer);
+        lexer_advance(lexer);
         ast_expr_list_t *next = (ast_expr_list_t *) alloc_type(AST_EXPR_LIST, F_NONE);
         e = parse_expr(lexer);
         if (TYPEOF(e) > AST_EMPTY) {
@@ -285,7 +285,7 @@ static ast_expr_kv_list_t *parse_expr_kv_list(lexer_t *lexer) {
     root->next = NULL;
 
     while (lexer->token.tag == TAG_COMMA) {
-        advance(lexer);
+        lexer_advance(lexer);
         ast_expr_kv_list_t *next = (ast_expr_kv_list_t *) alloc_type(AST_DICT_KV, F_NONE);
         e = parse_expr(lexer);
 
@@ -313,7 +313,7 @@ static ast_expr_list_t *parse_block(lexer_t *lexer) {
     node->root = e;
 
     while (lexer->token.tag == TAG_EOL) {
-        advance(lexer);
+        lexer_advance(lexer);
         ast_expr_list_t *next = (ast_expr_list_t *) alloc_type(AST_EXPR_LIST, F_NONE);
         e = parse_expr(lexer);
         next->root = e;
@@ -380,7 +380,7 @@ static ast_expr_t *parse_expr_internal(lexer_t *lexer, int min_preced) {
         int next_min_preced = preced + preced_inc;
 
         tag_t tag = token.tag;
-        advance(lexer);
+        lexer_advance(lexer);
 
         switch (tag) {
             case TAG_ASSIGN:
@@ -471,7 +471,7 @@ static ast_expr_t *parse_expr_internal(lexer_t *lexer, int min_preced) {
                 lhs = ast_access(lhs, parse_expr_internal(lexer, next_min_preced));
                 break;
             case TAG_COLON:
-                advance(lexer);
+                lexer_advance(lexer);
                 lhs = ast_typed(lhs, c_str_to_bytearray(lexer->token.string));
                 break;
             default:
@@ -487,7 +487,7 @@ static ast_expr_t *parse_expr_internal(lexer_t *lexer, int min_preced) {
 static ast_expr_t *parse_expr(lexer_t *lexer) {
     switch (lexer->token.tag) {
         case TAG_TYPEDEF: {
-            advance(lexer);
+            lexer_advance(lexer);
             if (!eat(lexer, TAG_IDENT)) goto error;
             bytearray_t *name = c_str_to_bytearray(lexer->token.string);
             if (!eat(lexer, TAG_ASSIGN)) goto error;
@@ -497,7 +497,7 @@ static ast_expr_t *parse_expr(lexer_t *lexer) {
         }
         case TAG_BEGIN: {
             lexer->depth++;
-            advance(lexer);
+            lexer_advance(lexer);
             if (lexer->token.tag != TAG_END) {
                 ast_expr_list_t *es = parse_block(lexer);
                 if (!eat(lexer, TAG_END)) {
@@ -518,7 +518,7 @@ static ast_expr_t *parse_expr(lexer_t *lexer) {
             return ast_empty();
         }
         case TAG_IF: {
-            advance(lexer);
+            lexer_advance(lexer);
             ast_expr_t *if_clause = parse_expr(lexer);
             if (!eat(lexer, TAG_THEN)) goto error;
             ast_expr_t *then_clause = parse_expr(lexer);
@@ -530,7 +530,7 @@ static ast_expr_t *parse_expr(lexer_t *lexer) {
             return ast_if_then(if_clause, then_clause);
         }
         case TAG_DO: {
-            advance(lexer);
+            lexer_advance(lexer);
             ast_expr_t *pred = parse_expr(lexer);
             if (TYPEOF(pred) == AST_EMPTY) goto error;
             if (!eat(lexer, TAG_WHILE)) goto error;
@@ -539,7 +539,7 @@ static ast_expr_t *parse_expr(lexer_t *lexer) {
             return ast_do_while_loop(pred, cond);
         }
         case TAG_WHILE: {
-            advance(lexer);
+            lexer_advance(lexer);
             ast_expr_t *cond = parse_expr(lexer);
             if (TYPEOF(cond) == AST_EMPTY) goto error;
             ast_expr_t *pred = parse_expr(lexer);
@@ -547,7 +547,7 @@ static ast_expr_t *parse_expr(lexer_t *lexer) {
             return ast_while_loop(cond, pred);
         }
         case TAG_FOR: {
-            advance(lexer);
+            lexer_advance(lexer);
             // Be sure not to interpret the 'in' as part of a binop.
             ast_expr_t *elem = parse_atom(lexer);
             if (TYPEOF(elem) != AST_IDENT) goto error;
@@ -559,7 +559,7 @@ static ast_expr_t *parse_expr(lexer_t *lexer) {
         }
         case TAG_LIST: {
             // TODO - consolidate block parsing
-            advance(lexer);
+            lexer_advance(lexer);
             if (lexer->token.tag == TAG_BEGIN) {
                 lexer->depth++;
                 eat(lexer, TAG_BEGIN);
@@ -574,7 +574,7 @@ static ast_expr_t *parse_expr(lexer_t *lexer) {
             return ast_list(NULL);
         }
         case TAG_DICT: {
-            advance(lexer);
+            lexer_advance(lexer);
             if (lexer->token.tag == TAG_BEGIN) {
                 eat(lexer, TAG_BEGIN);
                 ast_expr_kv_list_t *kv = parse_expr_kv_list(lexer);
@@ -609,100 +609,100 @@ static ast_expr_t *parse_expr(lexer_t *lexer) {
 static ast_expr_t *parse_atom(lexer_t *lexer) {
     switch (lexer->token.tag) {
         case TAG_BREAK: {
-            advance(lexer);
+            lexer_advance(lexer);
             return ast_break();
         }
         case TAG_CONTINUE: {
-            advance(lexer);
+            lexer_advance(lexer);
             return ast_continue();
         }
         case TAG_NIL: {
-            advance(lexer);
+            lexer_advance(lexer);
             return ast_nil();
         }
         case TAG_TYPE_INT: {
-            advance(lexer);
+            lexer_advance(lexer);
             return ast_type(AST_INT);
         }
         case TAG_TYPE_FLOAT: {
-            advance(lexer);
+            lexer_advance(lexer);
             return ast_type(AST_FLOAT);
         }
         case TAG_TYPE_BYTE: {
-            advance(lexer);
+            lexer_advance(lexer);
             return ast_type(AST_BYTE);
         }
         case TAG_TYPE_STRING: {
-            advance(lexer);
+            lexer_advance(lexer);
             return ast_type(AST_STRING);
         }
         case TAG_TYPE_BOOLEAN: {
-            advance(lexer);
+            lexer_advance(lexer);
             return ast_type(AST_BOOLEAN);
         }
         case TAG_TRUE: {
-            advance(lexer);
+            lexer_advance(lexer);
             return ast_boolean(True);
         }
         case TAG_FALSE: {
-            advance(lexer);
+            lexer_advance(lexer);
             return ast_boolean(False);
         }
         case TAG_HEX: {
             ast_expr_t *e = ast_int(hex_to_int(lexer->token.string));
-            advance(lexer);
+            lexer_advance(lexer);
             return e;
         }
         case TAG_BIN: {
             ast_expr_t *e = ast_int(bin_to_int(lexer->token.string));
-            advance(lexer);
+            lexer_advance(lexer);
             return e;
         }
         case TAG_INT: {
             int i = lexer->token.intval;
-            advance(lexer);
+            lexer_advance(lexer);
             return ast_int(i);
         }
         case TAG_FLOAT: {
             float f = lexer->token.floatval;
-            advance(lexer);
+            lexer_advance(lexer);
             return ast_float(f);
         }
         case TAG_BYTE: {
             char c = lexer->token.ch;
-            advance(lexer);
+            lexer_advance(lexer);
             return ast_byte(c);
         }
         case TAG_STRING: {
             ast_expr_t *e = ast_string(c_str_to_bytearray(lexer->token.string));
-            advance(lexer);
+            lexer_advance(lexer);
             return e;
         }
         case TAG_MINUS: {
-            advance(lexer);
+            lexer_advance(lexer);
             return ast_unary(AST_NEGATE, parse_atom(lexer));
         }
         case TAG_NOT: {
-            advance(lexer);
+            lexer_advance(lexer);
             return ast_unary(AST_NOT, parse_atom(lexer));
         }
         case TAG_BITWISE_NOT: {
-            advance(lexer);
+            lexer_advance(lexer);
             return ast_unary(AST_BITWISE_NOT, parse_atom(lexer));
         }
         case TAG_LPAREN: {
-            advance(lexer);
+            lexer_advance(lexer);
             ast_expr_t *e = parse_expr(lexer);
             if (!eat(lexer, TAG_RPAREN)) goto error;
             return e;
         }
         case TAG_INVARIABLE: {
-            advance(lexer);
+            lexer_advance(lexer);
             if (!eat(lexer, TAG_IDENT)) goto error;
             return ast_ident_decl(c_str_to_bytearray(lexer->token.string), F_NONE);
         }
         case TAG_VARIABLE: {
-            advance(lexer);
+            lexer_advance(lexer);
             if (!eat(lexer, TAG_IDENT)) goto error;
             return ast_ident_decl(c_str_to_bytearray(lexer->token.string), F_ENV_MUTABLE);
         }
@@ -712,14 +712,14 @@ static ast_expr_t *parse_atom(lexer_t *lexer) {
             return id;
         }
         case TAG_ARR_DECL: {
-            advance(lexer);
+            lexer_advance(lexer);
             if (!eat(lexer, TAG_LPAREN)) goto error;
             ast_expr_t *size = parse_expr(lexer);
             if (!eat(lexer, TAG_RPAREN)) goto error;
             return ast_array_decl(size);
         }
         case TAG_FUNC_DEF: {
-            advance(lexer);
+            lexer_advance(lexer);
             if (!eat(lexer, TAG_LPAREN)) goto error;
             ast_fn_arg_decl_t *args = NULL;
             if (lexer->token.tag != TAG_RPAREN) {
@@ -741,13 +741,13 @@ static ast_expr_t *parse_atom(lexer_t *lexer) {
         case TAG_FUNC_RETURN: {
             // syntax: return a, b
             // TODO: destructuring assignment
-            advance(lexer);
+            lexer_advance(lexer);
             ast_expr_list_t *args = parse_expr_list(lexer);
             return ast_func_return(args);
         }
         case TAG_METHOD_CALL: {
             bytearray_t *name = c_str_to_bytearray(lexer->token.string);
-            advance(lexer);
+            lexer_advance(lexer);
             if (!eat(lexer, TAG_LPAREN)) {
                 mem_free(name);
                 name = NULL;
@@ -757,7 +757,7 @@ static ast_expr_t *parse_atom(lexer_t *lexer) {
                 ast_expr_t *id = ast_method_call(name, NULL);
                 mem_free(name);
                 name = NULL;
-                advance(lexer);
+                lexer_advance(lexer);
                 return id;
             }
             // More than 0 args.
@@ -774,11 +774,11 @@ static ast_expr_t *parse_atom(lexer_t *lexer) {
         }
         case TAG_FIELD_ACCESS: {
             bytearray_t *name = c_str_to_bytearray(lexer->token.string);
-            advance(lexer);
+            lexer_advance(lexer);
             return ast_field(name);
         }
         case TAG_DEL: {
-            advance(lexer);
+            lexer_advance(lexer);
             if (!eat(lexer, TAG_LPAREN)) goto error;
             ast_expr_t *id = ast_ident(c_str_to_bytearray(lexer->token.string));
             if (!eat(lexer, TAG_IDENT)) {
@@ -814,7 +814,7 @@ static ast_expr_t *parse_atom(lexer_t *lexer) {
         case TAG_READ:
         case TAG_PRINT: {
             ast_reserved_callable_type_t callable_type = ast_callable_type_for_tag(lexer->token.tag);
-            advance(lexer);
+            lexer_advance(lexer);
             if (lexer->token.tag == TAG_LPAREN) {
                 eat(lexer, TAG_LPAREN);
                 // More than 0 args.

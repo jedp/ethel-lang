@@ -1,5 +1,5 @@
 #include "unity/unity.h"
-#include "../src/vm/map.h"
+#include "../src/common/map.h"
 #include "test_map.h"
 
 void test_map_new(void) {
