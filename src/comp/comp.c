@@ -9,6 +9,7 @@
 static void parse_expr(parser_t *parser);
 
 static void error(parser_t *parser, uint8_t which) {
+    printf("ERROR: %d\n", which);
     parser->err = which;
 }
 
@@ -27,6 +28,7 @@ static void advance(parser_t *parser) {
 }
 
 static void eat(parser_t *parser, tag_t tag) {
+    printf("eat %d\n", tag);
     if (parser->curr.tag != tag) {
         error(parser, COMP_UNEXPECTED_TOKEN);
         return;
@@ -40,6 +42,7 @@ static void emit_byte(parser_t *parser, uint8_t byte) {
 }
 
 static void emit_bytes(parser_t *parser, uint8_t byte1, uint8_t byte2) {
+    printf("emit %d %d\n", byte1, byte2);
     emit_byte(parser, byte1);
     emit_byte(parser, byte2);
 }
@@ -69,6 +72,29 @@ static void emit_op(parser_t *parser, vm_op_t op) {
 
 }
 
+void parse_expr_by_precedence(parser_t *parser, uint8_t min_preced) {
+    advance(parser);
+    tag_t tag = parser->prev.tag;
+    printf("pase by preced: tag %d\n", tag);
+    parse_func prefix_rule = preced_rules[tag].parse_prefix;
+
+    if (prefix_rule == NULL) {
+        printf("prefix rule is null for tag %d!\n", tag);
+        error(parser, COMP_EXPECTED_EXPRESSION);
+        return;
+    }
+
+    prefix_rule(parser);
+
+    // Pratt precedence climbing.
+    while (min_preced <= preced_rules[parser->curr.tag].precedence) {
+        advance(parser);
+        parse_func infix_rule = preced_rules[parser->prev.tag].parse_infix;
+        printf("climb: tag %d. func is %p\n", parser->prev.tag, infix_rule);
+        if (infix_rule != NULL) infix_rule(parser);
+    }
+}
+
 void parse_int(parser_t *parser) {
     int const_int = (int) strtol(parser->prev.start, NULL, 10);
     (void) emit_const(parser, const_int);
@@ -95,17 +121,21 @@ void parse_binary_op(parser_t *parser) {
     parse_expr_by_precedence(parser, (preced_t) op_rule.precedence + 1);
 
     // Push the operator last.
-    switch(op) {
+    switch (op) {
         case TAG_PLUS:
+            printf("emit +\n");
             emit_byte(parser, VM_OP_ADD);
             break;
         case TAG_MINUS:
+            printf("emit -\n");
             emit_byte(parser, VM_OP_SUB);
             break;
         case TAG_TIMES:
+            printf("emit *\n");
             emit_byte(parser, VM_OP_MUL);
             break;
         case TAG_DIVIDE:
+            printf("emit /\n");
             emit_byte(parser, VM_OP_DIV);
             break;
         default:
@@ -116,31 +146,12 @@ void parse_binary_op(parser_t *parser) {
 
 void parse_parens(parser_t *parser) {
     parse_expr(parser);
-    eat(parser, TAG_RPAREN);
+    printf("parsed parens expr\n");
+//    eat(parser, TAG_RPAREN);
 }
 
 void parse_subscript(parser_t *parser) {
 
-}
-
-void parse_expr_by_precedence(parser_t *parser, uint8_t min_preced) {
-    advance(parser);
-    tag_t tag = parser->prev.tag;
-    parse_func prefix_rule= preced_rules[tag].parse_prefix;
-
-    if (prefix_rule== NULL) {
-        error(parser, COMP_EXPECTED_EXPRESSION);
-        return;
-    }
-
-    prefix_rule(parser);
-
-    // Pratt precedence climbing.
-    while(min_preced <= preced_rules[parser->curr.tag].precedence) {
-        advance(parser);
-        parse_func infix_rule = preced_rules[parser->prev.tag].parse_infix;
-        infix_rule(parser);
-    }
 }
 
 static void parse_expr(parser_t *parser) {

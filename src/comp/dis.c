@@ -45,7 +45,8 @@ uint32_t print_dis_byte(cg_t *cg, uint32_t offset) {
         case VM_OP_LOADI:
             return print_loadi(op_names[op], cg, offset);
         default:
-            return print_op("**UNKNOWN**", offset);
+            return print_op("byte", offset);
+            //return print_op("**UNKNOWN**", offset);
     }
 }
 

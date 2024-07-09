@@ -3,7 +3,7 @@
 #include "../src/comp/comp.h"
 
 void test_comp_arithmetic() {
-    const char *input = "300 + -3 * 4 - 12 / 2";
+    const char *input = "300 + (1 - -3) * 4 - 8 / 2";
 
     error_t err = comp(input);
 

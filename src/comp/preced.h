@@ -31,7 +31,7 @@ typedef enum {
     PRECED_BITWISE_NOT,
     PRECED_NOT,
     PRECED_SUBSCRIPT,
-    PRECED_ARGLIST,
+    PRECED_GROUPING,
     PRECED_MEMBER_ACCESS,
 } preced_t;
 
@@ -56,14 +56,14 @@ void parse_subscript(parser_t *parser);
 void parse_expr_by_precedence(parser_t *parser, uint8_t min_preded);
 
 parse_preced_rule_t preced_rules[] = {
-    [TAG_LPAREN] = {parse_parens, NULL, PRECED_ARGLIST},
+    [TAG_LPAREN] = {parse_parens, NULL, PRECED_GROUPING},
     [TAG_RPAREN] = {NULL, NULL, PRECED_NONE},
     [TAG_LBRACKET] = {parse_subscript, NULL, PRECED_NONE},
     [TAG_RBRACKET] = {NULL, NULL, PRECED_NONE},
-    [TAG_MINUS] = {parse_unary_op, parse_binary_op, PRECED_FACTOR},
-    [TAG_PLUS] = {NULL, parse_binary_op, PRECED_FACTOR},
-    [TAG_TIMES] = {NULL, parse_binary_op, PRECED_TERM},
-    [TAG_DIVIDE]= {NULL, parse_binary_op, PRECED_TERM},
+    [TAG_MINUS] = {parse_unary_op, parse_binary_op, PRECED_TERM},
+    [TAG_PLUS] = {NULL, parse_binary_op, PRECED_TERM},
+    [TAG_TIMES] = {NULL, parse_binary_op, PRECED_FACTOR},
+    [TAG_DIVIDE]= {NULL, parse_binary_op, PRECED_FACTOR},
     [TAG_INT] = {parse_int, NULL, PRECED_NONE},
     [TAG_EOF]= {NULL, NULL, PRECED_EOF},
 };
