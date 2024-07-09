@@ -3,7 +3,7 @@
 
 #include "../src/comp/cg.h"
 #include "../src/common/op.h"
-#include "../src/vm/dis.h"
+#include "../src/comp/dis.h"
 
 void test_print_dis(void) {
     cg_t cg;

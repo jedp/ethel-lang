@@ -21,6 +21,7 @@
 #include "test_dis.h"
 #include "test_vm.h"
 #include "test_map.h"
+#include "test_comp.h"
 
 void setUp(void) {
     //mem_init('x');
@@ -37,6 +38,7 @@ int main(int argc, char **argv) {
     test_map();
     test_cg();
     test_vm();
+    test_comp();
 
     /*
     test_heap();

@@ -9,13 +9,13 @@ COMPOBJS = \
 					 src/comp/comp.o \
 					 src/comp/lex.o \
 					 src/comp/comp.o \
+					 src/comp/dis.o \
 					 src/comp/cg.o
 
 ECOBJS = \
 					 src/comp/ec.o
 
 VMOBJS = \
-					 src/vm/dis.o \
 					 src/vm/vm.o
 
 REPLOBJS = src/repl/repl.o
@@ -27,6 +27,7 @@ TESTOBJS = test/unity/unity.o \
 					 test/test_cg.o \
 					 test/test_dis.o \
 					 test/test_vm.o \
+					 test/test_comp.o \
 					 test/test.o
 
 CFLAGS = -std=gnu11 -g3 -Os -I inc

@@ -1,6 +1,6 @@
 #pragma once
 
-#include "../comp/cg.h"
+#include "cg.h"
 
 uint32_t dis_byte(cg_t *cg, uint32_t offset);
 

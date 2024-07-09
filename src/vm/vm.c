@@ -3,7 +3,7 @@
 #include "../comp/cg.h"
 #include "../comp/comp.h"
 #include "../comp/cmem.h"
-#include "dis.h"
+#include "../comp/dis.h"
 #include "../common/op.h"
 #include "vm.h"
 

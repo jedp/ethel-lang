@@ -1,6 +1,6 @@
 #include <stdio.h>
 
-#include "../comp/cg.h"
+#include "cg.h"
 #include "../common/op.h"
 #include "dis.h"
 
@@ -10,7 +10,7 @@ static uint32_t print_op(const char *name, uint32_t offset) {
 }
 
 static uint32_t print_bpush(const char *name, cg_t *cg, uint32_t offset) {
-    printf("%8s [0x%2x]\n", name, cg->code[offset + 1]);
+    printf("%8s [0x%02x]\n", name, cg->code[offset + 1]);
     return offset + 2;
 }
 
@@ -50,6 +50,7 @@ uint32_t print_dis_byte(cg_t *cg, uint32_t offset) {
 }
 
 void print_dis(cg_t *cg) {
+    printf("\n== Disassembly ==\n");
     printf("%8s %s\n", "Offset", "Instruction");
     for (uint32_t offset = 0; offset < cg->len;) {
         offset = print_dis_byte(cg, offset);
