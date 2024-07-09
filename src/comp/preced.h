@@ -10,15 +10,15 @@ typedef enum {
     PRECED_EOF = 0,
     PRECED_NONE, // Lowest precedence
     PRECED_CAST,
-    PRECED_TYPED,
+    PRECED_TYPE_HINT,
     PRECED_TYPEDEF,
     PRECED_ASSIGN,
     PRECED_COND,
     PRECED_MAPS_TO,
-    PRECED_OR,
-    PRECED_AND,
-    PRECED_EQ,
-    PRECED_GLT,
+    PRECED_LOGICAL_OR,
+    PRECED_LOGICAL_AND,
+    PRECED_LOGICAL_EQ,
+    PRECED_LOGICAL_GLT,
     PRECED_BITWISE_OR,
     PRECED_BITWISE_XOR,
     PRECED_BITWISE_AND,
@@ -29,7 +29,7 @@ typedef enum {
     PRECED_UNARY,
     PRECED_BITWISE_SHIFT,
     PRECED_BITWISE_NOT,
-    PRECED_NOT,
+    PRECED_LOGICAL_NOT,
     PRECED_SUBSCRIPT,
     PRECED_GROUPING,
     PRECED_MEMBER_ACCESS,
@@ -45,6 +45,10 @@ typedef struct {
 
 void parse_int(parser_t *parser);
 
+void parse_hex(parser_t *parser);
+
+void parse_bin(parser_t *parser);
+
 void parse_unary_op(parser_t *parser);
 
 void parse_binary_op(parser_t *parser);
@@ -56,6 +60,9 @@ void parse_subscript(parser_t *parser);
 void parse_expr_by_precedence(parser_t *parser, uint8_t min_preded);
 
 parse_preced_rule_t preced_rules[] = {
+    [TAG_INT] = {parse_int, NULL, PRECED_NONE},
+    [TAG_HEX] = {parse_hex, NULL, PRECED_NONE},
+    [TAG_BIN] = {parse_bin, NULL, PRECED_NONE},
     [TAG_LPAREN] = {parse_parens, NULL, PRECED_GROUPING},
     [TAG_RPAREN] = {NULL, NULL, PRECED_NONE},
     [TAG_LBRACKET] = {parse_subscript, NULL, PRECED_NONE},
@@ -64,6 +71,10 @@ parse_preced_rule_t preced_rules[] = {
     [TAG_PLUS] = {NULL, parse_binary_op, PRECED_TERM},
     [TAG_TIMES] = {NULL, parse_binary_op, PRECED_FACTOR},
     [TAG_DIVIDE]= {NULL, parse_binary_op, PRECED_FACTOR},
-    [TAG_INT] = {parse_int, NULL, PRECED_NONE},
+    [TAG_BITWISE_OR] = {NULL, parse_binary_op, PRECED_BITWISE_OR},
+    [TAG_BITWISE_XOR] = {NULL, parse_binary_op, PRECED_BITWISE_XOR},
+    [TAG_BITWISE_AND] = {NULL, parse_binary_op, PRECED_BITWISE_AND},
+    [TAG_BITWISE_SHL] = {NULL, parse_binary_op, PRECED_BITWISE_SHIFT},
+    [TAG_BITWISE_SHR] = {NULL, parse_binary_op, PRECED_BITWISE_SHIFT},
     [TAG_EOF]= {NULL, NULL, PRECED_EOF},
 };

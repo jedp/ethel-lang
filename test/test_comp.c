@@ -10,6 +10,15 @@ void test_comp_arithmetic() {
     TEST_ASSERT_EQUAL(ERR_NO_ERROR, err);
 }
 
+void test_comp_boolean_arithmetic() {
+    const char *input = "0xff & (37 | 0xa) << 0b00000001";
+
+    error_t err = comp(input);
+
+    TEST_ASSERT_EQUAL(ERR_NO_ERROR, err);
+}
+
 void test_comp() {
     RUN_TEST(test_comp_arithmetic);
+    RUN_TEST(test_comp_boolean_arithmetic);
 }

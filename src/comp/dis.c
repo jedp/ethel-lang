@@ -37,6 +37,11 @@ uint32_t print_dis_byte(cg_t *cg, uint32_t offset) {
         case VM_OP_MUL:
         case VM_OP_DIV:
         case VM_OP_REM:
+        case VM_OP_BIN_OR:
+        case VM_OP_BIN_XOR:
+        case VM_OP_BIN_AND:
+        case VM_OP_BIN_SHL:
+        case VM_OP_BIN_SHR:
         case VM_OP_INC:
         case VM_OP_DEC:
             return print_op(op_names[op], offset);
@@ -45,8 +50,7 @@ uint32_t print_dis_byte(cg_t *cg, uint32_t offset) {
         case VM_OP_LOADI:
             return print_loadi(op_names[op], cg, offset);
         default:
-            return print_op("byte", offset);
-            //return print_op("**UNKNOWN**", offset);
+            return print_op("**UNKNOWN**", offset);
     }
 }
 
