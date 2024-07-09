@@ -8,6 +8,7 @@ enum tag_enum {
     TAG_ERROR,
     TAG_EOF,
     TAG_EOL,
+    TAG_INDENT,
     TAG_IDENT,
     TAG_ASSIGN,
     TAG_INVARIABLE,
@@ -110,6 +111,7 @@ enum tag_enum {
 typedef struct {
     tag_t tag;
     uint8_t err;
+    uint8_t indent;
     const char *start;
     uint32_t len;
 } token_t;

@@ -5,13 +5,14 @@
 #include "../common/def.h"
 #include "token.h"
 
-enum lex_err {
+typedef enum lex_err {
+    LEX_ERR_NO_ERROR,
     LEX_ERR_INVALID_SEQUENCE,
     LEX_ERR_UNTERMINATED_STRING,
     LEX_ERR_INVALID_CHAR,
     LEX_ERR_INVALID_HEX_NUMERAL,
     LEX_ERR_INVALID_BINARY_NUMERAL,
-};
+} lex_err_t;
 
 typedef struct {
     uint32_t err_pos;
