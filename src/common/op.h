@@ -3,7 +3,7 @@
 typedef enum {
     VM_OP_NO_SUCH_OP,
     VM_OP_NOP,
-    VM_OP_BPUSH,
+    VM_OP_PUSH,
     VM_OP_LOADI,
     VM_OP_LOADI_1N,
     VM_OP_LOADI_0,
@@ -28,7 +28,7 @@ typedef enum {
 static const char *op_names[VM_OP_MAX] = {
     [VM_OP_NO_SUCH_OP] = "ERROR_NO_SUCH_OP",
     [VM_OP_NOP] = "NOP",
-    [VM_OP_BPUSH] = "BPUSH",
+    [VM_OP_PUSH] = "PUSH",
     [VM_OP_LOADI] = "LOAD INT",
     [VM_OP_LOADI_1N] = "LOAD INT IMM [-1]",
     [VM_OP_LOADI_0] = "LOAD INT IMM [0]",

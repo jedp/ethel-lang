@@ -55,7 +55,7 @@ static map_err_t emit_const(parser_t *parser, int val) {
     } else if (val == 1) {
         emit_byte(parser, VM_OP_LOADI_1);
     } else if (val >= -128 && val <= 127) {
-        emit_bytes(parser, VM_OP_BPUSH, (uint8_t) val & 0xff);
+        emit_bytes(parser, VM_OP_PUSH, (uint8_t) val & 0xff);
     } else {
         map_elem_t v = {.type = MAP_ELEM_INT_TYPE, .elem.intval = val};
         uint8_t k;

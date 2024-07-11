@@ -77,7 +77,7 @@ static error_t exec(vm_t *vm) {
         switch (bytecode = READ_BYTE()) {
             case VM_OP_NOP:
                 break;
-            case VM_OP_BPUSH:
+            case VM_OP_PUSH:
                 vm_stack_push_int(vm, READ_BYTE());
                 break;
             case VM_OP_LOADI_1N:
