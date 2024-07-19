@@ -96,7 +96,7 @@ static error_t exec(vm_t *vm) {
                 vm_stack_push_int(vm, v.elem.intval);
                 break;
             }
-            case VM_OP_NEGATE: {
+            case VM_OP_NEG: {
                 vm_stack_elem_t *e = vm_stack_pop(vm);
                 err = numeric_negate(e);
                 vm_stack_push(vm, e);

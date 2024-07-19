@@ -120,7 +120,7 @@ void test_vm_stack_negate(void) {
 
     uint8_t bytes[] = {
         VM_OP_LOADI, 1,
-        VM_OP_NEGATE,
+        VM_OP_NEG,
         VM_OP_RET
     };
 

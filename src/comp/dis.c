@@ -35,7 +35,7 @@ uint32_t print_dis_byte(cg_t *cg, uint32_t offset) {
     switch (op) {
         case VM_OP_NOP:
         case VM_OP_RET:
-        case VM_OP_NEGATE:
+        case VM_OP_NEG:
         case VM_OP_LOADI_1N:
         case VM_OP_LOADI_0:
         case VM_OP_LOADI_1:

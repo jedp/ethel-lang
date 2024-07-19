@@ -132,7 +132,7 @@ void parse_unary_op(parser_t *parser) {
     parse_expr_by_precedence(parser, PRECED_UNARY);
 
     if (op == TAG_MINUS) {
-        emit_byte(parser, VM_OP_NEGATE);
+        emit_byte(parser, VM_OP_NEG);
     } else {
         error(parser, COMP_UNHANDLED_PREFIX_OP);
     }

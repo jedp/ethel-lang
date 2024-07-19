@@ -13,7 +13,7 @@ void test_comp_arithmetic() {
         VM_OP_LOADI, 1,
         VM_OP_LOADI_1,
         VM_OP_PUSHI, 3,
-        VM_OP_NEGATE,
+        VM_OP_NEG,
         VM_OP_SUB,
         VM_OP_PUSHI, 4,
         VM_OP_MUL,
