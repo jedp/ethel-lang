@@ -39,5 +39,7 @@ int main(int argc, const char *argv[]) {
     fclose(fp);
 
     // Buffer must not be modified or deallocated until compilation is complete.
-    exit(comp(buf));
+    cg_t cg;
+    cg_init(&cg);
+    exit(comp(buf, &cg));
 }

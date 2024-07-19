@@ -197,17 +197,14 @@ static void parse_expr(parser_t *parser) {
     parse_expr_by_precedence(parser, PRECED_NONE);
 }
 
-error_t comp(const char *input) {
+error_t comp(const char *input, cg_t *cg) {
     printf("Compiling input: %s\n", input);
     lexer_t lexer;
     lexer_init(&lexer, input);
 
-    cg_t cg;
-    cg_init(&cg);
-
     parser_t parser;
     parser.lexer = &lexer;
-    parser.cg = &cg;
+    parser.cg = cg;
     parser.err = COMP_ERR_NO_ERROR;
 
     advance(&parser);

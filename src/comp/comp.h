@@ -21,4 +21,4 @@ typedef struct parser_t {
     uint8_t err;
 } parser_t;
 
-error_t comp(const char *input);
+error_t comp(const char *input, cg_t *cg);
