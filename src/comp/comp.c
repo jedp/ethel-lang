@@ -143,8 +143,7 @@ void parse_binary_op(parser_t *parser) {
 
     // Parse and push the remainder of the expression.
     parse_preced_rule_t op_rule = preced_rules[op];
-    // TODO The +1 is only for left-associative operators.
-    parse_expr_by_precedence(parser, (preced_t) op_rule.precedence + 1);
+    parse_expr_by_precedence(parser, (preced_t) op_rule.precedence + op_rule.associativity);
 
     // Push the operator last.
     switch (op) {

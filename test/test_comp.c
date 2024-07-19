@@ -19,7 +19,7 @@ void test_comp_boolean_arithmetic() {
 }
 
 void test_comp_assign() {
-    const char *input = "foo = 2";
+    const char *input = "foo = bar = 2";
 
     error_t err = comp(input);
 

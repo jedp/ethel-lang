@@ -3,6 +3,11 @@
 #include "comp.h"
 #include "token.h"
 
+typedef enum {
+    ASSOC_RIGHT = -1,
+    ASSOC_LEFT = 1,
+} assoc_t;
+
 /*
  * Following the Principle of Least Astonishment.
  */
@@ -41,6 +46,8 @@ typedef struct {
     parse_func parse_prefix;
     parse_func parse_infix;
     preced_t precedence;
+    assoc_t associativity;
+
 } parse_preced_rule_t;
 
 void parse_int(parser_t *parser);
@@ -62,23 +69,23 @@ void parse_subscript(parser_t *parser);
 void parse_expr_by_precedence(parser_t *parser, uint8_t min_preded);
 
 parse_preced_rule_t preced_rules[] = {
-    [TAG_INT] = {parse_int, NULL, PRECED_NONE},
-    [TAG_HEX] = {parse_hex, NULL, PRECED_NONE},
-    [TAG_BIN] = {parse_bin, NULL, PRECED_NONE},
-    [TAG_IDENT] = {parse_ident, NULL, PRECED_NONE},
-    [TAG_LPAREN] = {parse_parens, NULL, PRECED_GROUPING},
-    [TAG_RPAREN] = {NULL, NULL, PRECED_NONE},
-    [TAG_LBRACKET] = {parse_subscript, NULL, PRECED_NONE},
-    [TAG_RBRACKET] = {NULL, NULL, PRECED_NONE},
-    [TAG_MINUS] = {parse_unary_op, parse_binary_op, PRECED_TERM},
-    [TAG_PLUS] = {NULL, parse_binary_op, PRECED_TERM},
-    [TAG_TIMES] = {NULL, parse_binary_op, PRECED_FACTOR},
-    [TAG_DIVIDE]= {NULL, parse_binary_op, PRECED_FACTOR},
-    [TAG_BITWISE_OR] = {NULL, parse_binary_op, PRECED_BITWISE_OR},
-    [TAG_BITWISE_XOR] = {NULL, parse_binary_op, PRECED_BITWISE_XOR},
-    [TAG_BITWISE_AND] = {NULL, parse_binary_op, PRECED_BITWISE_AND},
-    [TAG_BITWISE_SHL] = {NULL, parse_binary_op, PRECED_BITWISE_SHIFT},
-    [TAG_BITWISE_SHR] = {NULL, parse_binary_op, PRECED_BITWISE_SHIFT},
-    [TAG_ASSIGN] = {NULL, parse_binary_op, PRECED_ASSIGN},
-    [TAG_EOF]= {NULL, NULL, PRECED_EOF},
+    [TAG_INT] = {parse_int, NULL, PRECED_NONE, ASSOC_LEFT},
+    [TAG_HEX] = {parse_hex, NULL, PRECED_NONE, ASSOC_LEFT},
+    [TAG_BIN] = {parse_bin, NULL, PRECED_NONE, ASSOC_LEFT},
+    [TAG_IDENT] = {parse_ident, NULL, PRECED_NONE, ASSOC_LEFT},
+    [TAG_LPAREN] = {parse_parens, NULL, PRECED_GROUPING, ASSOC_LEFT},
+    [TAG_RPAREN] = {NULL, NULL, PRECED_NONE, ASSOC_LEFT},
+    [TAG_LBRACKET] = {parse_subscript, NULL, PRECED_NONE, ASSOC_LEFT},
+    [TAG_RBRACKET] = {NULL, NULL, PRECED_NONE, ASSOC_LEFT},
+    [TAG_MINUS] = {parse_unary_op, parse_binary_op, PRECED_TERM, ASSOC_LEFT},
+    [TAG_PLUS] = {NULL, parse_binary_op, PRECED_TERM, ASSOC_LEFT},
+    [TAG_TIMES] = {NULL, parse_binary_op, PRECED_FACTOR, ASSOC_LEFT},
+    [TAG_DIVIDE]= {NULL, parse_binary_op, PRECED_FACTOR, ASSOC_LEFT},
+    [TAG_BITWISE_OR] = {NULL, parse_binary_op, PRECED_BITWISE_OR, ASSOC_LEFT},
+    [TAG_BITWISE_XOR] = {NULL, parse_binary_op, PRECED_BITWISE_XOR, ASSOC_LEFT},
+    [TAG_BITWISE_AND] = {NULL, parse_binary_op, PRECED_BITWISE_AND, ASSOC_LEFT},
+    [TAG_BITWISE_SHL] = {NULL, parse_binary_op, PRECED_BITWISE_SHIFT, ASSOC_LEFT},
+    [TAG_BITWISE_SHR] = {NULL, parse_binary_op, PRECED_BITWISE_SHIFT, ASSOC_LEFT},
+    [TAG_ASSIGN] = {NULL, parse_binary_op, PRECED_ASSIGN, ASSOC_RIGHT},
+    [TAG_EOF]= {NULL, NULL, PRECED_EOF, ASSOC_LEFT},
 };
