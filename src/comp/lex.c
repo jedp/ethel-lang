@@ -9,7 +9,6 @@ boolean lexer_at_eof(lexer_t *lexer) {
 }
 
 static char advance(lexer_t *lexer) {
-    lexer->char_pos++;
     lexer->curr++;
     return lexer->curr[-1];
 }
@@ -38,35 +37,19 @@ static boolean match_next(lexer_t *lexer, const char ch) {
     return True;
 }
 
-/*
- * Consume subsequent whitespace, returning non-zero number
- * if spaces were consumed at the beginning of a line (indentation).
- */
-static uint8_t consume_ws(lexer_t *lexer) {
-    boolean line_init = lexer->char_pos == 0;
-    if (line_init) {
-        lexer->start = lexer->curr;
-    }
-    uint8_t consumed = 0;
+static void consume_ws(lexer_t *lexer) {
     for (;;) {
         char ch = peek(lexer);
         switch (ch) {
             case ' ':
             case '\t':
-                // Possible line-initial indentation.
-                consumed += 1;
-                advance(lexer);
-                break;
-
             case '\r':
-                // Ignore form feed.
-                // Do not eat '\n', which is EOL.
+                // Do not eat EOL.
                 advance(lexer);
                 break;
 
             default:
-                // Signal whether this is line-initial whitespace.
-                return line_init ? consumed : 0;
+                return;
         }
     }
 }
@@ -85,13 +68,6 @@ static token_t make_token(lexer_t *lexer, tag_t tag) {
      */
     return token;
 }
-
-static token_t make_eol(lexer_t *lexer) {
-    token_t token = make_token(lexer, TAG_EOL);
-    lexer->char_pos = 0;
-    lexer->line_pos++;
-    return token;
-};
 
 static token_t make_error_token(lexer_t *lexer, uint8_t err) {
     token_t token = make_token(lexer, TAG_ERROR);
@@ -121,11 +97,8 @@ static token_t make_char_token(lexer_t *lexer) {
 static token_t make_string_token(lexer_t *lexer) {
     while (peek(lexer) != '"' && !lexer_at_eof(lexer)) {
         if (peek(lexer) == '\n') {
-            // TODO why was I doing this?
-            /*
             lexer->char_pos = 0;
             lexer->line_pos++;
-             */
         }
         advance(lexer);
     }
@@ -469,13 +442,7 @@ static token_t lex_field_or_method_access(lexer_t *lexer) {
 }
 
 token_t next_token(lexer_t *lexer) {
-    uint8_t line_initial_space = consume_ws(lexer);
-
-    // what am i doing wrong here ...
-    if (line_initial_space) {
-        return make_token(lexer, TAG_INDENT);
-    }
-
+    consume_ws(lexer);
     lexer->start = lexer->curr;
 
     if (*lexer->curr == '\0') {
@@ -485,7 +452,7 @@ token_t next_token(lexer_t *lexer) {
     char ch = advance(lexer);
 
     if (ch == '\n') {
-        return make_eol(lexer);
+        return make_token(lexer, TAG_EOL);
     }
 
     if (ch >= '0' && ch <= '9') {
@@ -525,19 +492,10 @@ token_t next_token(lexer_t *lexer) {
         case '/': {
             if (match_next(lexer, '/')) {
                 // Ignore comment.
-                while (peek_next(lexer) != '\n' && !lexer_at_eof(lexer)) {
+                while (peek(lexer) != '\n' && peek(lexer) != '\0') {
                     advance(lexer);
                 }
-                return next_token(lexer);
-                /*
-                if (peek_next(lexer) == '\n') {
-                    return next_token(lexer);
-//                    return make_token(lexer, TAG_EOL);
-                }
-                if (peek(lexer) == '\0') {
-                    return make_token(lexer, TAG_EOF);
-                }
-                 */
+                return make_token(lexer, TAG_EOL);
             } else {
                 return make_token(lexer, TAG_DIVIDE);
             }

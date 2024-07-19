@@ -41,7 +41,6 @@ int main(int argc, char **argv) {
     test_comp();
 
     /*
-
     test_heap();
     test_parser();
     test_gc();
