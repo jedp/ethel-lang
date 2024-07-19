@@ -18,7 +18,16 @@ void test_comp_boolean_arithmetic() {
     TEST_ASSERT_EQUAL(ERR_NO_ERROR, err);
 }
 
+void test_comp_assign() {
+    const char *input = "foo = 2";
+
+    error_t err = comp(input);
+
+    TEST_ASSERT_EQUAL(ERR_NO_ERROR, err);
+}
+
 void test_comp() {
     RUN_TEST(test_comp_arithmetic);
     RUN_TEST(test_comp_boolean_arithmetic);
+    RUN_TEST(test_comp_assign);
 }

@@ -21,6 +21,13 @@ static uint32_t print_loadi(const char *name, cg_t *cg, uint32_t offset) {
     return offset + 2;
 }
 
+static uint32_t print_loads(const char *name, cg_t *cg, uint32_t offset) {
+    map_elem_t v;
+    cg_get_const(cg, cg->code[offset + 1], &v);
+    printf("%8s #%d [%s]\n", name, cg->code[offset + 1], v.elem.stringval_ptr);
+    return offset + 2;
+}
+
 uint32_t print_dis_byte(cg_t *cg, uint32_t offset) {
     printf("%08d %02x ", offset, cg->code[offset]);
 
@@ -44,11 +51,14 @@ uint32_t print_dis_byte(cg_t *cg, uint32_t offset) {
         case VM_OP_BIN_SHR:
         case VM_OP_INC:
         case VM_OP_DEC:
+        case VM_OP_ASSIGN:
             return print_op(op_names[op], offset);
-        case VM_OP_PUSH:
+        case VM_OP_PUSHI:
             return print_push(op_names[op], cg, offset);
         case VM_OP_LOADI:
             return print_loadi(op_names[op], cg, offset);
+        case VM_OP_LOADS:
+            return print_loads(op_names[op], cg, offset);
         default:
             return print_op("**UNKNOWN**", offset);
     }

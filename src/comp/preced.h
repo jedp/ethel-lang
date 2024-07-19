@@ -49,6 +49,8 @@ void parse_hex(parser_t *parser);
 
 void parse_bin(parser_t *parser);
 
+void parse_ident(parser_t *parser);
+
 void parse_unary_op(parser_t *parser);
 
 void parse_binary_op(parser_t *parser);
@@ -63,6 +65,7 @@ parse_preced_rule_t preced_rules[] = {
     [TAG_INT] = {parse_int, NULL, PRECED_NONE},
     [TAG_HEX] = {parse_hex, NULL, PRECED_NONE},
     [TAG_BIN] = {parse_bin, NULL, PRECED_NONE},
+    [TAG_IDENT] = {parse_ident, NULL, PRECED_NONE},
     [TAG_LPAREN] = {parse_parens, NULL, PRECED_GROUPING},
     [TAG_RPAREN] = {NULL, NULL, PRECED_NONE},
     [TAG_LBRACKET] = {parse_subscript, NULL, PRECED_NONE},
@@ -76,5 +79,6 @@ parse_preced_rule_t preced_rules[] = {
     [TAG_BITWISE_AND] = {NULL, parse_binary_op, PRECED_BITWISE_AND},
     [TAG_BITWISE_SHL] = {NULL, parse_binary_op, PRECED_BITWISE_SHIFT},
     [TAG_BITWISE_SHR] = {NULL, parse_binary_op, PRECED_BITWISE_SHIFT},
+    [TAG_ASSIGN] = {NULL, parse_binary_op, PRECED_ASSIGN},
     [TAG_EOF]= {NULL, NULL, PRECED_EOF},
 };

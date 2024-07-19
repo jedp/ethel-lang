@@ -1,4 +1,5 @@
 #include <stdlib.h>
+#include <string.h>
 #include "../common/op.h"
 #include "cg.h"
 #include "comp.h"
@@ -45,7 +46,7 @@ static void emit_bytes(parser_t *parser, uint8_t byte1, uint8_t byte2) {
     emit_byte(parser, byte2);
 }
 
-static map_err_t emit_const(parser_t *parser, int val) {
+static map_err_t emit_const_int(parser_t *parser, int val) {
     map_err_t err = MAP_OK;
 
     if (val == -1) {
@@ -55,7 +56,7 @@ static map_err_t emit_const(parser_t *parser, int val) {
     } else if (val == 1) {
         emit_byte(parser, VM_OP_LOADI_1);
     } else if (val >= -128 && val <= 127) {
-        emit_bytes(parser, VM_OP_PUSH, (uint8_t) val & 0xff);
+        emit_bytes(parser, VM_OP_PUSHI, (uint8_t) val & 0xff);
     } else {
         map_elem_t v = {.type = MAP_ELEM_INT_TYPE, .elem.intval = val};
         uint8_t k;
@@ -66,8 +67,22 @@ static map_err_t emit_const(parser_t *parser, int val) {
     return err;
 }
 
-static void emit_op(parser_t *parser, vm_op_t op) {
+static map_err_t emit_const_str(parser_t *parser, const char *val, uint32_t len) {
+    map_err_t err;
 
+    char *strval = malloc(len + 1);
+    strncpy(strval, val, len);
+    strval[len] = '\0';
+
+    map_elem_t v = {
+        .type = MAP_ELEM_STRING_TYPE,
+        .elem.stringval_ptr = strval,
+    };
+    uint8_t k;
+    err = cg_put_const(parser->cg, v, &k);
+    emit_bytes(parser, VM_OP_LOADS, k);
+
+    return err;
 }
 
 void parse_expr_by_precedence(parser_t *parser, uint8_t min_preced) {
@@ -86,24 +101,29 @@ void parse_expr_by_precedence(parser_t *parser, uint8_t min_preced) {
     while (min_preced <= preced_rules[parser->curr.tag].precedence) {
         advance(parser);
         parse_func infix_rule = preced_rules[parser->prev.tag].parse_infix;
-        if (infix_rule != NULL) infix_rule(parser);
+        if (infix_rule != NULL)
+            infix_rule(parser);
     }
 }
 
 void parse_int(parser_t *parser) {
     int const_int = (int) strtol(parser->prev.start, NULL, 10);
-    (void) emit_const(parser, const_int);
+    (void) emit_const_int(parser, const_int);
 }
 
 void parse_hex(parser_t *parser) {
     int const_int = (int) strtol(parser->prev.start, NULL, 16);
-    (void) emit_const(parser, const_int);
+    (void) emit_const_int(parser, const_int);
 }
 
 void parse_bin(parser_t *parser) {
     // strtol removes the '0x' for hex, but not the '0b' for bin.
     int const_int = (int) strtol(parser->prev.start + 2, NULL, 2);
-    (void) emit_const(parser, const_int);
+    (void) emit_const_int(parser, const_int);
+}
+
+void parse_ident(parser_t *parser) {
+    (void) emit_const_str(parser, parser->prev.start, parser->prev.len);
 }
 
 void parse_unary_op(parser_t *parser) {
@@ -141,10 +161,10 @@ void parse_binary_op(parser_t *parser) {
             emit_byte(parser, VM_OP_DIV);
             break;
         case TAG_BITWISE_OR:
-            emit_byte(parser, VM_OP_BIN_OR) ;
+            emit_byte(parser, VM_OP_BIN_OR);
             break;
         case TAG_BITWISE_XOR:
-            emit_byte(parser, VM_OP_BIN_XOR) ;
+            emit_byte(parser, VM_OP_BIN_XOR);
             break;
         case TAG_BITWISE_AND:
             emit_byte(parser, VM_OP_BIN_AND);
@@ -154,6 +174,9 @@ void parse_binary_op(parser_t *parser) {
             break;
         case TAG_BITWISE_SHR:
             emit_byte(parser, VM_OP_BIN_SHR);
+            break;
+        case TAG_ASSIGN:
+            emit_byte(parser, VM_OP_ASSIGN);
             break;
         default:
             error(parser, COMP_UNHANDLED_INFIX_OP);

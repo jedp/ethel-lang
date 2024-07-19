@@ -162,6 +162,16 @@ void test_lex_tokenize(void) {
     expect_type(&lexer, TAG_EOF);
 }
 
+void test_lex_assign(void) {
+    char *expr = "foo = 2";
+    lexer_t lexer;
+    lexer_init(&lexer, expr);
+
+    expect_type_with_text(&lexer, TAG_IDENT, "foo");
+    expect_type(&lexer, TAG_ASSIGN);
+    expect_type_with_text(&lexer, TAG_INT, "2");
+}
+
 void test_lex_error(void) {
     char *expr = "if 42 @ moo";
     lexer_t lexer;
@@ -214,6 +224,7 @@ void test_lex_indent(void) {
 void test_lex(void) {
     RUN_TEST(test_lex_eof);
     RUN_TEST(test_lex_tokenize);
+    RUN_TEST(test_lex_assign);
     RUN_TEST(test_lex_error);
     RUN_TEST(test_lex_indent);
 }

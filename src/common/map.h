@@ -19,6 +19,7 @@ typedef enum {
     MAP_ELEM_INT_TYPE,
     MAP_ELEM_UINT_TYPE,
     MAP_ELEM_FLOAT_TYPE,
+    MAP_ELEM_STRING_TYPE,
     MAP_ELEM_ADDR_TYPE,
 } map_elem_type_t;
 
@@ -29,6 +30,7 @@ typedef union {
     int intval;
     uint32_t uintval;
     float floatval;
+    const char *stringval_ptr;
     size_t addrval;
 } map_elem;
 
