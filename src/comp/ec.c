@@ -41,5 +41,5 @@ int main(int argc, const char *argv[]) {
     // Buffer must not be modified or deallocated until compilation is complete.
     cg_t cg;
     cg_init(&cg);
-    exit(comp(buf, &cg));
+    exit(codegen(buf, &cg));
 }

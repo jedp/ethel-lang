@@ -230,7 +230,7 @@ error_t vm_exec(vm_t *vm) {
 error_t vm_interp(vm_t *vm, const char *input) {
     cg_t cg;
     cg_init(&cg);
-    comp(input, &cg);
+    codegen(input, &cg);
 
     return ERR_VM_INTERP_OK;
 }

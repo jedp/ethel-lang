@@ -197,7 +197,7 @@ static void parse_expr(parser_t *parser) {
     parse_expr_by_precedence(parser, PRECED_NONE);
 }
 
-error_t comp(const char *input, cg_t *cg) {
+error_t codegen(const char *input, cg_t *cg) {
     printf("Compiling input: %s\n", input);
     lexer_t lexer;
     lexer_init(&lexer, input);
@@ -215,4 +215,60 @@ error_t comp(const char *input, cg_t *cg) {
     print_dis(parser.cg);
 
     return parser.err;
+}
+
+error_t compile(const cg_t *cg, uint32_t max_size, uint8_t buf[], uint32_t *size) {
+    if (max_size < MIN_BYTECODE_ALLOC) {
+        return COMP_INSUFFICIENT_SPACE_FOR_BYTECODE;
+    }
+
+    uint32_t offset = 0;
+
+    // Header
+    memcpy(buf, magic, 4);
+    offset = 4;
+    buf[offset++] = major;
+    buf[offset++] = minor;
+
+    // Const pool
+    if (cg->consts->buckets->nelems > UINT8_MAX) {
+        return COMP_TOO_MANY_CONSTANTS;
+    }
+    buf[offset++] = cg->consts->buckets->nelems;
+    for (uint8_t i = 1; i <= (uint8_t) cg->consts->buckets->nelems; i++) {
+        const_info_t info;
+        map_elem_t k = {.type = MAP_ELEM_INT_TYPE, .elem.intval=i};
+        map_elem_t *v = map_get(cg->consts, &k);
+
+        switch (v->type) {
+            case MAP_ELEM_INT_TYPE:
+                // TODO alloc a thing; check size
+                buf[offset++] = CONST_INT32;
+                buf[offset++] = 4; // Length
+                buf[offset++] = (uint8_t) ((v->elem.intval & 0xff000000) >> 24);
+                buf[offset++] = (uint8_t) ((v->elem.intval & 0x00ff0000) >> 16);
+                buf[offset++] = (uint8_t) ((v->elem.intval & 0x0000ff00) >> 8);
+                buf[offset++] = (uint8_t) (v->elem.intval & 0x000000ff);
+                break;
+            case MAP_ELEM_STRING_TYPE:
+                // TODO check string too long
+                buf[offset++] = CONST_STRING;
+                uint8_t slen = buf[offset++] = strlen(v->elem.stringval_ptr);
+                memcpy(buf + offset, v->elem.stringval_ptr, slen);
+                offset += slen;
+                break;
+            default:
+                return COMP_UNEXPECTED_CONST_TYPE;
+
+        }
+    }
+
+    *size = offset;
+    /*
+    for (uint8_t i = 0; i < offset; i++) {
+        printf("buf[%d]\t%x\n", i, buf[i]);
+    }
+     */
+
+    return ERR_NO_ERROR;
 }

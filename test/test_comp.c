@@ -8,7 +8,7 @@ void test_comp_arithmetic() {
 
     cg_t cg;
     cg_init(&cg);
-    error_t err = comp(input, &cg);
+    error_t err = codegen(input, &cg);
     uint8_t expected[] = {
         VM_OP_ICONST, 1,
         VM_OP_IPUSH_1,
@@ -39,7 +39,7 @@ void test_comp_boolean_arithmetic() {
 
     cg_t cg;
     cg_init(&cg);
-    error_t err = comp(input, &cg);
+    error_t err = codegen(input, &cg);
     uint8_t expected[] = {
         VM_OP_ICONST, 1,
         VM_OP_IPUSH, 37,
@@ -66,7 +66,7 @@ void test_comp_assign() {
 
     cg_t cg;
     cg_init(&cg);
-    error_t err = comp(input, &cg);
+    error_t err = codegen(input, &cg);
 
     uint8_t expected[] = {
         VM_OP_SCONST, 1,
@@ -81,8 +81,52 @@ void test_comp_assign() {
     TEST_ASSERT_EQUAL(ERR_NO_ERROR, err);
 }
 
+void test_comp_header() {
+    // Check magic, major, minor.
+    const char *input = "0";
+
+    cg_t cg;
+    cg_init(&cg);
+    error_t err;
+
+    err = codegen(input, &cg);
+    TEST_ASSERT_EQUAL(ERR_NO_ERROR, err);
+
+    uint8_t buf[MIN_BYTECODE_ALLOC] = {0};
+    uint32_t size;
+    err = compile(&cg, MIN_BYTECODE_ALLOC, buf, &size);
+    TEST_ASSERT_EQUAL(ERR_NO_ERROR, err);
+    uint8_t expected[] = {'J', 'E', 'D', '!', 0, 1};
+    TEST_ASSERT_EQUAL_MEMORY(expected, buf, size - 1);
+}
+
+void test_comp_const_pool() {
+    const char *input = "x = 16909060";
+
+    cg_t cg;
+    cg_init(&cg);
+    error_t err;
+
+    err = codegen(input, &cg);
+    TEST_ASSERT_EQUAL(ERR_NO_ERROR, err);
+
+    uint8_t buf[MIN_BYTECODE_ALLOC] = {0};
+    uint32_t size;
+    err = compile(&cg, MIN_BYTECODE_ALLOC, buf, &size);
+    TEST_ASSERT_EQUAL(ERR_NO_ERROR, err);
+    uint8_t expected[] = {
+        'J', 'E', 'D', '!', 0, 1,
+        2, /* 2 consts */
+        CONST_STRING, 1, 'x',
+        CONST_INT32, 4, 1, 2, 3, 4
+    };
+    TEST_ASSERT_EQUAL_MEMORY(expected, buf, size - 1);
+}
+
 void test_comp() {
     RUN_TEST(test_comp_arithmetic);
     RUN_TEST(test_comp_boolean_arithmetic);
     RUN_TEST(test_comp_assign);
+    RUN_TEST(test_comp_header);
+    RUN_TEST(test_comp_const_pool);
 }

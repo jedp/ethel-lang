@@ -177,3 +177,7 @@ map_elem_t *map_get(map_t *map, map_elem_t *k) {
 
     return NULL;
 }
+
+uint8_t map_num_elems(map_t *map) {
+    return map->buckets->nelems;
+}
