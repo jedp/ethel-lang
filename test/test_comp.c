@@ -10,15 +10,15 @@ void test_comp_arithmetic() {
     cg_init(&cg);
     error_t err = comp(input, &cg);
     uint8_t expected[] = {
-        VM_OP_LOADI, 1,
-        VM_OP_LOADI_1,
-        VM_OP_PUSHI, 3,
+        VM_OP_ICONST, 1,
+        VM_OP_IPUSH_1,
+        VM_OP_IPUSH, 3,
         VM_OP_NEG,
         VM_OP_SUB,
-        VM_OP_PUSHI, 4,
+        VM_OP_IPUSH, 4,
         VM_OP_MUL,
-        VM_OP_PUSHI, 8,
-        VM_OP_PUSHI, 2,
+        VM_OP_IPUSH, 8,
+        VM_OP_IPUSH, 2,
         VM_OP_DIV,
         VM_OP_SUB,
         VM_OP_ADD,
@@ -41,11 +41,11 @@ void test_comp_boolean_arithmetic() {
     cg_init(&cg);
     error_t err = comp(input, &cg);
     uint8_t expected[] = {
-        VM_OP_LOADI, 1,
-        VM_OP_PUSHI, 37,
-        VM_OP_PUSHI, 0xa,
+        VM_OP_ICONST, 1,
+        VM_OP_IPUSH, 37,
+        VM_OP_IPUSH, 0xa,
         VM_OP_BIN_OR,
-        VM_OP_LOADI_1,
+        VM_OP_IPUSH_1,
         VM_OP_BIN_SHL,
         VM_OP_BIN_AND,
         VM_OP_RET,
@@ -69,9 +69,9 @@ void test_comp_assign() {
     error_t err = comp(input, &cg);
 
     uint8_t expected[] = {
-        VM_OP_LOADS, 1,
-        VM_OP_LOADS, 2,
-        VM_OP_PUSHI, 2,
+        VM_OP_SCONST, 1,
+        VM_OP_SCONST, 2,
+        VM_OP_IPUSH, 2,
         VM_OP_ASSIGN,
         VM_OP_ASSIGN,
         VM_OP_RET,

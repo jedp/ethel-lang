@@ -13,9 +13,9 @@ void test_print_dis(void) {
     map_elem_t v = {.type= MAP_ELEM_INT_TYPE, .elem.intval = 42};
     cg_put_const(&cg, v, &k);
 
-    cg_byte(&cg, VM_OP_PUSHI);
+    cg_byte(&cg, VM_OP_IPUSH);
     cg_byte(&cg, 0xa5);
-    cg_byte(&cg, VM_OP_LOADI);
+    cg_byte(&cg, VM_OP_ICONST);
     cg_byte(&cg, 1);
     cg_byte(&cg, VM_OP_NOP);
     cg_byte(&cg, VM_OP_RET);

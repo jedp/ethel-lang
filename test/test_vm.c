@@ -95,7 +95,7 @@ void test_vm_loadi(void) {
 
     uint8_t bytes[] = {
         VM_OP_NOP,
-        VM_OP_LOADI, 1,
+        VM_OP_ICONST, 1,
         VM_OP_RET};
 
     err |= vm_load_code(&vm, bytes, sizeof(bytes));
@@ -119,7 +119,7 @@ void test_vm_stack_negate(void) {
     error_t err = ERR_NO_ERROR;
 
     uint8_t bytes[] = {
-        VM_OP_LOADI, 1,
+        VM_OP_ICONST, 1,
         VM_OP_NEG,
         VM_OP_RET
     };
@@ -145,8 +145,8 @@ void test_vm_stack_add(void) {
 
     // 123 + 456
     uint8_t bytes[] = {
-        VM_OP_LOADI, 1,
-        VM_OP_LOADI, 2,
+        VM_OP_ICONST, 1,
+        VM_OP_ICONST, 2,
         VM_OP_ADD,
         VM_OP_RET
     };
@@ -176,8 +176,8 @@ void test_vm_stack_sub(void) {
 
     // 5 - 2
     uint8_t bytes[] = {
-        VM_OP_LOADI, 1,
-        VM_OP_LOADI, 2,
+        VM_OP_ICONST, 1,
+        VM_OP_ICONST, 2,
         VM_OP_SUB,
         VM_OP_RET
     };
@@ -205,8 +205,8 @@ void test_vm_stack_mul(void) {
 
     // 5 * 3
     uint8_t bytes[] = {
-        VM_OP_LOADI, 1,
-        VM_OP_LOADI, 2,
+        VM_OP_ICONST, 1,
+        VM_OP_ICONST, 2,
         VM_OP_MUL,
         VM_OP_RET
     };
@@ -234,8 +234,8 @@ void test_vm_stack_div(void) {
 
     // Integer division. 12 / 2
     uint8_t bytes[] = {
-        VM_OP_LOADI, 1,
-        VM_OP_LOADI, 2,
+        VM_OP_ICONST, 1,
+        VM_OP_ICONST, 2,
         VM_OP_DIV,
         VM_OP_RET
     };
@@ -263,8 +263,8 @@ void test_vm_stack_rem(void) {
 
     // Modulus. 11 % 3
     uint8_t bytes[] = {
-        VM_OP_LOADI, 1,
-        VM_OP_LOADI, 2,
+        VM_OP_ICONST, 1,
+        VM_OP_ICONST, 2,
         VM_OP_REM,
         VM_OP_RET
     };
@@ -293,16 +293,16 @@ void test_vm_stack_arith(void) {
 
     // (2 - 1) * (3 + 5) / 2 % 3 = 1
     uint8_t bytes[] = {
-        VM_OP_LOADI, 1,
-        VM_OP_LOADI, 2,
+        VM_OP_ICONST, 1,
+        VM_OP_ICONST, 2,
         VM_OP_SUB,
-        VM_OP_LOADI, 3,
-        VM_OP_LOADI, 4,
+        VM_OP_ICONST, 3,
+        VM_OP_ICONST, 4,
         VM_OP_ADD,
         VM_OP_MUL,
-        VM_OP_LOADI, 1,
+        VM_OP_ICONST, 1,
         VM_OP_DIV,
-        VM_OP_LOADI, 3,
+        VM_OP_ICONST, 3,
         VM_OP_REM,
         VM_OP_RET
     };
@@ -333,11 +333,11 @@ void test_vm_stack_load_imm(void) {
     error_t err = ERR_NO_ERROR;
 
     uint8_t bytes[] = {
-        VM_OP_LOADI, 1,
-        VM_OP_LOADI_1N,
-        VM_OP_LOADI_1,
+        VM_OP_ICONST, 1,
+        VM_OP_IPUSH_1N,
+        VM_OP_IPUSH_1,
         VM_OP_ADD,
-        VM_OP_LOADI_0,
+        VM_OP_IPUSH_0,
         VM_OP_ADD,
         VM_OP_ADD,
         VM_OP_RET
@@ -363,7 +363,7 @@ void test_vm_stack_inc_dec(void) {
     error_t err = ERR_NO_ERROR;
 
     uint8_t bytes[] = {
-        VM_OP_LOADI_0,
+        VM_OP_IPUSH_0,
         VM_OP_INC,
         VM_OP_INC,
         VM_OP_DEC,

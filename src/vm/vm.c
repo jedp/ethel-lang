@@ -77,19 +77,19 @@ static error_t exec(vm_t *vm) {
         switch (bytecode = READ_BYTE()) {
             case VM_OP_NOP:
                 break;
-            case VM_OP_PUSHI:
+            case VM_OP_IPUSH:
                 vm_stack_push_int(vm, READ_BYTE());
                 break;
-            case VM_OP_LOADI_1N:
+            case VM_OP_IPUSH_1N:
                 vm_stack_push_int(vm, -1);
                 break;
-            case VM_OP_LOADI_0:
+            case VM_OP_IPUSH_0:
                 vm_stack_push_int(vm, 0);
                 break;
-            case VM_OP_LOADI_1:
+            case VM_OP_IPUSH_1:
                 vm_stack_push_int(vm, 1);
                 break;
-            case VM_OP_LOADI: {
+            case VM_OP_ICONST: {
                 map_elem_t v;
                 uint8_t k = READ_BYTE();
                 cg_get_const(vm->cg, k, &v);

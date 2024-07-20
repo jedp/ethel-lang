@@ -36,9 +36,9 @@ uint32_t print_dis_byte(cg_t *cg, uint32_t offset) {
         case VM_OP_NOP:
         case VM_OP_RET:
         case VM_OP_NEG:
-        case VM_OP_LOADI_1N:
-        case VM_OP_LOADI_0:
-        case VM_OP_LOADI_1:
+        case VM_OP_IPUSH_1N:
+        case VM_OP_IPUSH_0:
+        case VM_OP_IPUSH_1:
         case VM_OP_ADD:
         case VM_OP_SUB:
         case VM_OP_MUL:
@@ -53,11 +53,11 @@ uint32_t print_dis_byte(cg_t *cg, uint32_t offset) {
         case VM_OP_DEC:
         case VM_OP_ASSIGN:
             return print_op(op_names[op], offset);
-        case VM_OP_PUSHI:
+        case VM_OP_IPUSH:
             return print_push(op_names[op], cg, offset);
-        case VM_OP_LOADI:
+        case VM_OP_ICONST:
             return print_loadi(op_names[op], cg, offset);
-        case VM_OP_LOADS:
+        case VM_OP_SCONST:
             return print_loads(op_names[op], cg, offset);
         default:
             return print_op("**UNKNOWN**", offset);

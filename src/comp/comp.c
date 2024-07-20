@@ -50,18 +50,18 @@ static map_err_t emit_const_int(parser_t *parser, int val) {
     map_err_t err = MAP_OK;
 
     if (val == -1) {
-        emit_byte(parser, VM_OP_LOADI_1N);
+        emit_byte(parser, VM_OP_IPUSH_1N);
     } else if (val == 0) {
-        emit_byte(parser, VM_OP_LOADI_0);
+        emit_byte(parser, VM_OP_IPUSH_0);
     } else if (val == 1) {
-        emit_byte(parser, VM_OP_LOADI_1);
+        emit_byte(parser, VM_OP_IPUSH_1);
     } else if (val >= -128 && val <= 127) {
-        emit_bytes(parser, VM_OP_PUSHI, (uint8_t) val & 0xff);
+        emit_bytes(parser, VM_OP_IPUSH, (uint8_t) val & 0xff);
     } else {
         map_elem_t v = {.type = MAP_ELEM_INT_TYPE, .elem.intval = val};
         uint8_t k;
         err = cg_put_const(parser->cg, v, &k);
-        emit_bytes(parser, VM_OP_LOADI, k);
+        emit_bytes(parser, VM_OP_ICONST, k);
     }
 
     return err;
@@ -80,7 +80,7 @@ static map_err_t emit_const_str(parser_t *parser, const char *val, uint32_t len)
     };
     uint8_t k;
     err = cg_put_const(parser->cg, v, &k);
-    emit_bytes(parser, VM_OP_LOADS, k);
+    emit_bytes(parser, VM_OP_SCONST, k);
 
     return err;
 }
