@@ -33,6 +33,7 @@ void tearDown(void) {
 int main(int argc, char **argv) {
     UNITY_BEGIN();
 
+    test_ptr();
     test_lex();
     test_dis();
     test_map();

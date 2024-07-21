@@ -25,6 +25,6 @@ void test_print_dis(void) {
     cg_free(&cg);
 }
 
-void test_dis() {
+void test_dis(void) {
     RUN_TEST(test_print_dis);
 }

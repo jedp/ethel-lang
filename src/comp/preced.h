@@ -50,21 +50,21 @@ typedef struct {
 
 } parse_preced_rule_t;
 
-void parse_int(parser_t *parser);
+__attribute__((unused)) void parse_int(parser_t *parser);
 
-void parse_hex(parser_t *parser);
+__attribute__((unused)) void parse_hex(parser_t *parser);
 
-void parse_bin(parser_t *parser);
+__attribute__((unused)) void parse_bin(parser_t *parser);
 
-void parse_ident(parser_t *parser);
+__attribute__((unused)) void parse_ident(parser_t *parser);
 
-void parse_unary_op(parser_t *parser);
+__attribute__((unused)) void parse_unary_op(parser_t *parser);
 
-void parse_binary_op(parser_t *parser);
+__attribute__((unused)) void parse_binary_op(parser_t *parser);
 
-void parse_parens(parser_t *parser);
+__attribute__((unused)) void parse_parens(parser_t *parser);
 
-void parse_subscript(parser_t *parser);
+__attribute__((unused)) void parse_subscript(parser_t *parser);
 
 void parse_expr_by_precedence(parser_t *parser, uint8_t min_preded);
 

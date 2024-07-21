@@ -379,7 +379,7 @@ void test_vm_stack_inc_dec(void) {
     vm_free(&vm);
 }
 
-void test_vm() {
+void test_vm(void) {
     RUN_TEST(test_vm_init);
     RUN_TEST(test_vm_load_code);
     RUN_TEST(test_vm_stack_push_byte);

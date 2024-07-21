@@ -25,7 +25,7 @@ static void expect_type_with_text(lexer_t *lexer, tag_t tag, const char *expecte
 }
 
 void test_lex_eof(void) {
-    char *expr = "hi";
+    const char *expr = "hi";
     lexer_t lexer;
     lexer_init(&lexer, expr);
 
@@ -37,13 +37,13 @@ void test_lex_eof(void) {
 }
 
 void test_lex_tokenize(void) {
-    char *expr = "identifier Boolean Byte Bytearray Float Int List Map String "
-                 "abs and as bin break continue cos data del do dump else env "
-                 "exp false for fun hex if in input is ln log match mem nil not "
-                 "or print rand read return sin sqrt step struct tan then true "
-                 "type typeof val var while { } [ ] , : + * - / % & | ^ ~ .. "
-                 ".glug .merg() < <= << > >= >> = == ! != 'c' \"str\" 42 3.14 "
-                 "0xff 0b01100101 // And ignore comment at end.";
+    const char *expr = "identifier Boolean Byte Bytearray Float Int List Map String "
+                     "abs and as bin break continue cos data del do dump else env "
+                     "exp false for fun hex if in input is ln log match mem nil not "
+                     "or print rand read return sin sqrt step struct tan then true "
+                     "type typeof val var while { } [ ] , : + * - / % & | ^ ~ .. "
+                     ".glug .merg() < <= << > >= >> = == ! != 'c' \"str\" 42 3.14 "
+                     "0xff 0b01100101 // And ignore comment at end.";
     lexer_t lexer;
     lexer_init(&lexer, expr);
 
@@ -155,7 +155,7 @@ void test_lex_tokenize(void) {
 }
 
 void test_lex_assign(void) {
-    char *expr = "foo = 2";
+    const char *expr = "foo = 2";
     lexer_t lexer;
     lexer_init(&lexer, expr);
 
@@ -165,7 +165,7 @@ void test_lex_assign(void) {
 }
 
 void test_lex_error(void) {
-    char *expr = "if 42 @ moo";
+    const char *expr = "if 42 @ moo";
     lexer_t lexer;
     lexer_init(&lexer, expr);
 

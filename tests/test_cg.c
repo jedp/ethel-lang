@@ -55,7 +55,7 @@ void test_cg_add_const(void) {
 
     err |= cg_put_const(&cg, v1, &k1);
     err |= cg_put_const(&cg, v2, &k2);
-    err |= cg_put_const(&cg, v2, &k3);
+    err |= cg_put_const(&cg, v3, &k3);
     err |= cg_put_const(&cg, v4, &k4);
 
     TEST_ASSERT_EQUAL(ERR_NO_ERROR, err);

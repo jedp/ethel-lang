@@ -40,7 +40,7 @@ void cg_bytes(cg_t *cg, uint8_t *bytes, size_t size) {
 }
 
 map_err_t cg_put_const(cg_t *cg, map_elem_t v, uint8_t *k) {
-    uint8_t next_k = cg->consts->buckets->nelems + 1;
+    uint32_t next_k = cg->consts->buckets->nelems + 1;
     if (next_k > UINT8_MAX) {
         return MAP_TOO_MANY_ITEMS;
     }
@@ -48,9 +48,9 @@ map_err_t cg_put_const(cg_t *cg, map_elem_t v, uint8_t *k) {
     map_elem_t *ek = (map_elem_t *) comp_alloc(sizeof(map_elem_t));
     ek->type = MAP_ELEM_UINT_TYPE;
     ek->elem.uintval = next_k;
-    error_t err = map_put(cg->consts, ek, &v);
+    map_err_t err = map_put(cg->consts, ek, &v);
 
-    *k = next_k;
+    *k = (uint8_t) next_k;
 
     return err;
 }

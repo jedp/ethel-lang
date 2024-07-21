@@ -114,9 +114,9 @@ static token_t make_string_token(lexer_t *lexer) {
 }
 
 static boolean is_hex_digit(const char ch) {
-    return (ch >= '0' && ch <= '9' ||
-            ch >= 'A' && ch <= 'F' ||
-            ch >= 'a' && ch <= 'f'
+    return ((ch >= '0' && ch <= '9') ||
+            (ch >= 'A' && ch <= 'F') ||
+            (ch >= 'a' && ch <= 'f')
     );
 }
 

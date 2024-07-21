@@ -1,7 +1,11 @@
+cmake_install.cmake
+CMakeCache.txt
+CMakeFiles/
+Makefile
+
 *.o
-repl
-run
-test/test
+bin/
+lib/
 
 tags
 

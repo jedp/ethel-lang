@@ -1,6 +1,7 @@
 #include <stdlib.h>
 #include <string.h>
 #include "../common/op.h"
+#include "../common/ptr.h"
 #include "cg.h"
 #include "comp.h"
 #include "dis.h"
@@ -106,27 +107,32 @@ void parse_expr_by_precedence(parser_t *parser, uint8_t min_preced) {
     }
 }
 
-void parse_int(parser_t *parser) {
+// Referenced via pointer in the precedence table.
+__attribute__((unused)) void parse_int(parser_t *parser) {
     int const_int = (int) strtol(parser->prev.start, NULL, 10);
     (void) emit_const_int(parser, const_int);
 }
 
-void parse_hex(parser_t *parser) {
+// Referenced via pointer in the precedence table.
+__attribute__((unused)) void parse_hex(parser_t *parser) {
     int const_int = (int) strtol(parser->prev.start, NULL, 16);
     (void) emit_const_int(parser, const_int);
 }
 
-void parse_bin(parser_t *parser) {
+// Referenced via pointer in the precedence table.
+__attribute__((unused)) void parse_bin(parser_t *parser) {
     // strtol removes the '0x' for hex, but not the '0b' for bin.
     int const_int = (int) strtol(parser->prev.start + 2, NULL, 2);
     (void) emit_const_int(parser, const_int);
 }
 
-void parse_ident(parser_t *parser) {
+// Referenced via pointer in the precedence table.
+__attribute__((unused)) void parse_ident(parser_t *parser) {
     (void) emit_const_str(parser, parser->prev.start, parser->prev.len);
 }
 
-void parse_unary_op(parser_t *parser) {
+// Referenced via pointer in the precedence table.
+__attribute__((unused)) void parse_unary_op(parser_t *parser) {
     tag_t op = parser->prev.tag;
 
     parse_expr_by_precedence(parser, PRECED_UNARY);
@@ -138,12 +144,13 @@ void parse_unary_op(parser_t *parser) {
     }
 }
 
-void parse_binary_op(parser_t *parser) {
+// Referenced via pointer in the precedence table.
+__attribute__((unused)) void parse_binary_op(parser_t *parser) {
     tag_t op = parser->prev.tag;
 
     // Parse and push the remainder of the expression.
     parse_preced_rule_t op_rule = preced_rules[op];
-    parse_expr_by_precedence(parser, (preced_t) op_rule.precedence + op_rule.associativity);
+    parse_expr_by_precedence(parser, (uint8_t) op_rule.precedence + (uint8_t) op_rule.associativity);
 
     // Push the operator last.
     switch (op) {
@@ -183,14 +190,16 @@ void parse_binary_op(parser_t *parser) {
     }
 }
 
-void parse_parens(parser_t *parser) {
+// Referenced via pointer in the precedence table.
+__attribute__((unused)) void parse_parens(parser_t *parser) {
     parse_expr(parser);
     printf("TODO: TAG_RPAREN eaten by precedence climbing. Should it be?\n");
 //    eat(parser, TAG_RPAREN);
 }
 
-void parse_subscript(parser_t *parser) {
-
+// Referenced via pointer in the precedence table.
+__attribute__((unused)) void parse_subscript(parser_t *parser) {
+    (void) parser;
 }
 
 static void parse_expr(parser_t *parser) {
@@ -222,7 +231,7 @@ error_t compile(const cg_t *cg, uint32_t max_size, uint8_t buf[], uint32_t *size
         return COMP_INSUFFICIENT_SPACE_FOR_BYTECODE;
     }
 
-    uint32_t offset = 0;
+    uint32_t offset;
 
     // Header
     memcpy(buf, magic, 4);
@@ -234,9 +243,8 @@ error_t compile(const cg_t *cg, uint32_t max_size, uint8_t buf[], uint32_t *size
     if (cg->consts->buckets->nelems > UINT8_MAX) {
         return COMP_TOO_MANY_CONSTANTS;
     }
-    buf[offset++] = cg->consts->buckets->nelems;
+    buf[offset++] = (uint8_t) cg->consts->buckets->nelems;
     for (uint8_t i = 1; i <= (uint8_t) cg->consts->buckets->nelems; i++) {
-        const_info_t info;
         map_elem_t k = {.type = MAP_ELEM_INT_TYPE, .elem.intval=i};
         map_elem_t *v = map_get(cg->consts, &k);
 
@@ -245,7 +253,7 @@ error_t compile(const cg_t *cg, uint32_t max_size, uint8_t buf[], uint32_t *size
                 // TODO alloc a thing; check size
                 buf[offset++] = CONST_INT32;
                 buf[offset++] = 4; // Length
-                buf[offset++] = (uint8_t) ((v->elem.intval & 0xff000000) >> 24);
+                buf[offset++] = (uint8_t) (((uint32_t) v->elem.intval & 0xff000000) >> 24);
                 buf[offset++] = (uint8_t) ((v->elem.intval & 0x00ff0000) >> 16);
                 buf[offset++] = (uint8_t) ((v->elem.intval & 0x0000ff00) >> 8);
                 buf[offset++] = (uint8_t) (v->elem.intval & 0x000000ff);
@@ -253,8 +261,9 @@ error_t compile(const cg_t *cg, uint32_t max_size, uint8_t buf[], uint32_t *size
             case MAP_ELEM_STRING_TYPE:
                 // TODO check string too long
                 buf[offset++] = CONST_STRING;
-                uint8_t slen = buf[offset++] = strlen(v->elem.stringval_ptr);
-                memcpy(buf + offset, v->elem.stringval_ptr, slen);
+                uint8_t slen = buf[offset++] = (uint8_t) strlen(v->elem.stringval_ptr);
+                // Deliberately not null-terminated
+                mem_cp(buf + offset, v->elem.stringval_ptr, slen);
                 offset += slen;
                 break;
             default:

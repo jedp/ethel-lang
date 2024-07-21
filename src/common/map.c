@@ -16,7 +16,7 @@ uint32_t hash_primitive(map_elem_t *e) {
         case MAP_ELEM_UINT_TYPE:
             return (uint32_t) e->elem.uintval;
         case MAP_ELEM_FLOAT_TYPE:
-            return (uint32_t) e->elem.uintval;
+            return (uint32_t) e->elem.floatval;
         case MAP_ELEM_INT_TYPE:
             return (uint32_t) e->elem.intval;
         case MAP_ELEM_ADDR_TYPE:
@@ -51,9 +51,9 @@ uint8_t eq_primitive(map_elem_t *a, map_elem_t *b) {
     }
 }
 
-static map_buckets_t *buckets_new(uint8_t nbuckets) {
+static map_buckets_t *buckets_new(uint32_t nbuckets) {
     map_buckets_t *buckets = (map_buckets_t *) comp_alloc(sizeof(map_buckets_t) * nbuckets);
-    for (uint8_t i = 0; i < nbuckets; i++) {
+    for (uint32_t i = 0; i < nbuckets; i++) {
         buckets->nodes[i] = NULL;
     }
     buckets->nelems = 0;
@@ -176,8 +176,4 @@ map_elem_t *map_get(map_t *map, map_elem_t *k) {
     }
 
     return NULL;
-}
-
-uint8_t map_num_elems(map_t *map) {
-    return map->buckets->nelems;
 }

@@ -150,7 +150,7 @@ error_t vm_init(vm_t *vm) {
     if (stack == NULL)
         return ERR_OUT_OF_MEMORY;
 
-    vm_stack_elem_t *stack_buf = comp_alloc(sizeof(vm_stack_elem_t) * VM_DATA_STACK_SIZE);
+//    vm_stack_elem_t *stack_buf = comp_alloc(sizeof(vm_stack_elem_t) * VM_DATA_STACK_SIZE);
     stack->size = 0;
     stack->top = stack->buf;
 

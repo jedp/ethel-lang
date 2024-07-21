@@ -3,7 +3,7 @@
 #include "../src/common/op.h"
 #include "../src/comp/comp.h"
 
-void test_comp_arithmetic() {
+void test_comp_arithmetic(void) {
     const char *input = "300 + (1 - -3) * 4 - 8 / 2";
 
     cg_t cg;
@@ -34,7 +34,7 @@ void test_comp_arithmetic() {
     TEST_ASSERT_EQUAL(ERR_NO_ERROR, err);
 }
 
-void test_comp_boolean_arithmetic() {
+void test_comp_boolean_arithmetic(void) {
     const char *input = "0xff & (37 | 0xa) << 0b00000001";
 
     cg_t cg;
@@ -60,7 +60,7 @@ void test_comp_boolean_arithmetic() {
     TEST_ASSERT_EQUAL(ERR_NO_ERROR, err);
 }
 
-void test_comp_assign() {
+void test_comp_assign(void) {
     // Check right-associativity of assignment operator.
     const char *input = "foo = bar = 2";
 
@@ -81,7 +81,7 @@ void test_comp_assign() {
     TEST_ASSERT_EQUAL(ERR_NO_ERROR, err);
 }
 
-void test_comp_header() {
+void test_comp_header(void) {
     // Check magic, major, minor.
     const char *input = "0";
 
@@ -100,7 +100,7 @@ void test_comp_header() {
     TEST_ASSERT_EQUAL_MEMORY(expected, buf, size - 1);
 }
 
-void test_comp_const_pool() {
+void test_comp_const_pool(void) {
     const char *input = "x = 16909060";
 
     cg_t cg;
@@ -123,7 +123,7 @@ void test_comp_const_pool() {
     TEST_ASSERT_EQUAL_MEMORY(expected, buf, size - 1);
 }
 
-void test_comp() {
+void test_comp(void) {
     RUN_TEST(test_comp_arithmetic);
     RUN_TEST(test_comp_boolean_arithmetic);
     RUN_TEST(test_comp_assign);
