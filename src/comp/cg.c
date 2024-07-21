@@ -66,14 +66,20 @@ uint32_t cg_header(cg_t *cg, const uint8_t *bytes, size_t size) {
         map_elem_t v;
         uint8_t dont_care;
         switch (type) {
-            case CONST_INT32: {
+            case CONST_INT: {
+                // Ints are packed into as few bytes as possible,
+                // least-significant byte first.
                 uint32_t uintval = 0;
-                offset++; // Eat size. We know it's 4.
-                // TODO but we can be more efficient with consts
-                uintval |= (bytes[offset++] << 24) & 0xff000000;
-                uintval |= (bytes[offset++] << 16) & 0xff0000;
-                uintval |= (bytes[offset++] << 8) & 0xff00;
+                uint8_t intsize = bytes[offset++];
                 uintval |= (bytes[offset++]) & 0xff;
+                if (intsize > 1)
+                    uintval |= (bytes[offset++] << 8) & 0xff00;
+                if (intsize > 2)
+                    uintval |= (bytes[offset++] << 16) & 0xff0000;
+                if (intsize > 3)
+                    uintval |= (bytes[offset++] << 24) & 0xff000000;
+                if (intsize > 4)
+                    return 0;
                 v.type = MAP_ELEM_INT_TYPE;
                 v.elem.intval = (int) uintval;
                 cg_put_const(cg, v, &dont_care);

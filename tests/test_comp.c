@@ -118,7 +118,7 @@ void test_comp_const_pool(void) {
         'E', 'T', 'H', 'L', 0, 1,
         2, /* 2 consts */
         CONST_STRING, 1, 'x',
-        CONST_INT32, 4, 1, 2, 3, 4
+        CONST_INT, 4, 1, 2, 3, 4
     };
     TEST_ASSERT_EQUAL_MEMORY(expected, buf, size - 1);
 }

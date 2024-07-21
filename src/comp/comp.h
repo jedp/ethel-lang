@@ -14,7 +14,7 @@ static const uint8_t minor = 1;
 typedef enum {
     CONST_BOOLEAN,
     CONST_BYTE,
-    CONST_INT32,
+    CONST_INT,
     CONST_FLOAT32,
     CONST_BYTEARRAY,
     CONST_STRING,

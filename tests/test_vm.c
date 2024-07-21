@@ -101,7 +101,7 @@ void test_vm_iconst(void) {
     uint8_t bytes[] = {
         'E', 'T', 'H', 'L', 0, 1,
         // Const pool
-        1, CONST_INT32, 4, 0, 0, 0, 42,
+        1, CONST_INT, 1, 42,
         // Code
         VM_OP_NOP,
         VM_OP_ICONST, 1,
@@ -124,7 +124,7 @@ void test_vm_stack_negate(void) {
     uint8_t bytes[] = {
         'E', 'T', 'H', 'L', 0, 1,
         // Const pool
-        1, CONST_INT32, 4, 0, 0, 0, 123,
+        1, CONST_INT, 1, 123,
         // Code
         VM_OP_ICONST, 1,
         VM_OP_NEG,
@@ -150,8 +150,8 @@ void test_vm_stack_add(void) {
         'E', 'T', 'H', 'L', 0, 1,
         // Const pool
         2,
-        CONST_INT32, 4, 0, 0, 0, 123,
-        CONST_INT32, 4, 0, 0, 1, 200, // 456
+        CONST_INT, 1, 123,
+        CONST_INT, 2, 200, 1, // 456
         // Code
         VM_OP_ICONST, 1,
         VM_OP_ICONST, 2,
@@ -178,8 +178,8 @@ void test_vm_stack_sub(void) {
         'E', 'T', 'H', 'L', 0, 1,
         // Const pool
         2,
-        CONST_INT32, 4, 0, 0, 0, 5,
-        CONST_INT32, 4, 0, 0, 0, 2,
+        CONST_INT, 1, 5,
+        CONST_INT, 1, 2,
         // Code
         VM_OP_ICONST, 1,
         VM_OP_ICONST, 2,
@@ -213,8 +213,8 @@ void test_vm_stack_mul(void) {
         'E', 'T', 'H', 'L', 0, 1,
         // Const pool
         2,
-        CONST_INT32, 4, 0, 0, 0, 5,
-        CONST_INT32, 4, 0, 0, 0, 3,
+        CONST_INT, 1, 5,
+        CONST_INT, 1, 3,
         // Code
         VM_OP_ICONST, 1,
         VM_OP_ICONST, 2,
@@ -241,8 +241,8 @@ void test_vm_stack_div(void) {
         'E', 'T', 'H', 'L', 0, 1,
         // Const pool
         2,
-        CONST_INT32, 4, 0, 0, 0, 12,
-        CONST_INT32, 4, 0, 0, 0, 2,
+        CONST_INT, 1, 12,
+        CONST_INT, 1, 2,
         // Code
         VM_OP_ICONST, 1,
         VM_OP_ICONST, 2,
@@ -269,8 +269,8 @@ void test_vm_stack_rem(void) {
         'E', 'T', 'H', 'L', 0, 1,
         // Const pool
         2,
-        CONST_INT32, 4, 0, 0, 0, 11,
-        CONST_INT32, 4, 0, 0, 0, 3,
+        CONST_INT, 1, 11,
+        CONST_INT, 1, 3,
         // Code
         VM_OP_ICONST, 1,
         VM_OP_ICONST, 2,
@@ -298,10 +298,10 @@ void test_vm_stack_arith(void) {
         'E', 'T', 'H', 'L', 0, 1,
         // Const pool
         4,
-        CONST_INT32, 4, 0, 0, 0, 2,
-        CONST_INT32, 4, 0, 0, 0, 1,
-        CONST_INT32, 4, 0, 0, 0, 3,
-        CONST_INT32, 4, 0, 0, 0, 5,
+        CONST_INT, 1, 2,
+        CONST_INT, 1, 1,
+        CONST_INT, 1, 3,
+        CONST_INT, 1, 5,
         // Code
         VM_OP_ICONST, 1,
         VM_OP_ICONST, 2,
@@ -335,7 +335,7 @@ void test_vm_stack_load_imm(void) {
         'E', 'T', 'H', 'L', 0, 1,
         // Const pool
         1,
-        CONST_INT32, 4, 0, 0, 0, 42,
+        CONST_INT, 1, 42,
         // Code
         VM_OP_ICONST, 1,
         VM_OP_IPUSH_1N,
