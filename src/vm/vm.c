@@ -124,9 +124,9 @@ static error_t exec(vm_t *vm) {
                 vm_stack_peek(vm)->intval -= 1;
                 break;
             case VM_OP_RET:
-                return ERR_VM_INTERP_OK;
+                return ERR_NO_ERROR;
             default:
-                printf("Unsupported bytecode: %d\n", bytecode);
+                printf("Unsupported bytecode at offset %d: %d\n", *vm->pc, bytecode);
                 return ERR_VM_RUNTIME_ERROR;
         }
         if (err) {
@@ -134,7 +134,6 @@ static error_t exec(vm_t *vm) {
             return err;
         }
     }
-    return err;
 }
 
 error_t vm_init(vm_t *vm) {
@@ -155,8 +154,8 @@ error_t vm_init(vm_t *vm) {
     stack->top = stack->buf;
 
     vm->cg = cg;
-    vm->pc = cg->code;
-    vm->code_size = vm->cg->len;
+    vm->pc = cg->bytecode;
+    vm->bytecode_size = vm->cg->len;
     vm->stack = stack;
 
     return ERR_NO_ERROR;
@@ -216,8 +215,13 @@ vm_stack_elem_t *vm_stack_pop(vm_t *vm) {
 error_t vm_load_code(vm_t *vm, uint8_t *bytecode, size_t size) {
     vm_init(vm);
     cg_bytes(vm->cg, bytecode, size);
-    vm->pc = vm->cg->code;
-    vm->code_size = vm->cg->len;
+    uint32_t code_start = cg_header(vm->cg, bytecode, size);
+    if (code_start == 0) {
+        return ERR_VM_LOAD_ERROR;
+    }
+    vm->cg->code_start = code_start;
+    vm->pc = vm->cg->bytecode + code_start;
+    vm->bytecode_size = vm->cg->len;
     return ERR_NO_ERROR;
 }
 
@@ -232,5 +236,5 @@ error_t vm_interp(vm_t *vm, const char *input) {
     cg_init(&cg);
     codegen(input, &cg);
 
-    return ERR_VM_INTERP_OK;
+    return ERR_NO_ERROR;
 }

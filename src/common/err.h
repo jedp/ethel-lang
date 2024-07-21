@@ -37,10 +37,10 @@ enum error_enum {
     ERR_OUT_OF_MEMORY,
     ERR_BAD_ARGUMENT,
     ERR_VM_COMPILE_ERROR,
+    ERR_VM_LOAD_ERROR,
     ERR_VM_RUNTIME_ERROR,
     ERR_VM_STACK_OVERFLOW,
-    ERR_VM_INTERP_OK,
-    ERR_MAX
+    ERR_MAX,
 };
 
 static const char *err_names[ERR_MAX] = {
@@ -77,7 +77,7 @@ static const char *err_names[ERR_MAX] = {
     "Out of memory",
     "Bad argument",
     "Compile error",
+    "Error loading bytecode",
     "Runtime error",
     "VM Stack Overflow",
-    "VM OK",
 };

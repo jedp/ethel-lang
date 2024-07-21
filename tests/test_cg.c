@@ -9,7 +9,7 @@ void test_cg_init(void) {
 
     TEST_ASSERT_EQUAL(0, cg.max);
     TEST_ASSERT_EQUAL(0, cg.len);
-    TEST_ASSERT_EQUAL_PTR(NULL, cg.code);
+    TEST_ASSERT_EQUAL_PTR(NULL, cg.bytecode);
 }
 
 void test_cg_byte(void) {
@@ -20,7 +20,7 @@ void test_cg_byte(void) {
 
     TEST_ASSERT_GREATER_OR_EQUAL(1, cg.max);
     TEST_ASSERT_EQUAL(1, cg.len);
-    TEST_ASSERT_EQUAL(VM_OP_NOP, cg.code[0]);
+    TEST_ASSERT_EQUAL(VM_OP_NOP, cg.bytecode[0]);
 
     cg_free(&cg);
 }
@@ -34,7 +34,7 @@ void test_cg_free(void) {
 
     TEST_ASSERT_EQUAL(0, cg.max);
     TEST_ASSERT_EQUAL(0, cg.len);
-    TEST_ASSERT_EQUAL_PTR(NULL, cg.code);
+    TEST_ASSERT_EQUAL_PTR(NULL, cg.bytecode);
 }
 
 void test_cg_add_const(void) {

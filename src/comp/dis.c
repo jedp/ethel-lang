@@ -10,28 +10,28 @@ static uint32_t print_op(const char *name, uint32_t offset) {
 }
 
 static uint32_t print_push(const char *name, cg_t *cg, uint32_t offset) {
-    printf("%8s [0x%02x]\n", name, cg->code[offset + 1]);
+    printf("%8s [0x%02x]\n", name, cg->bytecode[offset + 1]);
     return offset + 2;
 }
 
 static uint32_t print_loadi(const char *name, cg_t *cg, uint32_t offset) {
     map_elem_t v;
-    cg_get_const(cg, cg->code[offset + 1], &v);
-    printf("%8s #%d [%d]\n", name, cg->code[offset + 1], v.elem.intval);
+    cg_get_const(cg, cg->bytecode[offset + 1], &v);
+    printf("%8s #%d [%d]\n", name, cg->bytecode[offset + 1], v.elem.intval);
     return offset + 2;
 }
 
 static uint32_t print_loads(const char *name, cg_t *cg, uint32_t offset) {
     map_elem_t v;
-    cg_get_const(cg, cg->code[offset + 1], &v);
-    printf("%8s #%d [%s]\n", name, cg->code[offset + 1], v.elem.stringval_ptr);
+    cg_get_const(cg, cg->bytecode[offset + 1], &v);
+    printf("%8s #%d [%s]\n", name, cg->bytecode[offset + 1], v.elem.stringval_ptr);
     return offset + 2;
 }
 
 uint32_t print_dis_byte(cg_t *cg, uint32_t offset) {
-    printf("%08d %02x ", offset, cg->code[offset]);
+    printf("%08d %02x ", offset, cg->bytecode[offset]);
 
-    uint8_t op = cg->code[offset];
+    uint8_t op = cg->bytecode[offset];
     switch (op) {
         case VM_OP_NOP:
         case VM_OP_RET:
@@ -67,7 +67,7 @@ uint32_t print_dis_byte(cg_t *cg, uint32_t offset) {
 void print_dis(cg_t *cg) {
     printf("\n== Disassembly ==\n");
     printf("%8s %s\n", "Offset", "Instruction");
-    for (uint32_t offset = 0; offset < cg->len;) {
+    for (uint32_t offset = cg->code_start; offset < cg->len;) {
         offset = print_dis_byte(cg, offset);
     }
 }

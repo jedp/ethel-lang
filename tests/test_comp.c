@@ -24,7 +24,7 @@ void test_comp_arithmetic(void) {
         VM_OP_ADD,
         VM_OP_RET,
     };
-    TEST_ASSERT_EQUAL_MEMORY(expected, cg.code, cg.len);
+    TEST_ASSERT_EQUAL_MEMORY(expected, cg.bytecode, cg.len);
 
     // Check int const 1.
     map_elem_t v;
@@ -50,7 +50,7 @@ void test_comp_boolean_arithmetic(void) {
         VM_OP_BIN_AND,
         VM_OP_RET,
     };
-    TEST_ASSERT_EQUAL_MEMORY(expected, cg.code, cg.len);
+    TEST_ASSERT_EQUAL_MEMORY(expected, cg.bytecode, cg.len);
 
     // Check int const 1.
     map_elem_t v;
@@ -76,7 +76,7 @@ void test_comp_assign(void) {
         VM_OP_ASSIGN,
         VM_OP_RET,
     };
-    TEST_ASSERT_EQUAL_MEMORY(expected, cg.code, cg.len);
+    TEST_ASSERT_EQUAL_MEMORY(expected, cg.bytecode, cg.len);
 
     TEST_ASSERT_EQUAL(ERR_NO_ERROR, err);
 }
@@ -96,7 +96,7 @@ void test_comp_header(void) {
     uint32_t size;
     err = compile(&cg, MIN_BYTECODE_ALLOC, buf, &size);
     TEST_ASSERT_EQUAL(ERR_NO_ERROR, err);
-    uint8_t expected[] = {'J', 'E', 'D', '!', 0, 1};
+    uint8_t expected[] = {'E', 'T', 'H', 'L', 0, 1};
     TEST_ASSERT_EQUAL_MEMORY(expected, buf, size - 1);
 }
 
@@ -115,7 +115,7 @@ void test_comp_const_pool(void) {
     err = compile(&cg, MIN_BYTECODE_ALLOC, buf, &size);
     TEST_ASSERT_EQUAL(ERR_NO_ERROR, err);
     uint8_t expected[] = {
-        'J', 'E', 'D', '!', 0, 1,
+        'E', 'T', 'H', 'L', 0, 1,
         2, /* 2 consts */
         CONST_STRING, 1, 'x',
         CONST_INT32, 4, 1, 2, 3, 4

@@ -2,7 +2,6 @@
 
 typedef enum {
     VM_OP_NO_SUCH_OP,
-    VM_OP_NOP,
     VM_OP_ICONST,
     VM_OP_SCONST,
     VM_OP_IPUSH,
@@ -24,12 +23,12 @@ typedef enum {
     VM_OP_DEC,
     VM_OP_ASSIGN,
     VM_OP_RET,
+    VM_OP_NOP,
     VM_OP_MAX,
 } vm_op_t;
 
 static const char *op_names[VM_OP_MAX] = {
     [VM_OP_NO_SUCH_OP] = "ERROR_NO_SUCH_OP",
-    [VM_OP_NOP] = "NOP",
     [VM_OP_IPUSH] = "IPUSH",
     [VM_OP_IPUSH_1N] = "IPUSH IMM [-1]",
     [VM_OP_IPUSH_0] = "IPUSH IMM [0]",
@@ -51,4 +50,5 @@ static const char *op_names[VM_OP_MAX] = {
     [VM_OP_DEC] = "DEC",
     [VM_OP_ASSIGN] = "ASSIGN",
     [VM_OP_RET] = "RET",
+    [VM_OP_NOP] = "NOP",
 };

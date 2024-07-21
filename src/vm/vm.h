@@ -42,8 +42,8 @@ typedef struct vm_stack_t {
 } vm_stack_t;
 
 typedef struct vm_t {
-    uint32_t code_size;
-    // pc is a pointer into the cg->code bytearray.
+    uint32_t bytecode_size;
+    // pc is a pointer into the cg->bytecode bytearray.
     uint8_t *pc;
     cg_t *cg;
     vm_stack_t *stack;

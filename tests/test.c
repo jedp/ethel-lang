@@ -38,8 +38,8 @@ int main(int argc, char **argv) {
     test_dis();
     test_map();
     test_cg();
-    test_vm();
     test_comp();
+    test_vm();
 
     /*
     test_heap();

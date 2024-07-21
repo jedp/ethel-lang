@@ -9,7 +9,8 @@
 typedef struct cg_t {
     uint32_t len;
     uint32_t max;
-    uint8_t *code;
+    uint32_t code_start;
+    uint8_t *bytecode;
     map_t *consts;
 } cg_t;
 
@@ -19,7 +20,12 @@ void cg_free(cg_t *cg);
 
 void cg_byte(cg_t *cg, uint8_t byte);
 
-void cg_bytes(cg_t *cg, uint8_t *bytes, size_t size);
+void cg_bytes(cg_t *cg, const uint8_t *bytes, size_t size);
+
+/*
+ * Parse the header and return the offset of the start of code.
+ */
+uint32_t cg_header(cg_t *cg, const uint8_t *bytes, size_t size);
 
 /*
  * Put a const v in the constant pool, writing back its index.

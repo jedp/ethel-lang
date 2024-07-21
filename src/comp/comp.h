@@ -5,7 +5,7 @@
 #include "token.h"
 #include "lex.h"
 
-static const uint8_t magic[] = {'J', 'E', 'D', '!'};
+static const uint8_t magic[] = {'E', 'T', 'H', 'L'};
 static const uint8_t major = 0;
 static const uint8_t minor = 1;
 
