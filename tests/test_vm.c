@@ -115,6 +115,30 @@ void test_vm_iconst(void) {
     vm_free(&vm);
 }
 
+void test_vm_iconst_2bytes_negative(void) {
+    vm_t vm;
+    vm_init(&vm);
+
+    error_t err = ERR_NO_ERROR;
+
+    // -32768
+    uint8_t bytes[] = {
+        'E', 'T', 'H', 'L', 0, 1,
+        // Const pool
+        1, CONST_INT, 2, 0x00, 0x80,
+        // Code
+        VM_OP_NOP,
+        VM_OP_ICONST, 1,
+        VM_OP_RET};
+
+    err |= vm_load_code(&vm, bytes, sizeof(bytes));
+    err |= vm_exec(&vm);
+    TEST_ASSERT_EQUAL(ERR_NO_ERROR, err);
+    TEST_ASSERT_EQUAL(-32768, vm_stack_peek(&vm)->intval);
+
+    vm_free(&vm);
+}
+
 void test_vm_stack_negate(void) {
     vm_t vm;
     vm_init(&vm);
@@ -412,6 +436,7 @@ void test_vm(void) {
     RUN_TEST(test_vm_stack_push_int);
     RUN_TEST(test_vm_stack_push);
     RUN_TEST(test_vm_iconst);
+    RUN_TEST(test_vm_iconst_2bytes_negative);
     RUN_TEST(test_vm_stack_negate);
     RUN_TEST(test_vm_stack_add);
     RUN_TEST(test_vm_stack_sub);

@@ -64,11 +64,18 @@ uint32_t cg_header(cg_t *cg, const uint8_t *bytes, size_t size) {
     for (uint8_t i = 1; i <= num_consts; i++) {
         const_type_t type = bytes[offset++];
         map_elem_t v;
-        uint8_t dont_care;
+        uint8_t k;
         switch (type) {
+            case CONST_BOOLEAN: {
+                // Bool don't have size.
+                uint8_t boolval = bytes[offset++] ? 1 : 0;
+
+               break;
+            }
             case CONST_INT: {
                 // Ints are packed into as few bytes as possible,
                 // least-significant byte first.
+                // Extend sign bit if necessary.
                 uint32_t uintval = 0;
                 uint8_t intsize = bytes[offset++];
                 uintval |= (bytes[offset++]) & 0xff;
@@ -80,9 +87,14 @@ uint32_t cg_header(cg_t *cg, const uint8_t *bytes, size_t size) {
                     uintval |= (bytes[offset++] << 24) & 0xff000000;
                 if (intsize > 4)
                     return 0;
+                // Extend sign bit.
+                if (intsize < 4 && uintval & (1 << ((intsize - 1) * 8 + 7))) {
+                    uintval |= (0xffffffff << intsize * 8);
+                }
                 v.type = MAP_ELEM_INT_TYPE;
                 v.elem.intval = (int) uintval;
-                cg_put_const(cg, v, &dont_care);
+                cg_put_const(cg, v, &k);
+                // TODO runtime assert k == i
                 break;
             }
             default:
