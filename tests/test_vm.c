@@ -325,6 +325,32 @@ void test_vm_stack_arith(void) {
     vm_free(&vm);
 }
 
+void test_vm_binop_type_check(void) {
+    vm_t vm;
+    vm_init(&vm);
+
+    error_t err = ERR_NO_ERROR;
+
+    uint8_t bytes[] = {
+        'E', 'T', 'H', 'L', 0, 1,
+        // Const pool
+        2,
+        CONST_INT, 1, 42,
+        CONST_STRING, 1, 'x',
+        // Code
+        VM_OP_ICONST, 1,
+        VM_OP_SCONST, 2,
+        VM_OP_ADD,
+        VM_OP_RET
+    };
+
+    err |= vm_load_code(&vm, bytes, sizeof(bytes));
+    err |= vm_exec(&vm);
+    TEST_ASSERT_EQUAL(ERR_VM_RUNTIME_ERROR, err);
+
+    vm_free(&vm);
+}
+
 void test_vm_stack_load_imm(void) {
     vm_t vm;
     vm_init(&vm);
@@ -393,6 +419,7 @@ void test_vm(void) {
     RUN_TEST(test_vm_stack_div);
     RUN_TEST(test_vm_stack_rem);
     RUN_TEST(test_vm_stack_arith);
+    RUN_TEST(test_vm_binop_type_check);
     RUN_TEST(test_vm_stack_load_imm);
     RUN_TEST(test_vm_stack_inc_dec);
 }

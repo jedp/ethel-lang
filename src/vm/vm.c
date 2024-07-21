@@ -1,4 +1,5 @@
 #include <stdio.h>
+#include <stdarg.h>
 #include "../common/err.h"
 #include "../comp/cg.h"
 #include "../comp/comp.h"
@@ -8,6 +9,26 @@
 #include "vm.h"
 
 #define READ_BYTE() (*vm->pc++)
+
+void runtime_error(vm_t *vm, const char *format, ...) {
+    va_list args;
+    va_start(args, format);
+    vfprintf(stderr, format, args);
+    va_end(args);
+    fputs("\n", stderr);
+
+    vm_stack_reset(vm);
+}
+
+void runtime_check(vm_t *vm, boolean condition, const char *format, ...) {
+    if (condition)
+        return;
+
+    va_list args;
+    va_start(args, format);
+    runtime_error(vm, format, args);
+    va_end(args);
+}
 
 static error_t numeric_negate(vm_stack_elem_t *e) {
     switch (e->type) {
@@ -24,7 +45,6 @@ static error_t numeric_negate(vm_stack_elem_t *e) {
             e->floatval = -e->floatval;
             break;
         default:
-            printf("Unsupported type for numeric negation: %d\n", e->type);
             return ERR_VM_RUNTIME_ERROR;
     }
     return ERR_NO_ERROR;
@@ -34,9 +54,14 @@ static error_t binop(vm_t *vm, vm_op_t op) {
     vm_stack_elem_t *a = vm_stack_pop(vm);
     vm_stack_elem_t *b = vm_stack_pop(vm);
 
+    runtime_check(vm, TYPE_IS_NUMERIC(a->type), "Operand to %s must be numeric. Is: %s", op_names[op],
+                  vm_stack_elem_type_names[a->type]);
+    runtime_check(vm, TYPE_IS_NUMERIC(b->type), "Operand to %s must be numeric. Is: %s", op_names[op],
+                  vm_stack_elem_type_names[b->type]);
+
     // TODO support more than just int.
     if (a->type != VM_STACK_INT_TYPE || b->type != VM_STACK_INT_TYPE) {
-        printf("Time to implement the other types!\n");
+        runtime_error(vm, "Time to implement the other types!");
         return ERR_VM_RUNTIME_ERROR;
     }
 
@@ -60,7 +85,7 @@ static error_t binop(vm_t *vm, vm_op_t op) {
             e.intval = b->intval % a->intval;
             break;
         default:
-            printf("Unsupported type for numeric binary operation: %d\n", e.type);
+            runtime_error(vm, "Unsupported type for numeric binary operation: %d\n", e.type);
             return ERR_VM_RUNTIME_ERROR;
     }
 
@@ -98,6 +123,7 @@ static error_t exec(vm_t *vm) {
             }
             case VM_OP_NEG: {
                 vm_stack_elem_t *e = vm_stack_pop(vm);
+                runtime_check(vm, TYPE_IS_NUMERIC(e->type), "Can only negate numbers.");
                 err = numeric_negate(e);
                 vm_stack_push(vm, e);
                 break;
@@ -126,11 +152,11 @@ static error_t exec(vm_t *vm) {
             case VM_OP_RET:
                 return ERR_NO_ERROR;
             default:
-                printf("Unsupported bytecode at offset %d: %d\n", *vm->pc, bytecode);
+                runtime_error(vm, "Unsupported bytecode at offset %d: %d", *vm->pc, bytecode);
                 return ERR_VM_RUNTIME_ERROR;
         }
         if (err) {
-            printf("Execution error: %d\n", err);
+            runtime_error(vm, "Execution error: %d\n", err);
             return err;
         }
     }

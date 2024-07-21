@@ -17,7 +17,19 @@ typedef enum {
     VM_STACK_INT_TYPE,
     VM_STACK_FLOAT_TYPE,
     VM_STACK_ADDR_TYPE,
+    VM_STACK_ELEM_TYPE_MAX,
 } vm_stack_elem_type_t;
+
+static const char *vm_stack_elem_type_names[VM_STACK_ELEM_TYPE_MAX] = {
+    [VM_STACK_ERROR_NO_TYPE] = "No type!",
+    [VM_STACK_BOOL_TYPE] = "Boolean",
+    [VM_STACK_BYTE_TYPE] = "Byte",
+    [VM_STACK_INT_TYPE] = "Int",
+    [VM_STACK_FLOAT_TYPE] = "Float",
+    [VM_STACK_ADDR_TYPE] = "Address",
+};
+
+#define TYPE_IS_NUMERIC(t) ((t == VM_STACK_BYTE_TYPE || t == VM_STACK_INT_TYPE || t == VM_STACK_FLOAT_TYPE))
 
 /*
  * Stack elem is tagged union to make straight arithmetic
@@ -48,6 +60,10 @@ typedef struct vm_t {
     cg_t *cg;
     vm_stack_t *stack;
 } vm_t;
+
+void runtime_error(vm_t *vm, const char *format, ...);
+
+void runtime_check(vm_t *vm, boolean condition, const char *format, ...);
 
 error_t vm_init(vm_t *vm);
 
