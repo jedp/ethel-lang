@@ -34,7 +34,6 @@ typedef enum {
     PRECED_UNARY,
     PRECED_BITWISE_SHIFT,
     PRECED_BITWISE_NOT,
-    PRECED_LOGICAL_NOT,
     PRECED_SUBSCRIPT,
     PRECED_GROUPING,
     PRECED_MEMBER_ACCESS,
@@ -58,6 +57,8 @@ __attribute__((unused)) void parse_bin(parser_t *parser);
 
 __attribute__((unused)) void parse_ident(parser_t *parser);
 
+__attribute__((unused)) void parse_literal(parser_t *parser);
+
 __attribute__((unused)) void parse_unary_op(parser_t *parser);
 
 __attribute__((unused)) void parse_binary_op(parser_t *parser);
@@ -72,6 +73,9 @@ parse_preced_rule_t preced_rules[] = {
     [TAG_INT] = {parse_int, NULL, PRECED_NONE, ASSOC_LEFT},
     [TAG_HEX] = {parse_hex, NULL, PRECED_NONE, ASSOC_LEFT},
     [TAG_BIN] = {parse_bin, NULL, PRECED_NONE, ASSOC_LEFT},
+    [TAG_TRUE] = {parse_literal, NULL, PRECED_NONE, ASSOC_LEFT},
+    [TAG_FALSE] = {parse_literal, NULL, PRECED_NONE, ASSOC_LEFT},
+    [TAG_NIL] = {parse_literal, NULL, PRECED_NONE, ASSOC_LEFT},
     [TAG_IDENT] = {parse_ident, NULL, PRECED_NONE, ASSOC_LEFT},
     [TAG_LPAREN] = {parse_parens, NULL, PRECED_GROUPING, ASSOC_LEFT},
     [TAG_RPAREN] = {NULL, NULL, PRECED_NONE, ASSOC_LEFT},
@@ -86,6 +90,9 @@ parse_preced_rule_t preced_rules[] = {
     [TAG_BITWISE_AND] = {NULL, parse_binary_op, PRECED_BITWISE_AND, ASSOC_LEFT},
     [TAG_BITWISE_SHL] = {NULL, parse_binary_op, PRECED_BITWISE_SHIFT, ASSOC_LEFT},
     [TAG_BITWISE_SHR] = {NULL, parse_binary_op, PRECED_BITWISE_SHIFT, ASSOC_LEFT},
+    [TAG_AND] = {NULL, parse_binary_op, PRECED_LOGICAL_AND, ASSOC_LEFT},
+    [TAG_OR] = {NULL, parse_binary_op, PRECED_LOGICAL_OR, ASSOC_LEFT},
+    [TAG_NOT] = {parse_unary_op, NULL, PRECED_TERM, ASSOC_LEFT},
     [TAG_ASSIGN] = {NULL, parse_binary_op, PRECED_ASSIGN, ASSOC_RIGHT},
     [TAG_EOF]= {NULL, NULL, PRECED_EOF, ASSOC_LEFT},
 };

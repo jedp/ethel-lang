@@ -34,7 +34,7 @@ void test_comp_arithmetic(void) {
     TEST_ASSERT_EQUAL(ERR_NO_ERROR, err);
 }
 
-void test_comp_boolean_arithmetic(void) {
+void test_comp_bit_arithmetic(void) {
     const char *input = "0xff & (37 | 0xa) << 0b00000001";
 
     cg_t cg;
@@ -56,6 +56,43 @@ void test_comp_boolean_arithmetic(void) {
     map_elem_t v;
     cg_get_const(&cg, 1, &v);
     TEST_ASSERT_EQUAL(0xff, v.elem.intval);
+
+    TEST_ASSERT_EQUAL(ERR_NO_ERROR, err);
+}
+
+void test_comp_booleans(void) {
+    const char *input = "true or false and not true";
+
+    cg_t cg;
+    cg_init(&cg);
+    error_t err = codegen(input, &cg);
+
+    uint8_t expected[] = {
+        VM_OP_TRUE,
+        VM_OP_FALSE,
+        VM_OP_TRUE,
+        VM_OP_LOGICAL_NOT,
+        VM_OP_LOGICAL_AND,
+        VM_OP_LOGICAL_OR,
+        VM_OP_RET,
+    };
+    TEST_ASSERT_EQUAL_MEMORY(expected, cg.bytecode, cg.len);
+
+    TEST_ASSERT_EQUAL(ERR_NO_ERROR, err);
+}
+
+void test_comp_nil(void) {
+    const char *input = "nil";
+
+    cg_t cg;
+    cg_init(&cg);
+    error_t err = codegen(input, &cg);
+
+    uint8_t expected[] = {
+        VM_OP_NIL,
+        VM_OP_RET,
+    };
+    TEST_ASSERT_EQUAL_MEMORY(expected, cg.bytecode, cg.len);
 
     TEST_ASSERT_EQUAL(ERR_NO_ERROR, err);
 }
@@ -125,8 +162,11 @@ void test_comp_const_pool(void) {
 
 void test_comp(void) {
     RUN_TEST(test_comp_arithmetic);
-    RUN_TEST(test_comp_boolean_arithmetic);
+    RUN_TEST(test_comp_bit_arithmetic);
+    RUN_TEST(test_comp_booleans);
+    RUN_TEST(test_comp_nil);
     RUN_TEST(test_comp_assign);
     RUN_TEST(test_comp_header);
     RUN_TEST(test_comp_const_pool);
 }
+

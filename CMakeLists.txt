@@ -46,7 +46,8 @@ set(COMP_OBJS
 )
 
 set(EC_OBJS
-        ${CMAKE_SRC_DIR}/comp/ec.c)
+        ${CMAKE_SRC_DIR}/comp/ec.c
+)
 
 set(ER_OBJS
         ${CMAKE_SRC_DIR}/run/er.c)

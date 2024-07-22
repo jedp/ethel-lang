@@ -13,6 +13,7 @@
  */
 typedef enum {
     VM_STACK_ERROR_NO_TYPE,
+    VM_STACK_NIL_TYPE,
     VM_STACK_BOOL_TYPE,
     VM_STACK_BYTE_TYPE,
     VM_STACK_INT_TYPE,
@@ -23,6 +24,7 @@ typedef enum {
 
 static const char *vm_stack_elem_type_names[VM_STACK_ELEM_TYPE_MAX] = {
     [VM_STACK_ERROR_NO_TYPE] = "No type!",
+    [VM_STACK_NIL_TYPE] = "Nil",
     [VM_STACK_BOOL_TYPE] = "Boolean",
     [VM_STACK_BYTE_TYPE] = "Byte",
     [VM_STACK_INT_TYPE] = "Int",
@@ -81,6 +83,8 @@ error_t vm_stack_push_byte(vm_t *vm, uint8_t b);
 error_t vm_stack_push_int(vm_t *vm, int i);
 
 error_t vm_stack_push_boolean(vm_t *vm, bool z);
+
+error_t vm_stack_push_nil(vm_t *vm);
 
 vm_stack_elem_t *vm_stack_peek(vm_t *vm);
 

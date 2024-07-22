@@ -30,6 +30,24 @@ bool runtime_check(vm_t *vm, bool condition, const char *message) {
     return false;
 }
 
+static bool truthiness(vm_stack_elem_t *e) {
+    switch (e->type) {
+        case VM_STACK_NIL_TYPE:
+            return false;
+        case VM_STACK_BOOL_TYPE:
+            return e->boolval == 1;
+        case VM_STACK_BYTE_TYPE:
+            return e->byteval != 0;
+        case VM_STACK_INT_TYPE:
+            return e->intval > 0;
+        case VM_STACK_FLOAT_TYPE:
+            return e->floatval > 0.0f;
+        default:
+            printf("Can't determine truthiness of stack elem type %d\n", e->type);
+            return false;
+    }
+}
+
 static error_t numeric_negate(vm_stack_elem_t *e) {
     switch (e->type) {
         case VM_STACK_BOOL_TYPE:
@@ -50,7 +68,7 @@ static error_t numeric_negate(vm_stack_elem_t *e) {
     return ERR_NO_ERROR;
 }
 
-static error_t binop(vm_t *vm, vm_op_t op) {
+static error_t numerical_binop(vm_t *vm, vm_op_t op) {
     vm_stack_elem_t *a = vm_stack_pop(vm);
     vm_stack_elem_t *b = vm_stack_pop(vm);
 
@@ -85,11 +103,34 @@ static error_t binop(vm_t *vm, vm_op_t op) {
             e.intval = b->intval % a->intval;
             break;
         default:
-            runtime_error(vm, "Unsupported type for numeric binary operation");
+            runtime_error(vm, "Unsupported numeric binary operation");
             return ERR_VM_RUNTIME_ERROR;
     }
 
     // Don't free b and a: They are still slots in the stack.
+
+    vm_stack_push(vm, &e);
+    return ERR_NO_ERROR;
+}
+
+static error_t logical_binop(vm_t *vm, vm_op_t op) {
+    bool a = truthiness(vm_stack_pop(vm));
+    bool b = truthiness(vm_stack_pop(vm));
+
+    vm_stack_elem_t e;
+    e.type = VM_STACK_BOOL_TYPE;
+
+    switch(op) {
+        case VM_OP_LOGICAL_AND:
+            e.boolval = a && b;
+            break;
+        case VM_OP_LOGICAL_OR:
+            e.boolval = a || b;
+            break;
+        default:
+            runtime_error(vm, "Unsupported logical binary operation");
+            return ERR_VM_RUNTIME_ERROR;
+    }
 
     vm_stack_push(vm, &e);
     return ERR_NO_ERROR;
@@ -127,6 +168,15 @@ static error_t exec(vm_t *vm) {
                 vm_stack_push_int(vm, v.elem.intval);
                 break;
             }
+            case VM_OP_TRUE:
+                vm_stack_push_boolean(vm, true);
+                break;
+            case VM_OP_FALSE:
+                vm_stack_push_boolean(vm, false);
+                break;
+            case VM_OP_NIL:
+                vm_stack_push_nil(vm);
+                break;
             case VM_OP_NEG: {
                 vm_stack_elem_t *e = vm_stack_pop(vm);
                 runtime_check(vm, TYPE_IS_NUMERIC(e->type), "Can only negate numbers.");
@@ -135,20 +185,34 @@ static error_t exec(vm_t *vm) {
                 break;
             }
             case VM_OP_ADD:
-                err = binop(vm, VM_OP_ADD);
+                err = numerical_binop(vm, VM_OP_ADD);
                 break;
             case VM_OP_SUB:
-                err = binop(vm, VM_OP_SUB);
+                err = numerical_binop(vm, VM_OP_SUB);
                 break;
             case VM_OP_MUL:
-                err = binop(vm, VM_OP_MUL);
+                err = numerical_binop(vm, VM_OP_MUL);
                 break;
             case VM_OP_DIV:
-                err = binop(vm, VM_OP_DIV);
+                err = numerical_binop(vm, VM_OP_DIV);
                 break;
             case VM_OP_REM:
-                err = binop(vm, VM_OP_REM);
+                err = numerical_binop(vm, VM_OP_REM);
                 break;
+            case VM_OP_LOGICAL_AND:
+                err = logical_binop(vm, VM_OP_LOGICAL_AND);
+                break;
+            case VM_OP_LOGICAL_OR:
+                err = logical_binop(vm, VM_OP_LOGICAL_OR);
+                break;
+            case VM_OP_LOGICAL_NOT: {
+                vm_stack_elem_t *e = vm_stack_pop(vm);
+                bool val = truthiness(e);
+                e->type = VM_STACK_BOOL_TYPE;
+                e->boolval = val;
+                vm_stack_push(vm, e);
+                break;
+            }
             case VM_OP_INC:
                 vm_stack_peek(vm)->intval += 1;
                 break;
@@ -235,6 +299,13 @@ error_t vm_stack_push_boolean(vm_t *vm, bool z) {
     vm_stack_elem_t e = {
         .type = VM_STACK_BOOL_TYPE,
         .boolval = z ? 1 : 0
+    };
+    return vm_stack_push(vm, &e);
+}
+
+error_t vm_stack_push_nil(vm_t *vm) {
+    vm_stack_elem_t e = {
+        .type = VM_STACK_NIL_TYPE
     };
     return vm_stack_push(vm, &e);
 }

@@ -11,7 +11,7 @@
 static void parse_expr(parser_t *parser);
 
 static void error(parser_t *parser, uint8_t which) {
-    printf("ERROR: %d\n", which);
+    printf("ERROR: Failed to parse token %d\n", which);
     parser->err = which;
 }
 
@@ -111,10 +111,6 @@ void parse_expr_by_precedence(parser_t *parser, uint8_t min_preced) {
     }
 }
 
-__attribute__((unused)) void parse_bool(parser_t *parser) {
-    (void) emit_const_bool(parser, parser->prev.tag == TAG_TRUE);
-}
-
 // Referenced via pointer in the precedence table.
 __attribute__((unused)) void parse_int(parser_t *parser) {
     int const_int = (int) strtol(parser->prev.start, NULL, 10);
@@ -140,15 +136,37 @@ __attribute__((unused)) void parse_ident(parser_t *parser) {
 }
 
 // Referenced via pointer in the precedence table.
+__attribute__((unused)) void parse_literal(parser_t *parser) {
+    switch (parser->prev.tag) {
+        case TAG_TRUE:
+            emit_byte(parser, VM_OP_TRUE);
+            break;
+        case TAG_FALSE:
+            emit_byte(parser, VM_OP_FALSE);
+            break;
+        case TAG_NIL:
+            emit_byte(parser, VM_OP_NIL);
+            break;
+        default:
+            error(parser, COMP_UNHANDLED_LITERAL);
+    }
+}
+
+// Referenced via pointer in the precedence table.
 __attribute__((unused)) void parse_unary_op(parser_t *parser) {
     tag_t op = parser->prev.tag;
 
     parse_expr_by_precedence(parser, PRECED_UNARY);
 
-    if (op == TAG_MINUS) {
-        emit_byte(parser, VM_OP_NEG);
-    } else {
-        error(parser, COMP_UNHANDLED_PREFIX_OP);
+    switch (op) {
+        case TAG_MINUS:
+            emit_byte(parser, VM_OP_NEG);
+            break;
+        case TAG_NOT:
+            emit_byte(parser, VM_OP_LOGICAL_NOT);
+            break;
+        default:
+            error(parser, COMP_UNHANDLED_PREFIX_OP);
     }
 }
 
@@ -188,6 +206,12 @@ __attribute__((unused)) void parse_binary_op(parser_t *parser) {
             break;
         case TAG_BITWISE_SHR:
             emit_byte(parser, VM_OP_BIN_SHR);
+            break;
+        case TAG_AND:
+            emit_byte(parser, VM_OP_LOGICAL_AND);
+            break;
+        case TAG_OR:
+            emit_byte(parser, VM_OP_LOGICAL_OR);
             break;
         case TAG_ASSIGN:
             emit_byte(parser, VM_OP_ASSIGN);

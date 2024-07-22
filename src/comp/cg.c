@@ -94,7 +94,6 @@ uint32_t cg_header(cg_t *cg, const uint8_t *bytes, size_t size) {
                 printf("We don't handle const type %d yet!\n", type);
                 return 0;
         }
-        printf("added const key %d\n", k);
         if (k != i) {
             printf("ERROR: Created const index %d, but bytecode index is %d\n", k, i);
             return 0;

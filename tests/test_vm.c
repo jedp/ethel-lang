@@ -349,6 +349,63 @@ void test_vm_stack_arith(void) {
     vm_free(&vm);
 }
 
+void test_vm_booleans(void) {
+    vm_t vm;
+    vm_init(&vm);
+
+    error_t err = ERR_NO_ERROR;
+
+    // true or false and not true
+    uint8_t bytes[] = {
+        'E', 'T', 'H', 'L', 0, 1,
+        EMPTY_CONST_POOL,
+        VM_OP_TRUE,
+        VM_OP_FALSE,
+        VM_OP_TRUE,
+        VM_OP_LOGICAL_NOT,
+        VM_OP_LOGICAL_AND,
+        VM_OP_LOGICAL_OR,
+        VM_OP_RET,
+    };
+
+    err |= vm_load_code(&vm, bytes, sizeof(bytes));
+    err |= vm_exec(&vm);
+    TEST_ASSERT_EQUAL(ERR_NO_ERROR, err);
+    TEST_ASSERT_EQUAL(VM_STACK_BOOL_TYPE, vm_stack_peek(&vm)->type);
+    TEST_ASSERT_EQUAL(1, vm_stack_peek(&vm)->boolval);
+
+    vm_free(&vm);
+}
+
+void test_vm_non_boolean_booleans(void) {
+    vm_t vm;
+    vm_init(&vm);
+
+    error_t err = ERR_NO_ERROR;
+
+    // 42 or -1 and not nil
+    uint8_t bytes[] = {
+        'E', 'T', 'H', 'L', 0, 1,
+        1,
+        CONST_INT, 1, 42,
+        VM_OP_ICONST, 1,
+        VM_OP_IPUSH_1N,
+        VM_OP_NIL,
+        VM_OP_LOGICAL_NOT,
+        VM_OP_LOGICAL_AND,
+        VM_OP_LOGICAL_OR,
+        VM_OP_RET,
+    };
+
+    err |= vm_load_code(&vm, bytes, sizeof(bytes));
+    err |= vm_exec(&vm);
+    TEST_ASSERT_EQUAL(ERR_NO_ERROR, err);
+    TEST_ASSERT_EQUAL(VM_STACK_BOOL_TYPE, vm_stack_peek(&vm)->type);
+    TEST_ASSERT_EQUAL(1, vm_stack_peek(&vm)->boolval);
+
+    vm_free(&vm);
+}
+
 void test_vm_binop_type_check(void) {
     vm_t vm;
     vm_init(&vm);
@@ -444,6 +501,8 @@ void test_vm(void) {
     RUN_TEST(test_vm_stack_div);
     RUN_TEST(test_vm_stack_rem);
     RUN_TEST(test_vm_stack_arith);
+    RUN_TEST(test_vm_booleans);
+    RUN_TEST(test_vm_non_boolean_booleans);
     RUN_TEST(test_vm_binop_type_check);
     RUN_TEST(test_vm_stack_load_imm);
     RUN_TEST(test_vm_stack_inc_dec);
