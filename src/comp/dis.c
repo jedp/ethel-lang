@@ -39,6 +39,8 @@ uint32_t print_dis_byte(cg_t *cg, uint32_t offset) {
         case VM_OP_IPUSH_1N:
         case VM_OP_IPUSH_0:
         case VM_OP_IPUSH_1:
+        case VM_OP_ZPUSH_F:
+        case VM_OP_ZPUSH_T:
         case VM_OP_ADD:
         case VM_OP_SUB:
         case VM_OP_MUL:

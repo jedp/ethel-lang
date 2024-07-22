@@ -6,7 +6,7 @@ set(CMAKE_INC_DIR ${CMAKE_SOURCE_DIR}/inc)
 set(CMAKE_TESTS_DIR ${CMAKE_SOURCE_DIR}/tests)
 
 set(CMAKE_C_STANDARD 11)
-set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -std=c11 -g3 -Os -I ${CMAKE_INC_DIR}")
+set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -std=c11 -g3 -Os -I ${CMAKE_INC_DIR} -I ${CMAKE_SRC_DIR}/common")
 set(CMAKE_C_FLAGS_TEST "${CMAKE_C_FLAGS_TEST} = -std=c11 -g3 -I ${CMAKE_INC_DIR}")
 set(EXTRA_CFLAGS
         -Wall
@@ -30,6 +30,7 @@ set(TESTFLAGS -I test -fno-omit-frame-pointer -fsanitize=address)
 set(LDFLAGS -lm -lreadline -ldl)
 
 set(COMMON_OBJS
+        ${CMAKE_INC_DIR}
         ${CMAKE_SRC_DIR}/common/map.c
         ${CMAKE_SRC_DIR}/common/math.c
         ${CMAKE_SRC_DIR}/common/ptr.c

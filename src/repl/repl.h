@@ -1,6 +1,6 @@
 #pragma once
 
-#import "../common/err.h"
+#import "err.h"
 
 error_t repl(void);
 

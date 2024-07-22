@@ -47,6 +47,10 @@ static void emit_bytes(parser_t *parser, uint8_t byte1, uint8_t byte2) {
     emit_byte(parser, byte2);
 }
 
+static void emit_const_bool(parser_t *parser, boolean val) {
+    emit_byte(parser, val ? VM_OP_ZPUSH_T : VM_OP_ZPUSH_F);
+}
+
 static map_err_t emit_const_int(parser_t *parser, int val) {
     map_err_t err = MAP_OK;
 
@@ -105,6 +109,10 @@ void parse_expr_by_precedence(parser_t *parser, uint8_t min_preced) {
         if (infix_rule != NULL)
             infix_rule(parser);
     }
+}
+
+__attribute__((unused)) void parse_bool(parser_t *parser) {
+    (void) emit_const_bool(parser, parser->prev.tag == TAG_TRUE);
 }
 
 // Referenced via pointer in the precedence table.

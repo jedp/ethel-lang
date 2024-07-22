@@ -2,10 +2,10 @@
 
 #include "../common/def.h"
 #include "../common/map.h"
+#include "../common/ptr.h"
 #include "cmem.h"
 #include "cg.h"
 #include "comp.h"
-#include "../common/ptr.h"
 
 void cg_init(cg_t *cg) {
     cg->len = 0;
@@ -66,12 +66,6 @@ uint32_t cg_header(cg_t *cg, const uint8_t *bytes, size_t size) {
         map_elem_t v;
         uint8_t k;
         switch (type) {
-            case CONST_BOOLEAN: {
-                // Bool don't have size.
-                uint8_t boolval = bytes[offset++] ? 1 : 0;
-
-               break;
-            }
             case CONST_INT: {
                 // Ints are packed into as few bytes as possible,
                 // least-significant byte first.
@@ -94,12 +88,16 @@ uint32_t cg_header(cg_t *cg, const uint8_t *bytes, size_t size) {
                 v.type = MAP_ELEM_INT_TYPE;
                 v.elem.intval = (int) uintval;
                 cg_put_const(cg, v, &k);
-                // TODO runtime assert k == i
                 break;
             }
             default:
                 printf("We don't handle const type %d yet!\n", type);
                 return 0;
+        }
+        printf("added const key %d\n", k);
+        if (k != i) {
+            printf("ERROR: Created const index %d, but bytecode index is %d\n", k, i);
+            return 0;
         }
     }
 

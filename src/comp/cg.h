@@ -3,7 +3,7 @@
 #include <inttypes.h>
 
 #include "../common/def.h"
-#include "../common/err.h"
+#include "err.h"
 #include "../common/map.h"
 
 typedef struct cg_t {

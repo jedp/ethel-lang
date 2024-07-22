@@ -1,8 +1,9 @@
 #pragma once
 
+#include <stdbool.h>
 #include "../comp/cg.h"
 #include "../common/def.h"
-#include "../common/err.h"
+#include "err.h"
 
 #define VM_DATA_STACK_SIZE (64)
 
@@ -61,9 +62,9 @@ typedef struct vm_t {
     vm_stack_t *stack;
 } vm_t;
 
-void runtime_error(vm_t *vm, const char *format, ...);
+void runtime_error(vm_t *vm, const char *message);
 
-void runtime_check(vm_t *vm, boolean condition, const char *format, ...);
+bool runtime_check(vm_t *vm, bool condition, const char *message);
 
 error_t vm_init(vm_t *vm);
 
@@ -78,6 +79,8 @@ error_t vm_stack_push(vm_t *vm, vm_stack_elem_t *e);
 error_t vm_stack_push_byte(vm_t *vm, uint8_t b);
 
 error_t vm_stack_push_int(vm_t *vm, int i);
+
+error_t vm_stack_push_boolean(vm_t *vm, bool z);
 
 vm_stack_elem_t *vm_stack_peek(vm_t *vm);
 

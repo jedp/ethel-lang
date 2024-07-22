@@ -115,7 +115,7 @@ void test_vm_iconst(void) {
     vm_free(&vm);
 }
 
-void test_vm_iconst_2bytes_negative(void) {
+void test_vm_iconst_negative(void) {
     vm_t vm;
     vm_init(&vm);
 
@@ -355,15 +355,15 @@ void test_vm_binop_type_check(void) {
 
     error_t err = ERR_NO_ERROR;
 
+    // Can't add 42 + true
     uint8_t bytes[] = {
         'E', 'T', 'H', 'L', 0, 1,
         // Const pool
-        2,
+        1,
         CONST_INT, 1, 42,
-        CONST_STRING, 1, 'x',
         // Code
         VM_OP_ICONST, 1,
-        VM_OP_SCONST, 2,
+        VM_OP_ZPUSH_T,
         VM_OP_ADD,
         VM_OP_RET
     };
@@ -436,7 +436,7 @@ void test_vm(void) {
     RUN_TEST(test_vm_stack_push_int);
     RUN_TEST(test_vm_stack_push);
     RUN_TEST(test_vm_iconst);
-    RUN_TEST(test_vm_iconst_2bytes_negative);
+    RUN_TEST(test_vm_iconst_negative);
     RUN_TEST(test_vm_stack_negate);
     RUN_TEST(test_vm_stack_add);
     RUN_TEST(test_vm_stack_sub);

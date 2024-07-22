@@ -1,6 +1,6 @@
 #pragma once
 
-#include "../common/err.h"
+#include "err.h"
 #include "cg.h"
 #include "token.h"
 #include "lex.h"
@@ -12,7 +12,6 @@ static const uint8_t minor = 1;
 #define MIN_BYTECODE_ALLOC (32)
 
 typedef enum {
-    CONST_BOOLEAN,
     CONST_BYTE,
     CONST_INT,
     CONST_FLOAT32,

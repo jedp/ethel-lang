@@ -1,7 +1,7 @@
 #pragma once
 
 #include <inttypes.h>
-#include "../common/err.h"
+#include "err.h"
 #include "../common/def.h"
 #include "token.h"
 
