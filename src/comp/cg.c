@@ -10,6 +10,7 @@
 void cg_init(cg_t *cg) {
     cg->len = 0;
     cg->max = 0;
+    cg->code_start = 0;
     cg->bytecode = NULL;
     cg->consts = map_new(MAP_NEW_BUCKETS, &hash_primitive, &eq_primitive);
 }

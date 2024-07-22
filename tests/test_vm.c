@@ -7,6 +7,24 @@
 
 #define EMPTY_CONST_POOL (0)
 
+static void test_program(uint8_t *bytes, uint16_t size,
+                         vm_stack_elem_t expect_stack_top,
+                         error_t expect_err) {
+    vm_t vm;
+    vm_init(&vm);
+
+    error_t err = ERR_NO_ERROR;
+
+    err |= vm_load_code(&vm, bytes, size);
+    err |= vm_exec(&vm);
+
+    TEST_ASSERT_EQUAL(expect_err, err);
+    TEST_ASSERT_EQUAL(expect_stack_top.type, vm_stack_peek(&vm)->type);
+    TEST_ASSERT_EQUAL(expect_stack_top.boolval, vm_stack_peek(&vm)->boolval);
+
+    vm_free(&vm);
+}
+
 void test_vm_init(void) {
     vm_t vm;
     vm_init(&vm);
@@ -359,9 +377,9 @@ void test_vm_booleans(void) {
     uint8_t bytes[] = {
         'E', 'T', 'H', 'L', 0, 1,
         EMPTY_CONST_POOL,
-        VM_OP_TRUE,
-        VM_OP_FALSE,
-        VM_OP_TRUE,
+        VM_OP_ZPUSH_T,
+        VM_OP_ZPUSH_F,
+        VM_OP_ZPUSH_T,
         VM_OP_LOGICAL_NOT,
         VM_OP_LOGICAL_AND,
         VM_OP_LOGICAL_OR,
@@ -440,6 +458,83 @@ void test_vm_boolean_comparators(void) {
     TEST_ASSERT_EQUAL(1, vm_stack_peek(&vm)->boolval);
 
     vm_free(&vm);
+}
+
+void test_vm_if_true_then(void) {
+    // if (true) then { 2 + 2 }
+    uint8_t bytes[] = {
+        'E', 'T', 'H', 'L', 0, 1,
+        EMPTY_CONST_POOL,
+        VM_OP_ZPUSH_T,
+        VM_OP_JZ, 16, 0,
+        VM_OP_IPUSH, 2,
+        VM_OP_IPUSH, 2,
+        VM_OP_ADD,
+        VM_OP_RET,
+    };
+
+    vm_stack_elem_t stack_top = {.type= VM_STACK_INT_TYPE, .intval= 4};
+    test_program(bytes, sizeof(bytes), stack_top, ERR_NO_ERROR);
+}
+
+void test_vm_if_false_then(void) {
+    // push -1; if (false) then { 2 + 2 }
+    uint8_t bytes[] = {
+        'E', 'T', 'H', 'L', 0, 1,
+        EMPTY_CONST_POOL,
+        VM_OP_IPUSH_1N,
+        VM_OP_ZPUSH_F,
+        VM_OP_JZ, 17, 0,
+        VM_OP_IPUSH, 2,
+        VM_OP_IPUSH, 2,
+        VM_OP_ADD,
+        VM_OP_RET,
+    };
+
+    vm_stack_elem_t stack_top = {.type= VM_STACK_INT_TYPE, .intval= -1};
+    test_program(bytes, sizeof(bytes), stack_top, ERR_NO_ERROR);
+}
+
+void test_vm_if_true_then_else(void) {
+    // if (true) then { 1 + 2 } else { 3 + 4 }
+    uint8_t bytes[] = {
+        'E', 'T', 'H', 'L', 0, 1,
+        EMPTY_CONST_POOL,
+        VM_OP_ZPUSH_T,
+        VM_OP_JZ, 0x12, 0,
+        VM_OP_IPUSH_1,
+        VM_OP_IPUSH, 2,
+        VM_OP_ADD,
+        VM_OP_JMP, 0x17, 0,
+        VM_OP_IPUSH, 3,
+        VM_OP_IPUSH, 4,
+        VM_OP_ADD,
+        VM_OP_RET,
+    };
+
+    vm_stack_elem_t stack_top = {.type= VM_STACK_INT_TYPE, .intval= 3};
+    test_program(bytes, sizeof(bytes), stack_top, ERR_NO_ERROR);
+}
+
+void test_vm_if_false_then_else(void) {
+    // if (false) then { 1 + 2 } else { 3 + 4 }
+    uint8_t bytes[] = {
+        'E', 'T', 'H', 'L', 0, 1,
+        EMPTY_CONST_POOL,
+        VM_OP_ZPUSH_F,
+        VM_OP_JZ, 0x12, 0,
+        VM_OP_IPUSH_1,
+        VM_OP_IPUSH, 2,
+        VM_OP_ADD,
+        VM_OP_JMP, 0x17, 0,
+        VM_OP_IPUSH, 3,
+        VM_OP_IPUSH, 4,
+        VM_OP_ADD,
+        VM_OP_RET,
+    };
+
+    vm_stack_elem_t stack_top = {.type= VM_STACK_INT_TYPE, .intval= 7};
+    test_program(bytes, sizeof(bytes), stack_top, ERR_NO_ERROR);
 }
 
 void test_vm_binop_type_check(void) {
@@ -540,6 +635,10 @@ void test_vm(void) {
     RUN_TEST(test_vm_booleans);
     RUN_TEST(test_vm_non_boolean_booleans);
     RUN_TEST(test_vm_boolean_comparators);
+    RUN_TEST(test_vm_if_true_then);
+    RUN_TEST(test_vm_if_false_then);
+    RUN_TEST(test_vm_if_true_then_else);
+    RUN_TEST(test_vm_if_false_then_else);
     RUN_TEST(test_vm_binop_type_check);
     RUN_TEST(test_vm_stack_load_imm);
     RUN_TEST(test_vm_stack_inc_dec);

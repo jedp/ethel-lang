@@ -68,9 +68,9 @@ void test_comp_booleans(void) {
     error_t err = codegen(input, &cg);
 
     uint8_t expected[] = {
-        VM_OP_TRUE,
-        VM_OP_FALSE,
-        VM_OP_TRUE,
+        VM_OP_ZPUSH_T,
+        VM_OP_ZPUSH_F,
+        VM_OP_ZPUSH_T,
         VM_OP_LOGICAL_NOT,
         VM_OP_LOGICAL_AND,
         VM_OP_LOGICAL_OR,
@@ -190,6 +190,122 @@ void test_comp_const_pool(void) {
     TEST_ASSERT_EQUAL_MEMORY(expected, buf, size - 1);
 }
 
+void test_comp_if_statement(void) {
+    const char *input = "if (true) then 2 + 2";
+
+    cg_t cg;
+    cg_init(&cg);
+    error_t err = codegen(input, &cg);
+
+    uint8_t expected[] = {
+        VM_OP_ZPUSH_T,
+        VM_OP_JZ, 9, 0,
+        VM_OP_IPUSH, 2,
+        VM_OP_IPUSH, 2,
+        VM_OP_ADD,
+        VM_OP_RET,
+    };
+    TEST_ASSERT_EQUAL_MEMORY(expected, cg.bytecode, cg.len);
+
+    TEST_ASSERT_EQUAL(ERR_NO_ERROR, err);
+}
+
+void test_comp_if_else_statements(void) {
+    const char *input = "if (true) then 1 else 0";
+
+    cg_t cg;
+    cg_init(&cg);
+    error_t err = codegen(input, &cg);
+
+    uint8_t expected[] = {
+        VM_OP_ZPUSH_T,
+        VM_OP_JZ, 8, 0,
+        VM_OP_IPUSH_1,
+        VM_OP_JMP, 9, 0,
+        VM_OP_IPUSH_0,
+        VM_OP_RET,
+    };
+    TEST_ASSERT_EQUAL_MEMORY(expected, cg.bytecode, cg.len);
+
+    TEST_ASSERT_EQUAL(ERR_NO_ERROR, err);
+}
+
+void test_comp_if_then_block(void) {
+    const char *input = "if (true) then { \n"
+                        "    1 + 2        \n"
+                        "}";
+
+    cg_t cg;
+    cg_init(&cg);
+    error_t err = codegen(input, &cg);
+
+    uint8_t expected[] = {
+        VM_OP_ZPUSH_T,
+        VM_OP_JZ, 8, 0,
+        VM_OP_IPUSH_1,
+        VM_OP_IPUSH, 2,
+        VM_OP_ADD,
+        VM_OP_RET,
+    };
+    TEST_ASSERT_EQUAL_MEMORY(expected, cg.bytecode, cg.len);
+
+    TEST_ASSERT_EQUAL(ERR_NO_ERROR, err);
+}
+
+void test_comp_if_then_else_block(void) {
+    const char *input = "if (true) then { \n"
+                        "    1 + 2        \n"
+                        "} else {         \n"
+                        "    3 + 4        \n"
+                        "}";
+
+    cg_t cg;
+    cg_init(&cg);
+    error_t err = codegen(input, &cg);
+
+    uint8_t expected[] = {
+        VM_OP_ZPUSH_T,
+        VM_OP_JZ, 11, 0,
+        VM_OP_IPUSH_1,
+        VM_OP_IPUSH, 2,
+        VM_OP_ADD,
+        VM_OP_JMP, 16, 0,
+        VM_OP_IPUSH, 3,
+        VM_OP_IPUSH, 4,
+        VM_OP_ADD,
+        VM_OP_RET,
+    };
+    TEST_ASSERT_EQUAL_MEMORY(expected, cg.bytecode, cg.len);
+
+    TEST_ASSERT_EQUAL(ERR_NO_ERROR, err);
+}
+
+void test_comp_multiline_block(void) {
+    const char *input = "if (true) then { \n"
+                        "    x = 1        \n"
+                        "    y = 2        \n"
+                        "}";
+
+    cg_t cg;
+    cg_init(&cg);
+    error_t err = codegen(input, &cg);
+
+    uint8_t expected[] = {
+        VM_OP_ZPUSH_T,
+        VM_OP_JZ, 13, 0,
+        VM_OP_SCONST, 1,
+        VM_OP_IPUSH_1,
+        VM_OP_ASSIGN,
+        VM_OP_SCONST, 2,
+        VM_OP_IPUSH, 2,
+        VM_OP_ASSIGN,
+        VM_OP_RET,
+    };
+    TEST_ASSERT_EQUAL_MEMORY(expected, cg.bytecode, cg.len);
+
+    TEST_ASSERT_EQUAL(ERR_NO_ERROR, err);
+}
+
 void test_comp(void) {
     RUN_TEST(test_comp_arithmetic);
     RUN_TEST(test_comp_bit_arithmetic);
@@ -199,5 +315,10 @@ void test_comp(void) {
     RUN_TEST(test_comp_assign);
     RUN_TEST(test_comp_header);
     RUN_TEST(test_comp_const_pool);
+    RUN_TEST(test_comp_if_statement);
+    RUN_TEST(test_comp_if_else_statements);
+    RUN_TEST(test_comp_if_then_block);
+    RUN_TEST(test_comp_if_then_else_block);
+    RUN_TEST(test_comp_multiline_block);
 }
 

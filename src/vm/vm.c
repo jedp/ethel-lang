@@ -1,5 +1,4 @@
 #include <stdio.h>
-#include <stdarg.h>
 #include <stdbool.h>
 #include "../common/err.h"
 #include "../comp/cg.h"
@@ -160,11 +159,46 @@ static error_t logical_binop(vm_t *vm, vm_op_t op) {
     return ERR_NO_ERROR;
 }
 
+static error_t jump(vm_t *vm, vm_op_t op) {
+    uint16_t jump_addr = 0;
+    // Little-endian
+    jump_addr |= READ_BYTE();
+    jump_addr |= (READ_BYTE() << 8);
+
+    switch (op) {
+        case VM_OP_JZ:
+            if (!truthiness(vm_stack_pop(vm))) {
+                vm->pc = &(vm->cg->bytecode[jump_addr]);
+            }
+            break;
+        case VM_OP_JEQ:
+            if (truthiness(vm_stack_pop(vm))) {
+                vm->pc = &(vm->cg->bytecode[jump_addr]);
+            }
+            break;
+        case VM_OP_JMP:
+            vm->pc = &(vm->cg->bytecode[jump_addr]);
+            break;
+        default:
+            runtime_error(vm, "Unsupported jump instruction");
+            return ERR_VM_RUNTIME_ERROR;
+    }
+
+    return ERR_NO_ERROR;
+}
+
 static error_t exec(vm_t *vm) {
     error_t err = ERR_NO_ERROR;
     for (;;) {
-        uint8_t bytecode;
-        switch (bytecode = READ_BYTE()) {
+        uint8_t bytecode = READ_BYTE();
+        /*
+        if (bytecode < VM_OP_MAX) {
+            printf("pc 0x%lx, code %s\n", (vm->pc - 1 - vm->cg->bytecode), op_names[bytecode]);
+        } else {
+            printf("pc 0x%lx, code %d\n", (vm->pc - 1 - vm->cg->bytecode), bytecode);
+        }
+         */
+        switch (bytecode) {
             case VM_OP_NOP:
                 break;
             case VM_OP_IPUSH:
@@ -192,12 +226,6 @@ static error_t exec(vm_t *vm) {
                 vm_stack_push_int(vm, v.elem.intval);
                 break;
             }
-            case VM_OP_TRUE:
-                vm_stack_push_boolean(vm, true);
-                break;
-            case VM_OP_FALSE:
-                vm_stack_push_boolean(vm, false);
-                break;
             case VM_OP_NIL:
                 vm_stack_push_nil(vm);
                 break;
@@ -263,6 +291,11 @@ static error_t exec(vm_t *vm) {
                 break;
             case VM_OP_RET:
                 return ERR_NO_ERROR;
+            case VM_OP_JZ:
+            case VM_OP_JEQ:
+            case VM_OP_JMP:
+                err = jump(vm, bytecode);
+                break;
             default:
                 runtime_error(vm, "Unsupported bytecode");
                 return ERR_VM_RUNTIME_ERROR;
@@ -365,6 +398,10 @@ vm_stack_elem_t *vm_stack_pop(vm_t *vm) {
     return vm->stack->top;
 }
 
+uint8_t vm_stack_size(vm_t *vm) {
+    return (vm->stack->top - vm->stack->buf) / sizeof(vm_stack_elem_t);
+}
+
 error_t vm_load_code(vm_t *vm, uint8_t *bytecode, size_t size) {
     vm_init(vm);
     cg_bytes(vm->cg, bytecode, size);
@@ -379,8 +416,8 @@ error_t vm_load_code(vm_t *vm, uint8_t *bytecode, size_t size) {
 }
 
 error_t vm_exec(vm_t *vm) {
-    printf("Executing code:\n");
     print_dis(vm->cg);
+    printf("Executing ...\n");
     return exec(vm);
 }
 

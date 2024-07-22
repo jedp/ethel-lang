@@ -34,7 +34,7 @@ typedef enum {
     PRECED_BITWISE_SHIFT,
     PRECED_BITWISE_NOT,
     PRECED_SUBSCRIPT,
-    PRECED_GROUPING,
+    PRECED_FUNCTION_ARGS,
     PRECED_MEMBER_ACCESS,
 } preced_t;
 
@@ -64,6 +64,8 @@ __attribute__((unused)) void parse_binary_op(parser_t *parser);
 
 __attribute__((unused)) void parse_parens(parser_t *parser);
 
+__attribute__ ((unused)) void parse_block(parser_t *parser);
+
 __attribute__((unused)) void parse_subscript(parser_t *parser);
 
 void parse_expr_by_precedence(parser_t *parser, uint8_t min_preced);
@@ -76,8 +78,10 @@ parse_preced_rule_t preced_rules[] = {
     [TAG_FALSE] = {parse_literal, NULL, PRECED_NONE, ASSOC_LEFT},
     [TAG_NIL] = {parse_literal, NULL, PRECED_NONE, ASSOC_LEFT},
     [TAG_IDENT] = {parse_ident, NULL, PRECED_NONE, ASSOC_LEFT},
-    [TAG_LPAREN] = {parse_parens, NULL, PRECED_GROUPING, ASSOC_LEFT},
+    [TAG_LPAREN] = {parse_parens, NULL, PRECED_NONE, ASSOC_LEFT},
     [TAG_RPAREN] = {NULL, NULL, PRECED_NONE, ASSOC_LEFT},
+    [TAG_BEGIN] = {parse_block, NULL, PRECED_NONE, ASSOC_LEFT},
+    [TAG_END] = {NULL, NULL, PRECED_NONE, ASSOC_LEFT},
     [TAG_LBRACKET] = {parse_subscript, NULL, PRECED_NONE, ASSOC_LEFT},
     [TAG_RBRACKET] = {NULL, NULL, PRECED_NONE, ASSOC_LEFT},
     [TAG_MINUS] = {parse_unary_op, parse_binary_op, PRECED_TERM, ASSOC_LEFT},

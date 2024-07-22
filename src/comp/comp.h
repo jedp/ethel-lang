@@ -25,7 +25,7 @@ typedef struct {
     uint8_t data[];
 } const_info_t;
 
-enum {
+typedef enum {
     COMP_ERR_NO_ERROR,
     COMP_UNEXPECTED_TOKEN,
     COMP_UNHANDLED_LITERAL,
@@ -35,7 +35,7 @@ enum {
     COMP_TOO_MANY_CONSTANTS,
     COMP_UNEXPECTED_CONST_TYPE,
     COMP_INSUFFICIENT_SPACE_FOR_BYTECODE,
-};
+} comp_err_t;
 
 typedef struct parser_t {
     lexer_t *lexer;

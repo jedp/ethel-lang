@@ -1,5 +1,6 @@
 #include <stdlib.h>
 #include <string.h>
+#include <stdbool.h>
 #include "../common/op.h"
 #include "../common/ptr.h"
 #include "cg.h"
@@ -10,8 +11,12 @@
 
 static void parse_expr(parser_t *parser);
 
-static void error(parser_t *parser, uint8_t which) {
-    printf("ERROR: Failed to parse token %d\n", which);
+static void parse_stmt(parser_t *parser);
+
+static void parse_decl(parser_t *parser);
+
+static void error(parser_t *parser, comp_err_t which) {
+    printf("ERROR: Failed to parse token: error %d\n", which);
     parser->err = which;
 }
 
@@ -31,6 +36,7 @@ static void advance(parser_t *parser) {
 
 static void eat(parser_t *parser, tag_t tag) {
     if (parser->curr.tag != tag) {
+        printf("Eat unexpected token %d\n", parser->curr.tag);
         error(parser, COMP_UNEXPECTED_TOKEN);
         return;
     }
@@ -38,7 +44,25 @@ static void eat(parser_t *parser, tag_t tag) {
     advance(parser);
 }
 
+static bool check_token_tag(parser_t *parser, tag_t tag) {
+    return parser->curr.tag == tag;
+}
+
+static bool token_tag_matches(parser_t *parser, tag_t tag) {
+    if (!check_token_tag(parser, tag)) {
+        return false;
+    }
+
+    advance(parser);
+    return true;
+}
+
 static void emit_byte(parser_t *parser, uint8_t byte) {
+    if (byte < 0xff) {
+        printf("emit %02x %s\n", byte, op_names[byte]);
+    } else {
+        printf("emit %02x\n", byte);
+    }
     cg_byte(parser->cg, byte);
 }
 
@@ -90,12 +114,39 @@ static map_err_t emit_const_str(parser_t *parser, const char *val, uint32_t len)
     return err;
 }
 
+static uint16_t emit_jump(parser_t *parser, vm_op_t jump_op) {
+    emit_byte(parser, jump_op);
+    uint32_t loc = parser->cg->len;
+
+    // Placeholder for 16-bit jump address.
+    emit_byte(parser, 0xff);
+    emit_byte(parser, 0xff);
+
+    // Return address of jump address bytes.
+    return loc;
+}
+
+static void set_jump_addr(parser_t *parser, uint16_t from_addr, uint16_t to_addr) {
+    // TODO do we want relative jumps? Save a byte?
+    uint8_t low_byte = (uint8_t) (to_addr & 0xff);
+    uint8_t high_byte = (uint8_t) ((to_addr & 0xff00) >> 8);
+
+    parser->cg->bytecode[from_addr] = low_byte;
+    parser->cg->bytecode[from_addr + 1] = high_byte;
+}
+
 void parse_expr_by_precedence(parser_t *parser, uint8_t min_preced) {
     advance(parser);
     tag_t tag = parser->prev.tag;
+
+    if (tag == TAG_EOL) {
+        return;
+    }
+
     parse_func prefix_rule = preced_rules[tag].parse_prefix;
 
     if (prefix_rule == NULL) {
+        printf("No prefix rule for token %s\n", tag_names[tag]);
         error(parser, COMP_EXPECTED_EXPRESSION);
         return;
     }
@@ -139,10 +190,10 @@ __attribute__((unused)) void parse_ident(parser_t *parser) {
 __attribute__((unused)) void parse_literal(parser_t *parser) {
     switch (parser->prev.tag) {
         case TAG_TRUE:
-            emit_byte(parser, VM_OP_TRUE);
+            emit_byte(parser, VM_OP_ZPUSH_T);
             break;
         case TAG_FALSE:
-            emit_byte(parser, VM_OP_FALSE);
+            emit_byte(parser, VM_OP_ZPUSH_F);
             break;
         case TAG_NIL:
             emit_byte(parser, VM_OP_NIL);
@@ -244,7 +295,7 @@ __attribute__((unused)) void parse_binary_op(parser_t *parser) {
 __attribute__((unused)) void parse_parens(parser_t *parser) {
     parse_expr(parser);
     printf("TODO: TAG_RPAREN eaten by precedence climbing. Should it be?\n");
-//    eat(parser, TAG_RPAREN);
+    //eat(parser, TAG_RPAREN);
 }
 
 // Referenced via pointer in the precedence table.
@@ -254,6 +305,83 @@ __attribute__((unused)) void parse_subscript(parser_t *parser) {
 
 static void parse_expr(parser_t *parser) {
     parse_expr_by_precedence(parser, PRECED_NONE);
+}
+
+static void parse_if_stmt(parser_t *parser) {
+    uint16_t from_if_addr;
+    uint16_t from_else_addr;
+
+    eat(parser, TAG_LPAREN);
+    parse_expr(parser);
+    // again expr eats too much?
+    //eat(parser, TAG_RPAREN);
+    eat(parser, TAG_THEN);
+
+    from_if_addr = emit_jump(parser, VM_OP_JZ);
+
+    parse_stmt(parser);
+
+    if (token_tag_matches(parser, TAG_ELSE)) {
+        from_else_addr = emit_jump(parser, VM_OP_JMP);
+
+        set_jump_addr(parser, from_if_addr, parser->cg->len);
+
+        parse_stmt(parser);
+
+        set_jump_addr(parser, from_else_addr, parser->cg->len);
+    } else {
+        set_jump_addr(parser, from_if_addr, parser->cg->len);
+    }
+}
+
+
+// Referenced via pointer in the precedence table.
+__attribute__ ((unused)) void parse_block(parser_t *parser) {
+    while (!token_tag_matches(parser, TAG_END) &&
+           !token_tag_matches(parser, TAG_EOF)) {
+        parse_decl(parser);
+    }
+//    eat(parser, TAG_END);
+}
+
+
+static void enter_scope(parser_t *parser) {
+    // compiler enter scope
+}
+
+static void exit_scope(parser_t *parser) {
+    // compiler exit scope
+}
+
+/*
+ * Parse stmt
+ *
+ * stmt -> if_stmt
+ *       | expr
+ *       | block
+ *
+ * block -> "{" decl* "}"
+ */
+static void parse_stmt(parser_t *parser) {
+    if (token_tag_matches(parser, TAG_IF)) {
+        parse_if_stmt(parser);
+    } else if (token_tag_matches(parser, TAG_LBRACKET)) {
+        enter_scope(parser);
+        parse_block(parser);
+        exit_scope(parser);
+    } else {
+        parse_expr(parser);
+    }
+}
+
+/*
+ * Parse declaration
+ *
+ * decl -> stmt
+ */
+static void parse_decl(parser_t *parser) {
+    parse_stmt(parser);
+    token_tag_matches(parser, TAG_EOL);
 }
 
 error_t codegen(const char *input, cg_t *cg) {
@@ -267,7 +395,9 @@ error_t codegen(const char *input, cg_t *cg) {
     parser.err = COMP_ERR_NO_ERROR;
 
     advance(&parser);
-    parse_expr(&parser);
+    while (!token_tag_matches(&parser, TAG_EOF)) {
+        parse_decl(&parser);
+    }
     eat(&parser, TAG_EOF);
     emit_byte(&parser, VM_OP_RET);
 
