@@ -97,6 +97,36 @@ void test_comp_nil(void) {
     TEST_ASSERT_EQUAL(ERR_NO_ERROR, err);
 }
 
+void test_comp_comparators(void) {
+    const char *input = "1 < 2 and 3 > 4 or 4 <= 5 and x==6";
+
+    cg_t cg;
+    cg_init(&cg);
+    error_t err = codegen(input, &cg);
+
+    uint8_t expected[] = {
+        VM_OP_IPUSH_1,
+        VM_OP_IPUSH, 2,
+        VM_OP_LT,
+        VM_OP_IPUSH, 3,
+        VM_OP_IPUSH, 4,
+        VM_OP_GT,
+        VM_OP_LOGICAL_AND,
+        VM_OP_IPUSH, 4,
+        VM_OP_IPUSH, 5,
+        VM_OP_LE,
+        VM_OP_SCONST, 1,
+        VM_OP_IPUSH, 6,
+        VM_OP_EQ,
+        VM_OP_LOGICAL_AND,
+        VM_OP_LOGICAL_OR,
+        VM_OP_RET,
+    };
+    TEST_ASSERT_EQUAL_MEMORY(expected, cg.bytecode, cg.len);
+
+    TEST_ASSERT_EQUAL(ERR_NO_ERROR, err);
+}
+
 void test_comp_assign(void) {
     // Check right-associativity of assignment operator.
     const char *input = "foo = bar = 2";
@@ -165,6 +195,7 @@ void test_comp(void) {
     RUN_TEST(test_comp_bit_arithmetic);
     RUN_TEST(test_comp_booleans);
     RUN_TEST(test_comp_nil);
+    RUN_TEST(test_comp_comparators);
     RUN_TEST(test_comp_assign);
     RUN_TEST(test_comp_header);
     RUN_TEST(test_comp_const_pool);

@@ -213,6 +213,24 @@ __attribute__((unused)) void parse_binary_op(parser_t *parser) {
         case TAG_OR:
             emit_byte(parser, VM_OP_LOGICAL_OR);
             break;
+        case TAG_GT:
+            emit_byte(parser, VM_OP_GT);
+            break;
+        case TAG_LT:
+            emit_byte(parser, VM_OP_LT);
+            break;
+        case TAG_GE:
+            emit_byte(parser, VM_OP_GE);
+            break;
+        case TAG_LE:
+            emit_byte(parser, VM_OP_LE);
+            break;
+        case TAG_EQ:
+            emit_byte(parser, VM_OP_EQ);
+            break;
+        case TAG_NE:
+            emit_byte(parser, VM_OP_NE);
+            break;
         case TAG_ASSIGN:
             emit_byte(parser, VM_OP_ASSIGN);
             break;

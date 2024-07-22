@@ -102,6 +102,30 @@ static error_t numerical_binop(vm_t *vm, vm_op_t op) {
         case VM_OP_REM:
             e.intval = b->intval % a->intval;
             break;
+        case VM_OP_LT:
+            e.type = VM_STACK_BOOL_TYPE;
+            e.boolval = b->intval < a->intval ? 1 : 0;
+            break;
+        case VM_OP_LE:
+            e.type = VM_STACK_BOOL_TYPE;
+            e.boolval = b->intval <= a->intval ? 1 : 0;
+            break;
+        case VM_OP_GT:
+            e.type = VM_STACK_BOOL_TYPE;
+            e.boolval = b->intval > a->intval ? 1 : 0;
+            break;
+        case VM_OP_GE:
+            e.type = VM_STACK_BOOL_TYPE;
+            e.boolval = b->intval >= a->intval ? 1 : 0;
+            break;
+        case VM_OP_EQ:
+            e.type = VM_STACK_BOOL_TYPE;
+            e.boolval = b->intval == a->intval ? 1 : 0;
+            break;
+        case VM_OP_NE:
+            e.type = VM_STACK_BOOL_TYPE;
+            e.boolval = b->intval != a->intval ? 1 : 0;
+            break;
         default:
             runtime_error(vm, "Unsupported numeric binary operation");
             return ERR_VM_RUNTIME_ERROR;
@@ -120,7 +144,7 @@ static error_t logical_binop(vm_t *vm, vm_op_t op) {
     vm_stack_elem_t e;
     e.type = VM_STACK_BOOL_TYPE;
 
-    switch(op) {
+    switch (op) {
         case VM_OP_LOGICAL_AND:
             e.boolval = a && b;
             break;
@@ -204,6 +228,24 @@ static error_t exec(vm_t *vm) {
                 break;
             case VM_OP_LOGICAL_OR:
                 err = logical_binop(vm, VM_OP_LOGICAL_OR);
+                break;
+            case VM_OP_LT:
+                err = numerical_binop(vm, VM_OP_LT);
+                break;
+            case VM_OP_LE:
+                err = numerical_binop(vm, VM_OP_LE);
+                break;
+            case VM_OP_GT:
+                err = numerical_binop(vm, VM_OP_GT);
+                break;
+            case VM_OP_GE:
+                err = numerical_binop(vm, VM_OP_GE);
+                break;
+            case VM_OP_EQ:
+                err = numerical_binop(vm, VM_OP_EQ);
+                break;
+            case VM_OP_NE:
+                err = numerical_binop(vm, VM_OP_NE);
                 break;
             case VM_OP_LOGICAL_NOT: {
                 vm_stack_elem_t *e = vm_stack_pop(vm);

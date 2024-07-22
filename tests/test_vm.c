@@ -406,6 +406,42 @@ void test_vm_non_boolean_booleans(void) {
     vm_free(&vm);
 }
 
+void test_vm_boolean_comparators(void) {
+    vm_t vm;
+    vm_init(&vm);
+
+    error_t err = ERR_NO_ERROR;
+
+    // 1 < 2 and 3 > 4 or 4 <= 5 and 7==6
+    uint8_t bytes[] = {
+        'E', 'T', 'H', 'L', 0, 1,
+        EMPTY_CONST_POOL,
+        VM_OP_IPUSH_1,
+        VM_OP_IPUSH, 2,
+        VM_OP_LT,
+        VM_OP_IPUSH, 3,
+        VM_OP_IPUSH, 4,
+        VM_OP_GT,
+        VM_OP_LOGICAL_AND,
+        VM_OP_IPUSH, 4,
+        VM_OP_IPUSH, 5,
+        VM_OP_LE,
+        VM_OP_IPUSH, 7,
+        VM_OP_IPUSH, 6,
+        VM_OP_EQ,
+        VM_OP_LOGICAL_OR,
+        VM_OP_RET,
+    };
+
+    err |= vm_load_code(&vm, bytes, sizeof(bytes));
+    err |= vm_exec(&vm);
+    TEST_ASSERT_EQUAL(ERR_NO_ERROR, err);
+    TEST_ASSERT_EQUAL(VM_STACK_BOOL_TYPE, vm_stack_peek(&vm)->type);
+    TEST_ASSERT_EQUAL(1, vm_stack_peek(&vm)->boolval);
+
+    vm_free(&vm);
+}
+
 void test_vm_binop_type_check(void) {
     vm_t vm;
     vm_init(&vm);
@@ -503,6 +539,7 @@ void test_vm(void) {
     RUN_TEST(test_vm_stack_arith);
     RUN_TEST(test_vm_booleans);
     RUN_TEST(test_vm_non_boolean_booleans);
+    RUN_TEST(test_vm_boolean_comparators);
     RUN_TEST(test_vm_binop_type_check);
     RUN_TEST(test_vm_stack_load_imm);
     RUN_TEST(test_vm_stack_inc_dec);

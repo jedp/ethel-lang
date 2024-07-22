@@ -22,8 +22,7 @@ typedef enum {
     PRECED_MAPS_TO,
     PRECED_LOGICAL_OR,
     PRECED_LOGICAL_AND,
-    PRECED_LOGICAL_EQ,
-    PRECED_LOGICAL_GLT,
+    PRECED_CMP,
     PRECED_BITWISE_OR,
     PRECED_BITWISE_XOR,
     PRECED_BITWISE_AND,
@@ -67,7 +66,7 @@ __attribute__((unused)) void parse_parens(parser_t *parser);
 
 __attribute__((unused)) void parse_subscript(parser_t *parser);
 
-void parse_expr_by_precedence(parser_t *parser, uint8_t min_preded);
+void parse_expr_by_precedence(parser_t *parser, uint8_t min_preced);
 
 parse_preced_rule_t preced_rules[] = {
     [TAG_INT] = {parse_int, NULL, PRECED_NONE, ASSOC_LEFT},
@@ -93,6 +92,12 @@ parse_preced_rule_t preced_rules[] = {
     [TAG_AND] = {NULL, parse_binary_op, PRECED_LOGICAL_AND, ASSOC_LEFT},
     [TAG_OR] = {NULL, parse_binary_op, PRECED_LOGICAL_OR, ASSOC_LEFT},
     [TAG_NOT] = {parse_unary_op, NULL, PRECED_TERM, ASSOC_LEFT},
+    [TAG_GT] = {NULL, parse_binary_op, PRECED_CMP, ASSOC_LEFT},
+    [TAG_LT] = {NULL, parse_binary_op, PRECED_CMP, ASSOC_LEFT},
+    [TAG_GE] = {NULL, parse_binary_op, PRECED_CMP, ASSOC_LEFT},
+    [TAG_LE] = {NULL, parse_binary_op, PRECED_CMP, ASSOC_LEFT},
+    [TAG_EQ] = {NULL, parse_binary_op, PRECED_CMP, ASSOC_LEFT},
+    [TAG_NE] = {NULL, parse_binary_op, PRECED_CMP, ASSOC_LEFT},
     [TAG_ASSIGN] = {NULL, parse_binary_op, PRECED_ASSIGN, ASSOC_RIGHT},
     [TAG_EOF]= {NULL, NULL, PRECED_EOF, ASSOC_LEFT},
 };
