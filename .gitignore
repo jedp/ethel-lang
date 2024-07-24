@@ -3,6 +3,10 @@ cmake-build-debug/
 CMakeCache.txt
 CMakeFiles/
 Makefile
+.cmake/
+*.cbp
+
+Testing/
 
 *.o
 bin/
