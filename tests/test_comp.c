@@ -280,6 +280,42 @@ void test_comp_if_then_else_block(void) {
     TEST_ASSERT_EQUAL(ERR_NO_ERROR, err);
 }
 
+void test_comp_if_then_else_if_block(void) {
+    const char *input = "if (false) then {       \n"
+                        "    1 + 2               \n"
+                        "} else if (true) then { \n"
+                        "    3 + 4               \n"
+                        "} else {                \n"
+                        "    5 + 6               \n"
+                        "}";
+
+    cg_t cg;
+    cg_init(&cg);
+    error_t err = codegen(input, &cg);
+
+    uint8_t expected[] = {
+        VM_OP_ZPUSH_F,
+        VM_OP_JZ, 0x0b, 0,      // if not true, jump to first else.
+        VM_OP_IPUSH_1,
+        VM_OP_IPUSH, 2,
+        VM_OP_ADD,
+        VM_OP_JMP, 0x1c, 0,     // handled true; jump to end.
+        VM_OP_ZPUSH_T,          // else
+        VM_OP_JZ, 0x17, 0,      // else if not true jump to second else.
+        VM_OP_IPUSH, 3,
+        VM_OP_IPUSH, 4,
+        VM_OP_ADD,
+        VM_OP_JMP, 0x1c, 0,     // handled true; jump to end.
+        VM_OP_IPUSH, 5,         // else
+        VM_OP_IPUSH, 6,
+        VM_OP_ADD,
+        VM_OP_RET,
+    };
+    TEST_ASSERT_EQUAL_MEMORY(expected, cg.bytecode, cg.len);
+
+    TEST_ASSERT_EQUAL(ERR_NO_ERROR, err);
+}
+
 void test_comp_multiline_block(void) {
     const char *input = "if (true) then { \n"
                         "    x = 1        \n"
@@ -319,6 +355,7 @@ void test_comp(void) {
     RUN_TEST(test_comp_if_else_statements);
     RUN_TEST(test_comp_if_then_block);
     RUN_TEST(test_comp_if_then_else_block);
+    RUN_TEST(test_comp_if_then_else_if_block);
     RUN_TEST(test_comp_multiline_block);
 }
 

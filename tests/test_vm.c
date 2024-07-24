@@ -421,6 +421,32 @@ void test_vm_if_false_then_else(void) {
     test_program(bytes, sizeof(bytes), stack_top, ERR_NO_ERROR);
 }
 
+void test_vm_if_false_then_else_if_true(void) {
+    // if (false) then { 1 + 2 } else if (true) then { 3 + 4 } else { 5 + 6 }
+    uint8_t bytes[] = {
+        'E', 'T', 'H', 'L', 0, 1,
+        EMPTY_CONST_POOL,
+        VM_OP_ZPUSH_F,
+        VM_OP_JZ, 0xf, 0,      // if true
+        VM_OP_IPUSH_1,
+        VM_OP_IPUSH, 2,
+        VM_OP_ADD,
+        VM_OP_ZPUSH_T,
+        VM_OP_JZ, 0x1b, 0,     // else if true
+        VM_OP_IPUSH, 3,
+        VM_OP_IPUSH, 4,
+        VM_OP_ADD,
+        VM_OP_JMP, 0x20, 0,
+        VM_OP_IPUSH, 5,
+        VM_OP_IPUSH, 6,
+        VM_OP_ADD,
+        VM_OP_RET,
+    };
+
+    vm_stack_elem_t stack_top = {.type= VM_STACK_INT_TYPE, .intval= 7};
+    test_program(bytes, sizeof(bytes), stack_top, ERR_NO_ERROR);
+}
+
 void test_vm_binop_type_check(void) {
     // Can't add 42 + true
     uint8_t bytes[] = {
@@ -494,6 +520,8 @@ void test_vm(void) {
     RUN_TEST(test_vm_if_false_then);
     RUN_TEST(test_vm_if_true_then_else);
     RUN_TEST(test_vm_if_false_then_else);
+    RUN_TEST(test_vm_if_false_then_else);
+    RUN_TEST(test_vm_if_false_then_else_if_true);
     RUN_TEST(test_vm_binop_type_check);
     RUN_TEST(test_vm_stack_load_imm);
     RUN_TEST(test_vm_stack_inc_dec);

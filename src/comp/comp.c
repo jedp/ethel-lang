@@ -58,11 +58,13 @@ static bool token_tag_matches(parser_t *parser, tag_t tag) {
 }
 
 static void emit_byte(parser_t *parser, uint8_t byte) {
+    /*
     if (byte < 0xff) {
         printf("emit %02x %s\n", byte, op_names[byte]);
     } else {
         printf("emit %02x\n", byte);
     }
+     */
     cg_byte(parser->cg, byte);
 }
 
@@ -326,7 +328,9 @@ static void parse_if_stmt(parser_t *parser) {
 
         set_jump_addr(parser, from_if_addr, parser->cg->len);
 
-        parse_stmt(parser);
+        // Could be `else if (decl)` or `else (stmt)`
+        // so handle all cases with decl.
+        parse_decl(parser);
 
         set_jump_addr(parser, from_else_addr, parser->cg->len);
     } else {

@@ -99,14 +99,15 @@ uint32_t print_dis_byte(cg_t *cg, uint32_t offset) {
 void print_dis(cg_t *cg) {
     printf("\n== Disassembly ==\n");
 
-    printf("= Header %c%c%c%c v%d.%d\n",
-           cg->bytecode[0], cg->bytecode[1], cg->bytecode[2], cg->bytecode[3],
-           cg->bytecode[4], cg->bytecode[5]
-           );
+    if (cg->code_start > 0) {
+        printf("= Header %c%c%c%c v%d.%d\n",
+               cg->bytecode[0], cg->bytecode[1], cg->bytecode[2], cg->bytecode[3],
+               cg->bytecode[4], cg->bytecode[5]
+        );
 
-    uint8_t num_consts = cg->bytecode[6];
-    printf("= Constants: %d\n", num_consts);
-
+        uint8_t num_consts = cg->bytecode[6];
+        printf("= Constants: %d\n", num_consts);
+    }
     printf("= Code (start 0x%x, end 0x%x)\n", cg->code_start, cg->len - 1);
     printf("%8s %s\n", "Offset", "Instruction");
     for (uint32_t offset = cg->code_start; offset < cg->len;) {
