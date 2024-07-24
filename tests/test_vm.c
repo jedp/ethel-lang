@@ -19,8 +19,11 @@ static void test_program(uint8_t *bytes, uint16_t size,
     err |= vm_exec(&vm);
 
     TEST_ASSERT_EQUAL(expect_err, err);
-    TEST_ASSERT_EQUAL(expect_stack_top.type, vm_stack_peek(&vm)->type);
-    TEST_ASSERT_EQUAL(expect_stack_top.boolval, vm_stack_peek(&vm)->boolval);
+
+    if (expect_stack_top.type != 0) {
+        TEST_ASSERT_EQUAL(expect_stack_top.type, vm_stack_peek(&vm)->type);
+        TEST_ASSERT_EQUAL(expect_stack_top.intval, vm_stack_peek(&vm)->intval);
+    }
 
     vm_free(&vm);
 }
@@ -111,11 +114,6 @@ void test_vm_stack_push(void) {
 }
 
 void test_vm_iconst(void) {
-    vm_t vm;
-    vm_init(&vm);
-
-    error_t err = ERR_NO_ERROR;
-
     uint8_t bytes[] = {
         'E', 'T', 'H', 'L', 0, 1,
         // Const pool
@@ -125,20 +123,11 @@ void test_vm_iconst(void) {
         VM_OP_ICONST, 1,
         VM_OP_RET};
 
-    err |= vm_load_code(&vm, bytes, sizeof(bytes));
-    err |= vm_exec(&vm);
-    TEST_ASSERT_EQUAL(ERR_NO_ERROR, err);
-    TEST_ASSERT_EQUAL(42, vm_stack_peek(&vm)->intval);
-
-    vm_free(&vm);
+    vm_stack_elem_t stack_top = {.type= VM_STACK_INT_TYPE, .intval= 42};
+    test_program(bytes, sizeof(bytes), stack_top, ERR_NO_ERROR);
 }
 
 void test_vm_iconst_negative(void) {
-    vm_t vm;
-    vm_init(&vm);
-
-    error_t err = ERR_NO_ERROR;
-
     // -32768
     uint8_t bytes[] = {
         'E', 'T', 'H', 'L', 0, 1,
@@ -149,20 +138,11 @@ void test_vm_iconst_negative(void) {
         VM_OP_ICONST, 1,
         VM_OP_RET};
 
-    err |= vm_load_code(&vm, bytes, sizeof(bytes));
-    err |= vm_exec(&vm);
-    TEST_ASSERT_EQUAL(ERR_NO_ERROR, err);
-    TEST_ASSERT_EQUAL(-32768, vm_stack_peek(&vm)->intval);
-
-    vm_free(&vm);
+    vm_stack_elem_t stack_top = {.type= VM_STACK_INT_TYPE, .intval= -32768};
+    test_program(bytes, sizeof(bytes), stack_top, ERR_NO_ERROR);
 }
 
 void test_vm_stack_negate(void) {
-    vm_t vm;
-    vm_init(&vm);
-
-    error_t err = ERR_NO_ERROR;
-
     uint8_t bytes[] = {
         'E', 'T', 'H', 'L', 0, 1,
         // Const pool
@@ -173,20 +153,11 @@ void test_vm_stack_negate(void) {
         VM_OP_RET
     };
 
-    err |= vm_load_code(&vm, bytes, sizeof(bytes));
-    err |= vm_exec(&vm);
-    TEST_ASSERT_EQUAL(ERR_NO_ERROR, err);
-    TEST_ASSERT_EQUAL(-123, vm_stack_peek(&vm)->intval);
-
-    vm_free(&vm);
+    vm_stack_elem_t stack_top = {.type= VM_STACK_INT_TYPE, .intval= -123};
+    test_program(bytes, sizeof(bytes), stack_top, ERR_NO_ERROR);
 }
 
 void test_vm_stack_add(void) {
-    vm_t vm;
-    vm_init(&vm);
-
-    error_t err = ERR_NO_ERROR;
-
     // 123 + 456
     uint8_t bytes[] = {
         'E', 'T', 'H', 'L', 0, 1,
@@ -201,20 +172,11 @@ void test_vm_stack_add(void) {
         VM_OP_RET
     };
 
-    err |= vm_load_code(&vm, bytes, sizeof(bytes));
-    err |= vm_exec(&vm);
-    TEST_ASSERT_EQUAL(ERR_NO_ERROR, err);
-    TEST_ASSERT_EQUAL(579, vm_stack_peek(&vm)->intval);
-
-    vm_free(&vm);
+    vm_stack_elem_t stack_top = {.type= VM_STACK_INT_TYPE, .intval= 579};
+    test_program(bytes, sizeof(bytes), stack_top, ERR_NO_ERROR);
 }
 
 void test_vm_stack_sub(void) {
-    vm_t vm;
-    vm_init(&vm);
-
-    error_t err = ERR_NO_ERROR;
-
     // 5 - 2
     uint8_t bytes[] = {
         'E', 'T', 'H', 'L', 0, 1,
@@ -229,27 +191,11 @@ void test_vm_stack_sub(void) {
         VM_OP_RET
     };
 
-    err |= vm_load_code(&vm, bytes, sizeof(bytes));
-    uint8_t k;
-    map_elem_t v;
-    v = (map_elem_t) {.type=MAP_ELEM_INT_TYPE, .elem.intval = 5};
-    err |= cg_put_const(vm.cg, v, &k);
-    v = (map_elem_t) {.type=MAP_ELEM_INT_TYPE, .elem.intval = 2};
-    err |= cg_put_const(vm.cg, v, &k);
-
-    err |= vm_exec(&vm);
-    TEST_ASSERT_EQUAL(ERR_NO_ERROR, err);
-    TEST_ASSERT_EQUAL(3, vm_stack_peek(&vm)->intval);
-
-    vm_free(&vm);
+    vm_stack_elem_t stack_top = {.type= VM_STACK_INT_TYPE, .intval= 3};
+    test_program(bytes, sizeof(bytes), stack_top, ERR_NO_ERROR);
 }
 
 void test_vm_stack_mul(void) {
-    vm_t vm;
-    vm_init(&vm);
-
-    error_t err = ERR_NO_ERROR;
-
     // 5 * 3
     uint8_t bytes[] = {
         'E', 'T', 'H', 'L', 0, 1,
@@ -264,20 +210,11 @@ void test_vm_stack_mul(void) {
         VM_OP_RET
     };
 
-    err |= vm_load_code(&vm, bytes, sizeof(bytes));
-    err |= vm_exec(&vm);
-    TEST_ASSERT_EQUAL(ERR_NO_ERROR, err);
-    TEST_ASSERT_EQUAL(15, vm_stack_peek(&vm)->intval);
-
-    vm_free(&vm);
+    vm_stack_elem_t stack_top = {.type= VM_STACK_INT_TYPE, .intval= 15};
+    test_program(bytes, sizeof(bytes), stack_top, ERR_NO_ERROR);
 }
 
 void test_vm_stack_div(void) {
-    vm_t vm;
-    vm_init(&vm);
-
-    error_t err = ERR_NO_ERROR;
-
     // Integer division. 12 / 2
     uint8_t bytes[] = {
         'E', 'T', 'H', 'L', 0, 1,
@@ -292,20 +229,11 @@ void test_vm_stack_div(void) {
         VM_OP_RET
     };
 
-    err |= vm_load_code(&vm, bytes, sizeof(bytes));
-    err |= vm_exec(&vm);
-    TEST_ASSERT_EQUAL(ERR_NO_ERROR, err);
-    TEST_ASSERT_EQUAL(6, vm_stack_peek(&vm)->intval);
-
-    vm_free(&vm);
+    vm_stack_elem_t stack_top = {.type= VM_STACK_INT_TYPE, .intval= 6};
+    test_program(bytes, sizeof(bytes), stack_top, ERR_NO_ERROR);
 }
 
 void test_vm_stack_rem(void) {
-    vm_t vm;
-    vm_init(&vm);
-
-    error_t err = ERR_NO_ERROR;
-
     // Modulus. 11 % 3
     uint8_t bytes[] = {
         'E', 'T', 'H', 'L', 0, 1,
@@ -320,21 +248,11 @@ void test_vm_stack_rem(void) {
         VM_OP_RET
     };
 
-    err |= vm_load_code(&vm, bytes, sizeof(bytes));
-    err |= vm_exec(&vm);
-    TEST_ASSERT_EQUAL(ERR_NO_ERROR, err);
-    TEST_ASSERT_EQUAL(2, vm_stack_peek(&vm)->intval);
-
-    vm_free(&vm);
+    vm_stack_elem_t stack_top = {.type= VM_STACK_INT_TYPE, .intval= 2};
+    test_program(bytes, sizeof(bytes), stack_top, ERR_NO_ERROR);
 }
 
-
 void test_vm_stack_arith(void) {
-    vm_t vm;
-    vm_init(&vm);
-
-    error_t err = ERR_NO_ERROR;
-
     // (2 - 1) * (3 + 5) / 2 % 3 = 1
     uint8_t bytes[] = {
         'E', 'T', 'H', 'L', 0, 1,
@@ -359,20 +277,11 @@ void test_vm_stack_arith(void) {
         VM_OP_RET
     };
 
-    err |= vm_load_code(&vm, bytes, sizeof(bytes));
-    err |= vm_exec(&vm);
-    TEST_ASSERT_EQUAL(ERR_NO_ERROR, err);
-    TEST_ASSERT_EQUAL(1, vm_stack_peek(&vm)->intval);
-
-    vm_free(&vm);
+    vm_stack_elem_t stack_top = {.type= VM_STACK_INT_TYPE, .intval= 1};
+    test_program(bytes, sizeof(bytes), stack_top, ERR_NO_ERROR);
 }
 
 void test_vm_booleans(void) {
-    vm_t vm;
-    vm_init(&vm);
-
-    error_t err = ERR_NO_ERROR;
-
     // true or false and not true
     uint8_t bytes[] = {
         'E', 'T', 'H', 'L', 0, 1,
@@ -386,21 +295,11 @@ void test_vm_booleans(void) {
         VM_OP_RET,
     };
 
-    err |= vm_load_code(&vm, bytes, sizeof(bytes));
-    err |= vm_exec(&vm);
-    TEST_ASSERT_EQUAL(ERR_NO_ERROR, err);
-    TEST_ASSERT_EQUAL(VM_STACK_BOOL_TYPE, vm_stack_peek(&vm)->type);
-    TEST_ASSERT_EQUAL(1, vm_stack_peek(&vm)->boolval);
-
-    vm_free(&vm);
+    vm_stack_elem_t stack_top = {.type= VM_STACK_BOOL_TYPE, .intval= 1};
+    test_program(bytes, sizeof(bytes), stack_top, ERR_NO_ERROR);
 }
 
 void test_vm_non_boolean_booleans(void) {
-    vm_t vm;
-    vm_init(&vm);
-
-    error_t err = ERR_NO_ERROR;
-
     // 42 or -1 and not nil
     uint8_t bytes[] = {
         'E', 'T', 'H', 'L', 0, 1,
@@ -415,21 +314,11 @@ void test_vm_non_boolean_booleans(void) {
         VM_OP_RET,
     };
 
-    err |= vm_load_code(&vm, bytes, sizeof(bytes));
-    err |= vm_exec(&vm);
-    TEST_ASSERT_EQUAL(ERR_NO_ERROR, err);
-    TEST_ASSERT_EQUAL(VM_STACK_BOOL_TYPE, vm_stack_peek(&vm)->type);
-    TEST_ASSERT_EQUAL(1, vm_stack_peek(&vm)->boolval);
-
-    vm_free(&vm);
+    vm_stack_elem_t stack_top = {.type= VM_STACK_BOOL_TYPE, .intval= 1};
+    test_program(bytes, sizeof(bytes), stack_top, ERR_NO_ERROR);
 }
 
 void test_vm_boolean_comparators(void) {
-    vm_t vm;
-    vm_init(&vm);
-
-    error_t err = ERR_NO_ERROR;
-
     // 1 < 2 and 3 > 4 or 4 <= 5 and 7==6
     uint8_t bytes[] = {
         'E', 'T', 'H', 'L', 0, 1,
@@ -451,13 +340,8 @@ void test_vm_boolean_comparators(void) {
         VM_OP_RET,
     };
 
-    err |= vm_load_code(&vm, bytes, sizeof(bytes));
-    err |= vm_exec(&vm);
-    TEST_ASSERT_EQUAL(ERR_NO_ERROR, err);
-    TEST_ASSERT_EQUAL(VM_STACK_BOOL_TYPE, vm_stack_peek(&vm)->type);
-    TEST_ASSERT_EQUAL(1, vm_stack_peek(&vm)->boolval);
-
-    vm_free(&vm);
+    vm_stack_elem_t stack_top = {.type= VM_STACK_BOOL_TYPE, .boolval= 1};
+    test_program(bytes, sizeof(bytes), stack_top, ERR_NO_ERROR);
 }
 
 void test_vm_if_true_then(void) {
@@ -538,37 +422,21 @@ void test_vm_if_false_then_else(void) {
 }
 
 void test_vm_binop_type_check(void) {
-    vm_t vm;
-    vm_init(&vm);
-
-    error_t err = ERR_NO_ERROR;
-
     // Can't add 42 + true
     uint8_t bytes[] = {
         'E', 'T', 'H', 'L', 0, 1,
-        // Const pool
-        1,
-        CONST_INT, 1, 42,
-        // Code
+        1, CONST_INT, 1, 42,
         VM_OP_ICONST, 1,
         VM_OP_ZPUSH_T,
         VM_OP_ADD,
         VM_OP_RET
     };
 
-    err |= vm_load_code(&vm, bytes, sizeof(bytes));
-    err |= vm_exec(&vm);
-    TEST_ASSERT_EQUAL(ERR_VM_RUNTIME_ERROR, err);
-
-    vm_free(&vm);
+    vm_stack_elem_t stack_top = {.type= 0};
+    test_program(bytes, sizeof(bytes), stack_top, ERR_VM_RUNTIME_ERROR);
 }
 
 void test_vm_stack_load_imm(void) {
-    vm_t vm;
-    vm_init(&vm);
-
-    error_t err = ERR_NO_ERROR;
-
     uint8_t bytes[] = {
         'E', 'T', 'H', 'L', 0, 1,
         // Const pool
@@ -585,20 +453,11 @@ void test_vm_stack_load_imm(void) {
         VM_OP_RET
     };
 
-    err |= vm_load_code(&vm, bytes, sizeof(bytes));
-    err |= vm_exec(&vm);
-    TEST_ASSERT_EQUAL(ERR_NO_ERROR, err);
-    TEST_ASSERT_EQUAL(42, vm_stack_peek(&vm)->intval);
-
-    vm_free(&vm);
+    vm_stack_elem_t stack_top = {.type= VM_STACK_INT_TYPE, .intval= 42};
+    test_program(bytes, sizeof(bytes), stack_top, ERR_NO_ERROR);
 }
 
 void test_vm_stack_inc_dec(void) {
-    vm_t vm;
-    vm_init(&vm);
-
-    error_t err = ERR_NO_ERROR;
-
     uint8_t bytes[] = {
         'E', 'T', 'H', 'L', 0, 1,
         EMPTY_CONST_POOL,
@@ -609,12 +468,8 @@ void test_vm_stack_inc_dec(void) {
         VM_OP_RET,
     };
 
-    err |= vm_load_code(&vm, bytes, sizeof(bytes));
-    err |= vm_exec(&vm);
-    TEST_ASSERT_EQUAL(ERR_NO_ERROR, err);
-    TEST_ASSERT_EQUAL(1, vm_stack_peek(&vm)->intval);
-
-    vm_free(&vm);
+    vm_stack_elem_t stack_top = {.type= VM_STACK_INT_TYPE, .intval= 1};
+    test_program(bytes, sizeof(bytes), stack_top, ERR_NO_ERROR);
 }
 
 void test_vm(void) {
