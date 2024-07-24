@@ -11,11 +11,15 @@ Very much in progress and not useful yet.
 ```
 > val age = 42
 42
-> val x = if not(age < 1) then val y = "Ethel".length()
+> val x = if (not (age < 1)) then var y = "Ethel".length()
 5
 > x
 5
 > y
+5
+> y = 12
+12
+> x
 5
 ```
 
@@ -130,8 +134,8 @@ f
 > f(2, 5)
 10
 > val fib = fn(n) {
-    if n <= 0 then return 0  // Early returns
-    if n == 1 then return 1
+    if (n <= 0) then return 0  // Early returns
+    if (n == 1) then return 1
     fib(n - 2) + fib(n - 1)  // Last expr is still normal result value
     }
 Function
