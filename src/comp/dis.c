@@ -1,11 +1,12 @@
 #include <stdio.h>
 
 #include "cg.h"
+#include "comp.h"
 #include "../common/op.h"
 #include "dis.h"
 
 static uint32_t print_op(const char *name, uint32_t offset) {
-    printf("%8s\n", name);
+    printf("%-12s\n", name);
     return offset + 1;
 }
 
@@ -14,26 +15,26 @@ static uint32_t print_imm(const char *name, cg_t *cg, uint32_t offset) {
 }
 
 static uint32_t print_push(const char *name, cg_t *cg, uint32_t offset) {
-    printf("%8s [0x%x]\n", name, cg->bytecode[offset + 1]);
+    printf("%-12s [0x%x]\n", name, cg->bytecode[offset + 1]);
     return offset + 2;
 }
 
 static uint32_t print_loadi(const char *name, cg_t *cg, uint32_t offset) {
     map_elem_t v;
     cg_get_const(cg, cg->bytecode[offset + 1], &v);
-    printf("%8s #%02x [%d]\n", name, cg->bytecode[offset + 1], v.elem.intval);
+    printf("%-12s #%02x [%d]\n", name, cg->bytecode[offset + 1], v.elem.intval);
     return offset + 2;
 }
 
 static uint32_t print_loads(const char *name, cg_t *cg, uint32_t offset) {
     map_elem_t v;
     cg_get_const(cg, cg->bytecode[offset + 1], &v);
-    printf("%8s #%x [%s]\n", name, cg->bytecode[offset + 1], v.elem.stringval_ptr);
+    printf("%-12s #%x [%s]\n", name, cg->bytecode[offset + 1], v.elem.stringval_ptr);
     return offset + 2;
 }
 
 static uint32_t print_jump(const char *name, cg_t *cg, uint32_t offset) {
-    printf("%8s 0x%02x%02x\n",
+    printf("%-12s @0x%02x%02x\n",
            name,
            cg->bytecode[offset + 2],
            cg->bytecode[offset + 1]
@@ -96,18 +97,57 @@ uint32_t print_dis_byte(cg_t *cg, uint32_t offset) {
     }
 }
 
-void print_dis(cg_t *cg) {
-    printf("\n== Disassembly ==\n");
+static void print_constants(cg_t *cg) {
+    uint8_t offset = 6;
+    uint8_t num_consts = cg->bytecode[offset++];
+    printf("= Constants: %d\n", num_consts);
 
+    // 1-indexed constants.
+    for (uint8_t i = 1; i <= num_consts; i++) {
+        uint8_t type = cg->bytecode[offset++];
+        printf("#%02d ", i);
+        switch (type) {
+            case (CONST_INT): {
+                uint8_t int_len = cg->bytecode[offset++];
+                printf("INT%d  ", (int_len * 8));
+                for (int j = 0; j < int_len; j++) {
+                    printf("0x%02x ", cg->bytecode[offset++]);
+                }
+                printf("\n");
+                break;
+            }
+            case (CONST_STRING) : {
+                uint8_t str_len = cg->bytecode[offset++];
+                printf("STR  \"");
+                for (int j = 0; j < str_len; j++) {
+                    uint8_t c = cg->bytecode[offset++];
+                    printf("%c", (c >= 32 && c <= 126) ? (char) c : '.');
+                }
+                printf("\"\n");
+                break;
+            }
+            default:
+                printf("ERROR: Can't disassemble const type %d\n", type);
+        }
+    }
+}
+
+static void print_header(cg_t *cg) {
     if (cg->code_start > 0) {
         printf("= Header %c%c%c%c v%d.%d\n",
                cg->bytecode[0], cg->bytecode[1], cg->bytecode[2], cg->bytecode[3],
                cg->bytecode[4], cg->bytecode[5]
         );
 
-        uint8_t num_consts = cg->bytecode[6];
-        printf("= Constants: %d\n", num_consts);
+        print_constants(cg);
     }
+}
+
+void print_dis(cg_t *cg) {
+    printf("\n== Disassembly ==\n");
+
+    print_header(cg);
+
     printf("= Code (start 0x%x, end 0x%x)\n", cg->code_start, cg->len - 1);
     printf("%8s %s\n", "Offset", "Instruction");
     for (uint32_t offset = cg->code_start; offset < cg->len;) {

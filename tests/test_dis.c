@@ -1,24 +1,33 @@
 #include "unity/unity.h"
 #include "test_dis.h"
 
-#include "../src/comp/cg.h"
-#include "../src/common/op.h"
 #include "../src/comp/dis.h"
+#include "../src/comp/comp.h"
+#include "../src/common/op.h"
 
 void test_print_dis(void) {
     cg_t cg;
     cg_init(&cg);
 
-    uint8_t k;
-    map_elem_t v = {.type= MAP_ELEM_INT_TYPE, .elem.intval = 42};
-    cg_put_const(&cg, v, &k);
+    // Header
+    uint8_t bytecode[] = {
+        // Header
+        'E', 'T', 'H', 'L', 0, 1,
 
-    cg_byte(&cg, VM_OP_IPUSH);
-    cg_byte(&cg, 0xa5);
-    cg_byte(&cg, VM_OP_ICONST);
-    cg_byte(&cg, 1);
-    cg_byte(&cg, VM_OP_NOP);
-    cg_byte(&cg, VM_OP_RET);
+        // 2 Consts
+        2,
+        CONST_INT, 3, 1, 1, 1,
+        CONST_STRING, 3, 'f', 'o', 'o',
+
+        // Program
+        VM_OP_IPUSH, 0xa5,
+        VM_OP_ICONST, 0x01,
+        VM_OP_ADD,
+        VM_OP_RET,
+    };
+
+    cg_bytes(&cg, bytecode, sizeof(bytecode));
+    cg.code_start = 17;
 
     print_dis(&cg);
 
