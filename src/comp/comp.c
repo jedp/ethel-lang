@@ -296,8 +296,7 @@ __attribute__((unused)) void parse_binary_op(parser_t *parser) {
 // Referenced via pointer in the precedence table.
 __attribute__((unused)) void parse_parens(parser_t *parser) {
     parse_expr(parser);
-    printf("TODO: TAG_RPAREN eaten by precedence climbing. Should it be?\n");
-    //eat(parser, TAG_RPAREN);
+    eat(parser, TAG_RPAREN);
 }
 
 // Referenced via pointer in the precedence table.
@@ -306,7 +305,7 @@ __attribute__((unused)) void parse_subscript(parser_t *parser) {
 }
 
 static void parse_expr(parser_t *parser) {
-    parse_expr_by_precedence(parser, PRECED_NONE);
+    parse_expr_by_precedence(parser, PRECED_ASSIGN);
 }
 
 static void parse_if_stmt(parser_t *parser) {
@@ -315,8 +314,7 @@ static void parse_if_stmt(parser_t *parser) {
 
     eat(parser, TAG_LPAREN);
     parse_expr(parser);
-    // again expr eats too much?
-    //eat(parser, TAG_RPAREN);
+    eat(parser, TAG_RPAREN);
     eat(parser, TAG_THEN);
 
     from_if_addr = emit_jump(parser, VM_OP_JZ);

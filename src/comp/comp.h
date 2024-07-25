@@ -45,6 +45,10 @@ typedef struct parser_t {
     uint8_t err;
 } parser_t;
 
+typedef struct comp_t {
+
+} comp_t;
+
 error_t codegen(const char *input, cg_t *cg);
 
 error_t compile(const cg_t *cg, uint32_t max_size, uint8_t buf[], uint32_t *size);

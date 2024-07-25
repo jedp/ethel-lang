@@ -17,11 +17,11 @@ void test_comp_arithmetic(void) {
         VM_OP_SUB,
         VM_OP_IPUSH, 4,
         VM_OP_MUL,
+        VM_OP_ADD,
         VM_OP_IPUSH, 8,
         VM_OP_IPUSH, 2,
         VM_OP_DIV,
         VM_OP_SUB,
-        VM_OP_ADD,
         VM_OP_RET,
     };
     TEST_ASSERT_EQUAL_MEMORY(expected, cg.bytecode, cg.len);
