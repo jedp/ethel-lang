@@ -142,7 +142,14 @@ void parse_expr_by_precedence(parser_t *parser, uint8_t min_preced) {
     tag_t tag = parser->prev.tag;
 
     if (tag == TAG_EOL) {
-        return;
+        if (min_preced <= PRECED_NONE) {
+            return;
+        } else if (tag == TAG_EOL) {
+            // Inside an expression, consume whitespace.
+            // This lets us parse, for example, multi-line parentheses.
+            advance(parser);
+            tag = parser->prev.tag;
+        }
     }
 
     parse_func prefix_rule = preced_rules[tag].parse_prefix;
@@ -295,7 +302,11 @@ __attribute__((unused)) void parse_binary_op(parser_t *parser) {
 
 // Referenced via pointer in the precedence table.
 __attribute__((unused)) void parse_parens(parser_t *parser) {
-    parse_expr(parser);
+    while (!check_token_tag(parser, TAG_RPAREN) &&
+           !check_token_tag(parser, TAG_EOF)) {
+        parse_decl(parser);
+        token_tag_matches(parser, TAG_EOL);
+    }
     eat(parser, TAG_RPAREN);
 }
 
@@ -313,8 +324,8 @@ static void parse_if_stmt(parser_t *parser) {
     uint16_t from_else_addr;
 
     eat(parser, TAG_LPAREN);
-    parse_expr(parser);
-    eat(parser, TAG_RPAREN);
+    parse_parens(parser);
+
     eat(parser, TAG_THEN);
 
     from_if_addr = emit_jump(parser, VM_OP_JZ);

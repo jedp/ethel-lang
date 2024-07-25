@@ -342,6 +342,36 @@ void test_comp_multiline_block(void) {
     TEST_ASSERT_EQUAL(ERR_NO_ERROR, err);
 }
 
+void test_comp_multiline_parens(void) {
+    const char *input = "if (3 > 2 and         \n"
+                        "    4 < 5 and         \n"
+                        "    5 <= 9) then true   ";
+
+    cg_t cg;
+    cg_init(&cg);
+    error_t err = codegen(input, &cg);
+
+    uint8_t expected[] = {
+        VM_OP_IPUSH, 3,
+        VM_OP_IPUSH, 2,
+        VM_OP_GT,
+        VM_OP_IPUSH, 4,
+        VM_OP_IPUSH, 5,
+        VM_OP_LT,
+        VM_OP_LOGICAL_AND,
+        VM_OP_IPUSH, 5,
+        VM_OP_IPUSH, 9,
+        VM_OP_LE,
+        VM_OP_LOGICAL_AND,
+        VM_OP_JZ, 0x15, 0,
+        VM_OP_ZPUSH_T,
+        VM_OP_RET,
+    };
+    TEST_ASSERT_EQUAL_MEMORY(expected, cg.bytecode, cg.len);
+
+    TEST_ASSERT_EQUAL(ERR_NO_ERROR, err);
+}
+
 void test_comp(void) {
     RUN_TEST(test_comp_arithmetic);
     RUN_TEST(test_comp_bit_arithmetic);
@@ -357,5 +387,6 @@ void test_comp(void) {
     RUN_TEST(test_comp_if_then_else_block);
     RUN_TEST(test_comp_if_then_else_if_block);
     RUN_TEST(test_comp_multiline_block);
+    RUN_TEST(test_comp_multiline_parens);
 }
 

@@ -34,6 +34,7 @@ typedef enum {
     PRECED_BITWISE_SHIFT,
     PRECED_BITWISE_NOT,
     PRECED_SUBSCRIPT,
+    PRECED_GROUPING,
     PRECED_FUNCTION_ARGS,
     PRECED_MEMBER_ACCESS,
 } preced_t;
@@ -78,7 +79,7 @@ parse_preced_rule_t preced_rules[] = {
     [TAG_FALSE] = {parse_literal, NULL, PRECED_NONE, ASSOC_LEFT},
     [TAG_NIL] = {parse_literal, NULL, PRECED_NONE, ASSOC_LEFT},
     [TAG_IDENT] = {parse_ident, NULL, PRECED_NONE, ASSOC_LEFT},
-    [TAG_LPAREN] = {parse_parens, NULL, PRECED_NONE, ASSOC_LEFT},
+    [TAG_LPAREN] = {parse_parens, NULL, PRECED_GROUPING, ASSOC_LEFT},
     [TAG_RPAREN] = {NULL, NULL, PRECED_NONE, ASSOC_LEFT},
     [TAG_BEGIN] = {parse_block, NULL, PRECED_NONE, ASSOC_LEFT},
     [TAG_END] = {NULL, NULL, PRECED_NONE, ASSOC_LEFT},
