@@ -4,6 +4,7 @@
 #include "comp.h"
 #include "../common/op.h"
 #include "dis.h"
+#include "val.h"
 
 static uint32_t print_op(const char *name, uint32_t offset) {
     printf("%-12s\n", name);
@@ -20,16 +21,16 @@ static uint32_t print_push(const char *name, cg_t *cg, uint32_t offset) {
 }
 
 static uint32_t print_loadi(const char *name, cg_t *cg, uint32_t offset) {
-    map_elem_t v;
+    val_t v;
     cg_get_const(cg, cg->bytecode[offset + 1], &v);
-    printf("%-12s #%02x [%d]\n", name, cg->bytecode[offset + 1], v.elem.intval);
+    printf("%-12s #%02x [%d]\n", name, cg->bytecode[offset + 1], v.as.intval);
     return offset + 2;
 }
 
 static uint32_t print_loads(const char *name, cg_t *cg, uint32_t offset) {
-    map_elem_t v;
+    val_t v;
     cg_get_const(cg, cg->bytecode[offset + 1], &v);
-    printf("%-12s #%x [%s]\n", name, cg->bytecode[offset + 1], v.elem.stringval_ptr);
+    printf("%-12s #%x [%s]\n", name, cg->bytecode[offset + 1], v.as.stringval_ptr);
     return offset + 2;
 }
 

@@ -8,6 +8,7 @@
 #include "dis.h"
 #include "lex.h"
 #include "preced.h"
+#include "val.h"
 
 static void parse_expr(parser_t *parser);
 
@@ -89,7 +90,7 @@ static map_err_t emit_const_int(parser_t *parser, int val) {
     } else if (val >= -128 && val <= 127) {
         emit_bytes(parser, VM_OP_IPUSH, (uint8_t) val & 0xff);
     } else {
-        map_elem_t v = {.type = MAP_ELEM_INT_TYPE, .elem.intval = val};
+        val_t v = {.type = VAL_TYPE_INT, .as.intval = val};
         uint8_t k;
         err = cg_put_const(parser->cg, v, &k);
         emit_bytes(parser, VM_OP_ICONST, k);
@@ -105,9 +106,9 @@ static map_err_t emit_const_str(parser_t *parser, const char *val, uint32_t len)
     strncpy(strval, val, len);
     strval[len] = '\0';
 
-    map_elem_t v = {
-        .type = MAP_ELEM_STRING_TYPE,
-        .elem.stringval_ptr = strval,
+    val_t v = {
+        .type = VAL_TYPE_STRING_PTR,
+        .as.stringval_ptr = strval,
     };
     uint8_t k;
     err = cg_put_const(parser->cg, v, &k);
@@ -438,42 +439,42 @@ error_t compile(const cg_t *cg, uint32_t max_size, uint8_t buf[], uint32_t *size
     }
     buf[offset++] = (uint8_t) cg->consts->buckets->nelems;
     for (uint8_t i = 1; i <= (uint8_t) cg->consts->buckets->nelems; i++) {
-        map_elem_t k = {.type = MAP_ELEM_INT_TYPE, .elem.intval=i};
-        map_elem_t *v = map_get(cg->consts, &k);
+        val_t k = {.type = VAL_TYPE_INT, .as.intval=i};
+        val_t *v = map_get(cg->consts, &k);
 
         switch (v->type) {
-            case MAP_ELEM_INT_TYPE: {
+            case VAL_TYPE_INT: {
                 // Ints are packed into as few bytes as possible,
                 // least-significant byte first.
                 buf[offset++] = CONST_INT;
                 uint32_t byte_len = offset++; // Set value below.
                 uint8_t intlen;
-                int intval = v->elem.intval;
+                int intval = v->as.intval;
                 if (intval >= -128 && intval <= 127) {
-                    buf[offset++] = (uint8_t) (v->elem.intval & 0x000000ff);
+                    buf[offset++] = (uint8_t) (v->as.intval & 0x000000ff);
                     intlen = 1;
                 }
                 if (intval >= -32768 && intval <= 32767) {
-                    buf[offset++] = (uint8_t) ((v->elem.intval & 0x0000ff00) >> 8);
+                    buf[offset++] = (uint8_t) ((v->as.intval & 0x0000ff00) >> 8);
                     intlen = 2;
                 }
                 if (intval >= -8388608 && intval <= 8388607) {
-                    buf[offset++] = (uint8_t) ((v->elem.intval & 0x00ff0000) >> 16);
+                    buf[offset++] = (uint8_t) ((v->as.intval & 0x00ff0000) >> 16);
                     intlen = 3;
                 }
                 if (intval) {
-                    buf[offset++] = (uint8_t) (((uint32_t) v->elem.intval & 0xff000000) >> 24);
+                    buf[offset++] = (uint8_t) (((uint32_t) v->as.intval & 0xff000000) >> 24);
                     intlen = 4;
                 }
                 buf[byte_len] = intlen;
                 break;
             }
-            case MAP_ELEM_STRING_TYPE:
+            case VAL_TYPE_STRING_PTR:
                 // TODO check string too long
                 buf[offset++] = CONST_STRING;
-                uint8_t slen = buf[offset++] = (uint8_t) strlen(v->elem.stringval_ptr);
+                uint8_t slen = buf[offset++] = (uint8_t) strlen(v->as.stringval_ptr);
                 // Deliberately not null-terminated
-                mem_cp(buf + offset, v->elem.stringval_ptr, slen);
+                mem_cp(buf + offset, v->as.stringval_ptr, slen);
                 offset += slen;
                 break;
             default:

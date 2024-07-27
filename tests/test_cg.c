@@ -2,6 +2,7 @@
 #include "test_cg.h"
 #include "../src/comp/cg.h"
 #include "../src/common/op.h"
+#include "val.h"
 
 void test_cg_init(void) {
     cg_t cg;
@@ -48,10 +49,10 @@ void test_cg_add_const(void) {
     uint8_t k3;
     uint8_t k4;
 
-    map_elem_t v1 = {.type= MAP_ELEM_INT_TYPE, .elem.intval = 5};
-    map_elem_t v2 = {.type= MAP_ELEM_INT_TYPE, .elem.floatval = 6.18f};
-    map_elem_t v3 = {.type= MAP_ELEM_INT_TYPE, .elem.charval = 'c'};
-    map_elem_t v4 = {.type= MAP_ELEM_INT_TYPE, .elem.byteval = 0xff};
+    val_t v1 = {.type= VAL_TYPE_INT, .as.intval = 5};
+    val_t v2 = {.type= VAL_TYPE_INT, .as.floatval = 6.18f};
+    val_t v3 = {.type= VAL_TYPE_INT, .as.charval = 'c'};
+    val_t v4 = {.type= VAL_TYPE_INT, .as.byteval = 0xff};
 
     err |= cg_put_const(&cg, v1, &k1);
     err |= cg_put_const(&cg, v2, &k2);

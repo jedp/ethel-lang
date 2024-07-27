@@ -7,6 +7,7 @@
 #include "../comp/dis.h"
 #include "../common/op.h"
 #include "vm.h"
+#include "val.h"
 
 #define READ_BYTE() (*vm->pc++)
 
@@ -220,10 +221,10 @@ static error_t exec(vm_t *vm) {
                 vm_stack_push_boolean(vm, true);
                 break;
             case VM_OP_ICONST: {
-                map_elem_t v;
+                val_t v;
                 uint8_t k = READ_BYTE();
                 cg_get_const(vm->cg, k, &v);
-                vm_stack_push_int(vm, v.elem.intval);
+                vm_stack_push_int(vm, v.as.intval);
                 break;
             }
             case VM_OP_NIL:

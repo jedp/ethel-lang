@@ -6,6 +6,7 @@
 #include "cmem.h"
 #include "cg.h"
 #include "comp.h"
+#include "val.h"
 
 void cg_init(cg_t *cg) {
     cg->len = 0;
@@ -64,7 +65,7 @@ uint32_t cg_header(cg_t *cg, const uint8_t *bytes, size_t size) {
 
     for (uint8_t i = 1; i <= num_consts; i++) {
         const_type_t type = bytes[offset++];
-        map_elem_t v;
+        val_t v;
         uint8_t k;
         switch (type) {
             case CONST_INT: {
@@ -86,8 +87,8 @@ uint32_t cg_header(cg_t *cg, const uint8_t *bytes, size_t size) {
                 if (intsize < 4 && uintval & (1 << ((intsize - 1) * 8 + 7))) {
                     uintval |= (0xffffffff << intsize * 8);
                 }
-                v.type = MAP_ELEM_INT_TYPE;
-                v.elem.intval = (int) uintval;
+                v.type = VAL_TYPE_INT;
+                v.as.intval = (int) uintval;
                 cg_put_const(cg, v, &k);
                 break;
             }
@@ -104,15 +105,15 @@ uint32_t cg_header(cg_t *cg, const uint8_t *bytes, size_t size) {
     return offset;
 }
 
-map_err_t cg_put_const(cg_t *cg, map_elem_t v, uint8_t *k) {
+map_err_t cg_put_const(cg_t *cg, val_t v, uint8_t *k) {
     uint32_t next_k = cg->consts->buckets->nelems + 1;
     if (next_k > UINT8_MAX) {
         return MAP_TOO_MANY_ITEMS;
     }
 
-    map_elem_t *ek = (map_elem_t *) comp_alloc(sizeof(map_elem_t));
-    ek->type = MAP_ELEM_UINT_TYPE;
-    ek->elem.uintval = next_k;
+    val_t *ek = (val_t *) comp_alloc(sizeof(val_t));
+    ek->type = VAL_TYPE_UINT;
+    ek->as.uintval = next_k;
     map_err_t err = map_put(cg->consts, ek, &v);
 
     *k = (uint8_t) next_k;
@@ -120,11 +121,11 @@ map_err_t cg_put_const(cg_t *cg, map_elem_t v, uint8_t *k) {
     return err;
 }
 
-map_err_t cg_get_const(cg_t *cg, uint8_t k, map_elem_t *v) {
-    map_elem_t *ek = (map_elem_t *) comp_alloc(sizeof(map_elem_t));
-    ek->type = MAP_ELEM_UINT_TYPE;
-    ek->elem.uintval = k;
-    map_elem_t *found = map_get(cg->consts, ek);
+map_err_t cg_get_const(cg_t *cg, uint8_t k, val_t *v) {
+    val_t *ek = (val_t *) comp_alloc(sizeof(val_t));
+    ek->type = VAL_TYPE_UINT;
+    ek->as.uintval = k;
+    val_t *found = map_get(cg->consts, ek);
     if (found == NULL) {
         return MAP_NOT_FOUND;
     }

@@ -5,6 +5,7 @@
 #include "../common/def.h"
 #include "err.h"
 #include "../common/map.h"
+#include "val.h"
 
 typedef struct cg_t {
     uint32_t len;
@@ -32,9 +33,9 @@ uint32_t cg_header(cg_t *cg, const uint8_t *bytes, size_t size);
  *
  * The indexes are generated sequentially.
  */
-map_err_t cg_put_const(cg_t *cg, map_elem_t v, uint8_t *k);
+map_err_t cg_put_const(cg_t *cg, val_t v, uint8_t *k);
 
 /*
  * Get a const by its index, writing back its value.
  */
-map_err_t cg_get_const(cg_t *cg, uint8_t k, map_elem_t *v);
+map_err_t cg_get_const(cg_t *cg, uint8_t k, val_t *v);

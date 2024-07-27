@@ -2,6 +2,7 @@
 #include "test_comp.h"
 #include "../src/common/op.h"
 #include "../src/comp/comp.h"
+#include "val.h"
 
 void test_comp_arithmetic(void) {
     const char *input = "300 + (1 - -3) * 4 - 8 / 2";
@@ -27,9 +28,9 @@ void test_comp_arithmetic(void) {
     TEST_ASSERT_EQUAL_MEMORY(expected, cg.bytecode, cg.len);
 
     // Check int const 1.
-    map_elem_t v;
+    val_t v;
     cg_get_const(&cg, 1, &v);
-    TEST_ASSERT_EQUAL(300, v.elem.intval);
+    TEST_ASSERT_EQUAL(300, v.as.intval);
 
     TEST_ASSERT_EQUAL(ERR_NO_ERROR, err);
 }
@@ -53,9 +54,9 @@ void test_comp_bit_arithmetic(void) {
     TEST_ASSERT_EQUAL_MEMORY(expected, cg.bytecode, cg.len);
 
     // Check int const 1.
-    map_elem_t v;
+    val_t v;
     cg_get_const(&cg, 1, &v);
-    TEST_ASSERT_EQUAL(0xff, v.elem.intval);
+    TEST_ASSERT_EQUAL(0xff, v.as.intval);
 
     TEST_ASSERT_EQUAL(ERR_NO_ERROR, err);
 }
