@@ -363,11 +363,10 @@ static void parse_if_stmt(parser_t *parser) {
 
 // Referenced via pointer in the precedence table.
 __attribute__ ((unused)) void parse_block(parser_t *parser) {
-    while (!token_tag_matches(parser, TAG_END) &&
+    while (!token_tag_matches(parser, TAG_RSQUIGGLY) &&
            !token_tag_matches(parser, TAG_EOF)) {
         parse_decl(parser);
     }
-//    eat(parser, TAG_END);
 }
 
 

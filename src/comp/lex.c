@@ -467,9 +467,9 @@ token_t next_token(lexer_t *lexer) {
 
     switch (ch) {
         case '{':
-            return make_token(lexer, TAG_BEGIN);
+            return make_token(lexer, TAG_LSQUIGGLY);
         case '}':
-            return make_token(lexer, TAG_END);
+            return make_token(lexer, TAG_RSQUIGGLY);
         case '(':
             return make_token(lexer, TAG_LPAREN);
         case ')':

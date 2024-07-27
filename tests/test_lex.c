@@ -110,8 +110,8 @@ void test_lex_tokenize(void) {
     expect_type(&lexer, TAG_INVARIABLE);
     expect_type(&lexer, TAG_VARIABLE);
     expect_type(&lexer, TAG_WHILE);
-    expect_type(&lexer, TAG_BEGIN);
-    expect_type(&lexer, TAG_END);
+    expect_type(&lexer, TAG_LSQUIGGLY);
+    expect_type(&lexer, TAG_RSQUIGGLY);
     expect_type(&lexer, TAG_LBRACKET);
     expect_type(&lexer, TAG_RBRACKET);
     expect_type(&lexer, TAG_COMMA);
