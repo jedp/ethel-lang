@@ -4,7 +4,7 @@
 #include "token.h"
 #include "lex.h"
 
-boolean lexer_at_eof(lexer_t *lexer) {
+bool lexer_at_eof(lexer_t *lexer) {
     return *lexer->curr == '\0';
 }
 
@@ -24,17 +24,17 @@ static char peek_next(lexer_t *lexer) {
     return lexer->curr[1];
 }
 
-static boolean match_next(lexer_t *lexer, const char ch) {
+static bool match_next(lexer_t *lexer, const char ch) {
     if (lexer_at_eof(lexer)) {
-        return False;
+        return false;
     }
 
     if (*lexer->curr != ch) {
-        return False;
+        return false;
     }
 
     lexer->curr++;
-    return True;
+    return true;
 }
 
 static void consume_ws(lexer_t *lexer) {
@@ -113,14 +113,14 @@ static token_t make_string_token(lexer_t *lexer) {
     return make_token(lexer, TAG_STRING);
 }
 
-static boolean is_hex_digit(const char ch) {
+static bool is_hex_digit(const char ch) {
     return ((ch >= '0' && ch <= '9') ||
             (ch >= 'A' && ch <= 'F') ||
             (ch >= 'a' && ch <= 'f')
     );
 }
 
-static boolean is_bin_digit(const char ch) {
+static bool is_bin_digit(const char ch) {
     return (ch == '0' || ch == '1');
 }
 

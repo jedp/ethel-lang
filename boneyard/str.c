@@ -2,10 +2,10 @@
 #include <stdlib.h>
 #include <limits.h>
 #include "../inc/type.h"
-#include "common/ptr.h"
+#include "ptr.h"
 #include "../inc/mem.h"
 #include "../inc/arr.h"
-#include "common/math.h"
+#include "math.h"
 #include "../inc/str.h"
 
 #define C_STR_BUF_SIZ 180

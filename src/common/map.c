@@ -2,58 +2,12 @@
 #include <string.h>
 #include <stdio.h>
 
-#include "../comp/cmem.h"
+#include "../mem/mem.h"
 #include "map.h"
 #include "val.h"
 
-uint32_t hash_primitive(val_t *e) {
-    switch (e->type) {
-        case VAL_TYPE_BOOL:
-            return (uint32_t) e->as.boolval;
-        case VAL_TYPE_BYTE:
-            return (uint32_t) e->as.byteval;
-        case VAL_TYPE_CHAR:
-            return (uint32_t) e->as.charval;
-        case VAL_TYPE_UINT:
-            return (uint32_t) e->as.uintval;
-        case VAL_TYPE_FLOAT:
-            return (uint32_t) e->as.floatval;
-        case VAL_TYPE_INT:
-            return (uint32_t) e->as.intval;
-        case VAL_TYPE_ADDR:
-            // TODO
-            return 77;
-        default:
-            printf("Unsupported type %d\n", e->type);
-            exit(1);
-    }
-}
-
-uint8_t eq_primitive(val_t *a, val_t *b) {
-    // TODO test b is of primitive type
-    switch (a->type) {
-        case VAL_TYPE_BOOL:
-            return (a->as.boolval == b->as.boolval) ? 1 : 0;
-        case VAL_TYPE_BYTE:
-            return (a->as.byteval == b->as.byteval) ? 1 : 0;
-        case VAL_TYPE_CHAR:
-            return (a->as.charval == b->as.charval) ? 1 : 0;
-        case VAL_TYPE_UINT:
-        case VAL_TYPE_FLOAT:
-            return (a->as.uintval == b->as.uintval) ? 1 : 0;
-        case VAL_TYPE_INT:
-            return (a->as.intval == b->as.intval) ? 1 : 0;
-        case VAL_TYPE_ADDR:
-            // TODO
-            return 0;
-        default:
-            printf("Unsupported type %d\n", a->type);
-            exit(1);
-    }
-}
-
 static map_buckets_t *buckets_new(uint32_t nbuckets) {
-    map_buckets_t *buckets = (map_buckets_t *) comp_alloc(sizeof(map_buckets_t) * nbuckets);
+    map_buckets_t *buckets = (map_buckets_t *) mem_alloc(sizeof(map_buckets_t) * nbuckets);
     for (uint32_t i = 0; i < nbuckets; i++) {
         buckets->nodes[i] = NULL;
     }
@@ -65,11 +19,11 @@ static map_buckets_t *buckets_new(uint32_t nbuckets) {
 map_t *map_new(
     uint8_t nbuckets,
     uint32_t (*hash_func)(val_t *node),
-    uint8_t (*eq_func)(val_t *node, val_t *other)
+    bool (*eq_func)(val_t *node, val_t *other)
 ) {
     map_buckets_t *buckets = buckets_new(nbuckets);
 
-    map_t *map = (map_t *) comp_alloc(sizeof(map_t));
+    map_t *map = (map_t *) mem_alloc(sizeof(map_t));
 
     if (buckets == NULL || map == NULL) {
         printf("Can't allocate new map. Out of memory.\n");
@@ -84,15 +38,15 @@ map_t *map_new(
 }
 
 void map_free(map_t *map) {
-    comp_free(map->buckets);
-    comp_free(map);
+    mem_free(map->buckets);
+    mem_free(map);
 }
 
 static map_err_t buckets_put_internal(map_buckets_t *buckets,
                                       val_t *k,
                                       val_t *v,
                                       uint32_t (*hash_func)(val_t *elem),
-                                      uint8_t (*eq_func)(val_t *node, val_t *other)
+                                      bool (*eq_func)(val_t *node, val_t *other)
 ) {
     uint32_t hash_val = hash_func(k);
     uint32_t bucket_index = hash_val % buckets->nbuckets;
@@ -110,15 +64,15 @@ static map_err_t buckets_put_internal(map_buckets_t *buckets,
     }
 
     // Create a new node.
-    map_kv_node_t *new = (map_kv_node_t *) comp_alloc(sizeof(map_kv_node_t));
+    map_kv_node_t *new = (map_kv_node_t *) mem_alloc(sizeof(map_kv_node_t));
     if (new == NULL) {
         exit(1);
     }
 
     new->hash_val = hash_val;
-    new->k = (val_t *) comp_alloc(sizeof(val_t));
+    new->k = (val_t *) mem_alloc(sizeof(val_t));
     *(new->k) = *k;
-    new->v = (val_t *) comp_alloc(sizeof(val_t));
+    new->v = (val_t *) mem_alloc(sizeof(val_t));
     *(new->v) = *v;
 
     // Insert at head of list in this bucket.
@@ -152,7 +106,7 @@ static map_err_t maybe_grow_map(map_t *orig_map) {
 
     map_buckets_t *old_buckets = orig_map->buckets;
     orig_map->buckets = new_buckets;
-    comp_free(old_buckets);
+    mem_free(old_buckets);
 
     return MAP_OK;
 }

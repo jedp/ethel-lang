@@ -1,6 +1,6 @@
 #pragma once
 
-#include "../src/common/def.h"
+#include "def.h"
 #include "obj.h"
 
 #define TYPEOF(x) (((gc_header_t*) x)->type)

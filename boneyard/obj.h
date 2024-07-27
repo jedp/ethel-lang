@@ -2,7 +2,7 @@
 
 #include <inttypes.h>
 #include "../src/common/err.h"
-#include "../src/common/def.h"
+#include "def.h"
 
 enum iter_state {
     ITER_NOT_STARTED,
@@ -10,7 +10,7 @@ enum iter_state {
     ITER_STOPPED,
 };
 
-typedef struct Obj obj_t;
+//typedef struct Obj obj_t;
 
 typedef struct VariableArg {
     gc_header_t hdr;
@@ -78,23 +78,23 @@ typedef struct ObjIterator {
     int state;
 } obj_iter_t;
 
-typedef struct Obj {
-    gc_header_t hdr;
-    union {
-        error_t errval;
-        int intval;
-        int boolval;
-        float floatval;
-        byte byteval;
-        obj_range_t *range;
-        obj_list_t *list;
-        obj_dict_t *dict;
-        bytearray_t *bytearray;
-        obj_func_def_t *func_def;
-        obj_iter_t *iterator;
-        struct Obj *return_val;
-    };
-} obj_t;
+//typedef struct Obj {
+//    gc_header_t hdr;
+//    union {
+//        error_t errval;
+//        int intval;
+//        int boolval;
+//        float floatval;
+//        byte byteval;
+//        obj_range_t *range;
+//        obj_list_t *list;
+//        obj_dict_t *dict;
+//        bytearray_t *bytearray;
+//        obj_func_def_t *func_def;
+//        obj_iter_t *iterator;
+//        struct Obj *return_val;
+//    };
+//} obj_t;
 
 typedef obj_t *(*static_method)(obj_t *obj, obj_varargs_t *args);
 

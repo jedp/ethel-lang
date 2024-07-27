@@ -1,24 +1,25 @@
 #include <stdlib.h>
+#include <stdio.h>
 
-#include "../common/def.h"
 #include "../common/map.h"
 #include "../common/ptr.h"
-#include "cmem.h"
+#include "../mem/mem.h"
 #include "cg.h"
 #include "comp.h"
 #include "val.h"
+#include "hash.h"
 
 void cg_init(cg_t *cg) {
     cg->len = 0;
     cg->max = 0;
     cg->code_start = 0;
     cg->bytecode = NULL;
-    cg->consts = map_new(MAP_NEW_BUCKETS, &hash_primitive, &eq_primitive);
+    cg->consts = map_new(MAP_NEW_BUCKETS, &val_hash, &val_eq);
 }
 
 void cg_free(cg_t *cg) {
-    comp_free(cg->bytecode);
-    comp_free(cg->consts);
+    mem_free(cg->bytecode);
+    mem_free(cg->consts);
     cg_init(cg);
 }
 
@@ -111,7 +112,7 @@ map_err_t cg_put_const(cg_t *cg, val_t v, uint8_t *k) {
         return MAP_TOO_MANY_ITEMS;
     }
 
-    val_t *ek = (val_t *) comp_alloc(sizeof(val_t));
+    val_t *ek = (val_t *) mem_alloc(sizeof(val_t));
     ek->type = VAL_TYPE_UINT;
     ek->as.uintval = next_k;
     map_err_t err = map_put(cg->consts, ek, &v);
@@ -122,7 +123,7 @@ map_err_t cg_put_const(cg_t *cg, val_t v, uint8_t *k) {
 }
 
 map_err_t cg_get_const(cg_t *cg, uint8_t k, val_t *v) {
-    val_t *ek = (val_t *) comp_alloc(sizeof(val_t));
+    val_t *ek = (val_t *) mem_alloc(sizeof(val_t));
     ek->type = VAL_TYPE_UINT;
     ek->as.uintval = k;
     val_t *found = map_get(cg->consts, ek);

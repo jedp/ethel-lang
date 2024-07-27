@@ -1,6 +1,7 @@
 #include <stdlib.h>
 #include <string.h>
 #include <stdbool.h>
+#include <stdio.h>
 #include "../common/op.h"
 #include "../common/ptr.h"
 #include "cg.h"
@@ -74,7 +75,7 @@ static void emit_bytes(parser_t *parser, uint8_t byte1, uint8_t byte2) {
     emit_byte(parser, byte2);
 }
 
-static void emit_const_bool(parser_t *parser, boolean val) {
+static void emit_const_bool(parser_t *parser, bool val) {
     emit_byte(parser, val ? VM_OP_ZPUSH_T : VM_OP_ZPUSH_F);
 }
 
@@ -99,16 +100,14 @@ static map_err_t emit_const_int(parser_t *parser, int val) {
     return err;
 }
 
-static map_err_t emit_const_str(parser_t *parser, const char *val, uint32_t len) {
+static map_err_t emit_const_obj_str(parser_t *parser, const char *chars, uint32_t length) {
     map_err_t err;
 
-    char *strval = malloc(len + 1);
-    strncpy(strval, val, len);
-    strval[len] = '\0';
+    obj_str_t *obj_str = obj_str_new(chars, length);
 
     val_t v = {
-        .type = VAL_TYPE_STRING_PTR,
-        .as.stringval_ptr = strval,
+        .type = VAL_TYPE_OBJ,
+        .as.objval = (obj_t *) obj_str,
     };
     uint8_t k;
     err = cg_put_const(parser->cg, v, &k);
@@ -193,7 +192,20 @@ __attribute__((unused)) void parse_bin(parser_t *parser) {
 
 // Referenced via pointer in the precedence table.
 __attribute__((unused)) void parse_ident(parser_t *parser) {
-    (void) emit_const_str(parser, parser->prev.start, parser->prev.len);
+    (void) emit_const_obj_str(parser, parser->prev.start, parser->prev.len);
+}
+
+// Referenced via pointer in the precedence table.
+__attribute__((unused)) void parse_string(parser_t *parser) {
+    // Remove surrounding quotes.
+    if (*parser->prev.start != '"') {
+        error(parser, COMP_UNEXPECTED_TOKEN);
+        return;
+    }
+
+    const char *start = parser->prev.start + 1;
+    uint32_t len = parser->prev.len - 2;
+    (void) emit_const_obj_str(parser, start, len);
 }
 
 // Referenced via pointer in the precedence table.
@@ -469,12 +481,13 @@ error_t compile(const cg_t *cg, uint32_t max_size, uint8_t buf[], uint32_t *size
                 buf[byte_len] = intlen;
                 break;
             }
-            case VAL_TYPE_STRING_PTR:
+            case VAL_TYPE_OBJ:
                 // TODO check string too long
                 buf[offset++] = CONST_STRING;
-                uint8_t slen = buf[offset++] = (uint8_t) strlen(v->as.stringval_ptr);
+                obj_str_t *obj_str = AS_OBJ_STR(v);
+                uint8_t slen = buf[offset++] = obj_str->length;
                 // Deliberately not null-terminated
-                mem_cp(buf + offset, v->as.stringval_ptr, slen);
+                mem_cp(buf + offset, AS_OBJ_STR(v)->chars, slen);
                 offset += slen;
                 break;
             default:

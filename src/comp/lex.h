@@ -1,8 +1,8 @@
 #pragma once
 
 #include <inttypes.h>
+#include <stdbool.h>
 #include "err.h"
-#include "../common/def.h"
 #include "token.h"
 
 enum lex_err {
@@ -23,6 +23,6 @@ typedef struct {
 
 void lexer_init(lexer_t *lexer, const char input[]);
 
-boolean lexer_at_eof(lexer_t *lexer);
+bool lexer_at_eof(lexer_t *lexer);
 
 token_t next_token(lexer_t *lexer);

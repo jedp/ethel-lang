@@ -1,6 +1,5 @@
 #pragma once
 
-#include "def.h"
 #include "err.h"
 #include "val.h"
 
@@ -23,19 +22,15 @@ typedef struct map_buckets_t {
 typedef struct map_t {
     uint32_t (*hash_func)(val_t *node);
 
-    uint8_t (*eq_func)(val_t *node, val_t *other);
+    bool (*eq_func)(val_t *node, val_t *other);
 
     map_buckets_t *buckets;
 } map_t;
 
-uint32_t hash_primitive(val_t *e);
-
-uint8_t eq_primitive(val_t *a, val_t *b);
-
 map_t *map_new(
     uint8_t nbuckets,
     uint32_t (*hash_func)(val_t *node),
-    uint8_t (*eq_func)(val_t *node, val_t *other)
+    bool (*eq_func)(val_t *node, val_t *other)
 );
 
 void map_free(map_t *map);

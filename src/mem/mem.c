@@ -1,12 +1,14 @@
 #include <stdlib.h>
 
-#include "cmem.h"
+#include "mem.h"
 
-void *comp_alloc(size_t size) {
+void *mem_alloc(uint32_t size) {
     return malloc(size);
 }
 
-void *comp_realloc(void *ptr, size_t new_size) {
+void *mem_realloc(void *ptr, uint32_t old_size, uint32_t new_size) {
+    (void) old_size;
+
     if (new_size == 0) {
         free(ptr);
         return NULL;
@@ -15,7 +17,7 @@ void *comp_realloc(void *ptr, size_t new_size) {
     return realloc(ptr, new_size);
 }
 
-void comp_free(void *ptr) {
+void mem_free(void *ptr) {
     free(ptr);
     ptr = NULL;
 }

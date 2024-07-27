@@ -1,4 +1,3 @@
-#include "../inc/mem.h"
 #include "unity/unity.h"
 #include "test_heap.h"
 #include "test_gc.h"

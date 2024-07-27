@@ -1,6 +1,6 @@
 #pragma once
 
-#include "../src/common/def.h"
+#include "def.h"
 #include "obj.h"
 
 /* Return the length of a c string, not including the terminating null.  */

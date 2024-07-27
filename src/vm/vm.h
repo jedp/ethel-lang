@@ -2,7 +2,6 @@
 
 #include <stdbool.h>
 #include "../comp/cg.h"
-#include "../common/def.h"
 #include "err.h"
 
 #define VM_DATA_STACK_SIZE (64)

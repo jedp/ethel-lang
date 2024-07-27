@@ -30,16 +30,26 @@ set(TESTFLAGS -I test -fno-omit-frame-pointer -fsanitize=address)
 set(LDFLAGS -lm -lreadline -ldl)
 
 set(COMMON_OBJS
-        ${CMAKE_INC_DIR}
+        ${CMAKE_SRC_DIR}/common/hash.c
         ${CMAKE_SRC_DIR}/common/map.c
         ${CMAKE_SRC_DIR}/common/math.c
         ${CMAKE_SRC_DIR}/common/ptr.c
         ${CMAKE_SRC_DIR}/common/rand.c
+        ${CMAKE_SRC_DIR}/common/val.c
+)
+
+set(MEM_OBJS
+        ${CMKE_SRC_DIR}/mem/mem.c
+)
+
+set(OBJ_OBJS
+        ${CMAKE_SRC_DIR}/obj/obj.c
+        ${CMAKE_SRC_DIR}/obj/obj_str.c
 )
 
 set(COMP_OBJS
+        ${OBJ_OBJS}
         ${CMAKE_SRC_DIR}/comp/cg.c
-        ${CMAKE_SRC_DIR}/comp/cmem.c
         ${CMAKE_SRC_DIR}/comp/comp.c
         ${CMAKE_SRC_DIR}/comp/dis.c
         ${CMAKE_SRC_DIR}/comp/lex.c

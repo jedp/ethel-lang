@@ -1,10 +1,11 @@
 #include "unity/unity.h"
 #include "../src/common/map.h"
 #include "test_map.h"
+#include "hash.h"
 #include "val.h"
 
 void test_map_new(void) {
-    map_t *map = map_new(8, &hash_primitive, &eq_primitive);
+    map_t *map = map_new(8, &val_hash, &val_eq);
 
     TEST_ASSERT_EQUAL(0, map->buckets->nelems);
 
@@ -12,7 +13,7 @@ void test_map_new(void) {
 }
 
 void test_map_put(void) {
-    map_t *map = map_new(8, &hash_primitive, &eq_primitive);
+    map_t *map = map_new(8, &val_hash, &val_eq);
     val_t k = {.type = VAL_TYPE_INT, .as = {1}};
     val_t v = {.type = VAL_TYPE_INT, .as = {42}};
 
@@ -24,7 +25,7 @@ void test_map_put(void) {
 }
 
 void test_map_put_collision(void) {
-    map_t *map = map_new(8, &hash_primitive, &eq_primitive);
+    map_t *map = map_new(8, &val_hash, &val_eq);
     val_t k1 = {.type = VAL_TYPE_BOOL, .as = {1}};
     val_t v1 = {.type = VAL_TYPE_INT, .as = {1}};
     val_t k2 = {.type = VAL_TYPE_BYTE, .as = {9}};

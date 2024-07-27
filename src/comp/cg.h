@@ -2,7 +2,6 @@
 
 #include <inttypes.h>
 
-#include "../common/def.h"
 #include "err.h"
 #include "../common/map.h"
 #include "val.h"

@@ -1,6 +1,6 @@
 #pragma once
 
-#include "../src/common/def.h"
+#include "def.h"
 
 /*
  * Allocate an object of size type_t with the given flags.

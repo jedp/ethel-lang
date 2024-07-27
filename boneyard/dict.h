@@ -1,6 +1,6 @@
 #pragma once
 
-#include "../src/common/def.h"
+#include "def.h"
 #include "../src/common/err.h"
 #include "obj.h"
 

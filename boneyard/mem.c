@@ -3,7 +3,7 @@
 #include "../inc/obj.h"
 #include "../inc/eval.h"
 #include "../inc/mem.h"
-#include "common/ptr.h"
+#include "ptr.h"
 #include "../inc/heap.h"
 
 #define HDR_ALLOC(t, y, c) { \

@@ -2,7 +2,7 @@
 #include <stdarg.h>
 #include <stdint.h>
 #include "../inc/type.h"
-#include "common/ptr.h"
+#include "ptr.h"
 #include "../inc/mem.h"
 #include "../inc/dict.h"
 #include "../inc/str.h"

@@ -1,4 +1,5 @@
 #include <stdio.h>
+#include <string.h>
 
 #include "cg.h"
 #include "comp.h"
@@ -30,7 +31,7 @@ static uint32_t print_loadi(const char *name, cg_t *cg, uint32_t offset) {
 static uint32_t print_loads(const char *name, cg_t *cg, uint32_t offset) {
     val_t v;
     cg_get_const(cg, cg->bytecode[offset + 1], &v);
-    printf("%-12s #%x [%s]\n", name, cg->bytecode[offset + 1], v.as.stringval_ptr);
+    printf("%-12s #%x [%s]\n", name, cg->bytecode[offset + 1], obj_str_to_c(AS_OBJ_STR(&v)));
     return offset + 2;
 }
 

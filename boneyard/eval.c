@@ -1,6 +1,6 @@
 #include <assert.h>
 #include <stdio.h>
-#include "common/err.h"
+#include "err.h"
 #include "../inc/mem.h"
 #include "../inc/heap.h"
 #include "../inc/gc.h"
@@ -9,7 +9,7 @@
 #include "../inc/list.h"
 #include "../inc/dict.h"
 #include "../inc/type.h"
-#include "common/rand.h"
+#include "rand.h"
 #include "../inc/eval.h"
 #include "../inc/parse.h"
 

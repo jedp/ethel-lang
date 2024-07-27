@@ -1,7 +1,13 @@
 #pragma once
 
-#include "def.h"
+#include <stdbool.h>
+#include "../obj/obj.h"
+#include "../obj/obj_str.h"
 #include "err.h"
+
+#define AS_OBJ(val) ((obj_t*) (val)->as.objval)
+#define AS_OBJ_STR(val) ((obj_str_t*) AS_OBJ(val))
+
 
 typedef enum {
     MAP_OK,
@@ -17,7 +23,7 @@ typedef enum {
     VAL_TYPE_INT,
     VAL_TYPE_UINT,
     VAL_TYPE_FLOAT,
-    VAL_TYPE_STRING_PTR,
+    VAL_TYPE_OBJ,
     VAL_TYPE_ADDR,
 } map_elem_type_t;
 
@@ -30,7 +36,9 @@ typedef struct {
         int intval;
         uint32_t uintval;
         float floatval;
-        const char *stringval_ptr;
+        obj_t *objval;
         size_t addrval;
     } as;
 } val_t;
+
+bool val_eq(val_t *a, val_t *b);

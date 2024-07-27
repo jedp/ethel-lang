@@ -3,7 +3,7 @@
 #include "../common/err.h"
 #include "../comp/cg.h"
 #include "../comp/comp.h"
-#include "../comp/cmem.h"
+#include "../mem/mem.h"
 #include "../comp/dis.h"
 #include "../common/op.h"
 #include "vm.h"
@@ -309,7 +309,7 @@ static error_t exec(vm_t *vm) {
 }
 
 error_t vm_init(vm_t *vm) {
-    cg_t *cg = comp_alloc(sizeof(cg_t));
+    cg_t *cg = mem_alloc(sizeof(cg_t));
     if (cg == NULL)
         return ERR_OUT_OF_MEMORY;
     cg_init(cg);
@@ -317,7 +317,7 @@ error_t vm_init(vm_t *vm) {
     // A stack of objects. Top is a pointer into buf.
     // Top always points to the next value to be filled.
     // If top == buf, stack is empty.
-    vm_stack_t *stack = comp_alloc(sizeof(vm_stack_t));
+    vm_stack_t *stack = mem_alloc(sizeof(vm_stack_t));
     if (stack == NULL)
         return ERR_OUT_OF_MEMORY;
 
@@ -335,7 +335,7 @@ error_t vm_init(vm_t *vm) {
 
 error_t vm_free(vm_t *vm) {
     cg_free(vm->cg);
-    comp_free(vm->cg);
+    mem_free(vm->cg);
     vm_init(vm);
 
     return ERR_NO_ERROR;
