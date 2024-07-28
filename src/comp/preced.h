@@ -57,7 +57,11 @@ __attribute__((unused)) void parse_bin(parser_t *parser);
 
 __attribute__((unused)) void parse_ident(parser_t *parser);
 
+__attribute__((unused)) void parse_char(parser_t *parser);
+
 __attribute__((unused)) void parse_string(parser_t *parser);
+
+__attribute__((unused)) void parse_array(parser_t *parser);
 
 __attribute__((unused)) void parse_literal(parser_t *parser);
 
@@ -79,7 +83,9 @@ parse_preced_rule_t preced_rules[] = {
     [TAG_BIN] = {parse_bin, NULL, PRECED_NONE, ASSOC_LEFT},
     [TAG_TRUE] = {parse_literal, NULL, PRECED_NONE, ASSOC_LEFT},
     [TAG_FALSE] = {parse_literal, NULL, PRECED_NONE, ASSOC_LEFT},
+    [TAG_CHAR] = {parse_char, NULL, PRECED_NONE, ASSOC_LEFT},
     [TAG_STRING] = {parse_string, NULL, PRECED_NONE, ASSOC_LEFT},
+    [TAG_ARRAY] = {parse_array, NULL, PRECED_NONE, ASSOC_LEFT},
     [TAG_NIL] = {parse_literal, NULL, PRECED_NONE, ASSOC_LEFT},
     [TAG_IDENT] = {parse_ident, NULL, PRECED_NONE, ASSOC_LEFT},
     [TAG_LPAREN] = {parse_parens, NULL, PRECED_GROUPING, ASSOC_LEFT},

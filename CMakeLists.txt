@@ -39,12 +39,15 @@ set(COMMON_OBJS
 )
 
 set(MEM_OBJS
-        ${CMKE_SRC_DIR}/mem/mem.c
+        ${CMAKE_SRC_DIR}/mem/mem.c
 )
 
 set(OBJ_OBJS
+        ${COMMON_OBJS}
+        ${MEM_OBJS}
         ${CMAKE_SRC_DIR}/obj/obj.c
         ${CMAKE_SRC_DIR}/obj/obj_str.c
+        ${CMAKE_SRC_DIR}/obj/obj_arr.c
 )
 
 set(COMP_OBJS
@@ -60,10 +63,12 @@ set(EC_OBJS
 )
 
 set(ER_OBJS
-        ${CMAKE_SRC_DIR}/run/er.c)
+        ${CMAKE_SRC_DIR}/run/er.c
+)
 
 set(VM_OBJS
-        ${CMAKE_SRC_DIR}/vm/vm.c)
+        ${CMAKE_SRC_DIR}/vm/vm.c
+)
 
 set(TEST_OBJS
         ${CMAKE_TESTS_DIR}/unity/unity.c

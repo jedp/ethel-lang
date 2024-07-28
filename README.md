@@ -49,7 +49,7 @@ Primitives:
 - Byte (`'c'`, `42`, `0x17`)
 - Int (`123`)
 - Float (`3.14`)
-- Byte Array (`arr(n)`)
+- Byte Array (`array(n)`)
 - String (`"hello, world"`)
 
 Compound:
@@ -64,7 +64,7 @@ Values of lists and dictionaries can be any type, including other lists and dict
 #### Byte Arrays and Strings
 
 ```
-> val a = arr(4)
+> val a = array(4)
 ByteArray(4)
 > a.length()
 4
@@ -76,7 +76,7 @@ ByteArray(4)
 'c'
 > del a
 <Nil>
-> val a = arr(4) { 'o', 'h', 'a', 'i' }
+> val a = array { 'o', 'h', 'a', 'i' }
 ByteArray(4)
 > print(a)
 "ohai"
@@ -213,7 +213,7 @@ Closures.
 ### Bitwise operators
 
 ```
-> val a = arr(4)
+> val a = array(4)
 Byte Array
 > a[0] = 255
 0xff
@@ -251,7 +251,7 @@ It's always instructive to see how data is actually stored as bits.
 > dump("This is the quickening!") // Strings get a canonical hex dump.
 00000000  54 68 69 73 20 69 73 20  74 68 65 20 71 75 69 63  |This.is.the.quic|
 00000010  6b 65 6e 69 6e 67 21                              |kening!|
-> dump(arr(40))                   // Same for bytearrays.
+> dump(array(40))                 // Same for bytearrays.
 00000000  00 00 00 00 00 00 00 00  00 00 00 00 00 00 00 00  |................|
 00000010  00 00 00 00 00 00 00 00  00 00 00 00 00 00 00 00  |................|
 00000020  00 00 00 00 00 00 00 00                           |........|

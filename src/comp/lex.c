@@ -230,6 +230,8 @@ static tag_t check_ident(lexer_t *lexer) {
                         return check_keyword(lexer, 2, 1, "s", TAG_ABS);
                     case 'n':
                         return check_keyword(lexer, 2, 1, "d", TAG_AND);
+                    case 'r':
+                        return check_keyword(lexer, 2, 3, "ray", TAG_ARRAY);
                 }
             }
             return check_keyword(lexer, 1, 1, "s", TAG_AS);

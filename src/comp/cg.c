@@ -94,11 +94,25 @@ uint32_t cg_header(cg_t *cg, const uint8_t *bytes, size_t size) {
                 break;
             }
             case CONST_STRING: {
-                uint32_t strlen = bytes[offset++];
+                // TODO enforce string max size?
+                uint8_t strlen = bytes[offset++];
                 v.type = VAL_TYPE_OBJ;
                 v.as.objval = (obj_t *) obj_str_new((const char *) &bytes[offset], strlen);
                 cg_put_const(cg, v, &k);
                 offset += strlen;
+                break;
+            }
+            case CONST_BYTEARRAY: {
+                uint32_t arrlen = 0;
+                // First four bytes are array length.
+                arrlen |= (bytes[offset++]) & 0xff;
+                arrlen |= (bytes[offset++] << 8) & 0xff00;
+                arrlen |= (bytes[offset++] << 16) & 0xff0000;
+                arrlen |= (bytes[offset++] << 24) & 0xff000000;
+                v.type = VAL_TYPE_OBJ;
+                v.as.objval = (obj_t*) obj_arr_new((const uint8_t*) &bytes[offset], arrlen);
+                cg_put_const(cg, v, &k);
+                offset += arrlen;
                 break;
             }
             default:

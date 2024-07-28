@@ -1,5 +1,5 @@
 #include <string.h>
-#include "../mem/mem.c"
+#include "../mem/mem.h"
 #include "obj_str.h"
 
 obj_str_t *obj_str_new(const char *chars, uint32_t length) {

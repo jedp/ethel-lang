@@ -31,7 +31,6 @@ void test_comp_arithmetic(void) {
     val_t v;
     cg_get_const(&cg, 1, &v);
     TEST_ASSERT_EQUAL(300, v.as.intval);
-
     TEST_ASSERT_EQUAL(ERR_NO_ERROR, err);
 }
 
@@ -57,7 +56,6 @@ void test_comp_bit_arithmetic(void) {
     val_t v;
     cg_get_const(&cg, 1, &v);
     TEST_ASSERT_EQUAL(0xff, v.as.intval);
-
     TEST_ASSERT_EQUAL(ERR_NO_ERROR, err);
 }
 
@@ -78,7 +76,6 @@ void test_comp_booleans(void) {
         VM_OP_RET,
     };
     TEST_ASSERT_EQUAL_MEMORY(expected, cg.bytecode, cg.len);
-
     TEST_ASSERT_EQUAL(ERR_NO_ERROR, err);
 }
 
@@ -94,7 +91,6 @@ void test_comp_nil(void) {
         VM_OP_RET,
     };
     TEST_ASSERT_EQUAL_MEMORY(expected, cg.bytecode, cg.len);
-
     TEST_ASSERT_EQUAL(ERR_NO_ERROR, err);
 }
 
@@ -124,7 +120,6 @@ void test_comp_comparators(void) {
         VM_OP_RET,
     };
     TEST_ASSERT_EQUAL_MEMORY(expected, cg.bytecode, cg.len);
-
     TEST_ASSERT_EQUAL(ERR_NO_ERROR, err);
 }
 
@@ -145,7 +140,6 @@ void test_comp_assign(void) {
         VM_OP_RET,
     };
     TEST_ASSERT_EQUAL_MEMORY(expected, cg.bytecode, cg.len);
-
     TEST_ASSERT_EQUAL(ERR_NO_ERROR, err);
 }
 
@@ -207,7 +201,6 @@ void test_comp_if_statement(void) {
         VM_OP_RET,
     };
     TEST_ASSERT_EQUAL_MEMORY(expected, cg.bytecode, cg.len);
-
     TEST_ASSERT_EQUAL(ERR_NO_ERROR, err);
 }
 
@@ -227,7 +220,6 @@ void test_comp_if_else_statements(void) {
         VM_OP_RET,
     };
     TEST_ASSERT_EQUAL_MEMORY(expected, cg.bytecode, cg.len);
-
     TEST_ASSERT_EQUAL(ERR_NO_ERROR, err);
 }
 
@@ -249,7 +241,6 @@ void test_comp_if_then_block(void) {
         VM_OP_RET,
     };
     TEST_ASSERT_EQUAL_MEMORY(expected, cg.bytecode, cg.len);
-
     TEST_ASSERT_EQUAL(ERR_NO_ERROR, err);
 }
 
@@ -277,7 +268,6 @@ void test_comp_if_then_else_block(void) {
         VM_OP_RET,
     };
     TEST_ASSERT_EQUAL_MEMORY(expected, cg.bytecode, cg.len);
-
     TEST_ASSERT_EQUAL(ERR_NO_ERROR, err);
 }
 
@@ -313,7 +303,6 @@ void test_comp_if_then_else_if_block(void) {
         VM_OP_RET,
     };
     TEST_ASSERT_EQUAL_MEMORY(expected, cg.bytecode, cg.len);
-
     TEST_ASSERT_EQUAL(ERR_NO_ERROR, err);
 }
 
@@ -339,7 +328,6 @@ void test_comp_multiline_block(void) {
         VM_OP_RET,
     };
     TEST_ASSERT_EQUAL_MEMORY(expected, cg.bytecode, cg.len);
-
     TEST_ASSERT_EQUAL(ERR_NO_ERROR, err);
 }
 
@@ -369,11 +357,10 @@ void test_comp_multiline_parens(void) {
         VM_OP_RET,
     };
     TEST_ASSERT_EQUAL_MEMORY(expected, cg.bytecode, cg.len);
-
     TEST_ASSERT_EQUAL(ERR_NO_ERROR, err);
 }
 
-void test_string_index(void) {
+void test_comp_string_index(void) {
     const char *input = "\"foo\"[(i + 1) / 2]";
 
     cg_t cg;
@@ -391,7 +378,21 @@ void test_string_index(void) {
         VM_OP_RET,
     };
     TEST_ASSERT_EQUAL_MEMORY(expected, cg.bytecode, cg.len);
+    TEST_ASSERT_EQUAL(ERR_NO_ERROR, err);
+}
 
+void test_comp_bytearray(void) {
+    const char *input = "array { '4', 'C', 'C', '!', 1, 2, 3, 4 }";
+
+    cg_t cg;
+    cg_init(&cg);
+    error_t err = codegen(input, &cg);
+
+    uint8_t expected[] = {
+        VM_OP_ACONST, 1,
+        VM_OP_RET,
+    };
+    TEST_ASSERT_EQUAL_MEMORY(expected, cg.bytecode, cg.len);
     TEST_ASSERT_EQUAL(ERR_NO_ERROR, err);
 }
 
@@ -411,6 +412,7 @@ void test_comp(void) {
     RUN_TEST(test_comp_if_then_else_if_block);
     RUN_TEST(test_comp_multiline_block);
     RUN_TEST(test_comp_multiline_parens);
-    RUN_TEST(test_string_index);
+    RUN_TEST(test_comp_string_index);
+    RUN_TEST(test_comp_bytearray);
 }
 

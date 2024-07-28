@@ -1,5 +1,5 @@
 #include <stdio.h>
-#include <string.h>
+#include <stdlib.h>
 
 #include "cg.h"
 #include "comp.h"
@@ -35,6 +35,28 @@ static uint32_t print_loads(const char *name, cg_t *cg, uint32_t offset) {
     return offset + 2;
 }
 
+static uint32_t print_loada(const char *name, cg_t *cg, uint32_t offset) {
+    uint8_t truncate_after = 4;
+    val_t v;
+    cg_get_const(cg, cg->bytecode[offset + 1], &v);
+    obj_arr_t *obj_arr = AS_OBJ_ARR(&v);
+    printf("%-12s #%x (%d){", name, cg->bytecode[offset + 1], obj_arr->length);
+    uint8_t last = (truncate_after < obj_arr->length) ? truncate_after : obj_arr->length;
+    bool is_truncated = last != obj_arr->length;
+    for (uint8_t i = 0; i < last; i++) {
+        printf("%d", obj_arr->buf[i]);
+        if (i != last - 1) {
+            printf(",");
+        }
+    }
+    if (is_truncated) {
+        printf(", ..., %d}\n", obj_arr->buf[obj_arr->length - 1]);
+    } else {
+        printf("}\n");
+    }
+    return offset + 2;
+}
+
 static uint32_t print_jump(const char *name, cg_t *cg, uint32_t offset) {
     printf("%-12s @0x%02x%02x\n",
            name,
@@ -56,12 +78,15 @@ uint32_t print_dis_byte(cg_t *cg, uint32_t offset) {
         case VM_OP_ZPUSH_F:
         case VM_OP_ZPUSH_T:
             return print_imm(op_names[op], cg, offset);
+        case VM_OP_BPUSH:
         case VM_OP_IPUSH:
             return print_push(op_names[op], cg, offset);
         case VM_OP_ICONST:
             return print_loadi(op_names[op], cg, offset);
         case VM_OP_SCONST:
             return print_loads(op_names[op], cg, offset);
+        case VM_OP_ACONST:
+            return print_loada(op_names[op], cg, offset);
         case VM_OP_ALOAD:
         case VM_OP_NOP:
         case VM_OP_RET:
@@ -110,7 +135,7 @@ static void print_constants(cg_t *cg) {
         uint8_t type = cg->bytecode[offset++];
         printf("#%02d ", i);
         switch (type) {
-            case (CONST_INT): {
+            case CONST_INT: {
                 uint8_t int_len = cg->bytecode[offset++];
                 printf("INT%d  ", (int_len * 8));
                 for (int j = 0; j < int_len; j++) {
@@ -119,18 +144,34 @@ static void print_constants(cg_t *cg) {
                 printf("\n");
                 break;
             }
-            case (CONST_STRING) : {
+            case CONST_STRING : {
                 uint8_t str_len = cg->bytecode[offset++];
                 printf("STR  \"");
-                for (int j = 0; j < str_len; j++) {
+                for (uint32_t j = 0; j < str_len; j++) {
                     uint8_t c = cg->bytecode[offset++];
                     printf("%c", (c >= 32 && c <= 126) ? (char) c : '.');
                 }
                 printf("\"\n");
                 break;
             }
+            case CONST_BYTEARRAY: {
+                // Four-byte array length, little-endian.
+                uint32_t arr_len = 0;
+                arr_len |= cg->bytecode[offset++];
+                arr_len |= cg->bytecode[offset++] << 8;
+                arr_len |= cg->bytecode[offset++] << 16;
+                arr_len |= cg->bytecode[offset++] << 24;
+                printf("ARR(%d) ", arr_len);
+                for (uint32_t j = 0; j < arr_len; j++) {
+                    printf(" %d", cg->bytecode[offset++]);
+                }
+                printf("\n");
+                break;
+            }
+
             default:
                 printf("ERROR: Can't disassemble const type %d\n", type);
+                exit(1);
         }
     }
 }

@@ -2,6 +2,7 @@
 #include <string.h>
 #include <stdbool.h>
 #include <stdio.h>
+#include "../mem/mem.h"
 #include "../common/op.h"
 #include "../common/ptr.h"
 #include "cg.h"
@@ -10,6 +11,24 @@
 #include "lex.h"
 #include "preced.h"
 #include "val.h"
+
+
+static uint32_t obj_arr_append(obj_arr_t *obj_arr, uint8_t byte) {
+    if (obj_arr->buflen < obj_arr->length + 1) {
+        obj_arr->buflen = ARR_GROW_MAX_SIZE(obj_arr->buflen);
+        obj_arr->buf = ARR_GROW(uint8_t, obj_arr->buf, obj_arr->buflen);
+
+        if (obj_arr->buf == NULL) {
+            printf("Realloc failed!\n");
+            exit(1);
+        }
+    }
+
+    obj_arr->buf[obj_arr->length] = byte;
+    obj_arr->length++;
+
+    return obj_arr->length;
+}
 
 static void parse_expr(parser_t *parser);
 
@@ -50,7 +69,7 @@ static bool check_token_tag(parser_t *parser, tag_t tag) {
     return parser->curr.tag == tag;
 }
 
-static bool token_tag_matches(parser_t *parser, tag_t tag) {
+static bool token_tag_match_and_consume(parser_t *parser, tag_t tag) {
     if (!check_token_tag(parser, tag)) {
         return false;
     }
@@ -61,7 +80,7 @@ static bool token_tag_matches(parser_t *parser, tag_t tag) {
 
 static void emit_byte(parser_t *parser, uint8_t byte) {
     /*
-    if (byte < 0xa5) {
+    if (byte < VM_OP_MAX) {
         printf("emit %02x %s\n", byte, op_names[byte]);
     } else {
         printf("emit %02x\n", byte);
@@ -74,6 +93,11 @@ static void emit_byte(parser_t *parser, uint8_t byte) {
 static void emit_bytes(parser_t *parser, uint8_t byte1, uint8_t byte2) {
     emit_byte(parser, byte1);
     emit_byte(parser, byte2);
+}
+
+static void emit_const_byte(parser_t *parser, uint32_t byte) {
+    emit_byte(parser, VM_OP_BPUSH);
+    emit_byte(parser, byte);
 }
 
 static void emit_const_bool(parser_t *parser, bool val) {
@@ -112,6 +136,20 @@ static map_err_t emit_const_obj_str(parser_t *parser, const char *chars, uint32_
     uint8_t k;
     err = cg_put_const(parser->cg, v, &k);
     emit_bytes(parser, VM_OP_SCONST, k);
+
+    return err;
+}
+
+static map_err_t emit_const_obj_arr(parser_t *parser, obj_arr_t *obj_arr) {
+    map_err_t err;
+
+    val_t v = {
+        .type = VAL_TYPE_OBJ,
+        .as.objval = (obj_t *) obj_arr,
+    };
+    uint8_t k;
+    err = cg_put_const(parser->cg, v, &k);
+    emit_bytes(parser, VM_OP_ACONST, k);
 
     return err;
 }
@@ -197,6 +235,19 @@ __attribute__((unused)) void parse_ident(parser_t *parser) {
 }
 
 // Referenced via pointer in the precedence table.
+__attribute__((unused)) void parse_char(parser_t *parser) {
+    // Remove surrounding quotes.
+    if (*parser->prev.start != '\'') {
+        error(parser, COMP_UNEXPECTED_TOKEN);
+        return;
+    }
+
+    const char *ch = parser->prev.start + 1;
+
+    (void) emit_const_byte(parser, (uint8_t) *ch);
+}
+
+// Referenced via pointer in the precedence table.
 __attribute__((unused)) void parse_string(parser_t *parser) {
     // Remove surrounding quotes.
     if (*parser->prev.start != '"') {
@@ -207,6 +258,98 @@ __attribute__((unused)) void parse_string(parser_t *parser) {
     const char *start = parser->prev.start + 1;
     uint32_t len = parser->prev.len - 2;
     (void) emit_const_obj_str(parser, start, len);
+}
+
+static void parse_array_alloc(parser_t *parser) {
+    while (!check_token_tag(parser, TAG_RPAREN) &&
+           !check_token_tag(parser, TAG_EOF)) {
+        // Push uint32 size of array.
+        parse_decl(parser);
+        token_tag_match_and_consume(parser, TAG_EOL);
+    }
+    eat(parser, TAG_RPAREN);
+    emit_byte(parser, VM_OP_AALLOC);
+}
+
+static void parse_array_decl(parser_t *parser) {
+    uint32_t count = 0;
+    uint32_t start_pos = parser->cg->len;
+    obj_arr_t *obj_arr = obj_arr_new(NULL, 0);
+
+    // This is pretty gross, but we're going to eval all the expressions,
+    // and then parse them ourselves, shoving each byte into the array.
+    if (!check_token_tag(parser, TAG_RSQUIGGLY) &&
+        !check_token_tag(parser, TAG_EOF)) {
+        do {
+
+            parse_expr_by_precedence(parser, PRECED_LOGICAL_OR);
+
+            if (count > BYTEARRAY_MAX) {
+                printf("Too many elements in byte array\n");
+                error(parser, COMP_TOO_MANY_ELEMENTS);
+                return;
+            }
+
+            token_tag_match_and_consume(parser, TAG_EOL);
+
+            count++;
+
+            // TODO Check that each expr evaluated to a single byte.
+        } while (token_tag_match_and_consume(parser, TAG_COMMA));
+    }
+
+    // Bytes are all present in bytecode.
+    // Steal them and put them in a bytearray.
+    uint32_t end_pos = parser->cg->len;
+
+    // Avert your eyes.
+    // Parse what we just compiled.
+    uint32_t offset = start_pos;
+    uint8_t code;
+    while (offset < end_pos) {
+        switch (code = parser->cg->bytecode[offset++]) {
+            case VM_OP_BPUSH:
+            case VM_OP_IPUSH:
+                obj_arr_append(obj_arr, parser->cg->bytecode[offset++]);
+                break;
+            case VM_OP_IPUSH_0:
+                obj_arr_append(obj_arr, 0);
+                break;
+            case VM_OP_IPUSH_1:
+                obj_arr_append(obj_arr, 1);
+                break;
+            default:
+                printf("Bad bytecode: %d at offset %d\n", code, offset);
+                error(parser, COMP_NON_BYTE_IN_BYTEARRAY);
+                offset = end_pos;
+                break;
+        }
+    }
+    // Back up to the array
+    parser->cg->len = start_pos;
+
+    emit_const_obj_arr(parser, obj_arr);
+
+    eat(parser, TAG_RSQUIGGLY);
+}
+
+static void parse_array_expr(parser_t *parser) {
+    uint32_t arr_size = 0;
+
+    if (check_token_tag(parser, TAG_LPAREN)) {
+        // array(12)
+        parse_array_alloc(parser);
+    } else if (token_tag_match_and_consume(parser, TAG_LSQUIGGLY)) {
+        // array { 1, 2, 3 }
+        parse_array_decl(parser);
+    } else {
+        error(parser, COMP_UNEXPECTED_TOKEN);
+    }
+}
+
+// Referenced via pointer in the precedence table.
+__attribute__((unused)) void parse_array(parser_t *parser) {
+    parse_array_expr(parser);
 }
 
 // Referenced via pointer in the precedence table.
@@ -319,7 +462,7 @@ __attribute__((unused)) void parse_parens(parser_t *parser) {
     while (!check_token_tag(parser, TAG_RPAREN) &&
            !check_token_tag(parser, TAG_EOF)) {
         parse_decl(parser);
-        token_tag_matches(parser, TAG_EOL);
+        token_tag_match_and_consume(parser, TAG_EOL);
     }
     eat(parser, TAG_RPAREN);
 }
@@ -329,10 +472,10 @@ __attribute__((unused)) void parse_subscript(parser_t *parser) {
     while (!check_token_tag(parser, TAG_RBRACKET) &&
            !check_token_tag(parser, TAG_EOF)) {
         parse_expr(parser);
-        token_tag_matches(parser, TAG_EOL);
+        token_tag_match_and_consume(parser, TAG_EOL);
     }
-    emit_byte(parser, VM_OP_ALOAD);
     eat(parser, TAG_RBRACKET);
+    emit_byte(parser, VM_OP_ALOAD);
 }
 
 static void parse_expr(parser_t *parser) {
@@ -352,7 +495,7 @@ static void parse_if_stmt(parser_t *parser) {
 
     parse_stmt(parser);
 
-    if (token_tag_matches(parser, TAG_ELSE)) {
+    if (token_tag_match_and_consume(parser, TAG_ELSE)) {
         from_else_addr = emit_jump(parser, VM_OP_JMP);
 
         set_jump_addr(parser, from_if_addr, parser->cg->len);
@@ -370,8 +513,8 @@ static void parse_if_stmt(parser_t *parser) {
 
 // Referenced via pointer in the precedence table.
 __attribute__ ((unused)) void parse_block(parser_t *parser) {
-    while (!token_tag_matches(parser, TAG_RSQUIGGLY) &&
-           !token_tag_matches(parser, TAG_EOF)) {
+    while (!token_tag_match_and_consume(parser, TAG_RSQUIGGLY) &&
+           !token_tag_match_and_consume(parser, TAG_EOF)) {
         parse_decl(parser);
     }
 }
@@ -389,14 +532,17 @@ static void exit_scope(parser_t *parser) {
  * Parse stmt
  *
  * stmt -> if_stmt
+ *       | array_expr
  *       | expr
  *       | block
  *
  * block -> "{" decl* "}"
  */
 static void parse_stmt(parser_t *parser) {
-    if (token_tag_matches(parser, TAG_IF)) {
+    if (token_tag_match_and_consume(parser, TAG_IF)) {
         parse_if_stmt(parser);
+    } else if (token_tag_match_and_consume(parser, TAG_ARRAY)) {
+        parse_array_expr(parser);
     } else {
         parse_expr(parser);
     }
@@ -409,7 +555,7 @@ static void parse_stmt(parser_t *parser) {
  */
 static void parse_decl(parser_t *parser) {
     parse_stmt(parser);
-    token_tag_matches(parser, TAG_EOL);
+    token_tag_match_and_consume(parser, TAG_EOL);
 }
 
 error_t codegen(const char *input, cg_t *cg) {
@@ -423,7 +569,7 @@ error_t codegen(const char *input, cg_t *cg) {
     parser.err = COMP_ERR_NO_ERROR;
 
     advance(&parser);
-    while (!token_tag_matches(&parser, TAG_EOF)) {
+    while (!token_tag_match_and_consume(&parser, TAG_EOF)) {
         parse_decl(&parser);
     }
     eat(&parser, TAG_EOF);
@@ -493,8 +639,8 @@ error_t compile(const cg_t *cg, uint32_t max_size, uint8_t buf[], uint32_t *size
                 offset += slen;
                 break;
             default:
-                return COMP_UNEXPECTED_CONST_TYPE;
-
+                printf("Can't compile const type %d\n", v->type);
+                exit(1);
         }
     }
 

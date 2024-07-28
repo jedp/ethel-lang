@@ -9,6 +9,7 @@ static const uint8_t magic[] = {'E', 'T', 'H', 'L'};
 static const uint8_t major = 0;
 static const uint8_t minor = 1;
 
+#define BYTEARRAY_MAX (1024)
 #define MIN_BYTECODE_ALLOC (32)
 
 typedef enum {
@@ -33,7 +34,9 @@ typedef enum {
     COMP_UNHANDLED_INFIX_OP,
     COMP_EXPECTED_EXPRESSION,
     COMP_TOO_MANY_CONSTANTS,
+    COMP_TOO_MANY_ELEMENTS,
     COMP_UNEXPECTED_CONST_TYPE,
+    COMP_NON_BYTE_IN_BYTEARRAY,
     COMP_INSUFFICIENT_SPACE_FOR_BYTECODE,
 } comp_err_t;
 

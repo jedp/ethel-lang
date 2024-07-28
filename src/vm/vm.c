@@ -280,7 +280,8 @@ static error_t exec(vm_t *vm) {
                 vm_stack_push_int(vm, v.as.intval);
                 break;
             }
-            case VM_OP_SCONST: {
+            case VM_OP_SCONST:
+            case VM_OP_ACONST: {
                 val_t v;
                 uint8_t k = READ_BYTE();
                 cg_get_const(vm->cg, k, &v);

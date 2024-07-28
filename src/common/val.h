@@ -3,10 +3,12 @@
 #include <stdbool.h>
 #include "../obj/obj.h"
 #include "../obj/obj_str.h"
+#include "../obj/obj_arr.h"
 #include "err.h"
 
 #define AS_OBJ(val) ((obj_t*) (val)->as.objval)
 #define AS_OBJ_STR(val) ((obj_str_t*) AS_OBJ(val))
+#define AS_OBJ_ARR(val) ((obj_arr_t*) AS_OBJ(val))
 
 typedef enum {
     MAP_OK,
