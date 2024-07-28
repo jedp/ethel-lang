@@ -412,6 +412,23 @@ void test_comp_bytearray(void) {
     TEST_ASSERT_EQUAL(ERR_NO_ERROR, err);
 }
 
+void test_comp_print(void) {
+    const char *input = "print(1 + 2)";
+
+    cg_t cg;
+    cg_init(&cg);
+    error_t err = codegen(input, &cg);
+
+    uint8_t expected[] = {
+        VM_OP_IPUSH_1,
+        VM_OP_IPUSH, 2,
+        VM_OP_ADD,
+        VM_OP_PRINT,
+        VM_OP_RET,
+    };
+    TEST_ASSERT_EQUAL_MEMORY(expected, cg.bytecode, cg.len);
+    TEST_ASSERT_EQUAL(ERR_NO_ERROR, err);
+}
 
 void test_comp(void) {
     RUN_TEST(test_comp_arithmetic);
@@ -432,5 +449,5 @@ void test_comp(void) {
     RUN_TEST(test_comp_string_index);
     RUN_TEST(test_comp_bytearray_decl);
     RUN_TEST(test_comp_bytearray);
+    RUN_TEST(test_comp_print);
 }
-

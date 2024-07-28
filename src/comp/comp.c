@@ -483,6 +483,12 @@ static void parse_expr(parser_t *parser) {
     parse_expr_by_precedence(parser, PRECED_ASSIGN);
 }
 
+static void parse_print(parser_t *parser) {
+    eat(parser, TAG_LPAREN);
+    parse_parens(parser);
+    emit_byte(parser, VM_OP_PRINT);
+}
+
 static void parse_if_stmt(parser_t *parser) {
     uint16_t from_if_addr;
     uint16_t from_else_addr;
@@ -540,7 +546,9 @@ static void exit_scope(parser_t *parser) {
  * block -> "{" decl* "}"
  */
 static void parse_stmt(parser_t *parser) {
-    if (token_tag_match_and_consume(parser, TAG_IF)) {
+    if (token_tag_match_and_consume(parser, TAG_PRINT)) {
+       parse_print(parser);
+    } else if (token_tag_match_and_consume(parser, TAG_IF)) {
         parse_if_stmt(parser);
     } else if (token_tag_match_and_consume(parser, TAG_ARRAY)) {
         parse_array_expr(parser);
@@ -553,6 +561,7 @@ static void parse_stmt(parser_t *parser) {
  * Parse declaration
  *
  * decl -> stmt
+ *       | var_decl
  */
 static void parse_decl(parser_t *parser) {
     parse_stmt(parser);

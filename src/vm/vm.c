@@ -1,5 +1,6 @@
 #include <stdio.h>
 #include <stdbool.h>
+#include <string.h>
 #include "../common/err.h"
 #include "../comp/cg.h"
 #include "../comp/comp.h"
@@ -256,16 +257,16 @@ static error_t exec(vm_t *vm) {
             case VM_OP_NOP:
                 break;
             case VM_OP_IPUSH:
-                vm_stack_push_int(vm, READ_BYTE());
+                vm_stack_push_byte_as_int32(vm, READ_BYTE());
                 break;
             case VM_OP_IPUSH_1N:
-                vm_stack_push_int(vm, -1);
+                vm_stack_push_int32(vm, -1);
                 break;
             case VM_OP_IPUSH_0:
-                vm_stack_push_int(vm, 0);
+                vm_stack_push_int32(vm, 0);
                 break;
             case VM_OP_IPUSH_1:
-                vm_stack_push_int(vm, 1);
+                vm_stack_push_int32(vm, 1);
                 break;
             case VM_OP_ZPUSH_F:
                 vm_stack_push_boolean(vm, false);
@@ -277,7 +278,7 @@ static error_t exec(vm_t *vm) {
                 val_t v;
                 uint8_t k = READ_BYTE();
                 cg_get_const(vm->cg, k, &v);
-                vm_stack_push_int(vm, v.as.intval);
+                vm_stack_push_int32(vm, v.as.intval);
                 break;
             }
             case VM_OP_SCONST:
@@ -292,7 +293,7 @@ static error_t exec(vm_t *vm) {
                 vm_stack_elem_t *size_obj = vm_stack_pop(vm);
                 runtime_check(vm, TYPE_IS_NUMERIC(size_obj->type), "Numeric object required for array size.");
                 obj_arr_t *obj_arr = obj_arr_new(NULL, size_obj->as.intval);
-                vm_stack_push_obj(vm, (obj_t*) obj_arr);
+                vm_stack_push_obj(vm, (obj_t *) obj_arr);
                 break;
             }
             case VM_OP_NIL:
@@ -361,6 +362,13 @@ static error_t exec(vm_t *vm) {
             case VM_OP_DEC:
                 vm_stack_peek(vm)->as.intval -= 1;
                 break;
+            case VM_OP_PRINT: {
+                char *string = mem_alloc(sizeof(char) * 255);
+                string[255] = '\0';
+                vm_print_val(vm_stack_pop(vm), string, 254);
+                printf("%s\n", string);
+                break;
+            }
             case VM_OP_RET:
                 return ERR_NO_ERROR;
             case VM_OP_JZ:
@@ -434,10 +442,24 @@ error_t vm_stack_push_byte(vm_t *vm, uint8_t b) {
     return vm_stack_push(vm, &e);
 }
 
-error_t vm_stack_push_int(vm_t *vm, int i) {
+error_t vm_stack_push_byte_as_int32(vm_t *vm, uint8_t b) {
+    int signed_val = b;
+    if (b & 0x80) {
+        signed_val = -1;
+        signed_val <<= 8;
+        signed_val |= b;
+    }
     vm_stack_elem_t e = {
         .type = VM_STACK_INT_TYPE,
-        .as.intval = i
+        .as.intval = signed_val,
+    };
+    return vm_stack_push(vm, &e);
+}
+
+error_t vm_stack_push_int32(vm_t *vm, int i) {
+    vm_stack_elem_t e = {
+        .type = VM_STACK_INT_TYPE,
+        .as.intval = i,
     };
     return vm_stack_push(vm, &e);
 }
@@ -470,7 +492,6 @@ vm_stack_elem_t *vm_stack_peek(vm_t *vm) {
         return NULL;
     }
     return vm->stack->top - sizeof(vm_stack_elem_t);
-
 }
 
 vm_stack_elem_t *vm_stack_pop(vm_t *vm) {
@@ -493,6 +514,52 @@ error_t vm_load_code(vm_t *vm, uint8_t *bytecode, size_t size) {
     vm->pc = vm->cg->bytecode + code_start;
     vm->bytecode_size = vm->cg->len;
     return ERR_NO_ERROR;
+}
+
+void vm_print_val(const vm_stack_elem_t *elem, char *string, uint8_t max_length) {
+    switch (elem->type) {
+        case VM_STACK_NIL_TYPE:
+            snprintf(string, max_length, "<nil>");
+            break;
+        case VM_STACK_BOOL_TYPE:
+            snprintf(string, max_length, (elem->as.boolval) ? "true" : "false");
+            break;
+        case VM_STACK_BYTE_TYPE:
+            snprintf(string, max_length, "0x%02x", elem->as.byteval);
+            break;
+        case VM_STACK_INT_TYPE: {
+            snprintf(string, max_length, "%d", elem->as.intval);
+            break;
+        }
+        case VM_STACK_FLOAT_TYPE: {
+            sprintf(string, "%f", elem->as.floatval);
+            break;
+        }
+        case VM_STACK_OBJ_TYPE: {
+            obj_t *obj = elem->as.objval;
+            switch (obj->type) {
+                case OBJ_TYPE_STRING: {
+                    obj_str_t *obj_str = (obj_str_t *) obj;
+                    snprintf(string, max_length, "%s%c", obj_str->chars, '\0');
+                    break;
+                }
+                case OBJ_TYPE_BYTEARRAY: {
+                    obj_arr_t *obj_arr = (obj_arr_t *) obj;
+                    snprintf(string, max_length, "array(%d)%c", obj_arr->length, '\0');
+                    break;
+                }
+                default: {
+                    snprintf(string, max_length, "Unprintable object");
+                    break;
+                }
+            }
+        }
+        case VM_STACK_ADDR_TYPE:
+        default: {
+            string = "Unprintable type";
+            break;
+        }
+    }
 }
 
 error_t vm_exec(vm_t *vm) {

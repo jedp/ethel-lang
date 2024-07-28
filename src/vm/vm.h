@@ -85,7 +85,9 @@ error_t vm_stack_push(vm_t *vm, vm_stack_elem_t *e);
 
 error_t vm_stack_push_byte(vm_t *vm, uint8_t b);
 
-error_t vm_stack_push_int(vm_t *vm, int i);
+error_t vm_stack_push_byte_as_int32(vm_t *vm, uint8_t b);
+
+error_t vm_stack_push_int32(vm_t *vm, int i);
 
 error_t vm_stack_push_boolean(vm_t *vm, bool z);
 
@@ -100,6 +102,8 @@ vm_stack_elem_t *vm_stack_pop(vm_t *vm);
 uint8_t vm_stack_size(vm_t *vm);
 
 error_t vm_load_code(vm_t *vm, uint8_t *bytes, size_t size);
+
+void vm_print_val(const vm_stack_elem_t *elem, char *string, uint8_t max_length);
 
 error_t vm_exec(vm_t *vm);
 

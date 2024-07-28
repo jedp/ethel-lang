@@ -115,13 +115,25 @@ void test_vm_stack_push_int(void) {
 
     TEST_ASSERT_EQUAL_PTR(vm.stack->buf, vm.stack->top);
 
-    vm_stack_push_int(&vm, 1234);
-    vm_stack_push_int(&vm, 2345);
-    vm_stack_push_int(&vm, 3456);
+    vm_stack_push_int32(&vm, 1234);
+    vm_stack_push_int32(&vm, 2345);
+    vm_stack_push_int32(&vm, 3456);
 
     TEST_ASSERT_EQUAL(3456, vm_stack_pop(&vm)->as.intval);
     TEST_ASSERT_EQUAL(2345, vm_stack_pop(&vm)->as.intval);
     TEST_ASSERT_EQUAL(1234, vm_stack_pop(&vm)->as.intval);
+
+    vm_free(&vm);
+}
+
+void test_vm_stack_push_byte_as_int32(void) {
+    vm_t vm;
+    vm_init(&vm);
+
+    TEST_ASSERT_EQUAL_PTR(vm.stack->buf, vm.stack->top);
+
+    vm_stack_push_byte_as_int32(&vm, 0xd6);
+    TEST_ASSERT_EQUAL(-42, vm_stack_pop(&vm)->as.intval);
 
     vm_free(&vm);
 }
@@ -633,10 +645,36 @@ void test_vm_byte_array(void) {
     test_program_object(bytes, sizeof(bytes), OBJ_TYPE_BYTEARRAY, ERR_NO_ERROR);
 }
 
+void test_vm_print_int(void) {
+    uint8_t bytes[] = {
+        'E', 'T', 'H', 'L', 0, 1,
+        2,
+        CONST_STRING, 5, 'E', 't', 'h', 'e', 'l',
+        CONST_BYTEARRAY, 4, 0, 0, 0, 4, 5, 6, 7,
+        VM_OP_ZPUSH_T,
+        VM_OP_PRINT,
+        VM_OP_IPUSH_1,
+        VM_OP_PRINT,
+        VM_OP_IPUSH, -42,
+        VM_OP_PRINT,
+        VM_OP_SCONST, 1,
+        VM_OP_PRINT,
+        VM_OP_ACONST, 2,
+        VM_OP_PRINT,
+        VM_OP_NIL,
+        VM_OP_PRINT,
+        VM_OP_RET,
+    };
+
+    vm_stack_elem_t no_stack = {.type= 0};
+    test_program_primitive(bytes, sizeof(bytes), no_stack, ERR_NO_ERROR);
+}
+
 void test_vm(void) {
     RUN_TEST(test_vm_init);
     RUN_TEST(test_vm_load_code);
     RUN_TEST(test_vm_stack_push_byte);
+    RUN_TEST(test_vm_stack_push_byte_as_int32);
     RUN_TEST(test_vm_stack_push_int);
     RUN_TEST(test_vm_stack_push);
     RUN_TEST(test_vm_iconst);
@@ -667,4 +705,5 @@ void test_vm(void) {
     RUN_TEST(test_vm_string_negative_index_out_of_range);
     RUN_TEST(test_vm_byte_array_alloc);
     RUN_TEST(test_vm_byte_array);
+    RUN_TEST(test_vm_print_int);
 }

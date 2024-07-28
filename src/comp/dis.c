@@ -89,6 +89,7 @@ uint32_t print_dis_byte(cg_t *cg, uint32_t offset) {
             return print_loada(op_names[op], cg, offset);
         case VM_OP_AALLOC:
         case VM_OP_ALOAD:
+        case VM_OP_PRINT:
         case VM_OP_NOP:
         case VM_OP_RET:
         case VM_OP_NEG:

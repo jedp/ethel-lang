@@ -41,6 +41,7 @@ typedef enum {
     VM_OP_JEQ,
     VM_OP_JZ,
     VM_OP_JMP,
+    VM_OP_PRINT,
     VM_OP_RET,
     VM_OP_NOP,
     VM_OP_MAX,
@@ -87,6 +88,7 @@ static const char *op_names[VM_OP_MAX] = {
     [VM_OP_JEQ] = "JEQ",
     [VM_OP_JZ] = "JZ",
     [VM_OP_JMP] = "JMP",
+    [VM_OP_PRINT] = "PRINT",
     [VM_OP_RET] = "RET",
     [VM_OP_NOP] = "NOP",
 };
