@@ -1,6 +1,5 @@
 #pragma once
 
-#include "err.h"
 #include "cg.h"
 #include "token.h"
 #include "lex.h"
@@ -28,17 +27,29 @@ typedef struct {
 
 typedef enum {
     COMP_ERR_NO_ERROR,
-    COMP_UNEXPECTED_TOKEN,
-    COMP_UNHANDLED_LITERAL,
-    COMP_UNHANDLED_PREFIX_OP,
-    COMP_UNHANDLED_INFIX_OP,
-    COMP_EXPECTED_EXPRESSION,
-    COMP_TOO_MANY_CONSTANTS,
-    COMP_TOO_MANY_ELEMENTS,
-    COMP_UNEXPECTED_CONST_TYPE,
-    COMP_NON_BYTE_IN_BYTEARRAY,
-    COMP_INSUFFICIENT_SPACE_FOR_BYTECODE,
+    COMP_ERR_UNEXPECTED_TOKEN,
+    COMP_ERR_UNHANDLED_LITERAL,
+    COMP_ERR_UNHANDLED_PREFIX_OP,
+    COMP_ERR_UNHANDLED_INFIX_OP,
+    COMP_ERR_EXPECTED_EXPRESSION,
+    COMP_ERR_TOO_MANY_CONSTANTS,
+    COMP_ERR_TOO_MANY_ELEMENTS,
+    COMP_ERR_NON_BYTE_IN_BYTEARRAY,
+    COMP_ERR_INSUFFICIENT_SPACE_FOR_BYTECODE,
 } comp_err_t;
+
+static const char* comp_err_names[] = {
+    [COMP_ERR_NO_ERROR] = "Compiled OK",
+    [COMP_ERR_UNEXPECTED_TOKEN] = "Unexpected token",
+    [COMP_ERR_UNHANDLED_LITERAL] = "Unhandled literal",
+    [COMP_ERR_UNHANDLED_PREFIX_OP] = "Unhandled prefix operator",
+    [COMP_ERR_UNHANDLED_INFIX_OP] = "Unhandled infix operator",
+    [COMP_ERR_EXPECTED_EXPRESSION] = "Expected an expression",
+    [COMP_ERR_TOO_MANY_CONSTANTS] = "Too many constants",
+    [COMP_ERR_TOO_MANY_ELEMENTS] = "Too many elements",
+    [COMP_ERR_NON_BYTE_IN_BYTEARRAY] = "Byte array value larger than one byte",
+    [COMP_ERR_INSUFFICIENT_SPACE_FOR_BYTECODE] = "Insufficient space for bytecode",
+};
 
 typedef struct parser_t {
     lexer_t *lexer;
@@ -52,6 +63,6 @@ typedef struct comp_t {
 
 } comp_t;
 
-error_t codegen(const char *input, cg_t *cg);
+comp_err_t codegen(const char *input, cg_t *cg);
 
-error_t compile(const cg_t *cg, uint32_t max_size, uint8_t buf[], uint32_t *size);
+comp_err_t compile(const cg_t *cg, uint32_t max_size, uint8_t buf[], uint32_t *size);

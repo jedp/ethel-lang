@@ -97,8 +97,9 @@ static token_t make_char_token(lexer_t *lexer) {
 static token_t make_string_token(lexer_t *lexer) {
     while (peek(lexer) != '"' && !lexer_at_eof(lexer)) {
         if (peek(lexer) == '\n') {
-            lexer->char_pos = 0;
-            lexer->line_pos++;
+            lexer->curr_char_pos = 0;
+            lexer->curr_line_number++;
+            lexer->curr_line_start = lexer->curr;
         }
         advance(lexer);
     }
@@ -558,6 +559,9 @@ token_t next_token(lexer_t *lexer) {
 
 void lexer_init(lexer_t *lexer, const char input[]) {
     lexer->err_pos = 0;
+    lexer->curr_line_number = 1;
+    lexer->curr_char_pos = 0;
+    lexer->curr_line_start = input;
     lexer->start = input;
     lexer->curr = input;
 }

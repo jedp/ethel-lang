@@ -2,6 +2,7 @@
 #include <string.h>
 #include <stdbool.h>
 #include <stdio.h>
+#include <stdarg.h>
 #include "../mem/mem.h"
 #include "../common/op.h"
 #include "../common/ptr.h"
@@ -36,8 +37,53 @@ static void parse_stmt(parser_t *parser);
 
 static void parse_decl(parser_t *parser);
 
-static void error(parser_t *parser, comp_err_t which) {
-    printf("ERROR: Failed to parse token: error %d\n", which);
+static void parser_error(parser_t *parser, comp_err_t which, const char *fmt, ...) {
+    va_list args;
+    va_start(args, fmt);
+    fflush(stdout);
+    fflush(stderr);
+
+    fprintf(stderr, "ERROR: %s\n", comp_err_names[which]);
+    vfprintf(stderr, fmt, args);
+    fputc('\n', stderr);
+
+    // Make it 1-indexed for legibility.
+    int char_pos = (int) (&parser->curr.start + 1 - &parser->lexer->curr_line_start);
+    fprintf(stderr, "Input line %d, column %d:\n", parser->lexer->curr_line_number, char_pos);
+
+    // Print the line context.
+    if (char_pos > 60) {
+        fprintf(stderr, parser->lexer->curr_line_start, 60);
+        fprintf(stderr, " ...\n");
+    } else {
+        char buf[60] = {0};
+        buf[59] = '\0';
+        int offset = 0;
+        for (;;) {
+            buf[offset] = (char) *(parser->lexer->curr_line_start + offset);
+            if (offset >= 59
+                || buf[offset] == '\n'
+                || buf[offset] == '\0'
+                || buf[offset] == EOF) {
+                break;
+            }
+            offset++;
+        }
+        buf[offset] = '\0';
+        fprintf(stderr, buf, 60);
+        fputc('\n', stderr);
+
+        // Point to the location of the error.
+        for (int i = 0; i < char_pos; i++) {
+            fprintf(stderr, "-");
+        }
+        fprintf(stderr, "^\n");
+    }
+
+
+    fflush(stderr);
+    va_end(args);
+
     parser->err = which;
 }
 
@@ -57,8 +103,8 @@ static void advance(parser_t *parser) {
 
 static void eat(parser_t *parser, tag_t tag) {
     if (parser->curr.tag != tag) {
-        printf("Expected to eat %s, but ate %s\n", tag_names[tag], tag_names[parser->curr.tag]);
-        error(parser, COMP_UNEXPECTED_TOKEN);
+        parser_error(parser, COMP_ERR_UNEXPECTED_TOKEN,
+                     "Expected to eat %s, but ate %s\n", tag_names[tag], tag_names[parser->curr.tag]);
         return;
     }
 
@@ -193,8 +239,8 @@ void parse_expr_by_precedence(parser_t *parser, uint8_t min_preced) {
     parse_func prefix_rule = preced_rules[tag].parse_prefix;
 
     if (prefix_rule == NULL) {
-        printf("No prefix rule for token %s\n", tag_names[tag]);
-        error(parser, COMP_EXPECTED_EXPRESSION);
+        parser_error(parser, COMP_ERR_EXPECTED_EXPRESSION,
+                     "Expected valid expression before %s\n", tag_names[tag]);
         return;
     }
 
@@ -238,7 +284,8 @@ __attribute__((unused)) void parse_ident(parser_t *parser) {
 __attribute__((unused)) void parse_char(parser_t *parser) {
     // Remove surrounding quotes.
     if (*parser->prev.start != '\'') {
-        error(parser, COMP_UNEXPECTED_TOKEN);
+        parser_error(parser, COMP_ERR_UNEXPECTED_TOKEN,
+                     "Expected single quote; got char 0x%02x", *parser->prev.start);
         return;
     }
 
@@ -251,7 +298,8 @@ __attribute__((unused)) void parse_char(parser_t *parser) {
 __attribute__((unused)) void parse_string(parser_t *parser) {
     // Remove surrounding quotes.
     if (*parser->prev.start != '"') {
-        error(parser, COMP_UNEXPECTED_TOKEN);
+        parser_error(parser, COMP_ERR_UNEXPECTED_TOKEN,
+                     "Expected double quote; got char 0x%02x", *parser->prev.start);
         return;
     }
 
@@ -285,8 +333,8 @@ static void parse_array_decl(parser_t *parser) {
             parse_expr_by_precedence(parser, PRECED_LOGICAL_OR);
 
             if (count > BYTEARRAY_MAX) {
-                printf("Too many elements in byte array\n");
-                error(parser, COMP_TOO_MANY_ELEMENTS);
+                parser_error(parser, COMP_ERR_TOO_MANY_ELEMENTS,
+                             "Number of elements in by array exceeds max %d", BYTEARRAY_MAX);
                 return;
             }
 
@@ -319,8 +367,9 @@ static void parse_array_decl(parser_t *parser) {
                 obj_arr_append(obj_arr, 1);
                 break;
             default:
-                printf("Bad bytecode: %d at offset %d\n", code, offset);
-                error(parser, COMP_NON_BYTE_IN_BYTEARRAY);
+                // This will not report the location accurately, since we're modifying the output.
+                parser_error(parser, COMP_ERR_NON_BYTE_IN_BYTEARRAY,
+                             "Invalid bytecode %s constructing byte array", op_names[code < VM_OP_MAX ? code : 0]);
                 offset = end_pos;
                 break;
         }
@@ -344,7 +393,8 @@ static void parse_array_expr(parser_t *parser) {
         // array { 1, 2, 3 }
         parse_array_decl(parser);
     } else {
-        error(parser, COMP_UNEXPECTED_TOKEN);
+        parser_error(parser, COMP_ERR_UNEXPECTED_TOKEN,
+                     "Unexpected token in array expression: %s", tag_names[parser->curr.tag]);
     }
 }
 
@@ -366,7 +416,8 @@ __attribute__((unused)) void parse_literal(parser_t *parser) {
             emit_byte(parser, VM_OP_NIL);
             break;
         default:
-            error(parser, COMP_UNHANDLED_LITERAL);
+            parser_error(parser, COMP_ERR_UNHANDLED_LITERAL,
+                         "Unexpected token while parsing literal: %s", tag_names[parser->prev.tag]);
     }
 }
 
@@ -384,7 +435,8 @@ __attribute__((unused)) void parse_unary_op(parser_t *parser) {
             emit_byte(parser, VM_OP_LOGICAL_NOT);
             break;
         default:
-            error(parser, COMP_UNHANDLED_PREFIX_OP);
+            parser_error(parser, COMP_ERR_UNHANDLED_PREFIX_OP,
+                         "No handler for prefix op: %s", op_names[op]);
     }
 }
 
@@ -453,7 +505,8 @@ __attribute__((unused)) void parse_binary_op(parser_t *parser) {
             emit_byte(parser, VM_OP_ASSIGN);
             break;
         default:
-            error(parser, COMP_UNHANDLED_INFIX_OP);
+            parser_error(parser, COMP_ERR_UNHANDLED_INFIX_OP,
+                         "No handler for infix op: %s", op_names[op]);
             break;
     }
 }
@@ -547,7 +600,7 @@ static void exit_scope(parser_t *parser) {
  */
 static void parse_stmt(parser_t *parser) {
     if (token_tag_match_and_consume(parser, TAG_PRINT)) {
-       parse_print(parser);
+        parse_print(parser);
     } else if (token_tag_match_and_consume(parser, TAG_IF)) {
         parse_if_stmt(parser);
     } else if (token_tag_match_and_consume(parser, TAG_ARRAY)) {
@@ -568,7 +621,7 @@ static void parse_decl(parser_t *parser) {
     token_tag_match_and_consume(parser, TAG_EOL);
 }
 
-error_t codegen(const char *input, cg_t *cg) {
+comp_err_t codegen(const char *input, cg_t *cg) {
     printf("Compiling input: %s\n", input);
     lexer_t lexer;
     lexer_init(&lexer, input);
@@ -590,9 +643,9 @@ error_t codegen(const char *input, cg_t *cg) {
     return parser.err;
 }
 
-error_t compile(const cg_t *cg, uint32_t max_size, uint8_t buf[], uint32_t *size) {
+comp_err_t compile(const cg_t *cg, uint32_t max_size, uint8_t buf[], uint32_t *size) {
     if (max_size < MIN_BYTECODE_ALLOC) {
-        return COMP_INSUFFICIENT_SPACE_FOR_BYTECODE;
+        return COMP_ERR_INSUFFICIENT_SPACE_FOR_BYTECODE;
     }
 
     uint32_t offset;
@@ -605,7 +658,7 @@ error_t compile(const cg_t *cg, uint32_t max_size, uint8_t buf[], uint32_t *size
 
     // Const pool
     if (cg->consts->buckets->nelems > UINT8_MAX) {
-        return COMP_TOO_MANY_CONSTANTS;
+        return COMP_ERR_TOO_MANY_CONSTANTS;
     }
     buf[offset++] = (uint8_t) cg->consts->buckets->nelems;
     for (uint8_t i = 1; i <= (uint8_t) cg->consts->buckets->nelems; i++) {
@@ -661,5 +714,5 @@ error_t compile(const cg_t *cg, uint32_t max_size, uint8_t buf[], uint32_t *size
     }
      */
 
-    return ERR_NO_ERROR;
+    return COMP_ERR_NO_ERROR;
 }

@@ -15,8 +15,9 @@ enum lex_err {
 
 typedef struct {
     uint32_t err_pos;
-    uint32_t line_pos;
-    uint32_t char_pos;
+    uint32_t curr_line_number;
+    uint32_t curr_char_pos;
+    const char *curr_line_start;
     const char *start;
     const char *curr;
 } lexer_t;
