@@ -609,6 +609,18 @@ void test_vm_string_negative_index_out_of_range(void) {
     test_program_primitive(bytes, sizeof(bytes), stack_top, ERR_VM_COMPILE_ERROR);
 }
 
+void test_vm_byte_array_alloc(void) {
+    uint8_t bytes[] = {
+        'E', 'T', 'H', 'L', 0, 1,
+        EMPTY_CONST_POOL,
+        VM_OP_IPUSH, 42,
+        VM_OP_AALLOC,
+        VM_OP_RET,
+    };
+
+    test_program_object(bytes, sizeof(bytes), OBJ_TYPE_BYTEARRAY, ERR_NO_ERROR);
+}
+
 void test_vm_byte_array(void) {
     uint8_t bytes[] = {
         'E', 'T', 'H', 'L', 0, 1,
@@ -653,5 +665,6 @@ void test_vm(void) {
     RUN_TEST(test_vm_string_index_out_of_range);
     RUN_TEST(test_vm_string_negative_index);
     RUN_TEST(test_vm_string_negative_index_out_of_range);
+    RUN_TEST(test_vm_byte_array_alloc);
     RUN_TEST(test_vm_byte_array);
 }

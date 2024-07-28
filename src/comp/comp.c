@@ -57,7 +57,7 @@ static void advance(parser_t *parser) {
 
 static void eat(parser_t *parser, tag_t tag) {
     if (parser->curr.tag != tag) {
-        printf("Eat unexpected token %d\n", parser->curr.tag);
+        printf("Expected to eat %s, but ate %s\n", tag_names[tag], tag_names[parser->curr.tag]);
         error(parser, COMP_UNEXPECTED_TOKEN);
         return;
     }
@@ -336,9 +336,10 @@ static void parse_array_decl(parser_t *parser) {
 static void parse_array_expr(parser_t *parser) {
     uint32_t arr_size = 0;
 
-    if (check_token_tag(parser, TAG_LPAREN)) {
+    if (token_tag_match_and_consume(parser, TAG_LPAREN)) {
         // array(12)
-        parse_array_alloc(parser);
+        parse_parens(parser);
+        emit_byte(parser, VM_OP_AALLOC);
     } else if (token_tag_match_and_consume(parser, TAG_LSQUIGGLY)) {
         // array { 1, 2, 3 }
         parse_array_decl(parser);

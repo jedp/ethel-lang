@@ -381,6 +381,22 @@ void test_comp_string_index(void) {
     TEST_ASSERT_EQUAL(ERR_NO_ERROR, err);
 }
 
+void test_comp_bytearray_decl(void) {
+    const char *input = "array(20)";
+
+    cg_t cg;
+    cg_init(&cg);
+    error_t err = codegen(input, &cg);
+
+    uint8_t expected[] = {
+        VM_OP_IPUSH, 20,
+        VM_OP_AALLOC,
+        VM_OP_RET,
+    };
+    TEST_ASSERT_EQUAL_MEMORY(expected, cg.bytecode, cg.len);
+    TEST_ASSERT_EQUAL(ERR_NO_ERROR, err);
+}
+
 void test_comp_bytearray(void) {
     const char *input = "array { '4', 'C', 'C', '!', 1, 2, 3, 4 }";
 
@@ -395,6 +411,7 @@ void test_comp_bytearray(void) {
     TEST_ASSERT_EQUAL_MEMORY(expected, cg.bytecode, cg.len);
     TEST_ASSERT_EQUAL(ERR_NO_ERROR, err);
 }
+
 
 void test_comp(void) {
     RUN_TEST(test_comp_arithmetic);
@@ -413,6 +430,7 @@ void test_comp(void) {
     RUN_TEST(test_comp_multiline_block);
     RUN_TEST(test_comp_multiline_parens);
     RUN_TEST(test_comp_string_index);
+    RUN_TEST(test_comp_bytearray_decl);
     RUN_TEST(test_comp_bytearray);
 }
 

@@ -288,6 +288,13 @@ static error_t exec(vm_t *vm) {
                 vm_stack_push_obj(vm, v.as.objval);
                 break;
             }
+            case VM_OP_AALLOC: {
+                vm_stack_elem_t *size_obj = vm_stack_pop(vm);
+                runtime_check(vm, TYPE_IS_NUMERIC(size_obj->type), "Numeric object required for array size.");
+                obj_arr_t *obj_arr = obj_arr_new(NULL, size_obj->as.intval);
+                vm_stack_push_obj(vm, (obj_t*) obj_arr);
+                break;
+            }
             case VM_OP_NIL:
                 vm_stack_push_nil(vm);
                 break;
