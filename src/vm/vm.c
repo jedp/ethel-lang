@@ -35,13 +35,13 @@ static bool truthiness(vm_stack_elem_t *e) {
         case VM_STACK_NIL_TYPE:
             return false;
         case VM_STACK_BOOL_TYPE:
-            return e->boolval == 1;
+            return e->as.boolval == 1;
         case VM_STACK_BYTE_TYPE:
-            return e->byteval != 0;
+            return e->as.byteval != 0;
         case VM_STACK_INT_TYPE:
-            return e->intval > 0;
+            return e->as.intval > 0;
         case VM_STACK_FLOAT_TYPE:
-            return e->floatval > 0.0f;
+            return e->as.floatval > 0.0f;
         default:
             printf("Can't determine truthiness of stack elem type %d\n", e->type);
             return false;
@@ -51,16 +51,16 @@ static bool truthiness(vm_stack_elem_t *e) {
 static error_t numeric_negate(vm_stack_elem_t *e) {
     switch (e->type) {
         case VM_STACK_BOOL_TYPE:
-            e->boolval = e->boolval ? 0 : 1;
+            e->as.boolval = e->as.boolval ? 0 : 1;
             break;
         case VM_STACK_BYTE_TYPE:
-            e->byteval = ((0xff ^ e->byteval) + 1) & 0xff;
+            e->as.byteval = ((0xff ^ e->as.byteval) + 1) & 0xff;
             break;
         case VM_STACK_INT_TYPE:
-            e->intval = -e->intval;
+            e->as.intval = -e->as.intval;
             break;
         case VM_STACK_FLOAT_TYPE:
-            e->floatval = -e->floatval;
+            e->as.floatval = -e->as.floatval;
             break;
         default:
             return ERR_VM_RUNTIME_ERROR;
@@ -88,43 +88,43 @@ static error_t numerical_binop(vm_t *vm, vm_op_t op) {
 
     switch (op) {
         case VM_OP_ADD:
-            e.intval = b->intval + a->intval;
+            e.as.intval = b->as.intval + a->as.intval;
             break;
         case VM_OP_SUB:
-            e.intval = b->intval - a->intval;
+            e.as.intval = b->as.intval - a->as.intval;
             break;
         case VM_OP_MUL:
-            e.intval = b->intval * a->intval;
+            e.as.intval = b->as.intval * a->as.intval;
             break;
         case VM_OP_DIV:
-            e.intval = b->intval / a->intval;
+            e.as.intval = b->as.intval / a->as.intval;
             break;
         case VM_OP_REM:
-            e.intval = b->intval % a->intval;
+            e.as.intval = b->as.intval % a->as.intval;
             break;
         case VM_OP_LT:
             e.type = VM_STACK_BOOL_TYPE;
-            e.boolval = b->intval < a->intval ? 1 : 0;
+            e.as.boolval = b->as.intval < a->as.intval ? 1 : 0;
             break;
         case VM_OP_LE:
             e.type = VM_STACK_BOOL_TYPE;
-            e.boolval = b->intval <= a->intval ? 1 : 0;
+            e.as.boolval = b->as.intval <= a->as.intval ? 1 : 0;
             break;
         case VM_OP_GT:
             e.type = VM_STACK_BOOL_TYPE;
-            e.boolval = b->intval > a->intval ? 1 : 0;
+            e.as.boolval = b->as.intval > a->as.intval ? 1 : 0;
             break;
         case VM_OP_GE:
             e.type = VM_STACK_BOOL_TYPE;
-            e.boolval = b->intval >= a->intval ? 1 : 0;
+            e.as.boolval = b->as.intval >= a->as.intval ? 1 : 0;
             break;
         case VM_OP_EQ:
             e.type = VM_STACK_BOOL_TYPE;
-            e.boolval = b->intval == a->intval ? 1 : 0;
+            e.as.boolval = b->as.intval == a->as.intval ? 1 : 0;
             break;
         case VM_OP_NE:
             e.type = VM_STACK_BOOL_TYPE;
-            e.boolval = b->intval != a->intval ? 1 : 0;
+            e.as.boolval = b->as.intval != a->as.intval ? 1 : 0;
             break;
         default:
             runtime_error(vm, "Unsupported numeric binary operation");
@@ -146,10 +146,10 @@ static error_t logical_binop(vm_t *vm, vm_op_t op) {
 
     switch (op) {
         case VM_OP_LOGICAL_AND:
-            e.boolval = a && b;
+            e.as.boolval = a && b;
             break;
         case VM_OP_LOGICAL_OR:
-            e.boolval = a || b;
+            e.as.boolval = a || b;
             break;
         default:
             runtime_error(vm, "Unsupported logical binary operation");
@@ -157,6 +157,59 @@ static error_t logical_binop(vm_t *vm, vm_op_t op) {
     }
 
     vm_stack_push(vm, &e);
+    return ERR_NO_ERROR;
+}
+
+static error_t array_subscript(vm_t *vm) {
+    // Subscript
+    vm_stack_elem_t *a = vm_stack_pop(vm);
+    // Array Object
+    vm_stack_elem_t *b = vm_stack_pop(vm);
+
+    // Must be subscriptable object.
+    if (b->type != VM_STACK_OBJ_TYPE || !IS_OBJ_SUBSCRIPTABLE(b->as.objval)) {
+        runtime_error(vm, "Cannot take array subscript\n");
+        return ERR_VM_COMPILE_ERROR;
+    }
+
+    // Must have integer index value.
+    if (!VALID_SUBSCRIPT_INDEX(a)) {
+        runtime_error(vm, "Not a valid subscript index value\n");
+        return ERR_VM_COMPILE_ERROR;
+    }
+
+    obj_t *b_obj = b->as.objval;
+    switch (b_obj->type) {
+        case OBJ_TYPE_STRING: {
+            obj_str_t *str_obj = (obj_str_t *) b_obj;
+            int offset = a->as.intval;
+            char ch;
+            if (offset >= 0) {
+                // Index from start.
+                if (offset >= str_obj->length) {
+                    runtime_error(vm, "Subscript out of range.\n");
+                    return ERR_VM_COMPILE_ERROR;
+                }
+                ch = str_obj->chars[offset];
+                vm_stack_push_byte(vm, ch);
+            } else {
+                // Index from end.
+                if (offset < -str_obj->length) {
+                    runtime_error(vm, "Subscript out of range.\n");
+                    return ERR_VM_COMPILE_ERROR;
+                }
+                ch = str_obj->chars[str_obj->length + offset];
+                vm_stack_push_byte(vm, ch);
+            }
+            break;
+        }
+        case OBJ_TYPE_BYTEARRAY:
+        default:
+            runtime_error(vm, "Unsubscriptable object type\n");
+            return ERR_VM_COMPILE_ERROR;
+
+    }
+
     return ERR_NO_ERROR;
 }
 
@@ -227,6 +280,13 @@ static error_t exec(vm_t *vm) {
                 vm_stack_push_int(vm, v.as.intval);
                 break;
             }
+            case VM_OP_SCONST: {
+                val_t v;
+                uint8_t k = READ_BYTE();
+                cg_get_const(vm->cg, k, &v);
+                vm_stack_push_obj(vm, v.as.objval);
+                break;
+            }
             case VM_OP_NIL:
                 vm_stack_push_nil(vm);
                 break;
@@ -251,6 +311,9 @@ static error_t exec(vm_t *vm) {
                 break;
             case VM_OP_REM:
                 err = numerical_binop(vm, VM_OP_REM);
+                break;
+            case VM_OP_ALOAD:
+                err = array_subscript(vm);
                 break;
             case VM_OP_LOGICAL_AND:
                 err = logical_binop(vm, VM_OP_LOGICAL_AND);
@@ -280,15 +343,15 @@ static error_t exec(vm_t *vm) {
                 vm_stack_elem_t *e = vm_stack_pop(vm);
                 bool val = truthiness(e);
                 e->type = VM_STACK_BOOL_TYPE;
-                e->boolval = val;
+                e->as.boolval = val;
                 vm_stack_push(vm, e);
                 break;
             }
             case VM_OP_INC:
-                vm_stack_peek(vm)->intval += 1;
+                vm_stack_peek(vm)->as.intval += 1;
                 break;
             case VM_OP_DEC:
-                vm_stack_peek(vm)->intval -= 1;
+                vm_stack_peek(vm)->as.intval -= 1;
                 break;
             case VM_OP_RET:
                 return ERR_NO_ERROR;
@@ -358,7 +421,7 @@ error_t vm_stack_push(vm_t *vm, vm_stack_elem_t *e) {
 error_t vm_stack_push_byte(vm_t *vm, uint8_t b) {
     vm_stack_elem_t e = {
         .type = VM_STACK_BYTE_TYPE,
-        .byteval = b
+        .as.byteval = b
     };
     return vm_stack_push(vm, &e);
 }
@@ -366,7 +429,7 @@ error_t vm_stack_push_byte(vm_t *vm, uint8_t b) {
 error_t vm_stack_push_int(vm_t *vm, int i) {
     vm_stack_elem_t e = {
         .type = VM_STACK_INT_TYPE,
-        .intval = i
+        .as.intval = i
     };
     return vm_stack_push(vm, &e);
 }
@@ -374,7 +437,15 @@ error_t vm_stack_push_int(vm_t *vm, int i) {
 error_t vm_stack_push_boolean(vm_t *vm, bool z) {
     vm_stack_elem_t e = {
         .type = VM_STACK_BOOL_TYPE,
-        .boolval = z ? 1 : 0
+        .as.boolval = z ? 1 : 0
+    };
+    return vm_stack_push(vm, &e);
+}
+
+error_t vm_stack_push_obj(vm_t *vm, obj_t *obj) {
+    vm_stack_elem_t e = {
+        .type=VM_STACK_OBJ_TYPE,
+        .as.objval = obj
     };
     return vm_stack_push(vm, &e);
 }

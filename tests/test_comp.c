@@ -373,6 +373,28 @@ void test_comp_multiline_parens(void) {
     TEST_ASSERT_EQUAL(ERR_NO_ERROR, err);
 }
 
+void test_string_index(void) {
+    const char *input = "\"foo\"[(i + 1) / 2]";
+
+    cg_t cg;
+    cg_init(&cg);
+    error_t err = codegen(input, &cg);
+
+    uint8_t expected[] = {
+        VM_OP_SCONST, 1,
+        VM_OP_SCONST, 2,
+        VM_OP_IPUSH_1,
+        VM_OP_ADD,
+        VM_OP_IPUSH, 2,
+        VM_OP_DIV,
+        VM_OP_ALOAD,
+        VM_OP_RET,
+    };
+    TEST_ASSERT_EQUAL_MEMORY(expected, cg.bytecode, cg.len);
+
+    TEST_ASSERT_EQUAL(ERR_NO_ERROR, err);
+}
+
 void test_comp(void) {
     RUN_TEST(test_comp_arithmetic);
     RUN_TEST(test_comp_bit_arithmetic);
@@ -389,5 +411,6 @@ void test_comp(void) {
     RUN_TEST(test_comp_if_then_else_if_block);
     RUN_TEST(test_comp_multiline_block);
     RUN_TEST(test_comp_multiline_parens);
+    RUN_TEST(test_string_index);
 }
 

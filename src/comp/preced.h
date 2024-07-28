@@ -67,7 +67,7 @@ __attribute__((unused)) void parse_binary_op(parser_t *parser);
 
 __attribute__((unused)) void parse_parens(parser_t *parser);
 
-__attribute__ ((unused)) void parse_block(parser_t *parser);
+__attribute__((unused)) void parse_block(parser_t *parser);
 
 __attribute__((unused)) void parse_subscript(parser_t *parser);
 

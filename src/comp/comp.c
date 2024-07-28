@@ -61,12 +61,13 @@ static bool token_tag_matches(parser_t *parser, tag_t tag) {
 
 static void emit_byte(parser_t *parser, uint8_t byte) {
     /*
-    if (byte < 0xff) {
+    if (byte < 0xa5) {
         printf("emit %02x %s\n", byte, op_names[byte]);
     } else {
         printf("emit %02x\n", byte);
     }
      */
+
     cg_byte(parser->cg, byte);
 }
 
@@ -102,7 +103,6 @@ static map_err_t emit_const_int(parser_t *parser, int val) {
 
 static map_err_t emit_const_obj_str(parser_t *parser, const char *chars, uint32_t length) {
     map_err_t err;
-
     obj_str_t *obj_str = obj_str_new(chars, length);
 
     val_t v = {
@@ -121,8 +121,8 @@ static uint16_t emit_jump(parser_t *parser, vm_op_t jump_op) {
     uint32_t loc = parser->cg->len;
 
     // Placeholder for 16-bit jump address.
-    emit_byte(parser, 0xff);
-    emit_byte(parser, 0xff);
+    emit_byte(parser, 0xa5);
+    emit_byte(parser, 0xa5);
 
     // Return address of jump address bytes.
     return loc;
@@ -166,8 +166,9 @@ void parse_expr_by_precedence(parser_t *parser, uint8_t min_preced) {
     while (min_preced <= preced_rules[parser->curr.tag].precedence) {
         advance(parser);
         parse_func infix_rule = preced_rules[parser->prev.tag].parse_infix;
-        if (infix_rule != NULL)
+        if (infix_rule != NULL) {
             infix_rule(parser);
+        }
     }
 }
 
@@ -325,7 +326,13 @@ __attribute__((unused)) void parse_parens(parser_t *parser) {
 
 // Referenced via pointer in the precedence table.
 __attribute__((unused)) void parse_subscript(parser_t *parser) {
-    (void) parser;
+    while (!check_token_tag(parser, TAG_RBRACKET) &&
+           !check_token_tag(parser, TAG_EOF)) {
+        parse_expr(parser);
+        token_tag_matches(parser, TAG_EOL);
+    }
+    emit_byte(parser, VM_OP_ALOAD);
+    eat(parser, TAG_RBRACKET);
 }
 
 static void parse_expr(parser_t *parser) {
@@ -390,10 +397,6 @@ static void exit_scope(parser_t *parser) {
 static void parse_stmt(parser_t *parser) {
     if (token_tag_matches(parser, TAG_IF)) {
         parse_if_stmt(parser);
-    } else if (token_tag_matches(parser, TAG_LBRACKET)) {
-        enter_scope(parser);
-        parse_block(parser);
-        exit_scope(parser);
     } else {
         parse_expr(parser);
     }

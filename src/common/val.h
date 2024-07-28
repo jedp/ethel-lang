@@ -8,7 +8,6 @@
 #define AS_OBJ(val) ((obj_t*) (val)->as.objval)
 #define AS_OBJ_STR(val) ((obj_str_t*) AS_OBJ(val))
 
-
 typedef enum {
     MAP_OK,
     MAP_NOT_FOUND,
@@ -25,10 +24,10 @@ typedef enum {
     VAL_TYPE_FLOAT,
     VAL_TYPE_OBJ,
     VAL_TYPE_ADDR,
-} map_elem_type_t;
+} val_type_t;
 
 typedef struct {
-    map_elem_type_t type;
+    val_type_t type;
     union {
         uint8_t byteval;
         uint8_t boolval;

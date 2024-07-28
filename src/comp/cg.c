@@ -93,6 +93,14 @@ uint32_t cg_header(cg_t *cg, const uint8_t *bytes, size_t size) {
                 cg_put_const(cg, v, &k);
                 break;
             }
+            case CONST_STRING: {
+                uint32_t strlen = bytes[offset++];
+                v.type = VAL_TYPE_OBJ;
+                v.as.objval = (obj_t *) obj_str_new((const char *) &bytes[offset], strlen);
+                cg_put_const(cg, v, &k);
+                offset += strlen;
+                break;
+            }
             default:
                 printf("We don't handle const type %d yet!\n", type);
                 return 0;

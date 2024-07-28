@@ -2,9 +2,13 @@
 
 #include <stdint.h>
 
+#define IS_OBJ_SUBSCRIPTABLE(obj) \
+    ((obj)->type == OBJ_TYPE_STRING || (obj)->type == OBJ_TYPE_BYTEARRAY)
+
 typedef enum {
     OBJ_TYPE_ERROR_NONE = 0,
     OBJ_TYPE_STRING,
+    OBJ_TYPE_BYTEARRAY,
 } obj_type_t;
 
 typedef struct {

@@ -6,6 +6,9 @@
 
 #define VM_DATA_STACK_SIZE (64)
 
+#define VALID_SUBSCRIPT_INDEX(elem) \
+    ((elem)->type == VM_STACK_BYTE_TYPE || (elem)->type ==VM_STACK_INT_TYPE)
+
 /*
  * Order matters for determining which numeric values can be up-cast
  * with no loss.
@@ -17,17 +20,19 @@ typedef enum {
     VM_STACK_BYTE_TYPE,
     VM_STACK_INT_TYPE,
     VM_STACK_FLOAT_TYPE,
+    VM_STACK_OBJ_TYPE,
     VM_STACK_ADDR_TYPE,
     VM_STACK_ELEM_TYPE_MAX,
 } vm_stack_elem_type_t;
 
-static const char *vm_stack_elem_type_names[VM_STACK_ELEM_TYPE_MAX] = {
+static const char *vm_stack_elem_type_names[] = {
     [VM_STACK_ERROR_NO_TYPE] = "No type!",
     [VM_STACK_NIL_TYPE] = "Nil",
     [VM_STACK_BOOL_TYPE] = "Boolean",
     [VM_STACK_BYTE_TYPE] = "Byte",
     [VM_STACK_INT_TYPE] = "Int",
     [VM_STACK_FLOAT_TYPE] = "Float",
+    [VM_STACK_OBJ_TYPE] = "Object",
     [VM_STACK_ADDR_TYPE] = "Address",
 };
 
@@ -44,8 +49,9 @@ typedef struct vm_stack_elem_t {
         int intval;
         float floatval;
         int boolval;
-        uint8_t addrval;
-    };
+        obj_t *objval;
+        uint32_t addrval;
+    } as;
 } vm_stack_elem_t;
 
 typedef struct vm_stack_t {
@@ -82,6 +88,8 @@ error_t vm_stack_push_byte(vm_t *vm, uint8_t b);
 error_t vm_stack_push_int(vm_t *vm, int i);
 
 error_t vm_stack_push_boolean(vm_t *vm, bool z);
+
+error_t vm_stack_push_obj(vm_t *vm, obj_t *obj);
 
 error_t vm_stack_push_nil(vm_t *vm);
 
