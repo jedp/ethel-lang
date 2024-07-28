@@ -187,26 +187,22 @@ static error_t array_subscript(vm_t *vm) {
     }
 
     obj_t *b_obj = b->as.objval;
+    int offset = a->as.intval;
     switch (b_obj->type) {
         case OBJ_TYPE_STRING: {
             obj_str_t *obj_str = (obj_str_t *) b_obj;
-            int offset = a->as.intval;
             char ch;
             if (offset >= 0) {
                 // Index from start.
                 if (offset >= obj_str->length) {
-                    runtime_error(vm, "Subscript %d out of range for %s of length %d",
-                                  offset, obj_type_names[b_obj->type], obj_str->length);
-                    return ERR_VM_COMPILE_ERROR;
+                    goto obj_index_err;
                 }
                 ch = obj_str->chars[offset];
                 vm_stack_push_byte(vm, ch);
             } else {
                 // Index from end.
                 if (offset < -obj_str->length) {
-                    runtime_error(vm, "Subscript %d out of range for %s of length %d",
-                                  offset, obj_type_names[b_obj->type], obj_str->length);
-                    return ERR_VM_COMPILE_ERROR;
+                    goto obj_index_err;
                 }
                 ch = obj_str->chars[obj_str->length + offset];
                 vm_stack_push_byte(vm, ch);
@@ -215,23 +211,18 @@ static error_t array_subscript(vm_t *vm) {
         }
         case OBJ_TYPE_BYTEARRAY: {
             obj_arr_t *obj_arr = (obj_arr_t *) b_obj;
-            int offset = a->as.intval;
             char ch;
             if (offset >= 0) {
                 // Index from start.
                 if (offset >= obj_arr->length) {
-                    runtime_error(vm, "Subscript %d out of range for %s of length %d",
-                                  offset, obj_type_names[b_obj->type], obj_arr->length);
-                    return ERR_VM_COMPILE_ERROR;
+                    goto obj_index_err;
                 }
-                uint8_t byte= obj_arr->buf[offset];
+                uint8_t byte = obj_arr->buf[offset];
                 vm_stack_push_byte(vm, byte);
             } else {
                 // Index from end.
                 if (offset < -obj_arr->length) {
-                    runtime_error(vm, "Subscript %d out of range for %s of length %d",
-                                  offset, obj_type_names[b_obj->type], obj_arr->length);
-                    return ERR_VM_COMPILE_ERROR;
+                    goto obj_index_err;
                 }
                 uint8_t byte = obj_arr->buf[obj_arr->length + offset];
                 vm_stack_push_byte(vm, byte);
@@ -241,10 +232,16 @@ static error_t array_subscript(vm_t *vm) {
         default:
             runtime_error(vm, "Unsubscriptable object: %s\n", obj_type_names[b_obj->type]);
             return ERR_VM_COMPILE_ERROR;
-
     }
 
     return ERR_NO_ERROR;
+
+    obj_index_err:
+    // We can get the length attribute of any indexable object (str or arr).
+    // So as a hack, just cast it to an array to get length.
+    runtime_error(vm, "Subscript %d out of range for %s of length %d",
+                  offset, obj_type_names[b_obj->type], ((obj_arr_t *) b_obj)->length);
+    return ERR_VM_COMPILE_ERROR;
 }
 
 static error_t jump(vm_t *vm, vm_op_t op) {
