@@ -22,7 +22,7 @@ static void test_program(uint8_t *bytes, uint16_t size,
 
     if (expect_stack_top.type != 0) {
         TEST_ASSERT_EQUAL(expect_stack_top.type, vm_stack_peek(&vm)->type);
-        switch(expect_stack_top.type) {
+        switch (expect_stack_top.type) {
             case VM_STACK_BYTE_TYPE:
                 TEST_ASSERT_EQUAL(expect_stack_top.as.byteval, vm_stack_peek(&vm)->as.byteval);
                 break;
@@ -537,6 +537,21 @@ void test_vm_string_index(void) {
     test_program(bytes, sizeof(bytes), stack_top, ERR_NO_ERROR);
 }
 
+void test_vm_string_index_out_of_range(void) {
+    uint8_t bytes[] = {
+        'E', 'T', 'H', 'L', 0, 1,
+        1,
+        CONST_STRING, 5, 'E', 't', 'h', 'e', 'l',
+        VM_OP_SCONST, 1,
+        VM_OP_IPUSH, 5,
+        VM_OP_ALOAD,
+        VM_OP_RET,
+    };
+
+    vm_stack_elem_t stack_top = {.type= 0};
+    test_program(bytes, sizeof(bytes), stack_top, ERR_VM_COMPILE_ERROR);
+}
+
 void test_vm_string_negative_index(void) {
     uint8_t bytes[] = {
         'E', 'T', 'H', 'L', 0, 1,
@@ -551,6 +566,22 @@ void test_vm_string_negative_index(void) {
 
     vm_stack_elem_t stack_top = {.type= VM_STACK_BYTE_TYPE, .as.byteval= 'h'};
     test_program(bytes, sizeof(bytes), stack_top, ERR_NO_ERROR);
+}
+
+void test_vm_string_negative_index_out_of_range(void) {
+    uint8_t bytes[] = {
+        'E', 'T', 'H', 'L', 0, 1,
+        1,
+        CONST_STRING, 5, 'E', 't', 'h', 'e', 'l',
+        VM_OP_SCONST, 1,
+        VM_OP_IPUSH, 6,
+        VM_OP_NEG,
+        VM_OP_ALOAD,
+        VM_OP_RET,
+    };
+
+    vm_stack_elem_t stack_top = {.type= 0};
+    test_program(bytes, sizeof(bytes), stack_top, ERR_VM_COMPILE_ERROR);
 }
 
 void test_vm(void) {
@@ -582,5 +613,7 @@ void test_vm(void) {
     RUN_TEST(test_vm_stack_load_imm);
     RUN_TEST(test_vm_stack_inc_dec);
     RUN_TEST(test_vm_string_index);
+    RUN_TEST(test_vm_string_index_out_of_range);
     RUN_TEST(test_vm_string_negative_index);
+    RUN_TEST(test_vm_string_negative_index_out_of_range);
 }
