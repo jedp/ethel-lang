@@ -68,7 +68,7 @@ static uint32_t print_jump(const char *name, cg_t *cg, uint32_t offset) {
 }
 
 uint32_t print_dis_byte(cg_t *cg, uint32_t offset) {
-    printf("%08x %02x ", offset, cg->bytecode[offset]);
+    printf("%04x %02x ", offset, cg->bytecode[offset]);
 
     uint8_t op = cg->bytecode[offset];
     switch (op) {

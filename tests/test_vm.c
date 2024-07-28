@@ -670,6 +670,36 @@ void test_vm_print_int(void) {
     test_program_primitive(bytes, sizeof(bytes), no_stack, ERR_NO_ERROR);
 }
 
+void test_vm_bytearray_index(void) {
+    uint8_t bytes[] = {
+        'E', 'T', 'H', 'L', 0, 1,
+        1,
+        CONST_BYTEARRAY,  4, 0, 0, 0, 10, 11, 12, 13,
+        VM_OP_ACONST, 1,
+        VM_OP_IPUSH, 3,
+        VM_OP_ALOAD,
+        VM_OP_RET,
+    };
+
+    vm_stack_elem_t stack_top = {.type= VM_STACK_BYTE_TYPE, .as.byteval= 13};
+    test_program_primitive(bytes, sizeof(bytes), stack_top, ERR_NO_ERROR);
+}
+
+void test_vm_bytearray_negative_index(void) {
+    uint8_t bytes[] = {
+        'E', 'T', 'H', 'L', 0, 1,
+        1,
+        CONST_BYTEARRAY,  4, 0, 0, 0, 10, 11, 12, 13,
+        VM_OP_ACONST, 1,
+        VM_OP_IPUSH, -3,
+        VM_OP_ALOAD,
+        VM_OP_RET,
+    };
+
+    vm_stack_elem_t stack_top = {.type= VM_STACK_BYTE_TYPE, .as.byteval= 11};
+    test_program_primitive(bytes, sizeof(bytes), stack_top, ERR_NO_ERROR);
+}
+
 void test_vm(void) {
     RUN_TEST(test_vm_init);
     RUN_TEST(test_vm_load_code);
@@ -705,5 +735,7 @@ void test_vm(void) {
     RUN_TEST(test_vm_string_negative_index_out_of_range);
     RUN_TEST(test_vm_byte_array_alloc);
     RUN_TEST(test_vm_byte_array);
+    RUN_TEST(test_vm_bytearray_index);
+    RUN_TEST(test_vm_bytearray_negative_index);
     RUN_TEST(test_vm_print_int);
 }

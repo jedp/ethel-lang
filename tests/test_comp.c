@@ -360,7 +360,7 @@ void test_comp_multiline_parens(void) {
     TEST_ASSERT_EQUAL(ERR_NO_ERROR, err);
 }
 
-void test_comp_string_index(void) {
+void test_comp_subscript(void) {
     const char *input = "\"foo\"[(i + 1) / 2]";
 
     cg_t cg;
@@ -446,7 +446,7 @@ void test_comp(void) {
     RUN_TEST(test_comp_if_then_else_if_block);
     RUN_TEST(test_comp_multiline_block);
     RUN_TEST(test_comp_multiline_parens);
-    RUN_TEST(test_comp_string_index);
+    RUN_TEST(test_comp_subscript);
     RUN_TEST(test_comp_bytearray_decl);
     RUN_TEST(test_comp_bytearray);
     RUN_TEST(test_comp_print);
