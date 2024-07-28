@@ -1,6 +1,7 @@
 #include <stdio.h>
 #include <stdbool.h>
 #include <string.h>
+#include <stdarg.h>
 #include "../common/err.h"
 #include "../comp/cg.h"
 #include "../comp/comp.h"
@@ -12,12 +13,18 @@
 
 #define READ_BYTE() (*vm->pc++)
 
-void runtime_error(vm_t *vm, const char *message) {
+void runtime_error(vm_t *vm, const char *fmt, ...) {
+    va_list args;
+    va_start(args, fmt);
     fflush(stdout);
     fflush(stderr);
 
-    fprintf(stderr, "Runtime error: %s\n", message);
+    fprintf(stderr, "Runtime error: ");
+    vfprintf(stderr, fmt, args);
+    fputc('\n', stderr);
+
     fflush(stderr);
+    va_end(args);
 
     vm_stack_reset(vm);
 }
@@ -31,7 +38,7 @@ bool runtime_check(vm_t *vm, bool condition, const char *message) {
     return false;
 }
 
-static bool truthiness(vm_stack_elem_t *e) {
+static bool truthiness(vm_t *vm, vm_stack_elem_t *e) {
     switch (e->type) {
         case VM_STACK_NIL_TYPE:
             return false;
@@ -44,7 +51,7 @@ static bool truthiness(vm_stack_elem_t *e) {
         case VM_STACK_FLOAT_TYPE:
             return e->as.floatval > 0.0f;
         default:
-            printf("Can't determine truthiness of stack elem type %d\n", e->type);
+            runtime_error(vm, "Can't determine truthiness of stack elem type %d", e->type);
             return false;
     }
 }
@@ -139,8 +146,8 @@ static error_t numerical_binop(vm_t *vm, vm_op_t op) {
 }
 
 static error_t logical_binop(vm_t *vm, vm_op_t op) {
-    bool a = truthiness(vm_stack_pop(vm));
-    bool b = truthiness(vm_stack_pop(vm));
+    bool a = truthiness(vm, vm_stack_pop(vm));
+    bool b = truthiness(vm, vm_stack_pop(vm));
 
     vm_stack_elem_t e;
     e.type = VM_STACK_BOOL_TYPE;
@@ -188,7 +195,7 @@ static error_t array_subscript(vm_t *vm) {
             if (offset >= 0) {
                 // Index from start.
                 if (offset >= str_obj->length) {
-                    runtime_error(vm, "Subscript out of range.\n");
+                    runtime_error(vm, "Subscript %d out of range for String of length %d", offset, str_obj->length);
                     return ERR_VM_COMPILE_ERROR;
                 }
                 ch = str_obj->chars[offset];
@@ -196,7 +203,7 @@ static error_t array_subscript(vm_t *vm) {
             } else {
                 // Index from end.
                 if (offset < -str_obj->length) {
-                    runtime_error(vm, "Subscript out of range.\n");
+                    runtime_error(vm, "Subscript %d out of range for String of length %d", offset, str_obj->length);
                     return ERR_VM_COMPILE_ERROR;
                 }
                 ch = str_obj->chars[str_obj->length + offset];
@@ -206,7 +213,7 @@ static error_t array_subscript(vm_t *vm) {
         }
         case OBJ_TYPE_BYTEARRAY:
         default:
-            runtime_error(vm, "Unsubscriptable object type\n");
+            runtime_error(vm, "Unsubscriptable object: %s\n", obj_type_names[b_obj->type]);
             return ERR_VM_COMPILE_ERROR;
 
     }
@@ -222,12 +229,12 @@ static error_t jump(vm_t *vm, vm_op_t op) {
 
     switch (op) {
         case VM_OP_JZ:
-            if (!truthiness(vm_stack_pop(vm))) {
+            if (!truthiness(vm, vm_stack_pop(vm))) {
                 vm->pc = &(vm->cg->bytecode[jump_addr]);
             }
             break;
         case VM_OP_JEQ:
-            if (truthiness(vm_stack_pop(vm))) {
+            if (truthiness(vm, vm_stack_pop(vm))) {
                 vm->pc = &(vm->cg->bytecode[jump_addr]);
             }
             break;
@@ -350,7 +357,7 @@ static error_t exec(vm_t *vm) {
                 break;
             case VM_OP_LOGICAL_NOT: {
                 vm_stack_elem_t *e = vm_stack_pop(vm);
-                bool val = truthiness(e);
+                bool val = truthiness(vm, e);
                 e->type = VM_STACK_BOOL_TYPE;
                 e->as.boolval = val;
                 vm_stack_push(vm, e);
@@ -377,11 +384,10 @@ static error_t exec(vm_t *vm) {
                 err = jump(vm, bytecode);
                 break;
             default:
-                runtime_error(vm, "Unsupported bytecode");
+                runtime_error(vm, "Unsupported bytecode: %d", bytecode);
                 return ERR_VM_RUNTIME_ERROR;
         }
         if (err) {
-            runtime_error(vm, "Execution error");
             return err;
         }
     }

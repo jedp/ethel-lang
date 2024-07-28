@@ -69,7 +69,7 @@ typedef struct vm_t {
     vm_stack_t *stack;
 } vm_t;
 
-void runtime_error(vm_t *vm, const char *message);
+void runtime_error(vm_t *vm, const char *fmt, ...);
 
 bool runtime_check(vm_t *vm, bool condition, const char *message);
 

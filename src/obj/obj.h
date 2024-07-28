@@ -11,6 +11,12 @@ typedef enum {
     OBJ_TYPE_BYTEARRAY,
 } obj_type_t;
 
+static const char *obj_type_names[] ={
+    [OBJ_TYPE_ERROR_NONE] = "No Object",
+    [OBJ_TYPE_STRING] = "String Object",
+    [OBJ_TYPE_BYTEARRAY] = "Byte Array Object",
+};
+
 typedef struct {
 #ifdef BUILD64
     uint64_t type: 52;
