@@ -2,7 +2,6 @@
 #include <stdbool.h>
 #include <string.h>
 #include <stdarg.h>
-#include "../common/err.h"
 #include "../comp/cg.h"
 #include "../comp/comp.h"
 #include "../mem/mem.h"
@@ -56,7 +55,7 @@ static bool truthiness(vm_t *vm, vm_stack_elem_t *e) {
     }
 }
 
-static error_t numeric_negate(vm_stack_elem_t *e) {
+static vm_err_t numeric_negate(vm_stack_elem_t *e) {
     switch (e->type) {
         case VM_STACK_BOOL_TYPE:
             e->as.boolval = e->as.boolval ? 0 : 1;
@@ -71,24 +70,24 @@ static error_t numeric_negate(vm_stack_elem_t *e) {
             e->as.floatval = -e->as.floatval;
             break;
         default:
-            return ERR_VM_RUNTIME_ERROR;
+            return VM_ERR_RUNTIME_ERROR;
     }
-    return ERR_NO_ERROR;
+    return VM_ERR_NO_ERROR;
 }
 
-static error_t numerical_binop(vm_t *vm, vm_op_t op) {
+static vm_err_t numerical_binop(vm_t *vm, vm_op_t op) {
     vm_stack_elem_t *a = vm_stack_pop(vm);
     vm_stack_elem_t *b = vm_stack_pop(vm);
 
     if (!(runtime_check(vm, TYPE_IS_NUMERIC(a->type) && TYPE_IS_NUMERIC(b->type),
                         "Operator requires two numeric arguments"))) {
-        return ERR_VM_RUNTIME_ERROR;
+        return VM_ERR_RUNTIME_ERROR;
     }
 
     // TODO support more than just int.
     if (a->type != VM_STACK_INT_TYPE || b->type != VM_STACK_INT_TYPE) {
         runtime_error(vm, "Time to implement the other types!");
-        return ERR_VM_RUNTIME_ERROR;
+        return VM_ERR_RUNTIME_ERROR;
     }
 
     vm_stack_elem_t e;
@@ -136,16 +135,16 @@ static error_t numerical_binop(vm_t *vm, vm_op_t op) {
             break;
         default:
             runtime_error(vm, "Unsupported numeric binary operation");
-            return ERR_VM_RUNTIME_ERROR;
+            return VM_ERR_RUNTIME_ERROR;
     }
 
     // Don't free b and a: They are still slots in the stack.
 
     vm_stack_push(vm, &e);
-    return ERR_NO_ERROR;
+    return VM_ERR_NO_ERROR;
 }
 
-static error_t logical_binop(vm_t *vm, vm_op_t op) {
+static vm_err_t logical_binop(vm_t *vm, vm_op_t op) {
     bool a = truthiness(vm, vm_stack_pop(vm));
     bool b = truthiness(vm, vm_stack_pop(vm));
 
@@ -161,14 +160,14 @@ static error_t logical_binop(vm_t *vm, vm_op_t op) {
             break;
         default:
             runtime_error(vm, "Unsupported logical binary operation");
-            return ERR_VM_RUNTIME_ERROR;
+            return VM_ERR_RUNTIME_ERROR;
     }
 
     vm_stack_push(vm, &e);
-    return ERR_NO_ERROR;
+    return VM_ERR_NO_ERROR;
 }
 
-static error_t array_subscript(vm_t *vm) {
+static vm_err_t array_subscript(vm_t *vm) {
     // Subscript
     vm_stack_elem_t *a = vm_stack_pop(vm);
     // Array Object
@@ -177,13 +176,13 @@ static error_t array_subscript(vm_t *vm) {
     // Must be subscriptable object.
     if (b->type != VM_STACK_OBJ_TYPE || !IS_OBJ_SUBSCRIPTABLE(b->as.objval)) {
         runtime_error(vm, "Cannot take array subscript\n");
-        return ERR_VM_COMPILE_ERROR;
+        return VM_ERR_COMPILE_ERROR;
     }
 
     // Must have integer index value.
     if (!VALID_SUBSCRIPT_INDEX(a)) {
         runtime_error(vm, "Not a valid subscript index value\n");
-        return ERR_VM_COMPILE_ERROR;
+        return VM_ERR_COMPILE_ERROR;
     }
 
     obj_t *b_obj = b->as.objval;
@@ -211,40 +210,40 @@ static error_t array_subscript(vm_t *vm) {
         }
         case OBJ_TYPE_BYTEARRAY: {
             obj_arr_t *obj_arr = (obj_arr_t *) b_obj;
-            char ch;
+            uint8_t byte;
             if (offset >= 0) {
                 // Index from start.
                 if (offset >= obj_arr->length) {
                     goto obj_index_err;
                 }
-                uint8_t byte = obj_arr->buf[offset];
+                byte = obj_arr->buf[offset];
                 vm_stack_push_byte(vm, byte);
             } else {
                 // Index from end.
                 if (offset < -obj_arr->length) {
                     goto obj_index_err;
                 }
-                uint8_t byte = obj_arr->buf[obj_arr->length + offset];
+                byte = obj_arr->buf[obj_arr->length + offset];
                 vm_stack_push_byte(vm, byte);
             }
             break;
         }
         default:
             runtime_error(vm, "Unsubscriptable object: %s\n", obj_type_names[b_obj->type]);
-            return ERR_VM_COMPILE_ERROR;
+            return VM_ERR_COMPILE_ERROR;
     }
 
-    return ERR_NO_ERROR;
+    return VM_ERR_NO_ERROR;
 
     obj_index_err:
     // We can get the length attribute of any indexable object (str or arr).
     // So as a hack, just cast it to an array to get length.
     runtime_error(vm, "Subscript %d out of range for %s of length %d",
                   offset, obj_type_names[b_obj->type], ((obj_arr_t *) b_obj)->length);
-    return ERR_VM_COMPILE_ERROR;
+    return VM_ERR_COMPILE_ERROR;
 }
 
-static error_t jump(vm_t *vm, vm_op_t op) {
+static vm_err_t jump(vm_t *vm, vm_op_t op) {
     uint16_t jump_addr = 0;
     // Little-endian
     jump_addr |= READ_BYTE();
@@ -266,14 +265,14 @@ static error_t jump(vm_t *vm, vm_op_t op) {
             break;
         default:
             runtime_error(vm, "Unsupported jump instruction");
-            return ERR_VM_RUNTIME_ERROR;
+            return VM_ERR_RUNTIME_ERROR;
     }
 
-    return ERR_NO_ERROR;
+    return VM_ERR_NO_ERROR;
 }
 
-static error_t exec(vm_t *vm) {
-    error_t err = ERR_NO_ERROR;
+static vm_err_t exec(vm_t *vm) {
+    vm_err_t err = VM_ERR_NO_ERROR;
     for (;;) {
         uint8_t bytecode = READ_BYTE();
         /*
@@ -400,7 +399,7 @@ static error_t exec(vm_t *vm) {
                 break;
             }
             case VM_OP_RET:
-                return ERR_NO_ERROR;
+                return VM_ERR_NO_ERROR;
             case VM_OP_JZ:
             case VM_OP_JEQ:
             case VM_OP_JMP:
@@ -408,7 +407,7 @@ static error_t exec(vm_t *vm) {
                 break;
             default:
                 runtime_error(vm, "Unsupported bytecode: %d", bytecode);
-                return ERR_VM_RUNTIME_ERROR;
+                return VM_ERR_RUNTIME_ERROR;
         }
         if (err) {
             return err;
@@ -416,10 +415,10 @@ static error_t exec(vm_t *vm) {
     }
 }
 
-error_t vm_init(vm_t *vm) {
+vm_err_t vm_init(vm_t *vm) {
     cg_t *cg = mem_alloc(sizeof(cg_t));
     if (cg == NULL)
-        return ERR_OUT_OF_MEMORY;
+        return VM_ERR_OUT_OF_MEMORY;
     cg_init(cg);
 
     // A stack of objects. Top is a pointer into buf.
@@ -427,7 +426,7 @@ error_t vm_init(vm_t *vm) {
     // If top == buf, stack is empty.
     vm_stack_t *stack = mem_alloc(sizeof(vm_stack_t));
     if (stack == NULL)
-        return ERR_OUT_OF_MEMORY;
+        return VM_ERR_OUT_OF_MEMORY;
 
 //    vm_stack_elem_t *stack_buf = comp_alloc(sizeof(vm_stack_elem_t) * VM_DATA_STACK_SIZE);
     stack->size = 0;
@@ -438,32 +437,32 @@ error_t vm_init(vm_t *vm) {
     vm->bytecode_size = vm->cg->len;
     vm->stack = stack;
 
-    return ERR_NO_ERROR;
+    return VM_ERR_NO_ERROR;
 }
 
-error_t vm_free(vm_t *vm) {
+vm_err_t vm_free(vm_t *vm) {
     cg_free(vm->cg);
     mem_free(vm->cg);
     vm_init(vm);
 
-    return ERR_NO_ERROR;
+    return VM_ERR_NO_ERROR;
 }
 
-error_t vm_stack_reset(vm_t *vm) {
+vm_err_t vm_stack_reset(vm_t *vm) {
     vm->stack->top = vm->stack->buf;
-    return ERR_NO_ERROR;
+    return VM_ERR_NO_ERROR;
 }
 
-error_t vm_stack_push(vm_t *vm, vm_stack_elem_t *e) {
+vm_err_t vm_stack_push(vm_t *vm, vm_stack_elem_t *e) {
     if (vm->stack->top > vm->stack->buf + sizeof(vm_stack_elem_t *) * VM_DATA_STACK_SIZE) {
-        return ERR_VM_STACK_OVERFLOW;
+        return VM_ERR_STACK_OVERFLOW;
     }
     *(vm->stack->top) = *e;
     vm->stack->top += sizeof(vm_stack_elem_t);
-    return ERR_NO_ERROR;
+    return VM_ERR_NO_ERROR;
 }
 
-error_t vm_stack_push_byte(vm_t *vm, uint8_t b) {
+vm_err_t vm_stack_push_byte(vm_t *vm, uint8_t b) {
     vm_stack_elem_t e = {
         .type = VM_STACK_BYTE_TYPE,
         .as.byteval = b
@@ -471,7 +470,7 @@ error_t vm_stack_push_byte(vm_t *vm, uint8_t b) {
     return vm_stack_push(vm, &e);
 }
 
-error_t vm_stack_push_byte_as_int32(vm_t *vm, uint8_t b) {
+vm_err_t vm_stack_push_byte_as_int32(vm_t *vm, uint8_t b) {
     int signed_val = b;
     if (b & 0x80) {
         signed_val = -1;
@@ -485,7 +484,7 @@ error_t vm_stack_push_byte_as_int32(vm_t *vm, uint8_t b) {
     return vm_stack_push(vm, &e);
 }
 
-error_t vm_stack_push_int32(vm_t *vm, int i) {
+vm_err_t vm_stack_push_int32(vm_t *vm, int i) {
     vm_stack_elem_t e = {
         .type = VM_STACK_INT_TYPE,
         .as.intval = i,
@@ -493,7 +492,7 @@ error_t vm_stack_push_int32(vm_t *vm, int i) {
     return vm_stack_push(vm, &e);
 }
 
-error_t vm_stack_push_boolean(vm_t *vm, bool z) {
+vm_err_t vm_stack_push_boolean(vm_t *vm, bool z) {
     vm_stack_elem_t e = {
         .type = VM_STACK_BOOL_TYPE,
         .as.boolval = z ? 1 : 0
@@ -501,7 +500,7 @@ error_t vm_stack_push_boolean(vm_t *vm, bool z) {
     return vm_stack_push(vm, &e);
 }
 
-error_t vm_stack_push_obj(vm_t *vm, obj_t *obj) {
+vm_err_t vm_stack_push_obj(vm_t *vm, obj_t *obj) {
     vm_stack_elem_t e = {
         .type=VM_STACK_OBJ_TYPE,
         .as.objval = obj
@@ -509,7 +508,7 @@ error_t vm_stack_push_obj(vm_t *vm, obj_t *obj) {
     return vm_stack_push(vm, &e);
 }
 
-error_t vm_stack_push_nil(vm_t *vm) {
+vm_err_t vm_stack_push_nil(vm_t *vm) {
     vm_stack_elem_t e = {
         .type = VM_STACK_NIL_TYPE
     };
@@ -532,17 +531,17 @@ uint8_t vm_stack_size(vm_t *vm) {
     return (vm->stack->top - vm->stack->buf) / sizeof(vm_stack_elem_t);
 }
 
-error_t vm_load_code(vm_t *vm, uint8_t *bytecode, size_t size) {
+vm_err_t vm_load_code(vm_t *vm, uint8_t *bytecode, size_t size) {
     vm_init(vm);
     cg_bytes(vm->cg, bytecode, size);
     uint32_t code_start = cg_header(vm->cg, bytecode, size);
     if (code_start == 0) {
-        return ERR_VM_LOAD_ERROR;
+        return VM_ERR_LOAD_ERROR;
     }
     vm->cg->code_start = code_start;
     vm->pc = vm->cg->bytecode + code_start;
     vm->bytecode_size = vm->cg->len;
-    return ERR_NO_ERROR;
+    return VM_ERR_NO_ERROR;
 }
 
 void vm_print_val(const vm_stack_elem_t *elem, char *string, uint8_t max_length) {
@@ -585,22 +584,22 @@ void vm_print_val(const vm_stack_elem_t *elem, char *string, uint8_t max_length)
         }
         case VM_STACK_ADDR_TYPE:
         default: {
-            string = "Unprintable type";
+            snprintf(string, max_length, "Unprintable type");
             break;
         }
     }
 }
 
-error_t vm_exec(vm_t *vm) {
+vm_err_t vm_exec(vm_t *vm) {
     print_dis(vm->cg);
     printf("Executing ...\n");
     return exec(vm);
 }
 
-error_t vm_interp(vm_t *vm, const char *input) {
+vm_err_t vm_interp(vm_t *vm, const char *input) {
     cg_t cg;
     cg_init(&cg);
     codegen(input, &cg);
 
-    return ERR_NO_ERROR;
+    return VM_ERR_NO_ERROR;
 }

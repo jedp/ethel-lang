@@ -7,14 +7,9 @@
 
 #define EMPTY_CONST_POOL (0)
 
-typedef struct {
-    obj_type_t type;
-    uint32_t length;
-} obj_details_t;
-
 static error_t vm_init_and_exec(vm_t *vm, uint8_t *bytes, uint16_t size) {
     vm_init(vm);
-    error_t err = ERR_NO_ERROR;
+    error_t err = VM_ERR_NO_ERROR;
 
     err |= vm_load_code(vm, bytes, size);
     err |= vm_exec(vm);
@@ -171,7 +166,7 @@ void test_vm_iconst(void) {
         VM_OP_RET};
 
     vm_stack_elem_t stack_top = {.type= VM_STACK_INT_TYPE, .as.intval= 42};
-    test_program_primitive(bytes, sizeof(bytes), stack_top, ERR_NO_ERROR);
+    test_program_primitive(bytes, sizeof(bytes), stack_top, VM_ERR_NO_ERROR);
 }
 
 void test_vm_iconst_negative(void) {
@@ -186,7 +181,7 @@ void test_vm_iconst_negative(void) {
         VM_OP_RET};
 
     vm_stack_elem_t stack_top = {.type= VM_STACK_INT_TYPE, .as.intval= -32768};
-    test_program_primitive(bytes, sizeof(bytes), stack_top, ERR_NO_ERROR);
+    test_program_primitive(bytes, sizeof(bytes), stack_top, VM_ERR_NO_ERROR);
 }
 
 void test_vm_sconst(void) {
@@ -200,7 +195,7 @@ void test_vm_sconst(void) {
     };
 
     vm_stack_elem_t stack_top = {.type= 0};
-    test_program_primitive(bytes, sizeof(bytes), stack_top, ERR_NO_ERROR);
+    test_program_primitive(bytes, sizeof(bytes), stack_top, VM_ERR_NO_ERROR);
 }
 
 void test_vm_stack_negate(void) {
@@ -215,7 +210,7 @@ void test_vm_stack_negate(void) {
     };
 
     vm_stack_elem_t stack_top = {.type= VM_STACK_INT_TYPE, .as.intval= -123};
-    test_program_primitive(bytes, sizeof(bytes), stack_top, ERR_NO_ERROR);
+    test_program_primitive(bytes, sizeof(bytes), stack_top, VM_ERR_NO_ERROR);
 }
 
 void test_vm_stack_add(void) {
@@ -234,7 +229,7 @@ void test_vm_stack_add(void) {
     };
 
     vm_stack_elem_t stack_top = {.type= VM_STACK_INT_TYPE, .as.intval= 579};
-    test_program_primitive(bytes, sizeof(bytes), stack_top, ERR_NO_ERROR);
+    test_program_primitive(bytes, sizeof(bytes), stack_top, VM_ERR_NO_ERROR);
 }
 
 void test_vm_stack_sub(void) {
@@ -253,7 +248,7 @@ void test_vm_stack_sub(void) {
     };
 
     vm_stack_elem_t stack_top = {.type= VM_STACK_INT_TYPE, .as.intval= 3};
-    test_program_primitive(bytes, sizeof(bytes), stack_top, ERR_NO_ERROR);
+    test_program_primitive(bytes, sizeof(bytes), stack_top, VM_ERR_NO_ERROR);
 }
 
 void test_vm_stack_mul(void) {
@@ -272,7 +267,7 @@ void test_vm_stack_mul(void) {
     };
 
     vm_stack_elem_t stack_top = {.type= VM_STACK_INT_TYPE, .as.intval= 15};
-    test_program_primitive(bytes, sizeof(bytes), stack_top, ERR_NO_ERROR);
+    test_program_primitive(bytes, sizeof(bytes), stack_top, VM_ERR_NO_ERROR);
 }
 
 void test_vm_stack_div(void) {
@@ -291,7 +286,7 @@ void test_vm_stack_div(void) {
     };
 
     vm_stack_elem_t stack_top = {.type= VM_STACK_INT_TYPE, .as.intval= 6};
-    test_program_primitive(bytes, sizeof(bytes), stack_top, ERR_NO_ERROR);
+    test_program_primitive(bytes, sizeof(bytes), stack_top, VM_ERR_NO_ERROR);
 }
 
 void test_vm_stack_rem(void) {
@@ -310,7 +305,7 @@ void test_vm_stack_rem(void) {
     };
 
     vm_stack_elem_t stack_top = {.type= VM_STACK_INT_TYPE, .as.intval= 2};
-    test_program_primitive(bytes, sizeof(bytes), stack_top, ERR_NO_ERROR);
+    test_program_primitive(bytes, sizeof(bytes), stack_top, VM_ERR_NO_ERROR);
 }
 
 void test_vm_stack_arith(void) {
@@ -339,7 +334,7 @@ void test_vm_stack_arith(void) {
     };
 
     vm_stack_elem_t stack_top = {.type= VM_STACK_INT_TYPE, .as.intval= 1};
-    test_program_primitive(bytes, sizeof(bytes), stack_top, ERR_NO_ERROR);
+    test_program_primitive(bytes, sizeof(bytes), stack_top, VM_ERR_NO_ERROR);
 }
 
 void test_vm_booleans(void) {
@@ -357,7 +352,7 @@ void test_vm_booleans(void) {
     };
 
     vm_stack_elem_t stack_top = {.type= VM_STACK_BOOL_TYPE, .as.intval= 1};
-    test_program_primitive(bytes, sizeof(bytes), stack_top, ERR_NO_ERROR);
+    test_program_primitive(bytes, sizeof(bytes), stack_top, VM_ERR_NO_ERROR);
 }
 
 void test_vm_non_boolean_booleans(void) {
@@ -376,7 +371,7 @@ void test_vm_non_boolean_booleans(void) {
     };
 
     vm_stack_elem_t stack_top = {.type= VM_STACK_BOOL_TYPE, .as.intval= 1};
-    test_program_primitive(bytes, sizeof(bytes), stack_top, ERR_NO_ERROR);
+    test_program_primitive(bytes, sizeof(bytes), stack_top, VM_ERR_NO_ERROR);
 }
 
 void test_vm_boolean_comparators(void) {
@@ -402,7 +397,7 @@ void test_vm_boolean_comparators(void) {
     };
 
     vm_stack_elem_t stack_top = {.type= VM_STACK_BOOL_TYPE, .as.boolval= 1};
-    test_program_primitive(bytes, sizeof(bytes), stack_top, ERR_NO_ERROR);
+    test_program_primitive(bytes, sizeof(bytes), stack_top, VM_ERR_NO_ERROR);
 }
 
 void test_vm_if_true_then(void) {
@@ -419,7 +414,7 @@ void test_vm_if_true_then(void) {
     };
 
     vm_stack_elem_t stack_top = {.type= VM_STACK_INT_TYPE, .as.intval= 4};
-    test_program_primitive(bytes, sizeof(bytes), stack_top, ERR_NO_ERROR);
+    test_program_primitive(bytes, sizeof(bytes), stack_top, VM_ERR_NO_ERROR);
 }
 
 void test_vm_if_false_then(void) {
@@ -437,7 +432,7 @@ void test_vm_if_false_then(void) {
     };
 
     vm_stack_elem_t stack_top = {.type= VM_STACK_INT_TYPE, .as.intval= -1};
-    test_program_primitive(bytes, sizeof(bytes), stack_top, ERR_NO_ERROR);
+    test_program_primitive(bytes, sizeof(bytes), stack_top, VM_ERR_NO_ERROR);
 }
 
 void test_vm_if_true_then_else(void) {
@@ -458,7 +453,7 @@ void test_vm_if_true_then_else(void) {
     };
 
     vm_stack_elem_t stack_top = {.type= VM_STACK_INT_TYPE, .as.intval= 3};
-    test_program_primitive(bytes, sizeof(bytes), stack_top, ERR_NO_ERROR);
+    test_program_primitive(bytes, sizeof(bytes), stack_top, VM_ERR_NO_ERROR);
 }
 
 void test_vm_if_false_then_else(void) {
@@ -479,7 +474,7 @@ void test_vm_if_false_then_else(void) {
     };
 
     vm_stack_elem_t stack_top = {.type= VM_STACK_INT_TYPE, .as.intval= 7};
-    test_program_primitive(bytes, sizeof(bytes), stack_top, ERR_NO_ERROR);
+    test_program_primitive(bytes, sizeof(bytes), stack_top, VM_ERR_NO_ERROR);
 }
 
 void test_vm_if_false_then_else_if_true(void) {
@@ -505,7 +500,7 @@ void test_vm_if_false_then_else_if_true(void) {
     };
 
     vm_stack_elem_t stack_top = {.type= VM_STACK_INT_TYPE, .as.intval= 7};
-    test_program_primitive(bytes, sizeof(bytes), stack_top, ERR_NO_ERROR);
+    test_program_primitive(bytes, sizeof(bytes), stack_top, VM_ERR_NO_ERROR);
 }
 
 void test_vm_binop_type_check(void) {
@@ -520,7 +515,7 @@ void test_vm_binop_type_check(void) {
     };
 
     vm_stack_elem_t stack_top = {.type= 0};
-    test_program_primitive(bytes, sizeof(bytes), stack_top, ERR_VM_RUNTIME_ERROR);
+    test_program_primitive(bytes, sizeof(bytes), stack_top, VM_ERR_RUNTIME_ERROR);
 }
 
 void test_vm_stack_load_imm(void) {
@@ -541,7 +536,7 @@ void test_vm_stack_load_imm(void) {
     };
 
     vm_stack_elem_t stack_top = {.type= VM_STACK_INT_TYPE, .as.intval= 42};
-    test_program_primitive(bytes, sizeof(bytes), stack_top, ERR_NO_ERROR);
+    test_program_primitive(bytes, sizeof(bytes), stack_top, VM_ERR_NO_ERROR);
 }
 
 void test_vm_stack_inc_dec(void) {
@@ -556,7 +551,7 @@ void test_vm_stack_inc_dec(void) {
     };
 
     vm_stack_elem_t stack_top = {.type= VM_STACK_INT_TYPE, .as.intval= 1};
-    test_program_primitive(bytes, sizeof(bytes), stack_top, ERR_NO_ERROR);
+    test_program_primitive(bytes, sizeof(bytes), stack_top, VM_ERR_NO_ERROR);
 }
 
 void test_vm_string_index(void) {
@@ -571,7 +566,7 @@ void test_vm_string_index(void) {
     };
 
     vm_stack_elem_t stack_top = {.type= VM_STACK_BYTE_TYPE, .as.byteval= 'e'};
-    test_program_primitive(bytes, sizeof(bytes), stack_top, ERR_NO_ERROR);
+    test_program_primitive(bytes, sizeof(bytes), stack_top, VM_ERR_NO_ERROR);
 }
 
 void test_vm_string_index_out_of_range(void) {
@@ -586,7 +581,7 @@ void test_vm_string_index_out_of_range(void) {
     };
 
     vm_stack_elem_t stack_top = {.type= 0};
-    test_program_primitive(bytes, sizeof(bytes), stack_top, ERR_VM_COMPILE_ERROR);
+    test_program_primitive(bytes, sizeof(bytes), stack_top, VM_ERR_COMPILE_ERROR);
 }
 
 void test_vm_string_negative_index(void) {
@@ -602,7 +597,7 @@ void test_vm_string_negative_index(void) {
     };
 
     vm_stack_elem_t stack_top = {.type= VM_STACK_BYTE_TYPE, .as.byteval= 'h'};
-    test_program_primitive(bytes, sizeof(bytes), stack_top, ERR_NO_ERROR);
+    test_program_primitive(bytes, sizeof(bytes), stack_top, VM_ERR_NO_ERROR);
 }
 
 void test_vm_string_negative_index_out_of_range(void) {
@@ -618,7 +613,7 @@ void test_vm_string_negative_index_out_of_range(void) {
     };
 
     vm_stack_elem_t stack_top = {.type= 0};
-    test_program_primitive(bytes, sizeof(bytes), stack_top, ERR_VM_COMPILE_ERROR);
+    test_program_primitive(bytes, sizeof(bytes), stack_top, VM_ERR_COMPILE_ERROR);
 }
 
 void test_vm_byte_array_alloc(void) {
@@ -630,7 +625,7 @@ void test_vm_byte_array_alloc(void) {
         VM_OP_RET,
     };
 
-    test_program_object(bytes, sizeof(bytes), OBJ_TYPE_BYTEARRAY, ERR_NO_ERROR);
+    test_program_object(bytes, sizeof(bytes), OBJ_TYPE_BYTEARRAY, VM_ERR_NO_ERROR);
 }
 
 void test_vm_byte_array(void) {
@@ -642,7 +637,7 @@ void test_vm_byte_array(void) {
         VM_OP_RET,
     };
 
-    test_program_object(bytes, sizeof(bytes), OBJ_TYPE_BYTEARRAY, ERR_NO_ERROR);
+    test_program_object(bytes, sizeof(bytes), OBJ_TYPE_BYTEARRAY, VM_ERR_NO_ERROR);
 }
 
 void test_vm_print_int(void) {
@@ -667,14 +662,14 @@ void test_vm_print_int(void) {
     };
 
     vm_stack_elem_t no_stack = {.type= 0};
-    test_program_primitive(bytes, sizeof(bytes), no_stack, ERR_NO_ERROR);
+    test_program_primitive(bytes, sizeof(bytes), no_stack, VM_ERR_NO_ERROR);
 }
 
 void test_vm_bytearray_index(void) {
     uint8_t bytes[] = {
         'E', 'T', 'H', 'L', 0, 1,
         1,
-        CONST_BYTEARRAY,  4, 0, 0, 0, 10, 11, 12, 13,
+        CONST_BYTEARRAY, 4, 0, 0, 0, 10, 11, 12, 13,
         VM_OP_ACONST, 1,
         VM_OP_IPUSH, 3,
         VM_OP_ALOAD,
@@ -682,14 +677,14 @@ void test_vm_bytearray_index(void) {
     };
 
     vm_stack_elem_t stack_top = {.type= VM_STACK_BYTE_TYPE, .as.byteval= 13};
-    test_program_primitive(bytes, sizeof(bytes), stack_top, ERR_NO_ERROR);
+    test_program_primitive(bytes, sizeof(bytes), stack_top, VM_ERR_NO_ERROR);
 }
 
 void test_vm_bytearray_negative_index(void) {
     uint8_t bytes[] = {
         'E', 'T', 'H', 'L', 0, 1,
         1,
-        CONST_BYTEARRAY,  4, 0, 0, 0, 10, 11, 12, 13,
+        CONST_BYTEARRAY, 4, 0, 0, 0, 10, 11, 12, 13,
         VM_OP_ACONST, 1,
         VM_OP_IPUSH, -3,
         VM_OP_ALOAD,
@@ -697,7 +692,7 @@ void test_vm_bytearray_negative_index(void) {
     };
 
     vm_stack_elem_t stack_top = {.type= VM_STACK_BYTE_TYPE, .as.byteval= 11};
-    test_program_primitive(bytes, sizeof(bytes), stack_top, ERR_NO_ERROR);
+    test_program_primitive(bytes, sizeof(bytes), stack_top, VM_ERR_NO_ERROR);
 }
 
 void test_vm(void) {
