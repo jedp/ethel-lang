@@ -1,6 +1,7 @@
 #pragma once
 
 #include <stdbool.h>
+#include "vm_err.h"
 #include "../comp/cg.h"
 
 #define VM_DATA_STACK_SIZE (64)
@@ -35,24 +36,6 @@ static const char *vm_stack_elem_type_names[] = {
     [VM_STACK_ADDR_TYPE] = "Address",
 };
 
-typedef enum {
-    VM_ERR_NO_ERROR,
-    VM_ERR_COMPILE_ERROR,
-    VM_ERR_LOAD_ERROR,
-    VM_ERR_RUNTIME_ERROR,
-    VM_ERR_STACK_OVERFLOW,
-    VM_ERR_OUT_OF_MEMORY,
-} vm_err_t;
-
-static const char *vm_err_names[] = {
-    [VM_ERR_NO_ERROR] = "VM OK",
-    [VM_ERR_COMPILE_ERROR]= "Compile error",
-    [VM_ERR_LOAD_ERROR] = "Error loading bytecode",
-    [VM_ERR_RUNTIME_ERROR]= "Runtime error",
-    [VM_ERR_STACK_OVERFLOW]= "VM Stack Overflow",
-    [VM_ERR_OUT_OF_MEMORY] = "Out of memory",
-};
-
 #define TYPE_IS_NUMERIC(t) ((t == VM_STACK_BYTE_TYPE || t == VM_STACK_INT_TYPE || t == VM_STACK_FLOAT_TYPE))
 
 /*
@@ -80,48 +63,26 @@ typedef struct vm_stack_t {
 
 typedef struct vm_t {
     uint32_t bytecode_size;
-    // pc is a pointer into the cg->bytecode bytearray.
-    uint8_t *pc;
-    cg_t *cg;
+    uint32_t code_start;
+    uint8_t *bytecode;
+    map_t *consts;
     vm_stack_t *stack;
+    // pc is a pointer into the bytecode bytearray.
+    uint8_t *pc;
 } vm_t;
 
 void runtime_error(vm_t *vm, const char *fmt, ...);
 
 bool runtime_check(vm_t *vm, bool condition, const char *message);
 
-vm_err_t vm_init(vm_t *vm);
+map_err_t vm_put_const(vm_t *vm, val_t v, uint8_t *k);
 
-vm_err_t vm_free(vm_t *vm);
+map_err_t vm_get_const(vm_t *vm, uint8_t k, val_t *v);
 
 vm_err_t vm_stack_reset(vm_t *vm);
 
-vm_stack_elem_t vm_stack_elem_new(void);
+vm_err_t vm_init(vm_t *vm, const uint8_t *bytes, uint32_t length);
 
-vm_err_t vm_stack_push(vm_t *vm, vm_stack_elem_t *e);
-
-vm_err_t vm_stack_push_byte(vm_t *vm, uint8_t b);
-
-vm_err_t vm_stack_push_byte_as_int32(vm_t *vm, uint8_t b);
-
-vm_err_t vm_stack_push_int32(vm_t *vm, int i);
-
-vm_err_t vm_stack_push_boolean(vm_t *vm, bool z);
-
-vm_err_t vm_stack_push_obj(vm_t *vm, obj_t *obj);
-
-vm_err_t vm_stack_push_nil(vm_t *vm);
-
-vm_stack_elem_t *vm_stack_peek(vm_t *vm);
-
-vm_stack_elem_t *vm_stack_pop(vm_t *vm);
-
-uint8_t vm_stack_size(vm_t *vm);
-
-vm_err_t vm_load_code(vm_t *vm, uint8_t *bytes, size_t size);
-
-void vm_print_val(const vm_stack_elem_t *elem, char *string, uint8_t max_length);
+vm_err_t vm_free(vm_t *vm);
 
 vm_err_t vm_exec(vm_t *vm);
-
-vm_err_t vm_interp(vm_t *vm, const char *input);

@@ -50,11 +50,15 @@ set(OBJ_OBJS
         ${CMAKE_SRC_DIR}/obj/obj_arr.c
 )
 
+set(DIS_OBJS
+        ${CMAKE_SRC_DIR}/dis/dis.c
+)
+
 set(COMP_OBJS
         ${OBJ_OBJS}
+        ${DIS_OBJS}
         ${CMAKE_SRC_DIR}/comp/cg.c
         ${CMAKE_SRC_DIR}/comp/comp.c
-        ${CMAKE_SRC_DIR}/comp/dis.c
         ${CMAKE_SRC_DIR}/comp/lex.c
 )
 
@@ -67,6 +71,8 @@ set(ER_OBJS
 )
 
 set(VM_OBJS
+        ${CMAKE_SRC_DIR}/vm/ert.c
+        ${CMAKE_SRC_DIR}/vm/load.c
         ${CMAKE_SRC_DIR}/vm/vm.c
 )
 

@@ -1,46 +1,59 @@
 #include <stdio.h>
 #include <stdlib.h>
 
-#include "cg.h"
-#include "comp.h"
-#include "../common/op.h"
+#include "op.h"
 #include "dis.h"
 #include "val.h"
+#include "../comp/comp.h"
+#include "../mem/mem.h"
+
+static map_err_t get_const(map_t *consts, uint8_t k, val_t *v) {
+    val_t *ek = (val_t *) mem_alloc(sizeof(val_t));
+    ek->type = VAL_TYPE_UINT;
+    ek->as.uintval = k;
+    val_t *found = map_get(consts, ek);
+    if (found == NULL) {
+        return MAP_NOT_FOUND;
+    }
+    *v = *found;
+
+    return MAP_OK;
+}
 
 static uint32_t print_op(const char *name, uint32_t offset) {
     printf("%-12s\n", name);
     return offset + 1;
 }
 
-static uint32_t print_imm(const char *name, cg_t *cg, uint32_t offset) {
+static uint32_t print_imm(const char *name, uint32_t offset) {
     return print_op(name, offset);
 }
 
-static uint32_t print_push(const char *name, cg_t *cg, uint32_t offset) {
-    printf("%-12s [0x%x]\n", name, cg->bytecode[offset + 1]);
+static uint32_t print_push(dis_data_t *dis, const char *name, uint32_t offset) {
+    printf("%-12s [0x%x]\n", name, dis->bytecode[offset + 1]);
     return offset + 2;
 }
 
-static uint32_t print_loadi(const char *name, cg_t *cg, uint32_t offset) {
+static uint32_t print_loadi(dis_data_t *dis, const char *name, uint32_t offset) {
     val_t v;
-    cg_get_const(cg, cg->bytecode[offset + 1], &v);
-    printf("%-12s #%02x [%d]\n", name, cg->bytecode[offset + 1], v.as.intval);
+    get_const(dis->consts, dis->bytecode[offset + 1], &v);
+    printf("%-12s #%02x [%d]\n", name, dis->bytecode[offset + 1], v.as.intval);
     return offset + 2;
 }
 
-static uint32_t print_loads(const char *name, cg_t *cg, uint32_t offset) {
+static uint32_t print_loads(dis_data_t *dis, const char *name, uint32_t offset) {
     val_t v;
-    cg_get_const(cg, cg->bytecode[offset + 1], &v);
-    printf("%-12s #%x [%s]\n", name, cg->bytecode[offset + 1], obj_str_to_c(AS_OBJ_STR(&v)));
+    get_const(dis->consts, dis->bytecode[offset + 1], &v);
+    printf("%-12s #%x [%s]\n", name, dis->bytecode[offset + 1], obj_str_to_c(AS_OBJ_STR(&v)));
     return offset + 2;
 }
 
-static uint32_t print_loada(const char *name, cg_t *cg, uint32_t offset) {
+static uint32_t print_loada(dis_data_t *dis, const char *name, uint32_t offset) {
     uint8_t truncate_after = 4;
     val_t v;
-    cg_get_const(cg, cg->bytecode[offset + 1], &v);
+    get_const(dis->consts, dis->bytecode[offset + 1], &v);
     obj_arr_t *obj_arr = AS_OBJ_ARR(&v);
-    printf("%-12s #%x (%d){", name, cg->bytecode[offset + 1], obj_arr->length);
+    printf("%-12s #%x (%d){", name, dis->bytecode[offset + 1], obj_arr->length);
     uint8_t last = (truncate_after < obj_arr->length) ? truncate_after : obj_arr->length;
     bool is_truncated = last != obj_arr->length;
     for (uint8_t i = 0; i < last; i++) {
@@ -57,36 +70,36 @@ static uint32_t print_loada(const char *name, cg_t *cg, uint32_t offset) {
     return offset + 2;
 }
 
-static uint32_t print_jump(const char *name, cg_t *cg, uint32_t offset) {
+static uint32_t print_jump(dis_data_t *dis, const char *name, uint32_t offset) {
     printf("%-12s @0x%02x%02x\n",
            name,
-           cg->bytecode[offset + 2],
-           cg->bytecode[offset + 1]
+           dis->bytecode[offset + 2],
+           dis->bytecode[offset + 1]
     );
     // 16 bit addresses, so skip two bytes.
     return offset + 3;
 }
 
-uint32_t print_dis_byte(cg_t *cg, uint32_t offset) {
-    printf("%04x %02x ", offset, cg->bytecode[offset]);
+uint32_t print_dis_byte(dis_data_t *dis, uint32_t offset) {
+    printf("%04x %02x ", offset, dis->bytecode[offset]);
 
-    uint8_t op = cg->bytecode[offset];
+    uint8_t op = dis->bytecode[offset];
     switch (op) {
         case VM_OP_IPUSH_1N:
         case VM_OP_IPUSH_0:
         case VM_OP_IPUSH_1:
         case VM_OP_ZPUSH_F:
         case VM_OP_ZPUSH_T:
-            return print_imm(op_names[op], cg, offset);
+            return print_imm(op_names[op], offset);
         case VM_OP_BPUSH:
         case VM_OP_IPUSH:
-            return print_push(op_names[op], cg, offset);
+            return print_push(dis, op_names[op], offset);
         case VM_OP_ICONST:
-            return print_loadi(op_names[op], cg, offset);
+            return print_loadi(dis, op_names[op], offset);
         case VM_OP_SCONST:
-            return print_loads(op_names[op], cg, offset);
+            return print_loads(dis, op_names[op], offset);
         case VM_OP_ACONST:
-            return print_loada(op_names[op], cg, offset);
+            return print_loada(dis, op_names[op], offset);
         case VM_OP_AALLOC:
         case VM_OP_ALOAD:
         case VM_OP_PRINT:
@@ -120,37 +133,37 @@ uint32_t print_dis_byte(cg_t *cg, uint32_t offset) {
         case VM_OP_JEQ:
         case VM_OP_JZ:
         case VM_OP_JMP:
-            return print_jump(op_names[op], cg, offset);
+            return print_jump(dis, op_names[op], offset);
         default:
             printf("unknown op %d\n", op);
             return print_op("**UNKNOWN**", offset);
     }
 }
 
-static void print_constants(cg_t *cg) {
+static void print_constants(dis_data_t *dis) {
     uint8_t offset = 6;
-    uint8_t num_consts = cg->bytecode[offset++];
+    uint8_t num_consts = dis->bytecode[offset++];
     printf("= Constants: %d\n", num_consts);
 
     // 1-indexed constants.
     for (uint8_t i = 1; i <= num_consts; i++) {
-        uint8_t type = cg->bytecode[offset++];
+        uint8_t type = dis->bytecode[offset++];
         printf("#%02d ", i);
         switch (type) {
             case CONST_INT: {
-                uint8_t int_len = cg->bytecode[offset++];
+                uint8_t int_len = dis->bytecode[offset++];
                 printf("INT%d  ", (int_len * 8));
                 for (int j = 0; j < int_len; j++) {
-                    printf("0x%02x ", cg->bytecode[offset++]);
+                    printf("0x%02x ", dis->bytecode[offset++]);
                 }
                 printf("\n");
                 break;
             }
             case CONST_STRING : {
-                uint8_t str_len = cg->bytecode[offset++];
+                uint8_t str_len = dis->bytecode[offset++];
                 printf("STR  \"");
                 for (uint32_t j = 0; j < str_len; j++) {
-                    uint8_t c = cg->bytecode[offset++];
+                    uint8_t c = dis->bytecode[offset++];
                     printf("%c", (c >= 32 && c <= 126) ? (char) c : '.');
                 }
                 printf("\"\n");
@@ -159,13 +172,13 @@ static void print_constants(cg_t *cg) {
             case CONST_BYTEARRAY: {
                 // Four-byte array length, little-endian.
                 uint32_t arr_len = 0;
-                arr_len |= cg->bytecode[offset++];
-                arr_len |= cg->bytecode[offset++] << 8;
-                arr_len |= cg->bytecode[offset++] << 16;
-                arr_len |= cg->bytecode[offset++] << 24;
+                arr_len |= dis->bytecode[offset++];
+                arr_len |= dis->bytecode[offset++] << 8;
+                arr_len |= dis->bytecode[offset++] << 16;
+                arr_len |= dis->bytecode[offset++] << 24;
                 printf("ARR(%d) ", arr_len);
                 for (uint32_t j = 0; j < arr_len; j++) {
-                    printf(" %d", cg->bytecode[offset++]);
+                    printf(" %d", dis->bytecode[offset++]);
                 }
                 printf("\n");
                 break;
@@ -178,25 +191,25 @@ static void print_constants(cg_t *cg) {
     }
 }
 
-static void print_header(cg_t *cg) {
-    if (cg->code_start > 0) {
+static void print_header(dis_data_t *dis) {
+    if (dis->code_start > 0) {
         printf("= Header %c%c%c%c v%d.%d\n",
-               cg->bytecode[0], cg->bytecode[1], cg->bytecode[2], cg->bytecode[3],
-               cg->bytecode[4], cg->bytecode[5]
+               dis->bytecode[0], dis->bytecode[1], dis->bytecode[2], dis->bytecode[3],
+               dis->bytecode[4], dis->bytecode[5]
         );
 
-        print_constants(cg);
+        print_constants(dis);
     }
 }
 
-void print_dis(cg_t *cg) {
+void print_dis(dis_data_t *dis) {
     printf("\n== Disassembly ==\n");
 
-    print_header(cg);
+    print_header(dis);
 
-    printf("= Code (start 0x%x, end 0x%x)\n", cg->code_start, cg->len - 1);
+    printf("= Code (start 0x%x, end 0x%x)\n", dis->code_start, dis->length - 1);
     printf("%8s %s\n", "Offset", "Instruction");
-    for (uint32_t offset = cg->code_start; offset < cg->len;) {
-        offset = print_dis_byte(cg, offset);
+    for (uint32_t offset = dis->code_start; offset < dis->length;) {
+        offset = print_dis_byte(dis, offset);
     }
 }

@@ -1,7 +1,7 @@
 #include "unity/unity.h"
 #include "test_dis.h"
 
-#include "../src/comp/dis.h"
+#include "../src/dis/dis.h"
 #include "../src/comp/comp.h"
 #include "../src/common/op.h"
 
@@ -29,7 +29,14 @@ void test_print_dis(void) {
     cg_bytes(&cg, bytecode, sizeof(bytecode));
     cg.code_start = 17;
 
-    print_dis(&cg);
+    dis_data_t dis = {
+        .bytecode = cg.bytecode,
+        .consts = cg.consts,
+        .code_start = cg.code_start,
+        .length = cg.len
+    };
+
+    print_dis(&dis);
 
     cg_free(&cg);
 }

@@ -1,20 +1,22 @@
 #include "unity/unity.h"
 #include "test_vm.h"
-#include "../src/comp/cg.h"
 #include "../src/comp/comp.h"
 #include "../src/common/op.h"
 #include "../src/vm/vm.h"
+#include "../src/vm/ert.h"
+#include "../src/vm/load.h"
 
 #define EMPTY_CONST_POOL (0)
 
+static uint8_t bytecode_nop[] = {
+    'E', 'T', 'H', 'L', 0, 1,
+    EMPTY_CONST_POOL,
+    VM_OP_RET
+};
+
 static error_t vm_init_and_exec(vm_t *vm, uint8_t *bytes, uint16_t size) {
-    vm_init(vm);
-    error_t err = VM_ERR_NO_ERROR;
-
-    err |= vm_load_code(vm, bytes, size);
-    err |= vm_exec(vm);
-
-    return err;
+    vm_load_bytecode(vm, bytes, size);
+    return vm_exec(vm);
 }
 
 static void test_program_object(uint8_t *bytes, uint16_t size,
@@ -59,27 +61,33 @@ static void test_program_primitive(uint8_t *bytes, uint16_t size,
 }
 
 void test_vm_init(void) {
-    vm_t vm;
-    vm_init(&vm);
+    uint8_t bytecode[] = {
+        'E', 'T', 'H', 'L', 0, 1,
+        EMPTY_CONST_POOL,
+        VM_OP_NOP,
+        VM_OP_RET
+    };
 
-    TEST_ASSERT_EQUAL(vm.bytecode_size, vm.cg->len);
-    TEST_ASSERT_EQUAL_PTR(vm.pc, vm.cg->bytecode);
-    TEST_ASSERT_NULL(vm.cg->bytecode);
+    vm_t vm;
+    vm_load_bytecode(&vm, bytecode, sizeof(bytecode));
+
+    TEST_ASSERT_EQUAL(vm.bytecode_size, sizeof(bytecode));
+    TEST_ASSERT_EQUAL(vm.code_start, 7);
+    TEST_ASSERT_EQUAL_PTR(vm.pc, vm.bytecode + vm.code_start);
 
     vm_free(&vm);
 }
 
 void test_vm_load_code(void) {
-    vm_t vm;
-    vm_init(&vm);
-
     uint8_t bytes[] = {
         'E', 'T', 'H', 'L', 0, 1,
         EMPTY_CONST_POOL,
         VM_OP_NOP,
-        VM_OP_RET};
+        VM_OP_RET
+    };
 
-    vm_load_code(&vm, bytes, sizeof(bytes));
+    vm_t vm;
+    vm_load_bytecode(&vm, bytes, sizeof(bytes));
 
     TEST_ASSERT_EQUAL(VM_OP_NOP, *vm.pc++);
     TEST_ASSERT_EQUAL(VM_OP_RET, *vm.pc);
@@ -89,7 +97,7 @@ void test_vm_load_code(void) {
 
 void test_vm_stack_push_byte(void) {
     vm_t vm;
-    vm_init(&vm);
+    vm_init(&vm, bytecode_nop, sizeof(bytecode_nop));
 
     TEST_ASSERT_EQUAL_PTR(vm.stack->buf, vm.stack->top);
 
@@ -106,7 +114,7 @@ void test_vm_stack_push_byte(void) {
 
 void test_vm_stack_push_int(void) {
     vm_t vm;
-    vm_init(&vm);
+    vm_init(&vm, bytecode_nop, sizeof(bytecode_nop));
 
     TEST_ASSERT_EQUAL_PTR(vm.stack->buf, vm.stack->top);
 
@@ -123,7 +131,7 @@ void test_vm_stack_push_int(void) {
 
 void test_vm_stack_push_byte_as_int32(void) {
     vm_t vm;
-    vm_init(&vm);
+    vm_init(&vm, bytecode_nop, sizeof(bytecode_nop));
 
     TEST_ASSERT_EQUAL_PTR(vm.stack->buf, vm.stack->top);
 
@@ -135,7 +143,7 @@ void test_vm_stack_push_byte_as_int32(void) {
 
 void test_vm_stack_push(void) {
     vm_t vm;
-    vm_init(&vm);
+    vm_init(&vm, bytecode_nop, sizeof(bytecode_nop));
 
     vm_stack_elem_t i = {.type = VM_STACK_INT_TYPE, .as.intval = 42};
     vm_stack_elem_t f = {.type = VM_STACK_FLOAT_TYPE, .as.floatval = 2.34f};
@@ -163,7 +171,8 @@ void test_vm_iconst(void) {
         // Code
         VM_OP_NOP,
         VM_OP_ICONST, 1,
-        VM_OP_RET};
+        VM_OP_RET
+    };
 
     vm_stack_elem_t stack_top = {.type= VM_STACK_INT_TYPE, .as.intval= 42};
     test_program_primitive(bytes, sizeof(bytes), stack_top, VM_ERR_NO_ERROR);

@@ -4,11 +4,11 @@
 #include <stdio.h>
 #include <stdarg.h>
 #include "../mem/mem.h"
-#include "../common/op.h"
-#include "../common/ptr.h"
+#include "op.h"
+#include "ptr.h"
 #include "cg.h"
 #include "comp.h"
-#include "dis.h"
+#include "../dis/dis.h"
 #include "lex.h"
 #include "preced.h"
 #include "val.h"
@@ -638,7 +638,14 @@ comp_err_t codegen(const char *input, cg_t *cg) {
     eat(&parser, TAG_EOF);
     emit_byte(&parser, VM_OP_RET);
 
-    print_dis(parser.cg);
+    dis_data_t dis = {
+        .consts = cg->consts,
+        .bytecode = cg->bytecode,
+        .code_start = cg->code_start,
+        .length = cg->len
+    };
+
+    print_dis(&dis);
 
     return parser.err;
 }
