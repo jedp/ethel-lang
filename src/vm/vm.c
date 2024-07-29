@@ -35,8 +35,8 @@ vm_err_t vm_stack_reset(vm_t *vm) {
     return VM_ERR_NO_ERROR;
 }
 
-map_err_t vm_put_const(vm_t *vm, val_t v, uint8_t *k) {
-    uint32_t next_k = vm->consts->buckets->nelems + 1;
+map_err_t vm_map_put(map_t *map, val_t v, uint8_t *k) {
+    uint32_t next_k = map->buckets->nelems + 1;
     if (next_k > UINT8_MAX) {
         return MAP_TOO_MANY_ITEMS;
     }
@@ -44,18 +44,18 @@ map_err_t vm_put_const(vm_t *vm, val_t v, uint8_t *k) {
     val_t *ek = (val_t *) mem_alloc(sizeof(val_t));
     ek->type = VAL_TYPE_UINT;
     ek->as.uintval = next_k;
-    map_err_t err = map_put(vm->consts, ek, &v);
+    map_err_t err = map_put(map, ek, &v);
 
     *k = (uint8_t) next_k;
 
     return err;
 }
 
-map_err_t vm_get_const(vm_t *vm, uint8_t k, val_t *v) {
+map_err_t vm_map_get(map_t *map, uint8_t k, val_t *v) {
     val_t *ek = (val_t *) mem_alloc(sizeof(val_t));
     ek->type = VAL_TYPE_UINT;
     ek->as.uintval = k;
-    val_t *found = map_get(vm->consts, ek);
+    val_t *found = map_get(map, ek);
     if (found == NULL) {
         return MAP_NOT_FOUND;
     }

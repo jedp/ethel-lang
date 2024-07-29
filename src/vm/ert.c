@@ -279,7 +279,7 @@ static vm_err_t exec(vm_t *vm) {
             case VM_OP_ICONST: {
                 val_t v;
                 uint8_t k = READ_BYTE();
-                vm_get_const(vm, k, &v);
+                vm_map_get(vm->consts, k, &v);
                 vm_stack_push_int32(vm, v.as.intval);
                 break;
             }
@@ -287,7 +287,7 @@ static vm_err_t exec(vm_t *vm) {
             case VM_OP_ACONST: {
                 val_t v;
                 uint8_t k = READ_BYTE();
-                vm_get_const(vm, k, &v);
+                vm_map_get(vm->consts, k, &v);
                 vm_stack_push_obj(vm, v.as.objval);
                 break;
             }

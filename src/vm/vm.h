@@ -75,9 +75,9 @@ void runtime_error(vm_t *vm, const char *fmt, ...);
 
 bool runtime_check(vm_t *vm, bool condition, const char *message);
 
-map_err_t vm_put_const(vm_t *vm, val_t v, uint8_t *k);
+map_err_t vm_map_put(map_t *map, val_t v, uint8_t *k);
 
-map_err_t vm_get_const(vm_t *vm, uint8_t k, val_t *v);
+map_err_t vm_map_get(map_t *map, uint8_t k, val_t *v);
 
 vm_err_t vm_stack_reset(vm_t *vm);
 

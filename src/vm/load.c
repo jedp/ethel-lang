@@ -52,8 +52,7 @@ static uint32_t vm_interp_header(vm_t *vm) {
                 }
                 v.type = VAL_TYPE_INT;
                 v.as.intval = (int) uintval;
-                printf("PUT CONST %d\n", uintval);
-                vm_put_const(vm, v, &k);
+                vm_map_put(vm->consts, v, &k);
                 break;
             }
             case CONST_STRING: {
@@ -61,8 +60,7 @@ static uint32_t vm_interp_header(vm_t *vm) {
                 uint8_t strlen = bytes[offset++];
                 v.type = VAL_TYPE_OBJ;
                 v.as.objval = (obj_t *) obj_str_new((const char *) &bytes[offset], strlen);
-                printf("PUT CONST %s\n", obj_str_to_c((obj_str_t *) v.as.objval));
-                vm_put_const(vm, v, &k);
+                vm_map_put(vm->consts, v, &k);
                 offset += strlen;
                 break;
             }
@@ -75,7 +73,7 @@ static uint32_t vm_interp_header(vm_t *vm) {
                 arrlen |= (bytes[offset++] << 24) & 0xff000000;
                 v.type = VAL_TYPE_OBJ;
                 v.as.objval = (obj_t *) obj_arr_new((const uint8_t *) &bytes[offset], arrlen);
-                vm_put_const(vm, v, &k);
+                vm_map_put(vm->consts, v, &k);
                 offset += arrlen;
                 break;
             }
