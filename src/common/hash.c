@@ -2,11 +2,11 @@
 #include <stdlib.h>
 #include "hash.h"
 
-static uint32_t obj_str_hash(obj_str_t *obj_str) {
+static uint32_t obj_bytearray_hash(const uint8_t *bytes, uint32_t length) {
     uint32_t temp;
     uint8_t b;
 
-    if (obj_str->length == 0) {
+    if (length == 0) {
         return 0;
     }
 
@@ -16,8 +16,8 @@ static uint32_t obj_str_hash(obj_str_t *obj_str) {
      */
     temp = FNV32Basis;
     size_t i = 0;
-    while (i < obj_str->length) {
-        b = obj_str->chars[i];
+    while (i < length) {
+        b = bytes[i];
         temp = FNV32Prime * (temp ^ b);
         i++;
     }
@@ -25,12 +25,24 @@ static uint32_t obj_str_hash(obj_str_t *obj_str) {
     return temp;
 }
 
+static uint32_t obj_str_hash(obj_str_t *obj_str) {
+    return obj_bytearray_hash((const uint8_t *) obj_str->chars, obj_str->length);
+}
+
+static uint32_t obj_arr_hash(obj_arr_t *obj_arr) {
+    return obj_bytearray_hash((const uint8_t *) obj_arr->buf, obj_arr->length);
+}
+
 static uint32_t obj_hash(obj_t *obj) {
-    if (obj->type == OBJ_TYPE_STRING) {
-        return obj_str_hash((obj_str_t *) obj);
+    switch (obj->type) {
+        case OBJ_TYPE_STRING:
+            return obj_str_hash((obj_str_t *) obj);
+        case OBJ_TYPE_BYTEARRAY:
+            return obj_arr_hash((obj_arr_t *) obj);
+        default:
+            printf("No hash function for obj type %d\n", (uint32_t) obj->type);
+            exit(1);
     }
-    printf("No hash function for obj type %d\n", (uint32_t) obj->type);
-    exit(1);
 }
 
 uint32_t val_hash(val_t *val) {
@@ -45,6 +57,8 @@ uint32_t val_hash(val_t *val) {
             return (uint32_t) val->as.intval;
         case VAL_TYPE_UINT:
             return val->as.uintval;
+        case VAL_TYPE_FLOAT:
+            return val->as.floatval;
         case VAL_TYPE_OBJ:
             return obj_hash(AS_OBJ(val));
         default:

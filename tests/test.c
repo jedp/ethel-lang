@@ -1,4 +1,5 @@
 #include "unity/unity.h"
+#include "test_hash.h"
 #include "test_ptr.h"
 #include "test_lex.h"
 #include "test_cg.h"
@@ -17,6 +18,7 @@ int main(int argc, char **argv) {
     UNITY_BEGIN();
 
     test_ptr();
+    test_hash();
     test_lex();
     test_dis();
     test_map();

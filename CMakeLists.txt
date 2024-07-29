@@ -79,6 +79,7 @@ set(VM_OBJS
 set(TEST_OBJS
         ${CMAKE_TESTS_DIR}/unity/unity.c
         ${CMAKE_TESTS_DIR}/test_ptr.c
+        ${CMAKE_TESTS_DIR}/test_hash.c
         ${CMAKE_TESTS_DIR}/test_cg.c
         ${CMAKE_TESTS_DIR}/test_comp.c
         ${CMAKE_TESTS_DIR}/test_dis.c
