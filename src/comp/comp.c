@@ -321,16 +321,58 @@ static void parse_array_alloc(parser_t *parser) {
 
 static void parse_array_decl(parser_t *parser) {
     uint32_t count = 0;
-    uint32_t start_pos = parser->cg->len;
     obj_arr_t *obj_arr = obj_arr_new(NULL, 0);
 
-    // This is pretty gross, but we're going to eval all the expressions,
-    // and then parse them ourselves, shoving each byte into the array.
+    // Walk through the following sequence of tokens.
+    // We can do this because complex expressions are not allowed in array
+    // initializers, only primitive values that can be turned into bytes.
     if (!check_token_tag(parser, TAG_RSQUIGGLY) &&
         !check_token_tag(parser, TAG_EOF)) {
         do {
+            switch (parser->curr.tag) {
+                case TAG_TRUE:
+                    obj_arr_append(obj_arr, 1);
+                    break;
+                case TAG_FALSE:
+                    obj_arr_append(obj_arr, 0);
+                    break;
+                case TAG_HEX: {
+                    int val = (int) strtol(parser->curr.start, NULL, 16);
+                    if (val & ~0xff) {
+                        parser_error(parser, COMP_ERR_NON_BYTE_IN_BYTEARRAY,
+                                     "Hex value too large to fit in byte: 0x%x", val);
+                    }
+                    obj_arr_append(obj_arr, val & 0xff);
+                    break;
+                }
+                case TAG_BIN: {
+                    int val = (int) strtol(parser->curr.start + 2, NULL, 2);
+                    if (val & ~0xff) {
+                        parser_error(parser, COMP_ERR_NON_BYTE_IN_BYTEARRAY,
+                                     "Bin value too large to fit in byte: 0b%b", val);
+                    }
+                    obj_arr_append(obj_arr, val & 0xff);
+                    break;
+                }
+                case TAG_CHAR:
+                    obj_arr_append(obj_arr, (uint8_t) *(parser->curr.start + 1));
+                    break;
+                case TAG_INT: {
+                    int val = (int) strtol(parser->curr.start, NULL, 10);
+                    if (val & ~0xff) {
+                        parser_error(parser, COMP_ERR_NON_BYTE_IN_BYTEARRAY,
+                                     "Int value too large to fit in byte: %d", val);
+                    }
+                    obj_arr_append(obj_arr, val & 0xff);
+                    break;
+                }
+                default:
+                    parser_error(parser, COMP_ERR_UNEXPECTED_TOKEN,
+                                 "Bad token type in bytearray constructor: %s", tag_names[parser->curr.tag]);
+                    break;
+            }
 
-            parse_expr_by_precedence(parser, PRECED_LOGICAL_OR);
+            advance(parser);
 
             if (count > BYTEARRAY_MAX) {
                 parser_error(parser, COMP_ERR_TOO_MANY_ELEMENTS,
@@ -345,37 +387,6 @@ static void parse_array_decl(parser_t *parser) {
             // TODO Check that each expr evaluated to a single byte.
         } while (token_tag_match_and_consume(parser, TAG_COMMA));
     }
-
-    // Bytes are all present in bytecode.
-    // Steal them and put them in a bytearray.
-    uint32_t end_pos = parser->cg->len;
-
-    // Avert your eyes.
-    // Parse what we just compiled.
-    uint32_t offset = start_pos;
-    uint8_t code;
-    while (offset < end_pos) {
-        switch (code = parser->cg->bytecode[offset++]) {
-            case VM_OP_BPUSH:
-            case VM_OP_IPUSH:
-                obj_arr_append(obj_arr, parser->cg->bytecode[offset++]);
-                break;
-            case VM_OP_IPUSH_0:
-                obj_arr_append(obj_arr, 0);
-                break;
-            case VM_OP_IPUSH_1:
-                obj_arr_append(obj_arr, 1);
-                break;
-            default:
-                // This will not report the location accurately, since we're modifying the output.
-                parser_error(parser, COMP_ERR_NON_BYTE_IN_BYTEARRAY,
-                             "Invalid bytecode %s constructing byte array", op_names[code < VM_OP_MAX ? code : 0]);
-                offset = end_pos;
-                break;
-        }
-    }
-    // Back up to the array
-    parser->cg->len = start_pos;
 
     emit_const_obj_arr(parser, obj_arr);
 

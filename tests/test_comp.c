@@ -24,8 +24,18 @@ void test_comp_error_unexpected_token(void) {
     TEST_ASSERT_EQUAL(COMP_ERR_UNEXPECTED_TOKEN, err);
 }
 
-void test_comp_error_non_byte_in_bytearray(void) {
+void test_comp_error_unexpected_token_in_bytearray(void) {
     const char *input = "array { 'a', 'b', 'c', 'd', \"Cookie Monster\" }";
+
+    cg_t cg;
+    cg_init(&cg);
+    error_t err = codegen(input, &cg);
+
+    TEST_ASSERT_EQUAL(COMP_ERR_UNEXPECTED_TOKEN, err);
+}
+
+void test_comp_error_non_byte_in_bytearray(void) {
+    const char *input = "array { 'a', 'b', 'c', 'd', 256 }";
 
     cg_t cg;
     cg_init(&cg);
@@ -463,6 +473,7 @@ void test_comp_print(void) {
 void test_comp(void) {
     RUN_TEST(test_comp_error_expect_expression);
     RUN_TEST(test_comp_error_unexpected_token);
+    RUN_TEST(test_comp_error_unexpected_token_in_bytearray);
     RUN_TEST(test_comp_error_non_byte_in_bytearray);
     RUN_TEST(test_comp_arithmetic);
     RUN_TEST(test_comp_bit_arithmetic);
