@@ -346,6 +346,36 @@ void test_vm_stack_arith(void) {
     test_program_primitive(bytes, sizeof(bytes), stack_top, VM_ERR_NO_ERROR);
 }
 
+void test_vm_stack_bitwise_ops(void) {
+    // ((1 << 6) | (7 >> 1)) & 0xFF ^ 0x01 = 0x42
+    uint8_t bytes[] = {
+        'E', 'T', 'H', 'L', 0, 1,
+        // Const pool
+        5,
+        CONST_INT, 1, 1,
+        CONST_INT, 1, 6,
+        CONST_INT, 1, 7,
+        CONST_INT, 1, 255,
+        CONST_INT, 1, 66,
+        // Code
+        VM_OP_ICONST, 1,
+        VM_OP_ICONST, 2,
+        VM_OP_BIN_SHL,
+        VM_OP_ICONST, 3,
+        VM_OP_ICONST, 1,
+        VM_OP_BIN_SHR,
+        VM_OP_BIN_OR,
+        VM_OP_ICONST, 4,
+        VM_OP_BIN_AND,
+        VM_OP_ICONST, 1,
+        VM_OP_BIN_XOR,
+        VM_OP_RET
+    };
+
+    vm_stack_elem_t stack_top = {.type= VM_STACK_INT_TYPE, .as.intval= 0x42};
+    test_program_primitive(bytes, sizeof(bytes), stack_top, VM_ERR_NO_ERROR);
+}
+
 void test_vm_booleans(void) {
     // true or false and not true
     uint8_t bytes[] = {
@@ -721,6 +751,7 @@ void test_vm(void) {
     RUN_TEST(test_vm_stack_div);
     RUN_TEST(test_vm_stack_rem);
     RUN_TEST(test_vm_stack_arith);
+    RUN_TEST(test_vm_stack_bitwise_ops);
     RUN_TEST(test_vm_booleans);
     RUN_TEST(test_vm_non_boolean_booleans);
     RUN_TEST(test_vm_boolean_comparators);

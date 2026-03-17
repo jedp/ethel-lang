@@ -82,6 +82,21 @@ static vm_err_t numerical_binop(vm_t *vm, vm_op_t op) {
         case VM_OP_REM:
             e.as.intval = b->as.intval % a->as.intval;
             break;
+        case VM_OP_BIN_SHL:
+            e.as.intval = b->as.intval << a->as.intval;
+            break;
+        case VM_OP_BIN_SHR:
+            e.as.intval = b->as.intval >> a->as.intval;
+            break;
+        case VM_OP_BIN_AND:
+            e.as.intval = b->as.intval & a->as.intval;
+            break;
+        case VM_OP_BIN_OR:
+            e.as.intval = b->as.intval | a->as.intval;
+            break;
+        case VM_OP_BIN_XOR:
+            e.as.intval = b->as.intval ^ a->as.intval;
+            break;
         case VM_OP_LT:
             e.type = VM_STACK_BOOL_TYPE;
             e.as.boolval = b->as.intval < a->as.intval ? 1 : 0;
@@ -322,6 +337,21 @@ static vm_err_t exec(vm_t *vm) {
                 break;
             case VM_OP_REM:
                 err = numerical_binop(vm, VM_OP_REM);
+                break;
+            case VM_OP_BIN_SHL:
+                err = numerical_binop(vm, VM_OP_BIN_SHL);
+                break;
+            case VM_OP_BIN_SHR:
+                err = numerical_binop(vm, VM_OP_BIN_SHR);
+                break;
+            case VM_OP_BIN_AND:
+                err = numerical_binop(vm, VM_OP_BIN_AND);
+                break;
+            case VM_OP_BIN_OR:
+                err = numerical_binop(vm, VM_OP_BIN_OR);
+                break;
+            case VM_OP_BIN_XOR:
+                err = numerical_binop(vm, VM_OP_BIN_XOR);
                 break;
             case VM_OP_ALOAD:
                 err = array_subscript(vm);
