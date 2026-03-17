@@ -45,7 +45,7 @@ void test_comp_error_non_byte_in_bytearray(void) {
 }
 
 void test_comp_arithmetic(void) {
-    const char *input = "300 + (1 - -3) * 4 - 8 / 2";
+    const char *input = "300 + (1 - -3) * 4 - 8 / 2 % 3";
 
     cg_t cg;
     cg_init(&cg);
@@ -62,6 +62,8 @@ void test_comp_arithmetic(void) {
         VM_OP_IPUSH, 8,
         VM_OP_IPUSH, 2,
         VM_OP_DIV,
+        VM_OP_IPUSH, 3,
+        VM_OP_REM,
         VM_OP_SUB,
         VM_OP_RET,
     };

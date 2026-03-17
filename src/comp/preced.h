@@ -98,6 +98,7 @@ parse_preced_rule_t preced_rules[] = {
     [TAG_PLUS] = {NULL, parse_binary_op, PRECED_TERM, ASSOC_LEFT},
     [TAG_TIMES] = {NULL, parse_binary_op, PRECED_FACTOR, ASSOC_LEFT},
     [TAG_DIVIDE]= {NULL, parse_binary_op, PRECED_FACTOR, ASSOC_LEFT},
+    [TAG_MOD]= {NULL, parse_binary_op, PRECED_FACTOR, ASSOC_LEFT},
     [TAG_BITWISE_OR] = {NULL, parse_binary_op, PRECED_BITWISE_OR, ASSOC_LEFT},
     [TAG_BITWISE_XOR] = {NULL, parse_binary_op, PRECED_BITWISE_XOR, ASSOC_LEFT},
     [TAG_BITWISE_AND] = {NULL, parse_binary_op, PRECED_BITWISE_AND, ASSOC_LEFT},

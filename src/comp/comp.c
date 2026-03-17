@@ -473,6 +473,9 @@ __attribute__((unused)) void parse_binary_op(parser_t *parser) {
         case TAG_DIVIDE:
             emit_byte(parser, VM_OP_DIV);
             break;
+        case TAG_MOD:
+            emit_byte(parser, VM_OP_REM);
+            break;
         case TAG_BITWISE_OR:
             emit_byte(parser, VM_OP_BIN_OR);
             break;
