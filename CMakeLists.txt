@@ -110,6 +110,7 @@ add_executable(ec
 add_executable(er
         ${COMP_OBJS}
         ${COMMON_OBJS}
+        ${VM_OBJS}
         ${ER_OBJS}
 )
 
