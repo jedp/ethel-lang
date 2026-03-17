@@ -542,6 +542,10 @@ void test_vm_if_false_then_else_if_true(void) {
     test_program_primitive(bytes, sizeof(bytes), stack_top, VM_ERR_NO_ERROR);
 }
 
+void test_vm_while_true(void) {
+    // TODO: x = 0; while (x < 4) { x -= 1 }; 42;
+}
+
 void test_vm_binop_type_check(void) {
     // Can't add 42 + true
     uint8_t bytes[] = {

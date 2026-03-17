@@ -584,6 +584,26 @@ static void parse_if_stmt(parser_t *parser) {
     }
 }
 
+static void parse_while_stmt(parser_t *parser) {
+    uint16_t loop_top_addr;
+    uint16_t loop_top_jump_addr;
+    uint16_t loop_end_jump_addr;
+
+    eat(parser, TAG_LPAREN);
+    loop_top_addr = parser->cg->len;
+    parse_parens(parser);
+
+    // Jump to end when condition is false.
+    loop_end_jump_addr = emit_jump(parser, VM_OP_JZ);
+
+    parse_stmt(parser);
+
+    // Loop.
+    loop_top_jump_addr = emit_jump(parser, VM_OP_JMP);
+    set_jump_addr(parser, loop_top_jump_addr, loop_top_addr);
+    set_jump_addr(parser, loop_end_jump_addr, parser->cg->len);
+}
+
 
 // Referenced via pointer in the precedence table.
 __attribute__ ((unused)) void parse_block(parser_t *parser) {
@@ -606,6 +626,7 @@ static void exit_scope(parser_t *parser) {
  * Parse stmt
  *
  * stmt -> if_stmt
+ *       | while_stmt
  *       | array_expr
  *       | expr
  *       | block
@@ -617,6 +638,8 @@ static void parse_stmt(parser_t *parser) {
         parse_print(parser);
     } else if (token_tag_match_and_consume(parser, TAG_IF)) {
         parse_if_stmt(parser);
+    } else if (token_tag_match_and_consume(parser, TAG_WHILE)) {
+        parse_while_stmt(parser);
     } else if (token_tag_match_and_consume(parser, TAG_ARRAY)) {
         parse_array_expr(parser);
     } else {
@@ -683,7 +706,7 @@ comp_err_t compile(const cg_t *cg, uint32_t max_size, uint8_t buf[], uint32_t *s
     }
     buf[offset++] = (uint8_t) cg->consts->buckets->nelems;
     for (uint8_t i = 1; i <= (uint8_t) cg->consts->buckets->nelems; i++) {
-        val_t k = {.type = VAL_TYPE_INT, .as.intval=i};
+        val_t k = {.type = VAL_TYPE_INT, .as.intval = i};
         val_t *v = map_get(cg->consts, &k);
 
         switch (v->type) {

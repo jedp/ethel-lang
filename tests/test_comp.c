@@ -402,6 +402,26 @@ void test_comp_multiline_parens(void) {
     TEST_ASSERT_EQUAL(ERR_NO_ERROR, err);
 }
 
+void test_comp_while_true(void) {
+    const char *input = "while (true) { 1 + 2 }";
+
+    cg_t cg;
+    cg_init(&cg);
+    error_t err = codegen(input, &cg);
+
+    uint8_t expected[] = {
+        VM_OP_ZPUSH_T,
+        VM_OP_JZ, 0x0b, 0,
+        VM_OP_IPUSH_1,
+        VM_OP_IPUSH, 2,
+        VM_OP_ADD,
+        VM_OP_JMP, 0x00, 0,
+        VM_OP_RET,
+    };
+    TEST_ASSERT_EQUAL_MEMORY(expected, cg.bytecode, cg.len);
+    TEST_ASSERT_EQUAL(ERR_NO_ERROR, err);
+}
+
 void test_comp_subscript(void) {
     const char *input = "\"foo\"[(i + 1) / 2]";
 
@@ -492,6 +512,7 @@ void test_comp(void) {
     RUN_TEST(test_comp_if_then_else_if_block);
     RUN_TEST(test_comp_multiline_block);
     RUN_TEST(test_comp_multiline_parens);
+    RUN_TEST(test_comp_while_true);
     RUN_TEST(test_comp_subscript);
     RUN_TEST(test_comp_bytearray_decl);
     RUN_TEST(test_comp_bytearray);
